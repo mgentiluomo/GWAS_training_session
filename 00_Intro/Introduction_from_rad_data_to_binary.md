@@ -14,7 +14,7 @@ Starting from a DNA sample, genotypes for 500,000 or more genetic variants are o
   <p><em>Source: © 2025 Illumina, Inc. All rights reserved.</em></p>
 </div>
 
-![Genotyping Array Illustration]([https://unipiit-my.sharepoint.com/:i:/g/personal/a035503_unipi_it/ES9d1FcdQJdJlRJDek1bSlkBDLrOxRBalf9U9d_ErZCEBg?e=i6w5oA)
+![Genotyping Array Illustration](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/Genotyping%20array.png)
 
 
 ### Initial Representation
