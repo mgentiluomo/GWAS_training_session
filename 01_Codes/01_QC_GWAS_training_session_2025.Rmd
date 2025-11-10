@@ -226,6 +226,29 @@ print("End of chunk 2")
 
 ```
 
+⚠️ Important Note for Mac Users (Gatekeeper)
+The PLINK executable (plink2) is often downloaded outside of the official Apple App Store and may not be signed by an identified developer. Consequently, the macOS operating system (via its security feature, Gatekeeper) will likely block the file from running the first time you try to execute it, displaying a warning message such as: "The software cannot be opened because the developer cannot be verified."
+
+✅ How to Allow PLINK to Run
+To override this security block and grant permission for the executable:
+
+Attempt to Run the Command: Try to run the PLINK command (./plink2 --version) once in your R script or in the Terminal. The system will display the block warning.
+
+Open System Settings: Go to Apple Menu () > System Settings (or System Preferences on older macOS versions).
+
+Navigate to Security: Click on Privacy & Security in the sidebar.
+
+Find the Blocked App: Scroll down to the Security section. You should see a message mentioning the blocked PLINK software and an "Open Anyway" button next to it.
+
+Confirm and Open: Click the "Open Anyway" button. You may be prompted to enter your administrator password. A final confirmation dialogue will appear; click "Open".
+
+Once this exception is made, you will be able to run plink2 from the command line or within your R script without further warnings.
+############################################
+
+
+
+
+
 
 The first essential step in Sample QC is checking for inconsistencies between the reported sex (as listed in the .fam file or provided as an external phenotype) and the genetically inferred sex (derived from X chromosome heterozygosity). Discrepancies can bias subsequent calculations like HWE checks.
 Code Explanation: The 7-Step Sex Check Protocol
@@ -265,11 +288,11 @@ This is a final cleaning step: it sets the genotypes of the variants that were i
 # Step 1: Update sex data
 # This updates the sex information based on the file "Sex.txt" 
 # and creates a new binary file with the updated data.
-system("plink --bfile 01_Database/DB_A_updated --update-sex 01_Database/Sex.txt --make-bed --out 02_QC/QC1_sex")
+system(paste(plink_command, "--bfile 01_Database/DB_A_updated --update-sex 01_Database/Sex.txt --make-bed --out 02_QC/QC1_sex"))
 
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
-system("plink --bfile 02_QC/QC1_sex --check-sex --out 02_QC/results_checksex")
+system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex --out 02_QC/results_checksex"))
 
 # Step 3: Review the results
 # Load and visualise the results from the sex check.
@@ -286,7 +309,7 @@ write.table(as.data.frame(results_checksex), paste(QC_dir, "sex-discrepancy.txt"
 
 # Step 5: Remove individuals with sex inconsistencies
 # Exclude the individuals identified in the previous step.
-system("plink --bfile 02_QC/QC1_sex --remove 02_QC/sex-discrepancy.txt --make-bed --out 02_QC/QC2_sex")
+system(paste(plink_command, " --bfile 02_QC/QC1_sex --remove 02_QC/sex-discrepancy.txt --make-bed --out 02_QC/QC2_sex"))
 
 # Step 6: Investigate sex discrepancies
 # Load the variant data related to sex discrepancies for detailed analysis.
@@ -305,7 +328,7 @@ summary(as.factor(QC2_sex_variants$Chr))
 
 # Step 7: Clean up sex discrepancies
 # Set problematic variants to missing.
-system("plink --bfile 02_QC/QC2_sex --set-hh-missing --make-bed --out 02_QC/QC2_sex_cleaned")
+system(paste(plink_command, " --bfile 02_QC/QC2_sex --set-hh-missing --make-bed --out 02_QC/QC2_sex_cleaned"))
 ```
 
 This completed the sex check and resulted in a clean PLINK dataset (QC2_sex_cleaned). What is the next QC step in your pipeline?
@@ -334,7 +357,7 @@ Creates the new binary files: QC3_chr_selection.bed, .bim, and .fam.
 # SECTION 2: Chromosome selection
 
 # Retain only autosomal and sex chromosomes (1-23).
-system("plink --bfile 02_QC/QC2_sex_cleaned --chr 1-23 --make-bed --out 02_QC/QC3_chr_selection")
+system(paste(plink_command, " --bfile 02_QC/QC2_sex_cleaned --chr 1-23 --make-bed --out 02_QC/QC3_chr_selection"))
 ```
 
 
@@ -350,7 +373,7 @@ This step sets a standard threshold of $1\%$ ($0.01$).
 # SECTION 3: Minor Allele Frequency (MAF) filtering
 
 # Exclude SNPs with a minor allele frequency (MAF) below 1%.
-system("plink --bfile 02_QC/QC3_chr_selection --maf 0.01 --write-snplist --make-bed --out 02_QC/QC4_maf")
+system(paste(plink_command, " --bfile 02_QC/QC3_chr_selection --maf 0.01 --write-snplist --make-bed --out 02_QC/QC4_maf"))
 ```
 
 
@@ -371,10 +394,10 @@ Rationale: An individual with a high missing rate usually indicates poor quality
 # SECTION 4: Call rate filtering
 
 # Exclude SNPs with missing genotype data above 5%.
-system("plink --bfile 02_QC/QC4_maf --geno 0.05 --write-snplist --make-bed --out 02_QC/QC5_geno")
+system(paste(plink_command, " --bfile 02_QC/QC4_maf --geno 0.05 --write-snplist --make-bed --out 02_QC/QC5_geno"))
 
 # Exclude individuals with missing genotype data above 10%.
-system("plink --bfile 02_QC/QC5_geno --mind 0.10 --make-bed --out 02_QC/QC6_mind")
+system(paste(plink_command, " --bfile 02_QC/QC5_geno --mind 0.10 --make-bed --out 02_QC/QC6_mind"))
 ```
 
 
@@ -391,7 +414,7 @@ We use a standard threshold to identify these outliers: 3 Standard Deviations (S
 # SECTION 5: Heterozygosity check
 
 # Calculate heterozygosity rates for each individual.
-system("plink --bfile 02_QC/QC6_mind --het --out 02_QC/heterozygosity")
+system(paste(plink_command, " --bfile 02_QC/QC6_mind --het --out 02_QC/heterozygosity"))
 
 # Load heterozygosity data and identify outliers (±3 SD from the mean).
 dat <- read.table(paste(QC_dir, "heterozygosity.het", sep = ""), header = TRUE)
@@ -403,7 +426,7 @@ valid <- subset(dat, F <= m + 3 * s & F >= m - 3 * s)
 write.table(valid[, c("FID", "IID")], paste(QC_dir, "DB_valid_sample.txt", sep = ""), quote = FALSE, row.names = FALSE)
 
 # Retain only individuals with acceptable heterozygosity.
-system("plink --bfile 02_QC/QC6_mind --keep 02_QC/DB_valid_sample.txt --make-bed --out 02_QC/QC7_het")
+system(paste(plink_command, " --bfile 02_QC/QC6_mind --keep 02_QC/DB_valid_sample.txt --make-bed --out 02_QC/QC7_het"))
 ```
 
 
@@ -416,13 +439,13 @@ We use a two-part process: first, creating a set of independent markers, and sec
 # SECTION 6: Cryptic relatedness check
 
 # Step 1: Prune SNPs for relatedness analysis.
-system("plink --bfile 02_QC/QC7_het --indep-pairwise 200 50 0.25 --out 02_QC/Pruned_list")
+system(paste(plink_command, " --bfile 02_QC/QC7_het --indep-pairwise 200 50 0.25 --out 02_QC/Pruned_list"))
 
 # Step 2: Identify and exclude related individuals (threshold: 0.2).
-system("plink --bfile 02_QC/QC7_het --extract 02_QC/Pruned_list.prune.in --rel-cutoff 0.2 --out 02_QC/subject_rel")
+system(paste(plink_command, " --bfile 02_QC/QC7_het --extract 02_QC/Pruned_list.prune.in --rel-cutoff 0.2 --out 02_QC/subject_rel"))
 
 # Step 3: Create a dataset excluding related individuals.
-system("plink --bfile 02_QC/QC7_het --keep 2_QC/subject_rel.rel.id --make-bed --out 02_QC/QC8_rel")
+system(paste(plink_command, " --bfile 02_QC/QC7_het --keep 2_QC/subject_rel.rel.id --make-bed --out 02_QC/QC8_rel"))
 ```
 
 3.g - Quality Control (QC): Hardy-Weinberg Equilibrium (HWE) Filtering ⚖️
@@ -436,7 +459,7 @@ In a GWAS context, deviations from HWE (a very small p-value) are often not due 
 # SECTION 7: Hardy-Weinberg equilibrium filtering
 
 # Filter SNPs failing the Hardy-Weinberg equilibrium test (p-value < 1e-5).
-system("plink --bfile 02_QC/QC8_rel --hwe 1e-5 --pheno 01_Database/pheno.txt --write-snplist --make-bed --out 02_QC/QC9_hwe")
+system(paste(plink_command, " --bfile 02_QC/QC8_rel --hwe 1e-5 --pheno 01_Database/pheno.txt --write-snplist --make-bed --out 02_QC/QC9_hwe"))
 ```
 
 3.h - Save Environment: Backup and Reproducibility 💾
