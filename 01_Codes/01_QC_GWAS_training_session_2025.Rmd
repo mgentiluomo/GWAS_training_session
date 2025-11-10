@@ -201,18 +201,26 @@ Build Alpha 6.1 (14 Nov 2024)
 # Plink testing
 
 # Ensure the PLINK executable is in the main directory
-# Before running the following commands, copy and paste the PLINK executable (e.g., plink.exe) 
+# Before running the following commands, copy and paste the PLINK executable (e.g., plink2) 
 # into the main directory. This ensures the system can locate and execute PLINK commands.
+
+# 💡 Adaptation for Mac/Linux (and when the executable is not in the PATH)
+# Use "./plink2"
+#MAC user
+# plink_command <- "./plink2" # Define the base command with the relative path
+
+#Windows user
+plink_command <- "plink2" # Define the base command with the relative path
 
 # Verify the functionality of Plink
 # This command checks the installed version of Plink
-system("plink --version")
+system(paste(plink_command, "--version"))
 
 # This command displays the list of available functions in Plink
-system("plink --help")
+system(paste(plink_command, "--help"))
 
 # Print a confirmation message for the end of this code chunk
-print(system("plink --version"))
+print(system(paste(plink_command, "--version")))
 print("End of chunk 2")
 # End of chunk 2
 
