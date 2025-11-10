@@ -22,10 +22,12 @@ Genotypes are represented in a **Final Report File**.
 * This is a text file with Comma Separated Values (**`.csv`**).
 * It is produced after genotyping data analysis conducted with ad-hoc software (e.g., Genome Studio for Illumina machines).
 * The file contains key information for each variant and sample, including the **GenCall score (GC)**, a confidence measure used to filter poor quality calls (Illumina generally recommends filtering genotypes with GC ≤ 0.15 as failures).
-
+![Final Report File Example and GC Score Explanation](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/CSV_format.png)
 <div align="center">
-  ![Final Report File Example and GC Score Explanation](YOUR_IMAGE_URL_FOR_SLIDE_6_9)
-  <p><em>Source: Training School in Genomic data analysis in association studies. Pisa, Italy 19-21 June 2023.</em></p>
+  
+  <p><em>*The GenCall score (GC) is a confidence measure assigned to each call which can be used to filter poor quality calls, SNPs or samples. Illumina generally recommend that calls with GC ≤ 0.15 represent failed genotypes.
+
+</em></p>
 </div>
 
 ### The Problem with the CSV Format
