@@ -60,9 +60,10 @@ To perform statistical analysis, it is necessary to adopt binary formats, specif
 | **`.bim`** | Extended MAP File | Text file (no header) with one row per variant and **six fields**. |
 | **`.fam`** | Sample Information File | Text file (no header) with one row per sample and **six fields**. |
 
+![PLINK file format](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/Plink%20format%20files.png)
 <div align="center">
-  ![Diagram of the BED BIM FAM relationship](YOUR_IMAGE_URL_FOR_SLIDE_10_PLUS)
-  <p><em>Source: Training School in Genomic data analysis in association studies. Pisa, Italy 19-21 June 2023.</em></p>
+  
+  <p><em>Source: MG.</em></p>
 </div>
 
 ### Field Details
