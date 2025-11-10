@@ -1,3 +1,2 @@
-# Istruisce GitHub (tramite Linguist) a non contare i file HTML 
-# generati (come l'output del tuo R Markdown/Quarto) nelle statistiche dei linguaggi.
+# Instructs GitHub (via Linguist) not to count generated HTML files (such as the output from your R Markdown/Quarto) in the language statistics. *.html linguist-generated
 *.html linguist-generated
