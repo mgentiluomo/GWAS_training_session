@@ -98,11 +98,16 @@ The conversion from the **Final Report File** (CSV) to the binary format (`.bed/
 3. **From `.ped/.map` to `.bed/.bim/.fam` (Final Binary Format)**:
     The command `plink --file` is used to specify the input `.ped/.map` files, and `--make-bed` is used to obtain the final binary format. The binary format is **less time-consuming for analyses**.
 
-![Testo alternativo per l'immagine 1](percorso/o/URL/immagine1.png)
-![Testo alternativo per l'immagine 2](percorso/o/URL/immagine2.jpg)
-![Testo alternativo per l'immagine 3](percorso/o/URL/immagine3.gif)
-![Testo alternativo per l'immagine 4](percorso/o/URL/immagine4.jpeg)
-![Testo alternativo per l'immagine 5](percorso/o/URL/immagine5.png)
+![Testo alternativo per l'immagine 1](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide1.PNG)
+![Testo alternativo per l'immagine 2](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide2.PNG)
+![Testo alternativo per l'immagine 3](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide3.PNG)
+![Testo alternativo per l'immagine 4](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide4.PNG)
+![Testo alternativo per l'immagine 5](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide5.PNG)
+![Testo alternativo per l'immagine 5](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide6.PNG)
+![Testo alternativo per l'immagine 5](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide7.PNG)
+![Testo alternativo per l'immagine 5](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide8.PNG)
+
+
 
 ### PLINK Command Examples
 The basic syntax of a PLINK command is: `plink --[source file command] [name] --[action command] --out [output name]`.
@@ -113,4 +118,4 @@ The basic syntax of a PLINK command is: `plink --[source file command] [name] --
 | **Convert to Binary** | `plink --file ABC --make-bed --out ABC` | `ABC.bed`, `ABC.bim`, `ABC.fam` |
 
 ---
-*Source: Training School in Genomic data analysis in association studies. Pisa, Italy 19-21 June 2023. TRANSPAN COST action – University of PISA, Department of Biology.*
+*Source: Manuel Gentiluomo – University of PISA, Department of Biology.*
