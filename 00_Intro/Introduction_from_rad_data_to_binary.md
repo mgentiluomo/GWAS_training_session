@@ -14,11 +14,8 @@ Starting from a DNA sample, genotypes for 500,000 or more genetic variants are o
   <p><em>Source: © 2025 Illumina, Inc. All rights reserved.</em></p>
 </div>
 
-![Genotyping Array Illustration]([https://www.illumina.com/content/dam/illumina-marketing/images/product/clinical-research/global-screening-array.png](https://unipiit-my.sharepoint.com/:b:/g/personal/a035503_unipi_it/EYCfr7IivSpCjKlZ5C0bgSoBK2uhk76z1QFsWq2ot4jwXQ?e=LcgCOV))
-<div align="center">
-  [Genotyping Array Illustration](https://www.illumina.com/content/dam/illumina-marketing/images/product/clinical-research/global-screening-array.png)
-  <p><em>Source: © 2025 Illumina, Inc. All rights reserved.</em></p>
-  </div>
+![Genotyping Array Illustration]([https://unipiit-my.sharepoint.com/:i:/g/personal/a035503_unipi_it/ES9d1FcdQJdJlRJDek1bSlkBDLrOxRBalf9U9d_ErZCEBg?e=i6w5oA)
+
 
 ### Initial Representation
 Genotypes are represented in a **Final Report File**.
