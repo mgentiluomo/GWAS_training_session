@@ -1,0 +1,3 @@
+# Istruisce GitHub (tramite Linguist) a non contare i file HTML 
+# generati (come l'output del tuo R Markdown/Quarto) nelle statistiche dei linguaggi.
+*.html linguist-generated
