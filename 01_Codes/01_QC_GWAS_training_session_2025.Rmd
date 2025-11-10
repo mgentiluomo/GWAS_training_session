@@ -204,13 +204,48 @@ Build Alpha 6.1 (14 Nov 2024)
 # Before running the following commands, copy and paste the PLINK executable (e.g., plink2) 
 # into the main directory. This ensures the system can locate and execute PLINK commands.
 
-# 💡 Adaptation for Mac/Linux (and when the executable is not in the PATH)
-# Use "./plink2"
-#MAC user
-# plink_command <- "./plink2" # Define the base command with the relative path
+# 1. Retrieve system information
+os_name <- Sys.info()["sysname"]
 
-#Windows user
-plink_command <- "plink2" # Define the base command with the relative path
+# 2. Define the base PLINK command based on the operating system
+if (os_name == "Windows") {
+    # On Windows, the executable can usually be called directly (e.g., plink2.exe)
+    plink_executable <- "plink2"
+    
+} else if (os_name == "Darwin" || os_name == "Linux") {
+    # 'Darwin' is the macOS kernel.
+    # On Mac/Linux, we use "./" to indicate the current directory
+    plink_executable <- "./plink2"
+    
+} else {
+    # Fallback case for other operating systems
+    stop("Unsupported or unidentified operating system.")
+}
+
+# 3. Print the result for verification
+cat("Detected Operating System:", os_name, "\n")
+cat("PLINK command to be used:", plink_executable, "\n")
+
+# --- PLINK COMMAND DECLARATION ---
+
+# 💻 For Mac (macOS) and Linux users:
+# We must use "./" to specify the executable in the current directory.
+# plink_command <- "./plink2"
+
+# 🖥️ For Windows users:
+# The executable can typically be called directly by name.
+# plink_command <- "plink2"
+
+# ⚠️ ACTION REQUIRED: Uncomment ONE of the two lines above based on your system.
+
+# --- End of Declaration ---
+
+
+# --- Example Usage ---
+
+# Execute the PLINK version check command
+# This will automatically adapt to the operating system
+system(paste(plink_executable, "--version"))
 
 # Verify the functionality of Plink
 # This command checks the installed version of Plink
