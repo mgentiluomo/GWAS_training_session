@@ -30,6 +30,15 @@ Genotypes are represented in a **Final Report File**.
 </em></p>
 </div>
 
+
+![Final Report](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/Final%20report%20file.png)
+<div align="center">
+  
+  <p><em>Final report file.
+</em></p>
+</div>
+
+
 ### The Problem with the CSV Format
 When working with hundreds of thousands of variants (e.g., 730,059 SNPs) and several individuals (N > 500), the CSV format becomes unsustainable:
 * Data is often split into multiple files (one per individual).
