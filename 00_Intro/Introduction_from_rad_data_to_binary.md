@@ -90,11 +90,6 @@ To perform statistical analysis, it is necessary to adopt binary formats, specif
 
 The conversion from the **Final Report File** (CSV) to the binary format (`.bed/.bim/.fam`) is not direct. The procedure goes through an intermediate text format, such as the **`.lgen`** format (PLINK long-format genotype file).
 
-<div align="center">
-  ![Conversion Workflow Diagram (Final Report to Binary)](YOUR_IMAGE_URL_FOR_WORKFLOW_DIAGRAM)
-  <p><em>Source: Training School in Genomic data analysis in association studies. Pisa, Italy 19-21 June 2023.</em></p>
-</div>
-
 ### Conversion Phases
 1. **From Final Report to `.lgen/.map/.fam`**:
     All final report files are converted into the `.lgen` format. The `.lgen` file is readable by PLINK and combines information from `.map` (variants) and `.fam` (samples).
@@ -102,6 +97,12 @@ The conversion from the **Final Report File** (CSV) to the binary format (`.bed/
     The command `plink --lfile` is used to specify the input `.lgen/.map/.fam` files, and `--recode` is used to obtain the `.ped/.map` format.
 3. **From `.ped/.map` to `.bed/.bim/.fam` (Final Binary Format)**:
     The command `plink --file` is used to specify the input `.ped/.map` files, and `--make-bed` is used to obtain the final binary format. The binary format is **less time-consuming for analyses**.
+
+![Testo alternativo per l'immagine 1](percorso/o/URL/immagine1.png)
+![Testo alternativo per l'immagine 2](percorso/o/URL/immagine2.jpg)
+![Testo alternativo per l'immagine 3](percorso/o/URL/immagine3.gif)
+![Testo alternativo per l'immagine 4](percorso/o/URL/immagine4.jpeg)
+![Testo alternativo per l'immagine 5](percorso/o/URL/immagine5.png)
 
 ### PLINK Command Examples
 The basic syntax of a PLINK command is: `plink --[source file command] [name] --[action command] --out [output name]`.
