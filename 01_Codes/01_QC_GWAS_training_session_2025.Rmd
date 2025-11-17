@@ -210,12 +210,12 @@ os_name <- Sys.info()["sysname"]
 # 2. Define the base PLINK command based on the operating system
 if (os_name == "Windows") {
     # On Windows, the executable can usually be called directly (e.g., plink2.exe)
-    plink_executable <- "plink2"
+    plink_command <- "plink2"
     
 } else if (os_name == "Darwin" || os_name == "Linux") {
     # 'Darwin' is the macOS kernel.
     # On Mac/Linux, we use "./" to indicate the current directory
-    plink_executable <- "./plink2"
+    plink_command <- "./plink2"
     
 } else {
     # Fallback case for other operating systems
@@ -224,7 +224,7 @@ if (os_name == "Windows") {
 
 # 3. Print the result for verification
 cat("Detected Operating System:", os_name, "\n")
-cat("PLINK command to be used:", plink_executable, "\n")
+cat("PLINK command to be used:", plink_command, "\n")
 
 # --- PLINK COMMAND DECLARATION ---
 
