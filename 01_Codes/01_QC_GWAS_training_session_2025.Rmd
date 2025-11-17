@@ -323,7 +323,7 @@ This is a final cleaning step: it sets the genotypes of the variants that were i
 # Step 1: Update sex data
 # This updates the sex information based on the file "Sex.txt" 
 # and creates a new binary file with the updated data.
-system(paste(plink_command, "--bfile 01_Database/DB_A_updated --update-sex 01_Database/Sex.txt --make-bed --out 02_QC/QC1_sex"))
+system(paste(plink_command, "--bfile 01_Database/DB_A --update-sex 01_Database/Sex.txt --make-bed --out 02_QC/QC1_sex"))
 
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
