@@ -170,7 +170,7 @@ files_to_download <- list(
   pheno = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/pheno.txt",
   bim   = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/Databases/DB_A.bim",
   fam   = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/Databases/DB_A.fam",
-  linktobed ="https://github.com/mgentiluomo/GWAS_training_session/blob/main/02_Database/Databases/link_to_BED_file.txt"
+  linktobed ="https://github.com/mgentiluomo/GWAS_training_session/blob/main/02_Database/Databases/linktoBEDfile.txt"
 )
 
 # Loop to download each file
