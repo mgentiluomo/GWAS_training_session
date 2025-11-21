@@ -35,11 +35,7 @@ The Step from Array Matrix to PLINK:
 1) Cleaning and Re-formatting: The raw output file must first be cleaned and converted into an intermediate text format (sometimes called PLINK Long Format or TPED/TFAM format).
 2) PLINK Conversion: The command plink --make-bed is then used on the text format to generate the three essential binary files (.bed, .bim, and .fam).
 
-Our entire training session will commence using files already in the PLINK Binary format, which you will find located in the data/folder.
-
-DATA FOLDER
-https://unipiit-my.sharepoint.com/:f:/g/personal/a035503_unipi_it/EsmOBic2ICxIgMInykR6CfQBaz8XbmstRE13VUo0KFD7qQ?e=m1b5ln
-
+Our entire training session will commence using files already in the PLINK Binary format.
 
 
 ############################################################ #############################
@@ -161,6 +157,42 @@ cat(text)
 
 ```
 
+```{r 1.b3 - 🧩 Download required database files}
+# Step 1.b.3 — Download input files into 01_Database
+
+# Define the target directory
+DB_dir <- file.path(main, "01_Database")
+
+# Define URLs (raw GitHub links)
+files_to_download <- list(
+  sex   = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/Sex.txt",
+  covar = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/general_covar.txt",
+  pheno = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/pheno.txt",
+  bim   = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/Databases/DB_A.bim",
+  fam   = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/main/02_Database/Databases/DB_A.fam",
+  linktobed ="https://github.com/mgentiluomo/GWAS_training_session/blob/main/02_Database/Databases/link_to_BED_file.txt"
+)
+
+# Loop to download each file
+for (name in names(files_to_download)) {
+  dest_file <- file.path(DB_dir, basename(files_to_download[[name]]))
+  
+  # Download file if it doesn't already exist
+  if (!file.exists(dest_file)) {
+    message("⬇️ Downloading ", name, " file...")
+    download.file(files_to_download[[name]], destfile = dest_file, mode = "wb")
+  } else {
+    message("✅ File already exists: ", basename(dest_file))
+  }
+}
+
+# Confirm that files are present
+cat("📂 Files now available in:", DB_dir, "\n")
+print(list.files(DB_dir, pattern = "txt$|bim$|fam$", full.names = TRUE))
+
+```
+
+
  #2 Plink
 Download Links for PLINK 2.0
 
@@ -194,6 +226,59 @@ Build Alpha 6.1 (14 Nov 2024)
 2. The download will start immediately.
 3. Extract the downloaded ZIP file and follow the instructions in the [PLINK 2.0 Documentation](https://www.cog-genomics.org/plink/2.0/).
 
+```{r download_and_prepare_plink2}
+# Define the URL of the file to download #copy and paste the correct PLINK2 URL
+plink_url <- "https://s3.amazonaws.com/plink2-assets/plink2_win64_20251118.zip"
+
+# Define the destination path (download location + filename)
+dest_file <- file.path(notebook_dir, "plink2_win64_20251118.zip")
+
+# Download the file using HTTPS
+download.file(url = plink_url, destfile = dest_file, mode = "wb")
+
+# Optional: confirm the file exists
+file.exists(dest_file)
+
+# Find all ZIP files in the directory whose names contain "plink2"
+zip_files <- list.files(
+  path = notebook_dir,
+  pattern = "plink2.*\\.zip$",   # regex: contains "plink2" and ends with ".zip"
+  full.names = TRUE
+)
+
+# Loop through each matching ZIP file and unzip it
+for (zf in zip_files) {
+  # Create an extraction folder with the same name as the ZIP file (without .zip)
+  extract_dir <- file.path(notebook_dir, tools::file_path_sans_ext(basename(zf)))
+  
+  # Create the directory if it doesn’t exist
+  if (!dir.exists(extract_dir)) dir.create(extract_dir)
+  
+  # Unzip the contents
+  unzip(zipfile = zf, exdir = extract_dir)
+  
+  # Print a confirmation message
+  message("Extracted: ", basename(zf), " → ", extract_dir)
+}
+
+# Find any file inside the extracted folder that contains "plink" in its name
+  plink_files <- list.files(
+    path = extract_dir,
+    pattern = "plink",
+    full.names = TRUE,
+    recursive = TRUE
+  )
+  
+  # Copy each found file back into the main notebook directory
+  for (pf in plink_files) {
+    file.copy(from = pf, to = notebook_dir, overwrite = TRUE)
+    message("Copied: ", basename(pf), " → ", notebook_dir)
+  }
+
+
+# Optional: check that the plink files are now in the main directory
+list.files(notebook_dir, pattern = "plink", full.names = TRUE)
+```
 
 
 ```{r #2 Plink}
@@ -282,8 +367,6 @@ Once this exception is made, you will be able to run plink2 from the command lin
 
 
 
-
-
 The first essential step in Sample QC is checking for inconsistencies between the reported sex (as listed in the .fam file or provided as an external phenotype) and the genetically inferred sex (derived from X chromosome heterozygosity). Discrepancies can bias subsequent calculations like HWE checks.
 Code Explanation: The 7-Step Sex Check Protocol
 This block automates a rigorous process using both PLINK (for genetic calculations and filtering) and R (for viewing and selecting problematic samples).
@@ -329,18 +412,23 @@ system(paste(plink_command, "--bfile 01_Database/DB_A --update-sex 01_Database/S
 ```{r #3.a - Quality Control (QC) Check for sex discrepancies --check-sex}
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
-system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8 max-female-yrate=0.2 --out 02_QC/results_checksex"))
+system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8 --out 02_QC/results_checksex"))
 
 # --check-sex compares sex assignments in the input dataset with those imputed from chrX inbreeding coefficients and/or chrY valid genotype call count/rate (heterozygous genotype calls are invalid on chrY), and writes a report to plink2.sexcheck.
 ```
 
 
-```{r #3.a - Quality Control (QC) Check for sex discrepancies}
+```{r #3.a - Quality Control (QC) Check for sex discrepancies - view checksex}
 # Step 3: Review the results
 # Load and visualise the results from the sex check.
 results_checksex <- read_table(paste(QC_dir, "results_checksex.sexcheck", sep = ""))
+results_checksex <- results_checksex %>%
+  rename(FID = `#FID`)
 View(results_checksex)
+```
 
+
+```{r #3.a - Quality Control (QC) Check for sex discrepancies - remove sex-discrepancy}
 # Step 4: Identify individuals with sex inconsistencies
 # Filter out individuals marked as "PROBLEM" in the results.
 results_checksex <- filter(results_checksex, STATUS == "PROBLEM") %>%
@@ -352,25 +440,42 @@ write.table(as.data.frame(results_checksex), paste(QC_dir, "sex-discrepancy.txt"
 # Step 5: Remove individuals with sex inconsistencies
 # Exclude the individuals identified in the previous step.
 system(paste(plink_command, " --bfile 02_QC/QC1_sex --remove 02_QC/sex-discrepancy.txt --make-bed --out 02_QC/QC2_sex"))
+```
 
-# Step 6: Investigate sex discrepancies
-# Load the variant data related to sex discrepancies for detailed analysis.
-QC2_sex_variants <- read.delim(paste(main, "02_QC/QC2_sex.hh", sep = ""), header = FALSE)
-BIM <- read.delim(paste(main, "02_QC/QC2_sex.bim", sep = ""), header = FALSE)
 
-# Assign column names for better understanding.
-names(BIM) <- c("Chr", "SNP", "cM", "Pos", "A1", "A2")
-names(QC2_sex_variants) <- c("FID", "IID", "SNP")
+```{r #3.a - Quality Control (QC) Check for sex discrepancies}
+# Step 6: Quality Control (QC) - Check for sex discrepancies
+# Run this section only if the .hh file exists
 
-# Merge variant data with BIM file for additional information.
-QC2_sex_variants <- merge(QC2_sex_variants, BIM, by = "SNP")
+hh_file <- file.path(main, "02_QC/QC2_sex.hh")
 
-# Summary of chromosome distribution for problematic variants.
-summary(as.factor(QC2_sex_variants$Chr))
+if (file.exists(hh_file)) {
+  message("✅ File found: running sex discrepancy QC steps...")
 
-# Step 7: Clean up sex discrepancies
-# Set problematic variants to missing.
-system(paste(plink_command, " --bfile 02_QC/QC2_sex --set-hh-missing --make-bed --out 02_QC/QC2_sex_cleaned"))
+  # Load the variant data related to sex discrepancies for detailed analysis.
+  QC2_sex_variants <- read.delim(hh_file, header = FALSE)
+  BIM <- read.delim(file.path(main, "02_QC/QC2_sex.bim"), header = FALSE)
+
+  # Assign column names for better understanding.
+  names(BIM) <- c("Chr", "SNP", "cM", "Pos", "A1", "A2")
+  names(QC2_sex_variants) <- c("FID", "IID", "SNP")
+
+  # Merge variant data with BIM file for additional information.
+  QC2_sex_variants <- merge(QC2_sex_variants, BIM, by = "SNP")
+
+  # Summary of chromosome distribution for problematic variants.
+  summary(as.factor(QC2_sex_variants$Chr))
+
+  # Step 7: Clean up sex discrepancies
+  # Set problematic variants to missing.
+  system(paste(plink_command,
+               "--bfile 02_QC/QC2_sex --set-hh-missing --make-bed --out 02_QC/QC2_sex"))
+  
+  message("✅ QC2 sex discrepancy cleaning completed.")
+
+} else {
+  message("⚠️ File 'QC2_sex.hh' not found — skipping sex discrepancy QC steps.")
+}
 ```
 
 This completed the sex check and resulted in a clean PLINK dataset (QC2_sex_cleaned). What is the next QC step in your pipeline?
@@ -399,7 +504,7 @@ Creates the new binary files: QC3_chr_selection.bed, .bim, and .fam.
 # SECTION 2: Chromosome selection
 
 # Retain only autosomal and sex chromosomes (1-23).
-system(paste(plink_command, " --bfile 02_QC/QC2_sex_cleaned --chr 1-23 --make-bed --out 02_QC/QC3_chr_selection"))
+system(paste(plink_command, " --bfile 02_QC/QC2_sex --chr 1-23 --make-bed --out 02_QC/QC3_chr_selection"))
 ```
 
 
@@ -432,12 +537,15 @@ The --mind filter removes individuals (samples) that have missing genotype data 
 
 Rationale: An individual with a high missing rate usually indicates poor quality or low quantity of the starting DNA material. Retaining such individuals can disproportionately affect the accuracy of allele frequency and association estimates.
 
-```{r #3.d - Quality Control (QC) Call rate filtering}
+```{r #3.d - Quality Control (QC) Call rate filtering --geno}
 # SECTION 4: Call rate filtering
 
 # Exclude SNPs with missing genotype data above 5%.
 system(paste(plink_command, " --bfile 02_QC/QC4_maf --geno 0.05 --write-snplist --make-bed --out 02_QC/QC5_geno"))
+```
 
+
+```{r #3.d - Quality Control (QC) Call rate filtering --mind}
 # Exclude individuals with missing genotype data above 10%.
 system(paste(plink_command, " --bfile 02_QC/QC5_geno --mind 0.10 --make-bed --out 02_QC/QC6_mind"))
 ```
@@ -452,14 +560,19 @@ Samples showing extreme heterozygosity rates are usually indicative of problems:
 
 We use a standard threshold to identify these outliers: 3 Standard Deviations (SD) away from the population mean.
 
-```{r #3.e - Quality Control (QC) Heterozygosity check}
+```{r #3.e - Quality Control (QC) Heterozygosity check --het}
 # SECTION 5: Heterozygosity check
 
 # Calculate heterozygosity rates for each individual.
 system(paste(plink_command, " --bfile 02_QC/QC6_mind --het --out 02_QC/heterozygosity"))
+```
 
+
+```{r #3.e - Quality Control (QC) Heterozygosity check}
 # Load heterozygosity data and identify outliers (±3 SD from the mean).
-dat <- read.table(paste(QC_dir, "heterozygosity.het", sep = ""), header = TRUE)
+dat <- read.delim(paste(QC_dir, "heterozygosity.het", sep = ""), header = TRUE, quote="")
+dat <- dat %>%
+  rename(FID = `X.FID`)
 m <- mean(dat$F)
 s <- sd(dat$F)
 valid <- subset(dat, F <= m + 3 * s & F >= m - 3 * s)
@@ -477,17 +590,141 @@ Cryptic Relatedness refers to family ties (e.g., first or second-degree relative
 
 We use a two-part process: first, creating a set of independent markers, and second, calculating the genetic relationship between all pairs of individuals.
 
-```{r #3.f - Quality Control (QC) Cryptic relatedness check}
+```{r #3.f - Quality Control (QC) Cryptic relatedness check --indep-pairwise}
 # SECTION 6: Cryptic relatedness check
 
 # Step 1: Prune SNPs for relatedness analysis.
 system(paste(plink_command, " --bfile 02_QC/QC7_het --indep-pairwise 200 50 0.25 --out 02_QC/Pruned_list"))
+```
 
-# Step 2: Identify and exclude related individuals (threshold: 0.2).
-system(paste(plink_command, " --bfile 02_QC/QC7_het --extract 02_QC/Pruned_list.prune.in --rel-cutoff 0.2 --out 02_QC/subject_rel"))
+# 📘 Note on relatedness coefficients and cutoff values
+#
+# PLINK 1.9 and PLINK 2 use different measures of genetic relatedness:
+#
+#   • PLINK 1.9 uses the "pi-hat" value (IBD proportion),
+#     representing the *proportion of alleles shared identical-by-descent*.
+#
+#   • PLINK 2 (via the KING method) uses the *kinship coefficient (φ)*,
+#     which is equal to **half of the pi-hat value**:
+#
+#         φ = pi-hat / 2
+#
+# ---------------------------------------------------------------
+# 🔹 Comparison of theoretical values by relationship degree:
+#
+# | Relationship Type              | pi-hat (PLINK 1.9) | Kinship φ (PLINK 2) |
+# |--------------------------------|--------------------|----------------------|
+# | Monozygotic twins / duplicates | 1.000              | 0.500                |
+# | 1st degree (parent–child, full siblings) | 0.500 | 0.250 |
+# | 2nd degree (grandparent–grandchild, half-sibs, uncle–niece) | 0.250 | 0.125 |
+# | 3rd degree (first cousins)     | 0.125              | 0.0625               |
+# | Unrelated                      | < 0.0625           | < 0.03125            |
+#
+# ---------------------------------------------------------------
+# 🔹 Recommended cutoff values
+#
+# Because PLINK 2’s kinship coefficients are half the scale of PLINK 1.9’s pi-hat,
+# the corresponding thresholds should also be halved.
+#
+# | Intended filter (remove all ≥) | PLINK 1.9 (--rel-cutoff) | PLINK 2 (--king-cutoff) |
+# |--------------------------------|---------------------------|--------------------------|
+# | 1st-degree relatives           | 0.25                      | 0.125                    |
+# | 2nd-degree relatives           | 0.125                     | 0.0625                   |
+# | 3rd-degree relatives           | 0.0625                    | 0.03125                  |
+#
+# ---------------------------------------------------------------
+# 🔹 Common practice
+#
+# In most QC pipelines:
+#   - `--rel-cutoff 0.125` (PLINK 1.9)  ≈  `--king-cutoff 0.0625` (PLINK 2)
+#     → keeps only individuals less related than second-degree relatives.
+#
+#   - Some workflows use `--king-cutoff 0.0884` to include a small buffer,
+#     accounting for statistical noise in kinship estimation.
+#
+# ---------------------------------------------------------------
+# ✅ Summary
+#   - PLINK 1.9 → uses pi-hat (IBD proportion)
+#   - PLINK 2 → uses KING kinship coefficient (≈ pi-hat / 2)
+#   - Therefore, halve your cutoff when switching from PLINK 1.9 to PLINK 2.
 
-# Step 3: Create a dataset excluding related individuals.
-system(paste(plink_command, " --bfile 02_QC/QC7_het --keep 2_QC/subject_rel.rel.id --make-bed --out 02_QC/QC8_rel"))
+```{r #3.f - Quality Control (QC) Cryptic relatedness check --rel-cutoff}
+# qc_rel_cutoff_plink2
+# Step 2: Identify and exclude related individuals using KING-based cutoff (PLINK 2).
+# We restrict to the pruned SNPs to avoid LD inflation.
+# Threshold 0.2 ~ between 1st and 2nd degree; adjust to your protocol.
+system(paste(
+  plink_command,
+  "--bfile 02_QC/QC7_het",
+  "--extract 02_QC/Pruned_list.prune.in",
+  "--king-cutoff 0.2",
+  "--out 02_QC/subject_rel"
+))
+
+# PLINK 2 writes:
+#   02_QC/subject_rel.king.cutoff.in.id   -> samples to KEEP
+#   02_QC/subject_rel.king.cutoff.out.id  -> samples to REMOVE
+```
+
+```{r}
+#3.f - QC show related pairs above cutoff}
+# qc_show_related_pairs_plink2 (with proper column headers)
+# Step 2b: Display pairs of related individuals with kinship above the cutoff.
+
+cutoff <- 0.2  # keep aligned with the --king-cutoff used above
+
+# Expected KING output from PLINK 2:
+kin_plain <- "02_QC/subject_rel_pairs.kin0"
+kin_gz    <- "02_QC/subject_rel_pairs.kin0.gz"
+kin_file  <- if (file.exists(kin_plain)) kin_plain else if (file.exists(kin_gz)) kin_gz else NA
+
+if (!is.na(kin_file)) {
+  message("✅ Reading KING table: ", kin_file)
+
+  # Read file (with or without header)
+  con <- if (endsWith(kin_file, ".gz")) gzfile(kin_file, open = "rt") else file(kin_file, open = "r")
+  on.exit(close(con), add = TRUE)
+  king_pairs <- read.table(con, header = FALSE, sep = "", stringsAsFactors = FALSE)
+
+  # Assign proper PLINK 2 KING column names
+  names(king_pairs) <- c("FID1", "IID1", "FID2", "IID2", "NSNP", "HetHet", "IBS0", "Kinship")
+
+  # Filter pairs above cutoff
+  related_pairs <- subset(king_pairs, Kinship > cutoff)
+
+  message("Pairs above cutoff (kinship > ", cutoff, "): ", nrow(related_pairs))
+  print(utils::head(related_pairs, 20))
+
+  # Save filtered pairs
+  out_tsv <- "02_QC/subject_rel_pairs.above_cutoff.tsv"
+  write.table(related_pairs, out_tsv, sep = "\t", row.names = FALSE, quote = FALSE)
+  message("Saved filtered pairs to: ", out_tsv)
+} else {
+  message("⚠️ KING table not found: expected 02_QC/subject_rel_pairs.kin0 (or .kin0.gz).")
+}
+```
+
+
+
+```{r #3.f - Quality Control (QC) Cryptic relatedness check}
+# qc_make_unrelated_dataset_plink2
+# Step 3 (Option A): Keep only unrelated samples (recommended).
+system(paste(
+  plink_command,
+  "--bfile 02_QC/QC7_het",
+  "--keep 02_QC/subject_rel.king.cutoff.in.id",
+  "--make-bed",
+  "--out 02_QC/QC8_rel"
+))
+
+# (Option B): Alternatively, remove the related samples.
+# system(paste(
+#   plink_command,
+#   "--bfile 02_QC/QC7_het",
+#   "--remove 02_QC/subject_rel.king.cutoff.out.id",
+#   "--make-bed",
+#   "--out 02_QC/QC8_rel"
+# ))
 ```
 
 3.g - Quality Control (QC): Hardy-Weinberg Equilibrium (HWE) Filtering ⚖️
@@ -527,10 +764,10 @@ Ensure Reproducibility: It provides a snapshot of the exact environment used to 
 # SECTION 8: Save environment
 
 # Save the R environment for backup and reproducibility.
-save.image(paste(main, "Env_chunk3.RData", sep = ""))
+save.image(paste(main, "Env_chunk_QC.RData", sep = ""))
 
 # Confirm completion of the chunk.
-print("End of chunk 3")
+print("End of chunk QC")
 # End of chunk 3
 
 ```
