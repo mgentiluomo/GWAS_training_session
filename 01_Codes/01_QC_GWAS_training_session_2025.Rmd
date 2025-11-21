@@ -244,7 +244,7 @@ cat("PLINK command to be used:", plink_command, "\n")
 
 # Execute the PLINK version check command
 # This will automatically adapt to the operating system
-system(paste(plink_executable, "--version"))
+system(paste(plink_command, "--version"))
 
 # Verify the functionality of Plink
 # This command checks the installed version of Plink
@@ -316,7 +316,7 @@ This step is for diagnostic purposes. It loads the .hh (homozygosity haploid) ou
 system("plink ... --set-hh-missing ...")
 This is a final cleaning step: it sets the genotypes of the variants that were inconsistent with the inferred sex to missing (NA). This prevents these specific variants from causing further issues in downstream analysis, resulting in the final file for this step (QC2_sex_cleaned).
 
-```{r #3.a - Quality Control (QC) Check for sex discrepancies}
+```{r #3.a - Quality Control (QC) Check for sex discrepancies --update-sex}
 # SECTION 1: Check for sex discrepancies
 
 # Step 1: Update sex data
@@ -326,7 +326,7 @@ system(paste(plink_command, "--bfile 01_Database/DB_A --update-sex 01_Database/S
 ```
 
 
-```{r #3.a - Quality Control (QC) Check for sex discrepancies}
+```{r #3.a - Quality Control (QC) Check for sex discrepancies --check-sex}
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
 system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8 max-female-yrate=0.2 --out 02_QC/results_checksex"))
