@@ -1,2 +1,0 @@
-Asks the link for .bed file
-link "..."
