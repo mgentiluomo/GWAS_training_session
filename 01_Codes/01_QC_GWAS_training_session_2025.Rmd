@@ -42,7 +42,6 @@ https://unipiit-my.sharepoint.com/:f:/g/personal/a035503_unipi_it/EsmOBic2ICxIgM
 
 
 
-
 ############################################################ #############################
 🛠️ Environment Setup and Prerequisites
 Before starting the analysis pipeline, please follow these steps to organize your files and ensure you have all the necessary software installed. This organization is critical for the reproducibility of the entire course.
@@ -82,7 +81,7 @@ This specific code chunk is crucial for ensuring a smooth start to your GWAS tra
 
 ```{r #1.a - Installation of needed packages}
 # Installation of packages
-packages <- c("base", "readxl", "readr", "dplyr", "ggplot2", "rgl", "car", "utils", "qqman", "GGally", "ggfortify")
+packages <- c("base", "readxl", "readr", "dplyr", "ggplot2", "car", "utils", "qqman", "GGally", "ggfortify")
 for (pkg in packages) {
   if (!require(pkg, character.only = TRUE)) {
     install.packages(pkg)
@@ -324,11 +323,19 @@ This is a final cleaning step: it sets the genotypes of the variants that were i
 # This updates the sex information based on the file "Sex.txt" 
 # and creates a new binary file with the updated data.
 system(paste(plink_command, "--bfile 01_Database/DB_A --update-sex 01_Database/Sex.txt --make-bed --out 02_QC/QC1_sex"))
+```
 
+
+```{r #3.a - Quality Control (QC) Check for sex discrepancies}
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
-system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex --out 02_QC/results_checksex"))
+system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8 max-female-yrate=0.2 --out 02_QC/results_checksex"))
 
+# --check-sex compares sex assignments in the input dataset with those imputed from chrX inbreeding coefficients and/or chrY valid genotype call count/rate (heterozygous genotype calls are invalid on chrY), and writes a report to plink2.sexcheck.
+```
+
+
+```{r #3.a - Quality Control (QC) Check for sex discrepancies}
 # Step 3: Review the results
 # Load and visualise the results from the sex check.
 results_checksex <- read_table(paste(QC_dir, "results_checksex.sexcheck", sep = ""))
