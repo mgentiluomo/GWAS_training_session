@@ -228,10 +228,13 @@ Build Alpha 6.1 (14 Nov 2024)
 
 ```{r download_and_prepare_plink2}
 # Define the URL of the file to download #copy and paste the correct PLINK2 URL
-plink_url <- "https://s3.amazonaws.com/plink2-assets/plink2_win64_20251118.zip"
+plink_url <- "https://s3.amazonaws.com/plink2-assets/alpha6/plink2_win64_20251123.zip" # <-PASTE Here the link to Plink2 software
 
-# Define the destination path (download location + filename)
-dest_file <- file.path(notebook_dir, "plink2_win64_20251118.zip")
+# Estrai automaticamente il nome del file dall'URL
+file_name <- basename(plink_url)
+
+# Definisci il percorso di destinazione
+dest_file <- file.path(notebook_dir, file_name)
 
 # Download the file using HTTPS
 download.file(url = plink_url, destfile = dest_file, mode = "wb")
@@ -365,8 +368,6 @@ Once this exception is made, you will be able to run plink2 from the command lin
 ############################################
 
 
-
-
 The first essential step in Sample QC is checking for inconsistencies between the reported sex (as listed in the .fam file or provided as an external phenotype) and the genetically inferred sex (derived from X chromosome heterozygosity). Discrepancies can bias subsequent calculations like HWE checks.
 Code Explanation: The 7-Step Sex Check Protocol
 This block automates a rigorous process using both PLINK (for genetic calculations and filtering) and R (for viewing and selecting problematic samples).
@@ -412,11 +413,19 @@ system(paste(plink_command, "--bfile 01_Database/DB_A --update-sex 01_Database/S
 ```{r #3.a - Quality Control (QC) Check for sex discrepancies --check-sex}
 # Step 2: Verify consistency between reported and genetic sex
 # This generates a report on discrepancies between reported and genetic sex.
-system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8 --out 02_QC/results_checksex"))
+system(paste(plink_command, " --bfile 02_QC/QC1_sex --check-sex min-male-xf=0.8  --out 02_QC/results_checksex"))
 
 # --check-sex compares sex assignments in the input dataset with those imputed from chrX inbreeding coefficients and/or chrY valid genotype call count/rate (heterozygous genotype calls are invalid on chrY), and writes a report to plink2.sexcheck.
+# estimates smaller than 0.2 yield female calls, and values larger than 0.8 yield male calls.
+
 ```
 
+If 'max-female-xf=' and/or 'min-male-xf=' are specified, chrX is used if present.
+If 'max-female-ycount=', 'min-male-ycount=', 'max-female-yrate=', or 'min-male-yrate=' are specified, chrY is used if present.
+If both chrX and chrY are usable, sex is only called if both conditions are satisfied. Similarly, if both count and rate are specified for chrY, the strictest condition must be satisfied.
+If no thresholds are specified at all, a warning is printed, and then the run proceeds as if the parameters were "min-male-xf=1 max-female-yrate=0". In this case, unless you're just sanity-checking pre-cleaned data, you should look at the distributions of xf and yrate in the .sexcheck output file, and then rerun --check-sex with data-derived thresholds.
+On chrX, male F-statistics should be in a big clump near 1, while female F-statistics should be centered near zero but can be widely dispersed.
+On chrY, female valid-genotype rates should be in a big clump near 0, while male valid-genotype rates should be consistently higher but can be dispersed.
 
 ```{r #3.a - Quality Control (QC) Check for sex discrepancies - view checksex}
 # Step 3: Review the results
@@ -657,7 +666,7 @@ system(paste(
   plink_command,
   "--bfile 02_QC/QC7_het",
   "--extract 02_QC/Pruned_list.prune.in",
-  "--king-cutoff 0.2",
+  "--king-cutoff 0.0884",
   "--out 02_QC/subject_rel"
 ))
 
@@ -671,7 +680,7 @@ system(paste(
 # qc_show_related_pairs_plink2 (with proper column headers)
 # Step 2b: Display pairs of related individuals with kinship above the cutoff.
 
-cutoff <- 0.2  # keep aligned with the --king-cutoff used above
+cutoff <- 0.0884  # keep aligned with the --king-cutoff used above
 
 # Expected KING output from PLINK 2:
 kin_plain <- "02_QC/subject_rel_pairs.kin0"
