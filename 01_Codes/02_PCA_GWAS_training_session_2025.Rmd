@@ -168,6 +168,7 @@ system(paste(plink_command_old, "--version"))
 
 print("End of chunk 2")
 ```
+
 ```{r download_and_prepare_plink1.9}
 # Download and prepare PLINK 1.9 (old PLINK)
 # This chunk does NOT modify or overwrite plink2.
@@ -250,11 +251,9 @@ if (os_name != "Windows") {
 # List all PLINK-related files now present in the main notebook directory
 message("PLINK-related files in the notebook directory:")
 print(list.files(notebook_dir, pattern = "plink", full.names = TRUE))
+
+rm(plink_url,plink_url_mac,plink_url_windows)
 ```
-
-
-
-
 
 ```{r --pca}
 # SECTION 6: Cryptic relatedness check
@@ -278,7 +277,7 @@ library(readxl)
 library(ggfortify)
 ```
 
-```{r PLOTs - scree_plot}
+```{r PLOTs - scree_plot Eigenvalue}
 # 1. Create the timestamp (e.g., "20251126_122805")
 # %Y: Year with 4 digits, %m: Month, %d: Day
 # %H: Hour (24h), %M: Minutes, %S: Seconds
@@ -290,10 +289,18 @@ timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 # Load PCA eigenvalues
 PCA_val <- read.table("03_PCA/PCA.eigenval", quote = "", comment.char = "")
 names(PCA_val) <- "Eigenvalue"
+```
+
+
+```{r PLOTs - scree_plot Eigenvalue explainers}
 PCA_val$PC = paste("PC",1:length(PCA_val$Eigenvalue), sep="")
 PCA_val$ExplainedVariance <- PCA_val$Eigenvalue/sum(PCA_val$Eigenvalue)
 PCA_val$CumulativeVariance <- cumsum(PCA_val$ExplainedVariance)
+```
 
+
+```{r PLOTs - scree_plot}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 # Draw the scree plot
 PCA_val$PC <- factor(PCA_val$PC, levels = paste("PC", 1:length(PCA_val$Eigenvalue), sep = ""))
 scree_p = ggplot(PCA_val, aes(x = PC)) +
@@ -334,75 +341,169 @@ COV <- read.delim("02_Database/general_covar.txt", quote = "")
 ```
 
 
-```{r prepare df for plotting PCA by groups}
+```{r prepare df for plotting PCA by groups - FAM}
 library(dplyr)
 library(stringr) # Required for str_detect
 
 # Loading and preparing phenotype data (pheno)
 FAM <- read.table("02_QC/QC9_hwe.fam", quote = "", comment.char = "")
 names(FAM) <- c("FID", "IID", "f", "m", "sex", "phenotype")
+```
 
+
+```{r prepare df for plotting PCA by groups - ID_label}
 # Merge country data (ID_label) and phenotype data (FAM)
 ID_label <- merge(COV, FAM %>% select(FID, IID, phenotype), 
                   by = c("FID", "IID"), all.y = TRUE)
 
-# Set of 5 European countries (3-letter codes)
-countries <- c("ITA", "FRA", "DEU", "ESP", "GBR")
-
-# Add a random country to each row of ID_label
-set.seed(123)  # Optional, for reproducibility
-ID_label$country <- sample(countries, size = nrow(ID_label), replace = TRUE)
-
-ID_label <- dplyr::select(ID_label, c("FID", "IID", "country", "pheno"))
+ID_label <- dplyr::select(ID_label, c("FID", "IID", "Group", "pheno"))
 
 # Merge PCA results with label data
 dfPCA <- merge(PCA, ID_label, by = c("FID", "IID"), all.x = TRUE)
 
-# Ensure that 'country' and 'pheno' are factors for plotting
+# Ensure that 'Group' and 'pheno' are factors for plotting
 dfPCA$pheno <- as.factor(dfPCA$pheno) # Use pheno as the status/colour column
-dfPCA$country <- as.factor(dfPCA$country) # Use pheno as the status/colour column
+dfPCA$Group <- as.factor(dfPCA$Group) # Use pheno as the status/colour column
 ```
 
 
 ```{r PLOTs}
-### 3. Visualizzazione PCA (Colore per Status, Forma per Paese)
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 
-# Calcola la varianza spiegata (per le etichette degli assi)
+### 3. PCA Visualisation (Colour by Status, Shape by Centre/Group)
+
+# Compute explained variance (for axis labels)
 explained_var <- as.vector(round(slice(dplyr::select(PCA_val, c("ExplainedVariance")), c(1,2))*100, digits = 2)$ExplainedVariance)
 
-# Esegui la PCA per ottenere l'oggetto 'pca_res' necessario per autoplot
-pca_res <- prcomp(dplyr::select(dfPCA, starts_with("PC")), scale. = TRUE)
+# Run PCA to obtain the 'pca_res' object required for autoplot
+pca_res <- prcomp(dplyr::select(dfPCA, starts_with("PC")), scale. = FALSE)
 
-# Crea il grafico finale
+# Create the final plot
 plot_final <- autoplot(pca_res, data = dfPCA, 
-                       colour = "pheno",  # <--- COLORE basato sullo Stato (Case/Control)
-                       shape = "country",  # <--- FORMA basata sul Paese
+                       colour = "pheno",  # <--- COLOUR based on Status (Case/Control)
+                       shape = "Group",   # <--- SHAPE based on Group
                        size = 3) + 
     theme_bw() + 
-    # Aggiungi etichette degli assi
+    
+    # Add axis labels
     xlab(paste("PC1 (", explained_var[1], "%)", sep="")) + 
     ylab(paste("PC2 (", explained_var[2], "%)", sep="")) + 
-    # Titolo del grafico
-    ggtitle("PCA: Country (Shape) vs. Case/Control Status (Color)") +
     
-    # Personalizza i COLORI (opzionale, assegna colori specifici a Case/Control)
+    # Plot title
+    ggtitle("PCA: Group (Shape) vs Case/Control Status (Colour)") +
+    
+    # Customise COLOURS (optional, assign specific colours to Case/Control)
     scale_color_manual(name = "Status",
-                       values = c("Case" = "red",       # Esempio: Casse in Rosso
-                                  "Control" = "blue")) +  # Esempio: Controlli in Blu
+                       values = c("Case" = "red",        # Example: Cases in Red
+                                  "Control" = "blue")) +  # Example: Controls in Blue
                                   
-    # Personalizza le FORME (il numero di forme disponibili è limitato; ne userà una per ogni Paese)
-    # Se hai molti Paesi, ggplot2 userà automaticamente fino a 6 o 7 forme diverse prima di ricominciare.
-    # Se vuoi specificare un set più ampio:
-    # scale_shape_manual(name = "Country", 
-    #                    values = c(15, 16, 17, 18, 19, 20, 21, 22, 23, 24)) + 
-    
-    # Personalizza l'aspetto della legenda
+    # Customise legend appearance
     theme(legend.position = "right",
           plot.title = element_text(size = 14, face = "bold"),
           legend.title = element_text(size = 10, face = "bold"))
 
-# Salva il plot
-ggsave(filename = paste("03_PCA/","pca_status_country_swapped",timestamp,".jpeg", sep=""), plot = plot_final, width = 10, height = 7, dpi = 600)
+# Save the plot
+ggsave(filename = paste("03_PCA/","pca_status_Group_swapped_",timestamp,".jpeg", sep=""), 
+       plot = plot_final, width = 10, height = 7, dpi = 600)
+```
+
+```{r PLOTs by case control}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+
+### 3. PCA Visualisation (Colour by Status, Shape by Centre/Group)
+
+# Compute explained variance (for axis labels)
+explained_var <- as.vector(round(slice(dplyr::select(PCA_val, c("ExplainedVariance")), c(1,2))*100, digits = 2)$ExplainedVariance)
+
+# Run PCA to obtain the 'pca_res' object required for autoplot
+pca_res <- prcomp(dplyr::select(dfPCA, starts_with("PC")), scale. = FALSE)
+
+# Create the final plot
+plot_final <- autoplot(pca_res, data = dfPCA, 
+                       colour = "pheno",  # <--- COLOUR based on Status (Case/Control)
+                       shape = "Group",   # <--- SHAPE based on Group
+                       size = 3) + 
+    theme_bw() + 
+    
+    # Add axis labels
+    xlab(paste("PC1 (", explained_var[1], "%)", sep="")) + 
+    ylab(paste("PC2 (", explained_var[2], "%)", sep="")) + 
+    
+    # Plot title
+    ggtitle("PCA: Group (Shape) vs Case/Control Status (Colour)") +
+    
+    # Customise COLOURS (optional, assign specific colours to Case/Control)
+    scale_color_manual(name = "Status",
+                       values = c("Case" = "red",        # Example: Cases in Red
+                                  "Control" = "blue")) +  # Example: Controls in Blue
+                                  
+    # Customise legend appearance
+    theme(legend.position = "right",
+          plot.title = element_text(size = 14, face = "bold"),
+          legend.title = element_text(size = 10, face = "bold"))
+
+# Save the plot
+ggsave(filename = paste("03_PCA/","pca_status_Group_swapped_",timestamp,".jpeg", sep=""), 
+       plot = plot_final, width = 10, height = 7, dpi = 600)
+```
+
+
+```{r PLOTs}
+plot_final <- autoplot(pca_res, data = dfPCA, 
+                       colour = "Group",   # <--- COLOUR by PCA Group
+                       shape = "pheno",    # <--- SHAPE by Case/Control
+                       size = 3) + 
+    theme_bw() + 
+    
+    # Axis labels
+    xlab(paste("PC1 (", explained_var[1], "%)", sep="")) + 
+    ylab(paste("PC2 (", explained_var[2], "%)", sep="")) + 
+    
+    # Title
+    ggtitle("PCA: Group (Colour) vs Case/Control Status (Shape)") +
+    
+    # Custom colours for the 4 PCA groups
+    scale_color_manual(name = "Group",
+                       values = c("A" = "#E41A1C",   # red
+                                  "B" = "#377EB8",   # blue
+                                  "C" = "#4DAF4A",   # green
+                                  "X" = "#984EA3")) + # purple
+                                  
+    # Legend and theme
+    theme(legend.position = "right",
+          plot.title = element_text(size = 14, face = "bold"),
+          legend.title = element_text(size = 10, face = "bold"))
+
+# Save the plot
+ggsave(filename = paste("03_PCA/","pca_Group_swapped_",timestamp,".jpeg", sep=""), 
+       plot = plot_final, width = 10, height = 7, dpi = 600)
+```
+
+
+
+
+```{r}
+#Set threshold
+
+PC1_thr_min = 0.01
+PC1_thr_max = 1
+
+PC2_thr_min = -0.012
+PC2_thr_max = 0.012
+
+Selection <- subset(dfPCA,
+                    PC1 >= PC1_thr_min &
+                    PC1 <= PC1_thr_max &
+                    PC2 >= PC2_thr_min &
+                    PC2 <= PC2_thr_max)
+
+Selected_IDs <- Selection[, c("FID", "IID")]
+
+write.table(Selected_IDs, "03_PCA/Group_selection.txt", sep = "\t", row.names = FALSE, quote = FALSE)
+
+
+
+
 ```
 
 ```{r 1000Genome}
@@ -447,8 +548,16 @@ for (name in names(files_to_download)) {
 #Import 1000Genome data info
 oneTGenome <- read_excel("02_Database/DB_1K_genome/1000G_individuals.xlsx", col_names = FALSE)
 names(oneTGenome) <- c("FID","IID","Population")
+```
 
 
+```{r 1000Genome}
+BIM_DB <- read.table("02_QC/QC9_hwe.bim", header = F)
+BIM_1KG <- read.table("02_Database/DB_1K_genome/DB_1000G.bim", header = F)
+```
+
+
+```{r 1000Genome}
 system(paste(
   plink_command_old,
   "--bfile 02_QC/QC9_hwe",
@@ -456,10 +565,86 @@ system(paste(
   "--out 03_PCA/DB_merged_1KG"
 ))
 
+system(paste(
+  plink_command_old,
+  "--bfile 02_Database/DB_1K_genome/DB_1000G",
+  "--flip 03_PCA/DB_merged_1KG.missnp",
+  "--make-bed",
+  "--out 03_PCA/DB_flippedd_1KG"
+))
 
+
+system(paste(
+  plink_command_old,
+  "--bfile 02_QC/QC9_hwe",
+  "--bmerge 03_PCA/DB_flippedd_1KG.bed 03_PCA/DB_flippedd_1KG.bim 03_PCA/DB_flippedd_1KG.fam",
+  "--out 03_PCA/DB_merged_1KGv2"
+))
+
+
+system(paste(
+  plink_command_old,
+  "--bfile 03_PCA/DB_flippedd_1KG",
+  "--exclude 03_PCA/DB_merged_1KGv2.missnp",
+  "--make-bed",
+  "--out 03_PCA/DB_flippedd_1KGv2"
+))
+
+
+system(paste(
+  plink_command_old,
+  "--bfile 02_QC/QC9_hwe",
+  "--bmerge 03_PCA/DB_flippedd_1KGv2.bed 03_PCA/DB_flippedd_1KGv2.bim 03_PCA/DB_flippedd_1KGv2.fam",
+  "--out 03_PCA/DB_merged_1KG_final"
+))
+```
+
+
+```{r 1000Genome merged QC}
+#system(paste(
+  plink_command_old,
+  "--bfile 03_PCA/DB_merged_1KG_final",
+  "--geno 0.15 --mind 0.15",
+  "--make-bed",
+  "--out 03_PCA/DB_merged_1KG_clean"
+))
 
 
 ```
+
+```{r --pca 1KG}
+# SECTION 6: Cryptic relatedness check
+
+# Step 1: Prune SNPs for PCA analysis.
+system(paste(plink_command, " --bfile 03_PCA/DB_merged_1KG_clean --indep-pairwise 50 5 0.2 --out 03_PCA/Pruned_list_to_PCA1kG"))
+
+
+# STEP 2: Extraction of independent SNPs
+system(paste(plink_command," --bfile 03_PCA/DB_merged_1KG_clean --extract 03_PCA/Pruned_list_to_PCA1kG.prune.in --make-bed --out 03_PCA/DB_to_PCA1kG"))
+
+# STEP 8: PCA calculation
+system(paste(plink_command," --bfile 03_PCA/DB_to_PCA1kG --pca --out 03_PCA/PCA1kG"))
+```
+
+
+
+
+```{r PCA eigenvectors 1KG}
+#Load PCA eigenvectors
+PCA <- read.delim("03_PCA/PCA1kG.eigenvec", quote = "",)
+num_pca_columns <- ncol(PCA) - 2
+colnames(PCA) <- c("FID", "IID", paste0("PC", 1:num_pca_columns))
+```
+
+```{r}
+Database <- merge(PCA,oneTGenome,all.x = T, by = c("FID","IID"))
+
+table(Database$Population)
+
+
+```
+
+
 
 
 
