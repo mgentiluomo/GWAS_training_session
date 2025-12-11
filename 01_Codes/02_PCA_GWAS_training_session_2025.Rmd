@@ -638,19 +638,19 @@ dir.create(DB_dir, recursive = TRUE, showWarnings = FALSE)
 # Define URLs and destination file names
 files_to_download <- list(
   bed_1KG = list(
-    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQCMZbnTFipoRYVs_2tIdGk0ARoMtzCjqQ7mh-NY3QT5EG0?e=jYeGS4",
+    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQBPwQuhIMnOTJEaH3xvyK9jASbH8GEetD9hHmCp8827TSg?e=PHVe4o",
     dest = "DB_1000G.bed"
   ),
   fam_1KG = list(
-    url  = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/ba69c0ef61926cc7d1d8a06761aa35ad70f94777/02_Database/DB_1K_genome/DB_1000G.fam",
+    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQAa-xZmUvhPTYjD7V7uc7KfAZnBSKAOSv1JwO5vrQDI9KM?e=Lvl80W",
     dest = "DB_1000G.fam"
   ),
   bim_1KG = list(
-    url  = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/ba69c0ef61926cc7d1d8a06761aa35ad70f94777/02_Database/DB_1K_genome/DB_1000G.bim",
+    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQBts8b-ZfThTqJRBTbeowO8AZluFynMNyHQ_KpRBRwk5LQ?e=WtbB9o",
     dest = "DB_1000G.bim"
   ),
   info_1KG = list(
-    url  = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/ba69c0ef61926cc7d1d8a06761aa35ad70f94777/02_Database/DB_1K_genome/1000G_individuals.xlsx",
+    url  = "https://unipiit-my.sharepoint.com/:x:/g/personal/a035503_unipi_it/IQDgt9y5UOnhR4hgx5lWE7EAAenjEfN-UntswmSP5s9H8Rs?e=UDWmyk",
     dest = "1000G_individuals.xlsx"
   )
 )
