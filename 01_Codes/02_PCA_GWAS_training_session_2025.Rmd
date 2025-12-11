@@ -269,7 +269,7 @@ system(paste(plink_command," --bfile 02_QC/QC9_hwe --extract 03_PCA/Pruned_list_
 system(paste(plink_command," --bfile 03_PCA/DB_to_PCA --pca --out 03_PCA/PCA"))
 ```
 
-```{r PLOTs libraries}
+```{r prep PLOTs libraries}
 # Make sure the required packages are loaded
 library(ggplot2)
 library(dplyr)
@@ -277,7 +277,7 @@ library(readxl)
 library(ggfortify)
 ```
 
-```{r PLOTs - scree_plot Eigenvalue}
+```{r prep PLOTs - scree_plot Eigenvalue}
 # 1. Create the timestamp (e.g., "20251126_122805")
 # %Y: Year with 4 digits, %m: Month, %d: Day
 # %H: Hour (24h), %M: Minutes, %S: Seconds
@@ -291,15 +291,13 @@ PCA_val <- read.table("03_PCA/PCA.eigenval", quote = "", comment.char = "")
 names(PCA_val) <- "Eigenvalue"
 ```
 
-
-```{r PLOTs - scree_plot Eigenvalue explainers}
+```{r prep PLOTs - scree_plot Eigenvalue explainers}
 PCA_val$PC = paste("PC",1:length(PCA_val$Eigenvalue), sep="")
 PCA_val$ExplainedVariance <- PCA_val$Eigenvalue/sum(PCA_val$Eigenvalue)
 PCA_val$CumulativeVariance <- cumsum(PCA_val$ExplainedVariance)
 ```
 
-
-```{r PLOTs - scree_plot}
+```{r PLOT - scree_plot}
 timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 # Draw the scree plot
 PCA_val$PC <- factor(PCA_val$PC, levels = paste("PC", 1:length(PCA_val$Eigenvalue), sep = ""))
@@ -340,7 +338,6 @@ colnames(PCA) <- c("FID", "IID", paste0("PC", 1:num_pca_columns))
 COV <- read.delim("02_Database/general_covar.txt", quote = "")
 ```
 
-
 ```{r prepare df for plotting PCA by groups - FAM}
 library(dplyr)
 library(stringr) # Required for str_detect
@@ -349,7 +346,6 @@ library(stringr) # Required for str_detect
 FAM <- read.table("02_QC/QC9_hwe.fam", quote = "", comment.char = "")
 names(FAM) <- c("FID", "IID", "f", "m", "sex", "phenotype")
 ```
-
 
 ```{r prepare df for plotting PCA by groups - ID_label}
 # Merge country data (ID_label) and phenotype data (FAM)
@@ -366,8 +362,7 @@ dfPCA$pheno <- as.factor(dfPCA$pheno) # Use pheno as the status/colour column
 dfPCA$Group <- as.factor(dfPCA$Group) # Use pheno as the status/colour column
 ```
 
-
-```{r PLOTs}
+```{r PLOTs PC1 - PC2}
 timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 
 ### 3. PCA Visualisation (Colour by Status, Shape by Centre/Group)
@@ -407,46 +402,109 @@ ggsave(filename = paste("03_PCA/","pca_status_Group_swapped_",timestamp,".jpeg",
        plot = plot_final, width = 10, height = 7, dpi = 600)
 ```
 
-```{r PLOTs by case control}
+```{r PLOTs  PC2 - PC3 by case control}
 timestamp <- format(Sys.time(), "%m%d_%H%M%S")
 
-### 3. PCA Visualisation (Colour by Status, Shape by Centre/Group)
+### 1. Compute explained variance (for axis labels)
 
-# Compute explained variance (for axis labels)
-explained_var <- as.vector(round(slice(dplyr::select(PCA_val, c("ExplainedVariance")), c(1,2))*100, digits = 2)$ExplainedVariance)
+explained_var <- as.vector(round(slice(dplyr::select(PCA_val, c("ExplainedVariance")), c(1,3))*100, digits = 2)$ExplainedVariance)
 
-# Run PCA to obtain the 'pca_res' object required for autoplot
+### 2. Run PCA to obtain the 'pca_res' object required for autoplot
+
 pca_res <- prcomp(dplyr::select(dfPCA, starts_with("PC")), scale. = FALSE)
 
-# Create the final plot
-plot_final <- autoplot(pca_res, data = dfPCA, 
-                       colour = "pheno",  # <--- COLOUR based on Status (Case/Control)
-                       shape = "Group",   # <--- SHAPE based on Group
-                       size = 3) + 
-    theme_bw() + 
-    
-    # Add axis labels
-    xlab(paste("PC1 (", explained_var[1], "%)", sep="")) + 
-    ylab(paste("PC2 (", explained_var[2], "%)", sep="")) + 
-    
-    # Plot title
-    ggtitle("PCA: Group (Shape) vs Case/Control Status (Colour)") +
-    
-    # Customise COLOURS (optional, assign specific colours to Case/Control)
-    scale_color_manual(name = "Status",
-                       values = c("Case" = "red",        # Example: Cases in Red
-                                  "Control" = "blue")) +  # Example: Controls in Blue
-                                  
-    # Customise legend appearance
-    theme(legend.position = "right",
-          plot.title = element_text(size = 14, face = "bold"),
-          legend.title = element_text(size = 10, face = "bold"))
+### 3. Create the PC2–PC3 plot
 
-# Save the plot
-ggsave(filename = paste("03_PCA/","pca_status_Group_swapped_",timestamp,".jpeg", sep=""), 
-       plot = plot_final, width = 10, height = 7, dpi = 600)
+plot_PC2_PC3 <- autoplot(pca_res, data = dfPCA,
+colour = "pheno",   # Colour indicates Status (Case/Control)
+shape = "Group",    # Shape indicates Group
+size = 3,
+x = 2,              # Use PC2 for x-axis
+y = 3) +            # Use PC3 for y-axis
+theme_bw() +
+
+# Add axis labels using PC2 and PC3 explained variance
+xlab(paste("PC2 (", explained_var[2], "%)", sep = "")) +
+ylab(paste("PC3 (", explained_var[3], "%)", sep = "")) +
+
+# Plot title
+ggtitle("PCA: PC2 vs PC3 – Group (Shape) vs Case/Control Status (Colour)") +
+
+# Custom colour scheme for Case/Control
+scale_colour_manual(name = "Status",
+                    values = c("Case" = "red",
+                               "Control" = "blue")) +
+
+# Customise legend appearance
+theme(legend.position = "right",
+      plot.title = element_text(size = 14, face = "bold"),
+      legend.title = element_text(size = 10, face = "bold"))
+
+
+### 4. Save the plot
+
+ggsave(filename = paste("03_PCA/", "pca_PC2_PC3_status_Group_", timestamp, ".jpeg", sep = ""),
+plot = plot_PC2_PC3, width = 10, height = 7, dpi = 600)
+
 ```
 
+```{r PLOTs  PC1 - PC3 by case control}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+
+### 1. Compute explained variance (for axis labels)
+# This selects the explained variance for PC1 (row 1) and PC3 (row 3)
+explained_var <- as.vector(
+  round(
+    dplyr::slice(dplyr::select(PCA_val, c("ExplainedVariance")), c(1, 3)) * 100,
+    digits = 2
+  )$ExplainedVariance
+)
+
+### 2. Run PCA to obtain the 'pca_res' object required for autoplot
+pca_res <- prcomp(dplyr::select(dfPCA, dplyr::starts_with("PC")), scale. = FALSE)
+
+### 3. Create the PC1–PC3 plot
+plot_PC1_PC3 <- autoplot(
+  pca_res, data = dfPCA,
+  colour = "pheno",   # Colour indicates Status (Case/Control)
+  shape  = "Group",   # Shape indicates Group
+  size   = 3,
+  x      = 1,         # Use PC1 for x-axis
+  y      = 3          # Use PC3 for y-axis
+) +
+  theme_bw() +
+
+  # Add axis labels using PC1 and PC3 explained variance
+  xlab(paste("PC1 (", explained_var[1], "%)", sep = "")) +
+  ylab(paste("PC3 (", explained_var[2], "%)", sep = "")) +
+
+  # Plot title
+  ggtitle("PCA: PC1 vs PC3 – Group (Shape) vs Case/Control Status (Colour)") +
+
+  # Custom colour scheme for Case/Control
+  scale_colour_manual(
+    name   = "Status",
+    values = c("Case" = "red",
+               "Control" = "blue")
+  ) +
+
+  # Customise legend appearance
+  theme(
+    legend.position = "right",
+    plot.title      = element_text(size = 14, face = "bold"),
+    legend.title    = element_text(size = 10, face = "bold")
+  )
+
+### 4. Save the plot
+ggsave(
+  filename = paste("03_PCA/", "pca_PC1_PC3_status_Group_", timestamp, ".jpeg", sep = ""),
+  plot     = plot_PC1_PC3,
+  width    = 10,
+  height   = 7,
+  dpi      = 600
+)
+
+```
 
 ```{r PLOTs}
 plot_final <- autoplot(pca_res, data = dfPCA, 
@@ -479,10 +537,76 @@ ggsave(filename = paste("03_PCA/","pca_Group_swapped_",timestamp,".jpeg", sep=""
        plot = plot_final, width = 10, height = 7, dpi = 600)
 ```
 
+```{r PLOTs PC2 - PC3}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+plot_PC2_PC3 <- autoplot(pca_res, data = dfPCA, 
+                         colour = "Group",   # COLOUR by PCA Group
+                         shape  = "pheno",   # SHAPE by Case/Control
+                         size   = 3,
+                         x      = 2,         # Use PC2 for x-axis
+                         y      = 3) +       # Use PC3 for y-axis
+    theme_bw() + 
+    
+    # Axis labels
+    xlab(paste("PC2 (", explained_var[2], "%)", sep = "")) + 
+    ylab(paste("PC3 (", explained_var[3], "%)", sep = "")) + 
+    
+    # Title
+    ggtitle("PCA: PC2 vs PC3 – Group (Colour) vs Case/Control Status (Shape)") +
+    
+    # Custom colours for the 4 PCA groups
+    scale_color_manual(name = "Group",
+                       values = c("A" = "#E41A1C",   # red
+                                  "B" = "#377EB8",   # blue
+                                  "C" = "#4DAF4A",   # green
+                                  "X" = "#984EA3")) + # purple
+                                  
+    # Legend and theme
+    theme(legend.position = "right",
+          plot.title      = element_text(size = 14, face = "bold"),
+          legend.title    = element_text(size = 10, face = "bold"))
 
+# Save the plot
+ggsave(filename = paste("03_PCA/", "pca_Group_PC2_PC3_", timestamp, ".jpeg", sep = ""), 
+       plot = plot_PC2_PC3, width = 10, height = 7, dpi = 600)
 
+```
 
-```{r}
+```{r PLOTs PC1 - PC3}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+plot_PC1_PC3 <- autoplot(pca_res, data = dfPCA, 
+                         colour = "Group",   # COLOUR by PCA Group
+                         shape  = "pheno",   # SHAPE by Case/Control
+                         size   = 3,
+                         x      = 1,         # Use PC1 for x-axis
+                         y      = 3) +       # Use PC3 for y-axis
+    theme_bw() + 
+    
+    # Axis labels
+    xlab(paste("PC1 (", explained_var[1], "%)", sep = "")) + 
+    ylab(paste("PC3 (", explained_var[3], "%)", sep = "")) + 
+    
+    # Title
+    ggtitle("PCA: PC1 vs PC3 – Group (Colour) vs Case/Control Status (Shape)") +
+    
+    # Custom colours for the 4 PCA groups
+    scale_color_manual(name = "Group",
+                       values = c("A" = "#E41A1C",   # red
+                                  "B" = "#377EB8",   # blue
+                                  "C" = "#4DAF4A",   # green
+                                  "X" = "#984EA3")) + # purple
+                                  
+    # Legend and theme
+    theme(legend.position = "right",
+          plot.title      = element_text(size = 14, face = "bold"),
+          legend.title    = element_text(size = 10, face = "bold"))
+
+# Save the plot
+ggsave(filename = paste("03_PCA/", "pca_Group_PC1_PC3_", timestamp, ".jpeg", sep = ""), 
+       plot = plot_PC1_PC3, width = 10, height = 7, dpi = 600)
+```
+
+```{r Select a group of samples using PC coordinates}
 #Set threshold
 
 PC1_thr_min = 0.01
@@ -550,21 +674,21 @@ oneTGenome <- read_excel("02_Database/DB_1K_genome/1000G_individuals.xlsx", col_
 names(oneTGenome) <- c("FID","IID","Population")
 ```
 
-
-```{r 1000Genome}
+```{r 1000Genome Import DB .bim and 1000Genome .bim}
 BIM_DB <- read.table("02_QC/QC9_hwe.bim", header = F)
 BIM_1KG <- read.table("02_Database/DB_1K_genome/DB_1000G.bim", header = F)
 ```
 
-
-```{r 1000Genome}
+```{r 1000Genome  #Round 1 merging}
 system(paste(
   plink_command_old,
   "--bfile 02_QC/QC9_hwe",
   "--bmerge 02_Database/DB_1K_genome/DB_1000G.bed 02_Database/DB_1K_genome/DB_1000G.bim 02_Database/DB_1K_genome/DB_1000G.fam",
   "--out 03_PCA/DB_merged_1KG"
 ))
+```
 
+```{r 1000Genome flip variants before merge}
 system(paste(
   plink_command_old,
   "--bfile 02_Database/DB_1K_genome/DB_1000G",
@@ -572,8 +696,9 @@ system(paste(
   "--make-bed",
   "--out 03_PCA/DB_flippedd_1KG"
 ))
+```
 
-
+```{r 1000Genome #Round 2 merging}
 system(paste(
   plink_command_old,
   "--bfile 02_QC/QC9_hwe",
@@ -599,12 +724,11 @@ system(paste(
 ))
 ```
 
-
 ```{r 1000Genome merged QC}
-#system(paste(
+system(paste(
   plink_command_old,
   "--bfile 03_PCA/DB_merged_1KG_final",
-  "--geno 0.15 --mind 0.15",
+  "--geno 0.15 --mind 0.5",
   "--make-bed",
   "--out 03_PCA/DB_merged_1KG_clean"
 ))
@@ -620,14 +744,9 @@ system(paste(plink_command, " --bfile 03_PCA/DB_merged_1KG_clean --indep-pairwis
 
 
 # STEP 2: Extraction of independent SNPs
-system(paste(plink_command," --bfile 03_PCA/DB_merged_1KG_clean --extract 03_PCA/Pruned_list_to_PCA1kG.prune.in --make-bed --out 03_PCA/DB_to_PCA1kG"))
+system(paste(plink_command," --bfile 03_PCA/DB_merged_1KG_clean --extract 03_PCA/Pruned_list_to_PCA1kG.prune.in --pca --out 03_PCA/PCA1kG"))
 
-# STEP 8: PCA calculation
-system(paste(plink_command," --bfile 03_PCA/DB_to_PCA1kG --pca --out 03_PCA/PCA1kG"))
 ```
-
-
-
 
 ```{r PCA eigenvectors 1KG}
 #Load PCA eigenvectors
@@ -639,12 +758,336 @@ colnames(PCA) <- c("FID", "IID", paste0("PC", 1:num_pca_columns))
 ```{r}
 Database <- merge(PCA,oneTGenome,all.x = T, by = c("FID","IID"))
 
-table(Database$Population)
-
+table(Database$Population, useNA = "always")
 
 ```
 
+```{r PCA PC1-PC2 coloured by Population including NA}
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+library(ggplot2)
+
+### PCA scatter plot including all samples
+plot_PC1_PC2 <- ggplot(Database, aes(x = PC1, y = PC2, colour = Population)) +
+  geom_point(size = 2, alpha = 0.8) +
+  theme_bw() +
+  
+  # Axis labels
+  labs(
+    x = "PC1",
+    y = "PC2",
+    colour = "Population",
+    title = "PCA: PC1 vs PC2 coloured by Population (unknown in grey)"
+  ) +
+  
+  # Custom colours for AFR/EAS/EUR + grey for NA
+  scale_colour_manual(
+    values = c(
+      "AFR" = "#E41A1C",  # red
+      "EAS" = "#377EB8",  # blue
+      "EUR" = "#4DAF4A"   # green
+    ),
+    na.value = "grey70",   # colour for samples without Population
+    breaks   = c("AFR", "EAS", "EUR")  # only show real populations in legend
+  ) +
+  
+  # Theme adjustments
+  theme(
+    plot.title   = element_text(size = 14, face = "bold"),
+    legend.title = element_text(size = 10, face = "bold")
+  )
+
+# Save the plot
+ggsave(filename = paste("03_PCA/", "pca_1Kgenome_", timestamp, ".jpeg", sep = ""), 
+       plot = plot_PC1_PC2, width = 10, height = 7, dpi = 600)
+```
+
+```{r Mahalanobis function}
+library(dplyr)
+
+### Function to assign missing populations using Mahalanobis distance
+assign_population_mahalanobis <- function(df,
+                                          pop_col = "Population",
+                                          pcs     = c("PC1", "PC2"),
+                                          quantile_cutoff = 0.975) {
+  # Split into reference (known populations) and target (missing population)
+  ref_df    <- df %>% filter(!is.na(.data[[pop_col]]))
+  target_df <- df %>% filter(is.na(.data[[pop_col]]))
+  
+  # If there are no missing populations, just return the original data
+  if (nrow(target_df) == 0) {
+    df$AssignedPopulation <- df[[pop_col]]
+    return(df)
+  }
+  
+  pops <- sort(unique(ref_df[[pop_col]]))
+  k    <- length(pcs)
+  
+  # Chi-square cutoff for the chosen confidence level and number of PCs
+  chi_cutoff <- qchisq(quantile_cutoff, df = k)
+  
+  # Matrix to store Mahalanobis distances:
+  # rows = target samples, columns = populations
+  dist_mat <- matrix(NA_real_,
+                     nrow = nrow(target_df),
+                     ncol = length(pops),
+                     dimnames = list(NULL, pops))
+  
+  # Compute Mahalanobis distance of each NA sample to each population cluster
+  for (p in pops) {
+    ref_p <- ref_df %>% filter(.data[[pop_col]] == p)
+    Xref  <- as.matrix(ref_p[, pcs, drop = FALSE])
+    mu_p  <- colMeans(Xref)
+    S_p   <- cov(Xref)
+    
+    Xtar  <- as.matrix(target_df[, pcs, drop = FALSE])
+    
+    dist_mat[, p] <- mahalanobis(Xtar, center = mu_p, cov = S_p)
+  }
+  
+  # For each target sample, find the population with minimum distance
+  min_dist      <- apply(dist_mat, 1, min)
+  best_pop      <- pops[apply(dist_mat, 1, which.min)]
+  
+  # Assign population only if distance is within the chi-square cutoff
+  assigned_pop <- best_pop
+  
+  # Add new column to original data frame
+  ## assigned_pop <- ifelse(min_dist <= chi_cutoff, best_pop, NA)
+  df$AssignedPopulation <- df[[pop_col]]
+  
+  # Fill in assignments for missing Population
+  df$AssignedPopulation[is.na(df[[pop_col]])] <- assigned_pop
+  
+  return(df)
+}
+
+```
+
+```{r Apply Mahalanobis-based assignment using PC1 and PC2}
+# Apply Mahalanobis-based assignment using PC1 and PC2
+Database_maha <- assign_population_mahalanobis(
+  df      = Database,
+  pop_col = "Population",
+  pcs     = c("PC1", "PC2"),   # you can extend this, e.g. c("PC1","PC2","PC3","PC4")
+  quantile_cutoff = 0.975      # 97.5% confidence ellipse
+)
+
+# Controllo veloce:
+table(Database$Population, useNA = "always")
+table(Database_maha$AssignedPopulation, useNA = "always")
+
+Database_maha <- Database_maha %>%
+  mutate(
+    ### Final population label:
+    ### - original populations stay as they are (AFR/EAS/EUR)
+    ### - previously NA but now assigned become AFR*/EAS*/EUR*
+    ### - still NA if not assigned
+    AssignedPopulationStar = case_when(
+      !is.na(Population) ~ Population,
+      is.na(Population) & !is.na(AssignedPopulation) ~ paste0(AssignedPopulation, "*"),
+      TRUE ~ NA_character_
+    )
+  )
+
+# Controllo
+table(Database_maha$AssignedPopulationStar, useNA = "always")
+```
+
+```{r PCA PC1-PC2 with AssignedPopulationStar}
+
+library(ggplot2)
+
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+
+### Custom colours for populations and their assigned counterparts
+pop_cols <- c(
+  "AFR"  = "#E41A1C",  # red
+  "AFR*" = "#6e224d",  # same colour, different label
+  "EAS"  = "#377EB8",  # blue
+  "EAS*" = "#111b5c",
+  "EUR"  = "#4DAF4A",  # green
+  "EUR*" = "#b2d41e"
+)
+
+### PCA plot using the new population labels
+plot_PC1_PC2_star <- ggplot(Database_maha,
+                            aes(x = PC1, y = PC2, colour = AssignedPopulationStar)) +
+  geom_point(size = 2, alpha = 0.8) +
+  theme_bw() +
+  
+  # Axis labels and title
+  labs(
+    x = "PC1",
+    y = "PC2",
+    colour = "Population",
+    title = paste("PCA: PC1 vs PC2 – True and Assigned Populations (", timestamp, ")", sep = "")
+  ) +
+  
+  # Colour scale including NA as grey
+  scale_colour_manual(
+    values = pop_cols,
+    na.value = "grey70"
+  ) +
+  
+  # Theme customisation
+  theme(
+    plot.title   = element_text(size = 14, face = "bold"),
+    legend.title = element_text(size = 10, face = "bold")
+  )
+
+### Save the plot
+ggsave(
+  filename = paste0("03_PCA/pca_PC1_PC2_AssignedStar_", timestamp, ".jpeg"),
+  plot     = plot_PC1_PC2_star,
+  width    = 10,
+  height   = 7,
+  dpi      = 600
+)
+```
 
 
+```{r Remove outlier from reference pop}
+
+POP <- "AFR"
+
+PC1_min <- -0.01
+PC1_max <-  0.02
+
+PC2_min <- -0.02
+PC2_max <-  0.01
+
+### Identify outliers within the selected population
+outlier_idx <- which(
+  Database$Population == POP &
+  (
+    ((Database$PC1 > PC1_min &
+    Database$PC1 < PC1_max) |
+    (Database$PC2 > PC2_min &
+    Database$PC2 < PC2_max))
+  )
+)
+
+### Remove them
+Database_clean <- Database[-outlier_idx, ]
+
+### Optional: print how many were removed
+cat("Removed", length(outlier_idx), "outliers from population", POP, "\n")
+
+```
+
+```{r Apply Mahalanobis-based assignment using PC1 and PC2 NEW without outlier}
+# Apply Mahalanobis-based assignment using PC1 and PC2
+Database_maha <- assign_population_mahalanobis(
+  df      = Database_clean,
+  pop_col = "Population",
+  pcs     = c("PC1", "PC2"),   # you can extend this, e.g. c("PC1","PC2","PC3","PC4")
+  quantile_cutoff = 0.975      # 97.5% confidence ellipse
+)
+
+# Controllo veloce:
+table(Database$Population, useNA = "always")
+table(Database_maha$AssignedPopulation, useNA = "always")
+
+Database_maha <- Database_maha %>%
+  mutate(
+    ### Final population label:
+    ### - original populations stay as they are (AFR/EAS/EUR)
+    ### - previously NA but now assigned become AFR*/EAS*/EUR*
+    ### - still NA if not assigned
+    AssignedPopulationStar = case_when(
+      !is.na(Population) ~ Population,
+      is.na(Population) & !is.na(AssignedPopulation) ~ paste0(AssignedPopulation, "*"),
+      TRUE ~ NA_character_
+    )
+  )
+
+# Controllo
+table(Database_maha$AssignedPopulationStar, useNA = "always")
+```
+
+```{r PCA PC1-PC2 with AssignedPopulationStar NEW without outlier}
+
+library(ggplot2)
+
+timestamp <- format(Sys.time(), "%m%d_%H%M%S")
+
+### Custom colours for populations and their assigned counterparts
+pop_cols <- c(
+  "AFR"  = "#E41A1C",  # red
+  "AFR*" = "#6e224d",  # same colour, different label
+  "EAS"  = "#377EB8",  # blue
+  "EAS*" = "#111b5c",
+  "EUR"  = "#4DAF4A",  # green
+  "EUR*" = "#b2d41e"
+)
+
+### PCA plot using the new population labels
+plot_PC1_PC2_star <- ggplot(Database_maha,
+                            aes(x = PC1, y = PC2, colour = AssignedPopulationStar)) +
+  geom_point(size = 2, alpha = 0.8) +
+  theme_bw() +
+  
+  # Axis labels and title
+  labs(
+    x = "PC1",
+    y = "PC2",
+    colour = "Population",
+    title = paste("PCA: PC1 vs PC2 – True and Assigned Populations (", timestamp, ")", sep = "")
+  ) +
+  
+  # Colour scale including NA as grey
+  scale_colour_manual(
+    values = pop_cols,
+    na.value = "grey70"
+  ) +
+  
+  # Theme customisation
+  theme(
+    plot.title   = element_text(size = 14, face = "bold"),
+    legend.title = element_text(size = 10, face = "bold")
+  )
+
+### Save the plot
+ggsave(
+  filename = paste0("03_PCA/pca_PC1_PC2_AssignedStar_", timestamp, ".jpeg"),
+  plot     = plot_PC1_PC2_star,
+  width    = 10,
+  height   = 7,
+  dpi      = 600
+)
+```
+
+
+```{r Export EUR-star sample list}
+
+### Select EUR* samples and keep only first two columns
+Study_pop_EUR <- Database_maha %>%
+  dplyr::filter(AssignedPopulationStar == "EUR*") %>%
+  dplyr::select(1:2)   # selects the first two columns (usually FID and IID)
+
+### Write to TXT file
+write.table(
+  Study_pop_EUR,
+  file = "03_PCA/Study_pop_EUR.txt",
+  quote = FALSE,
+  sep = "\t",
+  row.names = FALSE,
+  col.names = FALSE
+)
+
+cat("Exported", nrow(Study_pop_EUR), "EUR* samples to 03_PCA/Study_pop_EUR.txt\n")
+
+
+```
+```{r Prepare the PLINK DB with only EUR}
+system(paste(
+  plink_command_old,
+  " --bfile 02_QC/QC9_hwe",
+  " --keep 03_PCA/Study_pop_EUR.txt",
+  " --make-bed",
+  " --freq",
+  " --out 03_PCA/DB_EUR"
+))
+```
 
 
