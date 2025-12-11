@@ -631,47 +631,32 @@ write.table(Selected_IDs, "03_PCA/Group_selection.txt", sep = "\t", row.names = 
 ```
 
 ```{r 1000Genome}
-# Define the target directory
+```{r 1000Genome}
+# Directory di destinazione
 DB_dir <- file.path(main, "02_Database", "DB_1K_genome")
 dir.create(DB_dir, recursive = TRUE, showWarnings = FALSE)
 
-# Define URLs and destination file names
-files_to_download <- list(
-  bed_1KG = list(
-    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQBPwQuhIMnOTJEaH3xvyK9jASbH8GEetD9hHmCp8827TSg?e=PHVe4o",
-    dest = "DB_1000G.bed"
-  ),
-  fam_1KG = list(
-    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQAa-xZmUvhPTYjD7V7uc7KfAZnBSKAOSv1JwO5vrQDI9KM?e=Lvl80W",
-    dest = "DB_1000G.fam"
-  ),
-  bim_1KG = list(
-    url  = "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQBts8b-ZfThTqJRBTbeowO8AZluFynMNyHQ_KpRBRwk5LQ?e=WtbB9o",
-    dest = "DB_1000G.bim"
-  ),
-  info_1KG = list(
-    url  = "https://unipiit-my.sharepoint.com/:x:/g/personal/a035503_unipi_it/IQDgt9y5UOnhR4hgx5lWE7EAAenjEfN-UntswmSP5s9H8Rs?e=UDWmyk",
-    dest = "1000G_individuals.xlsx"
-  )
-)
+# URL del pacchetto compresso (unico file)
+zip_url  <- "https://unipiit-my.sharepoint.com/:u:/g/personal/a035503_unipi_it/IQB9mes58wEwSrxtzB2tE8kvAdVWnJI0GnWO8XeN_59GzGQ?e=unh5zq"
+zip_dest <- file.path(DB_dir, "DB_1000G_bundle.zip")
 
-# Loop to download each file
-for (name in names(files_to_download)) {
-  url       <- files_to_download[[name]]$url
-  dest_name <- files_to_download[[name]]$dest
-  dest_file <- file.path(DB_dir, dest_name)
-  
-  if (!file.exists(dest_file)) {
-    message("⬇️ Downloading ", name, " file (", dest_name, ") ...")
-    download.file(url, destfile = dest_file, mode = "wb")
-  } else {
-    message("✅ File already exists: ", dest_name)
-  }
+# Scarica archivio se non esiste
+if (!file.exists(zip_dest)) {
+  message("⬇️ Downloading 1000G bundle ...")
+  download.file(zip_url, destfile = zip_dest, mode = "wb")
+} else {
+  message("✅ Archive already downloaded: ", basename(zip_dest))
 }
 
-#Import 1000Genome data info
-oneTGenome <- read_excel("02_Database/DB_1K_genome/1000G_individuals.xlsx", col_names = FALSE)
+# Estrai contenuto nell'apposita cartella
+message("📦 Extracting archive into: ", DB_dir)
+unzip(zip_dest, exdir = DB_dir)
+
+# Import 1000Genome data info
+oneTGenome <- readxl::read_excel(file.path(DB_dir, "1000G_individuals.xlsx"),
+                                 col_names = FALSE)
 names(oneTGenome) <- c("FID","IID","Population")
+
 ```
 
 ```{r 1000Genome Import DB .bim and 1000Genome .bim}
