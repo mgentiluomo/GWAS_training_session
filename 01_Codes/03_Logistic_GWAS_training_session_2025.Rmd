@@ -507,13 +507,14 @@ Your png file will be ready in the specified path and will look like this:
 ```{r Codes for qqplot generation:}
 library(qqman)
 
-png("06_Statistical_analysis/qqplot_l.png", width = 2000, height = 2000, units="px", res=400, type="cairo")
 
-lambda<-median(qchisq(1-na.omit(Logistic_unadjusted$P),1))/qchisq(0.5,1)
+png("06_Statistical_analysis/qqplot_l.png", width = 2000, height = 2000, units="px", res=400)
+
+lambda <- median(qchisq(1 - na.omit(Logistic_unadjusted$P), 1)) / qchisq(0.5, 1)
 
 qq(Logistic_unadjusted$P)
+text(1, 6, paste("lambda =", signif(lambda, digits = 3)))
 
-text(1,6, paste("lambda","=",  signif(lambda, digits = 3)) )
 dev.off()
 ```
 
