@@ -36,6 +36,16 @@ The course is an independent teaching resource for students across University of
 - Known broken references, to be fixed when the encrypted data release exists: `02_Database/` paths in `R/course.R` and `docs/data.md`, a `02_Database` line in `.gitignore`, and `tutorial/downloads/` links in `scripts/build_tutorial.py` and `tutorial/index.html`.
 - Keep and extend: `R/course.R` (PLINK execution from R, decimal, encoding and identifier safeguards), `scripts/preflight.R`, `scripts/check_course.R`, `VALIDATION.md`, the single-source principle of `scripts/build_tutorial.py` (site pages are generated from tested notebooks, never maintained as a second copy of the code), SHA-256 manifests for packages.
 
+## Current status
+
+- The simulated dataset is built and verified in `C:\WEB_site\data_sources\sim2026\` (seed 20261111), outside the repository.
+- Expected counts per step are in `instructor/build_report.md` and `instructor/answer_key.json`. Instructor files never go to students.
+- The generator and its checks are in `scripts/author/` (`python -I scripts/author/tests/test_sim2026.py`, 36 tests).
+- rs4988235, rs12913832 and rs1426654 leave at step 4.4 and do not reach module 5.
+- L1 has one genome-wide variant only: use L2 or L3 for the regional plot at 7.6.
+- Open decision: the Illumina names and GRCh38 positions of the array sites in the release.
+- Next steps: the encrypted release and the R helpers (`download_course_data`, `restore_checkpoint`, `check_step`), then the notebooks module by module, then the website (mockup first).
+
 ## Technical decisions
 
 - **Commands run from the R console.** Every PLINK call goes through the R helper. Each step also shows the plain PLINK 2 command as it would be typed in a terminal, with every option explained.
