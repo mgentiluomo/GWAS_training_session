@@ -1,1 +1,15 @@
 02_Database/DB_1K_genome/DB_1000G.bed
+
+# Local inputs, binaries and generated results
+data/
+results/
+bin/plink2
+bin/plink2.exe
+.Rproj.user/
+.RData
+.Rhistory
+Rplots.pdf
+lessons/*.html
+lessons/*_files/
+_site/
+.quarto/

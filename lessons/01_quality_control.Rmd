@@ -1,0 +1,205 @@
+---
+title: "Lesson 1 — From genotype files to quality control"
+author: "Manuel Gentiluomo — University of Pisa"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    number_sections: true
+---
+
+[Course home](../README.md) · [Setup](../docs/setup.md) · [Next: PCA](02_population_structure.Rmd)
+
+## Your destination
+
+By the end, you should be able to identify the three PLINK input files, run a
+command from R, explain missingness and allele-frequency filters, and account for
+the samples and variants remaining after each step.
+
+**Core walkthrough:** complete sections 1–7 in order. **Try it yourself:** keep a
+short record of your predictions and interpretations. **Going further:** optional
+challenges at the end. You do not need to finish them to start lesson 2.
+
+## Start with a clean session
+
+Open `GWAS_training_session.Rproj`, then this notebook. Use **Session → Restart R**.
+Run one chunk at a time with the green arrow, or Ctrl+Shift+Enter on Windows/Linux
+and Cmd+Shift+Enter on macOS. Do not use Run All before reading the lesson.
+
+```{r qc-setup}
+root <- if (file.exists("R/course.R")) "." else ".."
+source(file.path(root, "R", "course.R"))
+cfg <- course_config(root)
+print(check_bed(cfg$input))
+```
+
+**Check your result:** the message identifies `demo` or `course`. Demo means
+simulated practice data, not the original study. A missing BED message means you
+must complete [setup](../docs/setup.md) before continuing.
+
+### Which window am I using?
+
+| Window | What you type there | Example |
+|---|---|---|
+| R console | R expressions; the prompt is usually `>` | `2 + 2` |
+| Terminal | Operating-system commands | `plink2 --version` |
+| Notebook editor | Saved instructions and R chunks | The chunks on this page |
+
+Our notebook calls PLINK from R. A printed PLINK command explains what is being
+executed; you do not have to paste it into the R console.
+
+## Meet the files and identifiers
+
+**The question:** how do we connect genotypes to the right person and variant?
+
+| File | One record represents | Open as ordinary text? |
+|---|---|---|
+| `.bed` | Packed genotype calls, interpreted with BIM and FAM | No |
+| `.bim` | A variant: chromosome, ID, genetic distance, position, two alleles | Yes |
+| `.fam` | A sample: FID, IID, parental IDs, sex code, phenotype | Yes |
+
+```{r qc-inspect-files}
+fam <- read_fam(cfg$input)
+bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)
+head(fam)
+head(bim)
+metadata <- prepare_metadata(cfg)
+table(metadata$Disease, useNA = "ifany")
+```
+
+**Check your result:** one FAM row per sample and six BIM columns. Disease uses
+`1 = control`, `2 = case`, missing = unavailable. FID and IID stay as text so that
+leading zeros are preserved. Matching both identifiers prevents accidental joins
+between different people. Extra metadata records are not added to the genotype set.
+
+**Try it yourself — Q1:** which file would you inspect for a variant's physical
+position? Which two columns would you use to match a covariate record to a sample?
+
+## Establish the starting dataset
+
+**Before you run:** inputs are read without being overwritten. Outputs go into
+`results/demo/` or `results/course/`. Each PLINK command creates a log, a captured
+console file and a command record.
+
+```{r qc-prepare}
+start <- file.path(cfg$qc, "01_autosomes")
+run_plink(cfg, c("--bfile", cfg$input, "--autosome",
+                "--update-sex", file.path(cfg$out, "sex.tsv"),
+                "--pheno", file.path(cfg$out, "phenotype.tsv"), "--pheno-name", "Disease",
+                "--make-bed", "--out", start), paste0(start, c(".bed", ".bim", ".fam")))
+record_counts(cfg, start, "01_autosomes")
+run_plink(cfg, c("--bfile", start, "--missing", "--out", file.path(cfg$qc, "before")),
+          file.path(cfg$qc, c("before.smiss", "before.vmiss")))
+```
+
+`--bfile` names the input prefix, `--autosome` selects chromosomes 1–22,
+`--make-bed` writes a new binary set, and `--out` names the output prefix.
+This core exercise concerns autosomes. Sex-chromosome QC requires additional
+genome-build and pseudo-autosomal-region checks; see the optional section below.
+
+## Inspect missingness before filtering
+
+**The question:** are missing calls concentrated in particular samples or variants?
+
+```{r qc-missingness, fig.alt="Two histograms show the distributions of sample and variant missing-call fractions before filtering."}
+smiss <- read_ws(file.path(cfg$qc, "before.smiss"))
+vmiss <- read_ws(file.path(cfg$qc, "before.vmiss"))
+par(mfrow = c(1, 2))
+hist(as.numeric(smiss$F_MISS), breaks = 30, main = "Sample missingness", xlab = "Missing-call fraction")
+abline(v = cfg$mind, col = "#B45309", lty = 2)
+hist(as.numeric(vmiss$F_MISS), breaks = 30, main = "Variant missingness", xlab = "Missing-call fraction")
+abline(v = cfg$geno, col = "#B45309", lty = 2)
+par(mfrow = c(1, 1))
+```
+
+**Try it yourself — Q2:** a sample has 9% missing calls and a variant has 6%.
+With `--mind 0.10` and `--geno 0.05`, which passes its own missingness criterion?
+Explain what denominator each percentage uses.
+
+## Apply and audit the filters
+
+Thresholds below are teaching choices, not a universal GWAS protocol. We filter
+poorly called variants, then poorly called samples, then low-frequency variants.
+Changing the order can change the retained set because the denominators change.
+
+```{r qc-filters}
+geno <- file.path(cfg$qc, "02_geno")
+run_plink(cfg, c("--bfile", start, "--geno", cfg$geno, "--make-bed", "--out", geno))
+record_counts(cfg, geno, "02_geno")
+mind <- file.path(cfg$qc, "03_mind")
+run_plink(cfg, c("--bfile", geno, "--mind", cfg$mind, "--make-bed", "--out", mind))
+record_counts(cfg, mind, "03_mind")
+maf <- file.path(cfg$qc, "04_maf")
+run_plink(cfg, c("--bfile", mind, "--maf", cfg$maf, "--make-bed", "--out", maf))
+record_counts(cfg, maf, "04_maf")
+```
+
+**Check your result:** read `sample_variant_counts.tsv`. A zero change can be a
+valid result; do not invent an expected number of exclusions. MAF is an allele
+frequency, not the frequency of people carrying an allele.
+
+## Heterozygosity and relatedness
+
+**The question:** do unusual genotype patterns or close relatives require review?
+First select a set of common, approximately independent variants.
+
+```{r qc-pruning-and-het}
+prune <- file.path(cfg$qc, "prune")
+run_plink(cfg, c("--bfile", maf, "--maf", "0.05", "--indep-pairwise", "200", "50", "0.2",
+                "--out", prune), paste0(prune, ".prune.in"))
+run_plink(cfg, c("--bfile", maf, "--extract", paste0(prune, ".prune.in"),
+                "--het", "--out", file.path(cfg$qc, "heterozygosity")),
+          file.path(cfg$qc, "heterozygosity.het"))
+het <- read_ws(file.path(cfg$qc, "heterozygosity.het"))
+summary(as.numeric(het$F))
+```
+
+```{r qc-het-plot, fig.alt="Histogram of sample inbreeding-coefficient estimates used to review unusual heterozygosity."}
+hist(as.numeric(het$F), breaks = 30, main = "Review heterozygosity", xlab = "F coefficient")
+```
+
+An unusual F value is a reason to investigate. It can reflect ancestry,
+inbreeding, contamination or another technical problem. We do not automatically
+remove every sample beyond a pooled mean ±3 SD.
+
+```{r qc-relatedness}
+king <- file.path(cfg$qc, "relatedness")
+run_plink(cfg, c("--bfile", maf, "--extract", paste0(prune, ".prune.in"),
+                "--king-cutoff", cfg$kinship, "--out", king), paste0(king, ".king.cutoff.in.id"))
+final <- file.path(cfg$qc, "qc_final")
+# Apply the sample list to ALL QC-passing variants, not just the pruned subset.
+run_plink(cfg, c("--bfile", maf, "--keep", paste0(king, ".king.cutoff.in.id"),
+                "--make-bed", "--out", final))
+record_counts(cfg, final, "05_unrelated")
+read.delim(file.path(cfg$qc, "sample_variant_counts.tsv"))
+```
+
+KING kinship is approximately 0.5 for duplicate samples, 0.25 for first-degree
+relatives and 0.125 for second-degree relatives. The course cutoff, 0.0884,
+screens close relationships through roughly the second degree. Estimates vary;
+this is not the same quantity as PLINK 1.9's PI_HAT. In research, which relative
+to retain also depends on call quality and study design.
+
+## Finish and restart later
+
+Your checkpoint is the **three-file set** `01_qc/qc_final.bed/.bim/.fam` plus
+`metadata.tsv` and the count table. Lesson 2 reads files from disk; it does not
+depend on this R environment. See [recovery](../docs/troubleshooting.md#rejoining-the-class).
+
+**Exit check — Q3:** sample counts decrease at the relatedness step, but almost all
+variants remain. Explain why this is different from using the pruned variants as
+the final association dataset. Name one log you would inspect before accepting it.
+
+### Going further
+
+- Predict the effect of reducing `--mind` from 0.10 to 0.05. Try a separate output
+  prefix and compare counts without overwriting the core workflow.
+- For HWE, distinguish a diagnostic in controls from a filter applied to the
+  complete study. You will inspect this after the PCA in lesson 2.
+- For sex consistency, use the original unfiltered input with X/Y markers only
+  after confirming the genome build and splitting PAR correctly. Read the
+  [PLINK sex-check documentation](https://www.cog-genomics.org/plink/2.0/basic_stats#check_sex).
+  A discrepancy needs review, not an automatic change of recorded information.
+
+[Continue to lesson 2](02_population_structure.Rmd)

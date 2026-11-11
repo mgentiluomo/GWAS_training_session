@@ -1,0 +1,189 @@
+---
+title: "Lesson 2 — Population structure and the analysis cohort"
+author: "Manuel Gentiluomo — University of Pisa"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    number_sections: true
+---
+
+[Course home](../README.md) · [Previous: QC](01_quality_control.Rmd) · [Next: association](03_association.Rmd)
+
+## Your destination
+
+Use LD-pruned variants to calculate principal components, inspect possible
+structure and batch effects, join sample information safely, and build an
+explicit, reproducible sample list for the association models.
+
+**Core walkthrough:** sections 1–6. Keep your interpretation of each plot beside
+your code. **Going further:** reference panels, cohort restriction and HWE filters.
+
+## Start from the checkpoint
+
+Restart R. Open the project before running this first chunk.
+
+```{r pca-setup}
+root <- if (file.exists("R/course.R")) "." else ".."
+source(file.path(root, "R", "course.R"))
+cfg <- course_config(root)
+input <- file.path(cfg$qc, "qc_final")
+print(check_bed(input))
+metadata <- load_metadata(cfg)
+```
+
+**Check your result:** QC files are present in the same data mode you used in
+lesson 1. If you are rejoining the class, use the checkpoint instructions in
+[troubleshooting](../docs/troubleshooting.md#rejoining-the-class).
+
+## Choose the study samples and prune variants
+
+A PCA cluster is a genetic similarity pattern. Without appropriate reference
+data it is not a validated ancestry label. `Group` comes from the supplied
+metadata; do not assume that it means ancestry or recruitment centre.
+Demo `Group` values are the two frequency groups used by the simulator.
+
+The default walkthrough retains all post-QC samples for an exploratory analysis.
+If an analysis cohort has been agreed after reviewing the data, put its FID/IID
+file in `course_settings$analysis_keep` and rerun lessons 2 and 3. Do not choose a
+cohort by whichever selection produces the most significant association.
+
+```{r pca-analysis-cohort}
+cohort <- file.path(cfg$pca, "analysis_cohort")
+args <- c("--bfile", input)
+if (nzchar(cfg$analysis_keep)) {
+  keep_path <- file.path(cfg$root, cfg$analysis_keep)
+  keep <- read_ws(keep_path, header = FALSE)
+  if (ncol(keep) != 2L) stop("analysis_keep must have two headerless columns: FID IID.")
+  names(keep) <- c("FID", "IID")
+  check_ids(keep, "Analysis cohort list")
+  if (!all(id_key(keep) %in% id_key(read_fam(input)))) stop("Analysis list contains unknown QC sample IDs.")
+  args <- c(args, "--keep", keep_path)
+}
+run_plink(cfg, c(args, "--make-bed", "--out", cohort))
+prune <- file.path(cfg$pca, "prune")
+run_plink(cfg, c("--bfile", cohort, "--maf", "0.05", "--indep-pairwise", "200", "50", "0.2",
+                "--out", prune), paste0(prune, ".prune.in"))
+cat("LD-pruned variants:", length(readLines(paste0(prune, ".prune.in"))), "\n")
+```
+
+**Try it yourself — Q4:** why use an LD-pruned subset to estimate structure, but
+retain a larger set of variants for association testing?
+
+## Calculate PCs and inspect the eigenvalues
+
+```{r pca-calculate}
+run_plink(cfg, c("--bfile", cohort, "--extract", paste0(prune, ".prune.in"),
+                "--maf", "0.05", "--pca", cfg$n_pcs, "meanimpute", "scols=fid",
+                "--out", file.path(cfg$pca, "study")),
+          file.path(cfg$pca, c("study.eigenvec", "study.eigenval")))
+pcs <- read_pcs(cfg)
+eigenvalues <- scan(file.path(cfg$pca, "study.eigenval"), quiet = TRUE)
+head(pcs)
+```
+
+```{r pca-scree, fig.alt="Scree plot of the eigenvalues for the principal components calculated in this lesson."}
+plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16,
+     xlab = "Principal component", ylab = "Eigenvalue", main = "Returned PCA eigenvalues")
+```
+
+**Check your result:** FID, IID and PC columns are present. Only the requested
+eigenvalues are returned. Dividing each by the sum of these values gives its share
+of the returned components, not its share of total genome-wide variance.
+We plot the eigenvalues directly.
+
+## Join by identifiers, then plot
+
+**The question:** does structure overlap with phenotype or recorded groups?
+
+```{r pca-join}
+plot_data <- join_by_id(pcs, metadata)
+table(plot_data$Disease, plot_data$Group, useNA = "ifany")
+```
+
+```{r pca-scatter, fig.alt="PC1 versus PC2 shown twice, first with case/control symbols and then with symbols for the recorded metadata groups."}
+status <- factor(plot_data$Disease, levels = c(1, 2), labels = c("Control", "Case"))
+status_code <- as.integer(status)
+status_code[is.na(status_code)] <- 3L
+groups <- factor(ifelse(is.na(plot_data$Group), "Missing", plot_data$Group))
+draw_pca <- function() {
+  par(mfrow = c(1, 2))
+  plot(plot_data$PC1, plot_data$PC2, pch = c(1, 17, 4)[status_code],
+       col = c("#174A67", "#A34B18", "#555555")[status_code], xlab = "PC1", ylab = "PC2", main = "Phenotype")
+  legend("topright", c("Control", "Case", "Missing"), pch = c(1, 17, 4),
+         col = c("#174A67", "#A34B18", "#555555"), bty = "n", cex = 0.7)
+  group_code <- as.integer(groups)
+  plot(plot_data$PC1, plot_data$PC2, pch = 1 + (group_code - 1) %% 6,
+       col = hcl.colors(nlevels(groups), "Dark 3")[group_code],
+       xlab = "PC1", ylab = "PC2", main = "Recorded group")
+  legend("topright", levels(groups), pch = 1 + (seq_len(nlevels(groups)) - 1) %% 6,
+         col = hcl.colors(nlevels(groups), "Dark 3"), bty = "n", cex = 0.7)
+  par(mfrow = c(1, 1))
+}
+draw_pca()
+save_plot(file.path(cfg$pca, "pc1_pc2.png"), draw_pca, width = 2000)
+write.table(plot_data, file.path(cfg$pca, "pca_with_metadata.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+**Try it yourself — Q5:** describe two features you observe before proposing an
+explanation. What additional information would help distinguish population
+structure from an array batch effect? Inspect PC2 versus PC3 as well.
+
+## HWE: a diagnostic in controls
+
+Pooled ancestry groups can depart from HWE without a genotyping error. An
+association can also generate departures among cases. We therefore first inspect
+controls, and discuss population structure before considering exclusions.
+
+```{r pca-hwe-controls}
+cohort_fam <- read_fam(cohort)
+control_metadata <- join_by_id(cohort_fam[c("FID", "IID")], metadata)
+controls <- control_metadata[!is.na(control_metadata$Disease) & control_metadata$Disease == 1, c("FID", "IID")]
+if (nrow(controls) < 20) stop("Too few controls for this exercise; review the phenotype coding.")
+control_file <- file.path(cfg$pca, "controls.tsv")
+write_ids(controls, control_file)
+hwe_prefix <- file.path(cfg$pca, "hwe_controls")
+run_plink(cfg, c("--bfile", cohort, "--keep", control_file, "--hardy", "--out", hwe_prefix),
+          paste0(hwe_prefix, ".hardy"))
+hwe <- read_ws(paste0(hwe_prefix, ".hardy"))
+summary(as.numeric(hwe$P))
+```
+
+No HWE filter is applied automatically in this walkthrough. Review the controls'
+structure and the test counts before choosing a threshold. PCA adjustment in an
+association model does not correct a pooled HWE test.
+
+## Build the common analysis sample list
+
+**The question:** can we compare two models without also changing their samples?
+
+```{r pca-covariates}
+analysis <- build_covariates(cfg)
+table(analysis$Disease)
+summary(analysis[c("Age", "SEX", "PC1", "PC2")])
+```
+
+**Check your result:** `analysis_samples.tsv` and `covariates.tsv` are saved.
+The first file contains FID and IID; the second contains age, sex code and PCs.
+Missing values are excluded explicitly, not replaced by zero. Both models in
+lesson 3 will use this same complete-case sample set.
+
+**Exit check — Q6:** PCA contains 490 samples, but only 472 have complete age,
+sex and phenotype data. How would you make the two association models comparable?
+Which file records the decision?
+
+### Going further
+
+- Repeat a control-only HWE diagnostic within a justified study subgroup. To
+  filter, create a passing-variant ID list from that diagnostic and apply it to
+  the full corresponding case/control cohort. Keep cases in the analysis.
+  PLINK 2 does not automatically restrict HWE tests to controls.
+- The original course includes a 1000 Genomes exercise. Before merging, confirm
+  genome build, variant identity, allele orientation and ambiguous sites. Read
+  [reference-panel guidance](../docs/reference_panel.md). Do not blindly flip all
+  mismatching variants or assign ancestry from a two-PC distance rule alone.
+- Compare 5 and 10 PCs using a documented sensitivity plan, rather than choosing
+  whichever model gives the smallest p-value.
+
+[Continue to lesson 3](03_association.Rmd)

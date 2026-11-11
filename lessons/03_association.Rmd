@@ -1,0 +1,190 @@
+---
+title: "Lesson 3 — Association testing and interpretation"
+author: "Manuel Gentiluomo — University of Pisa"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    number_sections: true
+---
+
+[Course home](../README.md) · [Previous: PCA](02_population_structure.Rmd) · [Troubleshooting](../docs/troubleshooting.md)
+
+## Your destination
+
+Fit additive logistic models, explain the tested allele and odds ratio, compare
+models with and without PCs on a common sample set, inspect missing results and
+produce Manhattan and QQ plots. Finish with a short, cautious interpretation.
+
+**Core walkthrough:** sections 1–6. **Try it yourself:** Q7–Q9.
+**Going further:** sensitivity analyses and a bridge to imputation and follow-up.
+
+## Restart from files
+
+```{r assoc-setup}
+root <- if (file.exists("R/course.R")) "." else ".."
+source(file.path(root, "R", "course.R"))
+cfg <- course_config(root)
+input <- file.path(cfg$pca, "analysis_cohort")
+print(check_bed(input))
+require_files(file.path(cfg$pca, c("analysis_samples.tsv", "covariates.tsv")))
+covariates <- read_ws(file.path(cfg$pca, "covariates.tsv"))
+cat("Common complete-case sample set:", nrow(covariates), "\n")
+```
+
+**Check your result:** data mode matches lessons 1 and 2. If lesson 2 is missing,
+obtain its checkpoint or rerun it; restoring an old `.RData` file is unnecessary.
+
+## What is the model asking?
+
+For a binary outcome, logistic regression models the log-odds of being a case.
+The additive genetic predictor counts copies of the allele in the output `A1`
+column. Its coefficient is a log odds ratio; exponentiating it gives the OR.
+An OR concerns odds, not a direct percentage change in disease probability.
+
+| Model | Covariates | Purpose |
+|---|---|---|
+| Baseline | Age and sex | A comparison before PC adjustment |
+| PC-adjusted | Age, sex and PC1–PC10 by default | Account for measured broad genetic structure |
+
+The baseline is already adjusted for age and sex; calling it "unadjusted" would
+be misleading. Both models use the same samples and variants. PCs do not solve
+every form of confounding or make a mixed-population analysis automatically valid.
+
+## Fit the models with PLINK 2
+
+**Before you run:** the phenotype file explicitly names `Disease`; `1 = control`,
+`2 = case`. We use logistic regression with Firth fallback if logistic fitting
+fails. The output records which estimates used Firth and why a test failed.
+
+```{r assoc-models}
+common <- c("--bfile", input, "--keep", file.path(cfg$pca, "analysis_samples.tsv"),
+            "--pheno", file.path(cfg$out, "phenotype.tsv"), "--pheno-name", "Disease",
+            "--covar", file.path(cfg$pca, "covariates.tsv"), "--covar-variance-standardize",
+            "--glm", "hide-covar", "firth-fallback", "--ci", "0.95")
+baseline_prefix <- file.path(cfg$assoc, "baseline")
+adjusted_prefix <- file.path(cfg$assoc, "pc_adjusted")
+run_plink(cfg, c(common, "--covar-name", "Age", "SEX", "--out", baseline_prefix))
+run_plink(cfg, c(common, "--covar-name", "Age", "SEX", paste0("PC", seq_len(cfg$n_pcs)),
+                "--out", adjusted_prefix))
+baseline <- read_association(baseline_prefix)
+adjusted <- read_association(adjusted_prefix)
+```
+
+**Check your result:** PLINK creates files ending in `.Disease.glm.logistic.hybrid`.
+The helper keeps the additive test (`TEST = ADD`) and prints the `ERRCODE` counts.
+Do not interpret failed tests as non-significant results.
+
+`--covar-variance-standardize` rescales the selected covariates to avoid numerical
+problems when age and PC scores have very different scales. It does not rescale
+the genotype predictor: its OR still refers to one additional A1 allele copy.
+
+| Output column | Meaning |
+|---|---|
+| CHROM / POS / ID | Variant location and identifier |
+| A1 | Counted/tested allele; check it explicitly |
+| OR | Odds ratio per additional copy of A1 |
+| L95 / U95 | Approximate 95% confidence interval for the OR |
+| OBS_CT | Samples used for this variant's regression |
+| P | Association p-value |
+| ERRCODE | Reason an estimate is unavailable; `.` means no reported error |
+
+**Try it yourself — Q7:** a variant has A1 = G, OR = 1.35 and 95% CI 1.12–1.63.
+Write one sentence interpreting its direction and uncertainty without claiming
+that carrying G increases disease probability by 35%.
+
+## Compare results on matching variants
+
+```{r assoc-compare}
+comparison <- merge(baseline[c("ID", "A1", "OBS_CT", "OR", "P")],
+                    adjusted[c("ID", "A1", "OBS_CT", "OR", "P")],
+                    by = c("ID", "A1"), suffixes = c("_baseline", "_adjusted"))
+stopifnot(nrow(comparison) == nrow(baseline), nrow(comparison) == nrow(adjusted))
+stopifnot(all(comparison$OBS_CT_baseline == comparison$OBS_CT_adjusted, na.rm = TRUE))
+head(comparison[order(comparison$P_adjusted), ], 10)
+write.table(comparison, file.path(cfg$assoc, "model_comparison.tsv"),
+            sep = "\t", quote = FALSE, row.names = FALSE)
+```
+
+Even with a common eligible sample set, `OBS_CT` can vary between variants because
+their genotype calls have different missingness. Here it should agree between
+the two models for the same variant. Compare A1 as well as variant ID.
+
+## Visualize the evidence and the diagnostics
+
+```{r assoc-manhattan, fig.alt="Manhattan plot of additive PC-adjusted autosomal association p-values with the conventional 5e-8 threshold marked."}
+plot_manhattan(adjusted, "PC-adjusted association")
+save_plot(file.path(cfg$assoc, "manhattan.png"),
+          function() plot_manhattan(adjusted, "PC-adjusted association"), width = 2400)
+```
+
+Genomic position runs across the x-axis; larger `-log10(p)` values indicate smaller
+p-values. The line at `5e-8` is a conventional GWAS threshold. This small practice
+dataset does not represent the full multiple-testing burden of a human GWAS.
+Neighbouring significant SNPs can tag the same underlying association through LD.
+
+```{r assoc-qq, fig.alt="Side-by-side QQ plots compare baseline and PC-adjusted additive association p-values, with a reference diagonal and lambda GC for each."}
+draw_qq <- function() {
+  par(mfrow = c(1, 2))
+  plot_qq(baseline$P, "Age + sex")
+  plot_qq(adjusted$P, "Age + sex + PCs")
+  par(mfrow = c(1, 1))
+}
+draw_qq()
+save_plot(file.path(cfg$assoc, "qq_comparison.png"), draw_qq, width = 2000)
+data.frame(model = c("Baseline", "PC-adjusted"),
+           lambda_gc = c(lambda_gc(baseline$P), lambda_gc(adjusted$P)))
+```
+
+QQ plots compare observed and null-expected p-values. Inflation can reflect
+confounding, technical artifacts, polygenicity or other model problems. A lambda
+near one does not prove that every result is valid. Values outside `(0,1]`,
+including numerical underflow to zero, are omitted from these plots; inspect the
+original output instead of silently treating zeros as ordinary p-values.
+
+**Try it yourself — Q8:** a QQ plot follows the diagonal except for a small tail.
+Give two possible explanations and one additional check. Would a lower lambda
+alone justify selecting a model?
+
+## Export a review table and write an interpretation
+
+```{r assoc-review-table}
+valid <- adjusted[valid_p(adjusted$P) & adjusted$ERRCODE == ".", ]
+valid <- valid[order(valid$P), ]
+top <- head(valid, 20)
+write.table(top, file.path(cfg$assoc, "top20_for_review.tsv"),
+            sep = "\t", quote = FALSE, row.names = FALSE)
+cat("Valid additive tests:", nrow(valid), "\n")
+cat("Tests below the conventional 5e-8 threshold:", sum(valid$P < 5e-8), "\n")
+head(top)
+```
+
+This is a **ranking for review**, not a list of discoveries. No significant
+association is guaranteed. In demo mode every record is simulated and cannot
+support a biological claim about a real disease.
+
+**Exit check — Q9:** write a five-sentence results note covering:
+
+1. The data mode, eligible samples and variants tested.
+2. The outcome coding and covariates.
+3. One variant's A1, OR, confidence interval and p-value.
+4. One model diagnostic and its limitation.
+5. One necessary follow-up before making a biological claim.
+
+Your files are in `results/<mode>/03_association/`. Keep `software_versions.txt`,
+the model logs and `model_comparison.tsv` with your interpretation.
+
+### Going further
+
+- Compare a prespecified 5-PC sensitivity model on the same sample list. Record
+  model failures and effect estimates, not just changes in the smallest p-value.
+- Inspect case/control allele counts for a variant with a wide confidence
+  interval. Explain why Firth fallback does not create information that is absent.
+- Explain how imputation changes variant coverage and introduces dosage and
+  imputation-quality decisions. These lessons use pre-imputation hard calls.
+- Choose a follow-up question: replication, regional LD, fine-mapping, functional
+  annotation, PRS or Mendelian randomization. Distinguish what the current GWAS
+  estimates from the additional assumptions each follow-up needs.
+
+[Return to course home](../README.md)

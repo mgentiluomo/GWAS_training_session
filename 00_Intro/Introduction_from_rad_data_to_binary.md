@@ -1,6 +1,10 @@
 # GWAS Training Session
 ## Genome-Wide Association Study (GWAS) Training Session
 
+For the revised three-session practical course, start at the
+[course home](../README.md). This page explains the data formats; the guided
+lessons start from an existing binary genotype set.
+
 This technical guide outlines the process of converting raw genetic data (Genotyping Arrays) into the optimised PLINK binary format, which is essential for performing efficient Genome-Wide Association Studies (GWAS).
 
 ## 1. Raw Array Data: The "Final Report File"
@@ -43,15 +47,18 @@ Genotypes are represented in a **Final Report File**.
 When working with hundreds of thousands of variants (e.g., 730,059 SNPs) and several individuals (N > 500), the CSV format becomes unsustainable:
 * Data is often split into multiple files (one per individual).
 * The overall data size can reach Gigabytes (e.g., 4.5 GB for 730,059 SNPs x 130 samples).
-* **Conclusion:** This data is unusable in CSV format for performing a GWAS.
+* **Conclusion:** Large text exports are inconvenient for repeated genome-wide
+  analyses. Specialized genotype formats reduce storage and repeated parsing.
 
 ---
 
 ## 2. The Solution: The PLINK Binary Format
 
 To perform statistical analysis, it is necessary to adopt binary formats, specifically the **PLINK** format.
-* **PLINK** is the most widely used software to date for GWAS and remains the *gold standard* for canonical GWAS studies run on lab servers.
-* PLINK operates via the command line and requires files in the PLINK format. The standard and most efficient format is the binary file set of **`.bed`, `.bim`, and `.fam`**.
+* **PLINK** is a widely used command-line tool for genotype data management and association analysis.
+* The course uses **`.bed`, `.bim`, and `.fam`**, a compact biallelic genotype
+  fileset. PLINK 2 also supports `.pgen/.pvar/.psam`, including capabilities beyond
+  BED hard calls; BED is not the only supported or universally most efficient format.
 
 ### Description of the PLINK Binary File Set
 | Extension | File Name | Description |
@@ -71,10 +78,10 @@ To perform statistical analysis, it is necessary to adopt binary formats, specif
 #### The `.bim` File (Variant Information)
 1. Chromosome code (integer, X/Y/XY/MT).
 2. Variant identifier (SNP ID).
-3. Position in Morgans or Centimorgans (it is safe to use a dummy value of '0').
+3. Genetic-map position in centimorgans; often '0' when unavailable.
 4. Base-pair coordinate (1-based).
-5. Allele 1 (corresponds to clear bits in `.bed`, usually the minor allele).
-6. Allele 2 (corresponds to set bits in `.bed`, usually the major allele).
+5. Allele 1 (A1 in this fileset; not guaranteed to be the minor allele).
+6. Allele 2 (A2 in this fileset; not guaranteed to be a validated reference allele).
 
 #### The `.fam` File (Sample/Phenotype Information)
 1. Family ID (`FID`).
@@ -82,13 +89,16 @@ To perform statistical analysis, it is necessary to adopt binary formats, specif
 3. IID of father ('0' if not present in the dataset).
 4. IID of mother ('0' if not present in the dataset).
 5. Sex code ('1' = male, '2' = female, '0' = unknown).
-6. Phenotype value ('1' = control, '2' = case, '-9'/'0'/non-numeric = missing data).
+6. Phenotype value (for this course's binary coding: '1' = control, '2' = case,
+   '-9'/'0' = unavailable). Other phenotypes require explicit coding rules.
 
 ---
 
 ## 3. The PLINK Conversion Workflow
 
-The conversion from the **Final Report File** (CSV) to the binary format (`.bed/.bim/.fam`) is not direct. The procedure goes through an intermediate text format, such as the **`.lgen`** format (PLINK long-format genotype file).
+Conversion from a **Final Report File** to PLINK depends on the export format,
+manifest, allele conventions and genome build. The historical example below
+uses `.lgen`; it is one possible route, not a required conversion sequence.
 
 ### Conversion Phases
 1. **From Final Report to `.lgen/.map/.fam`**:
@@ -97,6 +107,10 @@ The conversion from the **Final Report File** (CSV) to the binary format (`.bed/
     The command `plink --lfile` is used to specify the input `.lgen/.map/.fam` files, and `--recode` is used to obtain the `.ped/.map` format.
 3. **From `.ped/.map` to `.bed/.bim/.fam` (Final Binary Format)**:
     The command `plink --file` is used to specify the input `.ped/.map` files, and `--make-bed` is used to obtain the final binary format. The binary format is **less time-consuming for analyses**.
+
+With PLINK 1.9, `plink --lfile ABC --make-bed --out ABC_binary` can also create
+the binary set directly, avoiding an unnecessary PED/MAP intermediate. These
+historical import examples use PLINK 1.9, not the PLINK 2-only guided workflow.
 
 ![Testo alternativo per l'immagine 1](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide1.PNG)
 ![Testo alternativo per l'immagine 2](https://github.com/mgentiluomo/GWAS_training_session/blob/main/Figures/From_finalREP_to_PLINK/Slide2.PNG)

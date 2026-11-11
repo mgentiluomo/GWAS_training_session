@@ -1,0 +1,49 @@
+# Revision checks
+
+## Verified on 11 November 2026
+
+- R 4.5.0 on Linux; PLINK 2.0 beta 1.4, build 7 November 2026.
+- All three new notebooks executed in order on the simulated data.
+- Each notebook also executed in a separate, fresh R process, with `lessons/` as
+  its working directory, using only files saved by earlier lessons.
+- Demo QC: 600 samples / 6000 variants initially; 592 samples / 5920 variants at
+  the final QC checkpoint. All 5920 additive tests completed in both models.
+- Baseline and PC-adjusted models used identical per-variant sample counts.
+- PCA, Manhattan and QQ PNGs were generated and visually inspected.
+- Original supplied phenotype, sex and covariate tables matched all 3185 samples
+  in the original FAM by FID/IID, without modifying those inputs.
+- New student-facing entry points have no missing relative file-link targets.
+- New R files and notebook chunks parse; chunk labels are unique. Identifier and
+  p-value safeguards are checked by the validation script.
+
+## Reproduce the checks
+
+From the project root, with R and PLINK 2 installed:
+
+```r
+source("scripts/check_course.R")
+```
+
+To additionally regenerate and execute the complete demo (overwrites demo outputs):
+
+```r
+Sys.setenv(GWAS_RUN_DEMO_CHECK = "1")
+source("scripts/check_course.R")
+Sys.unsetenv("GWAS_RUN_DEMO_CHECK")
+```
+
+The full check requires `mode = "demo"`. Do not use demo figures as expected
+results for the original dataset.
+
+## Remaining classroom checks
+
+The original class BED is access-controlled and was not available for a complete
+original-data run. Validate its matching release, provenance, genome build,
+population structure and study-specific exclusions before teaching with it.
+Test institutional access and prepare authorized lesson checkpoints before class.
+
+Windows and macOS instructions have not been executed on those platforms. The
+new `.Rmd` source and its generated analytical figures were checked; RStudio's
+Knit-to-HTML presentation has not been visually inspected in this environment.
+The existing 2025 HTML and notebooks are historical and are not outputs of this
+validation. No website has been published or deployment configuration added.
