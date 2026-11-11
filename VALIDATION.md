@@ -77,7 +77,7 @@ These checks do not replace execution on Windows and macOS.
 The original class BED is access-controlled and was not available for a complete
 original-data run. Validate its matching release, provenance, genome build,
 population structure and study-specific exclusions before teaching with it.
-Test institutional access and prepare authorized lesson checkpoints before class.
+Test institutional access and prepare authorised lesson checkpoints before class.
 
 Windows and macOS instructions have not been executed on those platforms. The
 new `.Rmd` source and its generated analytical figures were checked; RStudio's

@@ -31,7 +31,7 @@ the external program and records its printed command.
 1. Keep the failed run and record its first error.
 2. For demo data, regenerate checkpoints by running the preceding notebooks,
    or use a same-mode checkpoint supplied during class.
-3. For original data, request checkpoints through the authorized course channel.
+3. For original data, request checkpoints through the authorised course channel.
 4. Copy the **complete** set listed in [the data guide](data.md) into the matching
    mode's output folders. A BED file alone is not enough.
 5. Restart R and run the next notebook's setup chunk. Record which outputs came

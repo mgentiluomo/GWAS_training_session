@@ -48,7 +48,7 @@ When working with hundreds of thousands of variants (e.g., 730,059 SNPs) and sev
 * Data is often split into multiple files (one per individual).
 * The overall data size can reach Gigabytes (e.g., 4.5 GB for 730,059 SNPs x 130 samples).
 * **Conclusion:** Large text exports are inconvenient for repeated genome-wide
-  analyses. Specialized genotype formats reduce storage and repeated parsing.
+  analyses. Specialised genotype formats reduce storage and repeated parsing.
 
 ---
 

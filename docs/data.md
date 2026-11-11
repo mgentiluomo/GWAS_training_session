@@ -40,7 +40,7 @@ extension or a blanket find-and-replace. See [international settings](internatio
 | `Sex.txt` | Recorded sex | FID, IID, sex; 1=male, 2=female, 0/-9/NA=unavailable |
 | `general_covar.txt` | Covariates and groups | Tab-separated; FID, IID, Age, Group |
 
-The historical `2ID` header in `Sex.txt` is normalized in preparation. Inputs are
+The historical `2ID` header in `Sex.txt` is normalised in preparation. Inputs are
 preserved. FID/IID stay as text. Duplicate pairs, unknown outcome codes and
 missing metadata records stop execution; missing covariate values remain missing
 and are counted before fitting models. Age values 0/-9 are treated as unavailable.

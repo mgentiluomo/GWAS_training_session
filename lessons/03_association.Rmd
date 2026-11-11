@@ -111,7 +111,7 @@ Even with a common eligible sample set, `OBS_CT` can vary between variants becau
 their genotype calls have different missingness. Here it should agree between
 the two models for the same variant. Compare A1 as well as variant ID.
 
-## Visualize the evidence and the diagnostics
+## Visualise the evidence and the diagnostics
 
 ```{r assoc-manhattan, fig.alt="Manhattan plot of additive PC-adjusted autosomal association p-values with the conventional 5e-8 threshold marked."}
 plot_manhattan(adjusted, "PC-adjusted association")
@@ -184,7 +184,7 @@ the model logs and `model_comparison.tsv` with your interpretation.
 - Explain how imputation changes variant coverage and introduces dosage and
   imputation-quality decisions. These lessons use pre-imputation hard calls.
 - Choose a follow-up question: replication, regional LD, fine-mapping, functional
-  annotation, PRS or Mendelian randomization. Distinguish what the current GWAS
+  annotation, PRS or Mendelian randomisation. Distinguish what the current GWAS
   estimates from the additional assumptions each follow-up needs.
 
 [Return to course home](../README.md)

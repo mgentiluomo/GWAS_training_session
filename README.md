@@ -91,7 +91,7 @@ alternate between the two workflows.
 
 The core uses **pre-imputation autosomal hard calls**. Heterozygosity and HWE are
 diagnostics: no automatic ancestry exclusions, unreviewed HWE filter or ancestry
-labels from two PCs are applied. Sex chromosomes, reference harmonization,
+labels from two PCs are applied. Sex chromosomes, reference harmonisation,
 imputation and advanced follow-up are extensions. This is an exploratory teaching
 workflow, not a complete production GWAS protocol.
 

@@ -335,7 +335,7 @@ downloads = f'''<span class="eyebrow">Files and checkpoints</span><h1>The right 
 <p>For a full restart, restore the initial demo inputs and begin the QC walkthrough at step 1. To join lesson 2 directly, use the final QC checkpoint and open its notebook.</p>
 <h2>What is inside a checkpoint?</h2><p>The matching BED/BIM/FAM set for that stage, prepared metadata, phenotype and sex tables, a stage-appropriate count table and a manifest with SHA-256 checksums. It does not include a saved R workspace or the original study data.</p>
 <p><a href="{RAW}/tutorial/downloads/manifest.json">Inspect the package manifests and checksums</a></p>
-<h2>The original class data</h2><p>The original BED is distributed through the course’s institutional access arrangements. Older links may expire or require authentication. Use only its matching BIM/FAM files and authorized checkpoints.</p>
+<h2>The original class data</h2><p>The original BED is distributed through the course’s institutional access arrangements. Older links may expire or require authentication. Use only its matching BIM/FAM files and authorised checkpoints.</p>
 <a href="{REPO}/blob/{BRANCH}/docs/data.md">Read original-data access and coding instructions →</a>
 {end(('practice','Practice'),('help','Troubleshooting'))}'''
 
@@ -362,7 +362,7 @@ terms = [
     ('Call rate','The fraction of successfully called genotypes: one minus missingness.'),('MAF','Minor allele frequency in the samples used for the estimate.'),
     ('LD','Association between alleles at different loci; linked SNPs can carry correlated information.'),('LD pruning','Selecting an approximately independent subset for an analysis such as PCA.'),
     ('Heterozygosity','The presence of two different alleles at a diploid locus.'),('KING kinship','An estimate of genetic relationship; duplicates are near 0.5 on this scale.'),
-    ('HWE','A population-genetic expectation for genotype proportions; departures need contextual interpretation.'),('PCA / PC','Principal component analysis and the components summarizing genetic variation.'),
+    ('HWE','A population-genetic expectation for genotype proportions; departures need contextual interpretation.'),('PCA / PC','Principal component analysis and the components summarising genetic variation.'),
     ('Covariate','An additional predictor, such as age or a PC, included in a statistical model.'),('OR','Odds ratio per extra copy of the counted allele in an additive logistic model.'),
     ('A1','The counted allele reported by the association output; do not assume it is always the minor allele.'),('Confidence interval','A range expressing uncertainty under the model’s assumptions.'),
     ('p-value','Under the null model, the probability of a statistic at least as extreme as observed.'),('Checkpoint','A matching set of saved files from a defined stage, not a guarantee of scientific validity.')]

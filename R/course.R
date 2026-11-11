@@ -161,7 +161,7 @@ prepare_metadata <- function(cfg) {
   fam <- read_fam(cfg$input)
   ph <- read_ws(file.path(cfg$metadata, "pheno.txt"))
   sx <- read_ws(file.path(cfg$metadata, "Sex.txt"))
-  # The original Sex.txt has '2ID' as its first header; normalize the ID fields.
+  # The original Sex.txt has '2ID' as its first header; normalise the ID fields.
   if (ncol(ph) != 3L || ncol(sx) != 3L) stop("Phenotype and sex files must each have three columns.")
   names(ph) <- c("FID", "IID", "Disease")
   names(sx) <- c("FID", "IID", "SEX")
