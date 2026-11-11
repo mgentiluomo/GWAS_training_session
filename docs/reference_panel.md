@@ -2,7 +2,7 @@
 
 [Course home](../README.md) · [Lesson 2](../lessons/02_population_structure.Rmd)
 
-The [original PCA notebook](../01_Codes/02_PCA_GWAS_training_session_2025.Rmd)
+The [original PCA notebook](https://github.com/mgentiluomo/GWAS_training_session/blob/2025-original/01_Codes/02_PCA_GWAS_training_session_2025.Rmd)
 includes a reference-panel exercise. It is historical material, not a validated
 extension of the guided workflow: its paths and PLINK 1.9 merge commands differ.
 

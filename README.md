@@ -83,7 +83,7 @@ modes are saved in separate directories.
 
 ## Earlier materials and scientific scope
 
-The [original notebooks](01_Codes/) and
+The [original 2025 notebooks](https://github.com/mgentiluomo/GWAS_training_session/tree/2025-original/01_Codes) and
 [array-to-PLINK introduction](00_Intro/Introduction_from_rad_data_to_binary.md)
 remain available. Start the revised course in `lessons/`. The older notebooks
 use a different folder layout and mix PLINK 1.9 and PLINK 2 commands; do not
