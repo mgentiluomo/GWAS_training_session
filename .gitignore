@@ -13,3 +13,4 @@ lessons/*.html
 lessons/*_files/
 _site/
 .quarto/
+__pycache__/
