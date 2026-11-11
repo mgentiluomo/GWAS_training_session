@@ -20,6 +20,14 @@ The course is an independent teaching resource for students across University of
 - External links are allowed only to: literature (prefer DOIs), data repositories we use, official sites and manuals of software we use. Never link to other courses, tutorials or guides, including the tutorial sections of software sites.
 - All theory needed (p-values, multiple testing, power, LD, population structure, mixed models, inflation) is written in the course or its glossary.
 
+## Website destination
+
+- The final home of the course is a set of pages on manuelgentiluomo.it (Next.js, App Router, TypeScript, Tailwind, deployed on Vercel from the private repository mgentiluomo/personal-site). This repository is the source; the site renders it.
+- Each step page shows: what we do and why; information about the example data; the R command to copy; the raw PLINK 2 command as typed in a terminal, with its syntax explained option by option; the expected result, collapsed; troubleshooting; interactive elements where they help understanding (for example threshold sliders on real course values, quizzes, expandable explanations).
+- Visual design must be clean, simple to understand and easy to navigate: step numbers always visible, progress through each module, previous and next links, a course map.
+- `scripts/build_tutorial.py` must evolve to export structured content (for example JSON or MDX per step) generated from the tested notebooks, ready for the site, while keeping the single-source principle.
+- Before any work on the site, propose a visual mockup and wait for approval.
+
 ## Repository state (November 2026)
 
 - The repository was recreated with a clean history. No data files exist in any commit. Keep it that way.
