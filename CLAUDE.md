@@ -50,14 +50,14 @@ Modules 0 to 7 form the main path; A and B are additional.
 
 | Module | Topic |
 | --- | --- |
-| 0 | Preparing the computer, setup check, how to use the guide |
-| 1 | From DNA to array data: Infinium, GSA, plates, IDAT, GenomeStudio clustering, lab problems |
-| 2 | Files and formats: PED/MAP, binary formats, alleles and strand, genome builds (2.6), phenotype and covariates |
-| 3 | Sample QC: rough clean, call rate, sex check, LD pruning, heterozygosity, relatedness and duplicates, batch effects, summary |
-| 4 | Variant QC: call rate, differential missingness, allele frequency, Hardy-Weinberg (sample-size-aware threshold), sex chromosomes and MT, duplicates |
-| 5 | Population structure: PCA with a GRCh38 1000 Genomes reference subset, projection, outliers, number of PCs |
-| 6 | Association: one variant by hand, additive logistic model, covariates, output columns, Firth correction |
-| 7 | QQ plot, lambda, Manhattan plot, thresholds, clumping, regional plot, "what if we had skipped QC?", reporting |
+| 0 | Preparing the computer: what you need (0.1), install R (0.2), install RStudio (0.3), download PLINK 2 (0.4), download the course package (0.5), open the project (0.6), run the setup check (0.7), how to use this guide (0.8) |
+| 1 | From DNA to array data: SNPs and genotypes (1.1), how a genotyping array works (1.2), the Global Screening Array (1.3), from sample to scanned chip (1.4), calling genotypes (1.5), problems born in the lab (1.6), the export (1.7) |
+| 2 | Files and formats: the starting files (2.1), convert to binary format (2.2), samples and variants files (2.3), first overview (2.4), alleles and strand (2.5), genome builds GRCh37 and GRCh38 (2.6), add phenotype and covariates (2.7), checkpoint (2.8) |
+| 3 | Sample QC: rough clean (3.1), call rate (3.2), sex check (3.3), LD pruning (3.4), heterozygosity (3.5), relatedness and duplicates (3.6), batch effects (3.7), summary (3.8) |
+| 4 | Variant QC: call rate (4.1), differential missingness (4.2), allele frequency (4.3), Hardy-Weinberg with a sample-size-aware threshold (4.4), sex chromosomes, MT and duplicated variants (4.5), summary (4.6) |
+| 5 | Population structure with a GRCh38 1000 Genomes reference subset: why ancestry matters (5.1), prepare variants for PCA (5.2), match with the reference (5.3), run the PCA, reference and projection (5.4), plot the components (5.5), ancestry outliers (5.6), how many PCs (5.7) |
+| 6 | Association: one variant by hand (6.1), the additive logistic model (6.2), prepare covariates, including PCs (6.3), run the association (6.4), read the output (6.5), rare variants and Firth correction (6.6), first look at the results (6.7) |
+| 7 | QQ plot (7.1), lambda (7.2), Manhattan plot (7.3), thresholds (7.4), clumping (7.5), regional plot (7.6), analysis without PCs and without QC (7.7), reporting (7.8) |
 | A | Imputation: haplotypes and phasing theory, reference panels, Minimac4, file preparation, Michigan Imputation Server, Helmholtz Munich Imputation Server (HMIS), genetic data and GDPR (Rayner et al. 2024, doi:10.1038/s41588-024-02012-1), post-imputation QC, association on dosages |
 | B | Mixed models and REGENIE |
 
@@ -68,7 +68,7 @@ Modules 0 to 7 form the main path; A and B are additional.
 
 ## Simulated dataset (draft, to be confirmed with the author)
 
-About 2,000 individuals (1,000 cases, 1,000 controls) on 21 plates of 96, about 100,000 GSA-like variants on autosomes, X, Y and MT, GRCh38 coordinates, fixed seed. Planted problems, each discovered at a specific step: strand errors and ambiguous palindromic SNPs (2.5), low call rate samples (3.2), sex discordance including one XXY-like profile (3.3), contaminated samples (3.5), consanguineous samples (3.5), intended and unintended duplicates (3.6), first-degree relatives (3.6), one faulty plate (3.7), differential missingness (4.2), HWE-violating genotyping errors (4.4), duplicated variants (4.5), ancestry outliers unbalanced between cases and controls (5.6), three strong and one moderate true loci (7.3), one false signal from stratification (7.7). A small extra GRCh37 file supports the conversion exercise in 2.6.
+About 2,000 individuals (1,000 cases, 1,000 controls) on 21 plates of 96, about 100,000 GSA-like variants on autosomes, X, Y and MT, GRCh38 coordinates, fixed seed. Planted problems, each discovered at a specific step: strand errors and ambiguous palindromic SNPs (2.5), low call rate samples (3.2), sex discordance including one XXY-like profile (3.3), contaminated samples (3.5), consanguineous samples (3.5), intended and unintended duplicates (3.6), first-degree relatives (3.6), one faulty plate (3.7), differential missingness (4.2), HWE-violating genotyping errors (4.4), duplicated variants (4.5), ancestry outliers unbalanced between cases and controls (5.6), three strong and one moderate true loci (7.3), one false signal from stratification (removed by PCs at 6.3, shown again at 7.7). A small extra GRCh37 file supports the conversion exercise in 2.6.
 
 ## Data distribution
 
