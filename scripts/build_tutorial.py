@@ -168,21 +168,21 @@ def end(previous, next_):
 
 
 home = f'''
-<span class="eyebrow">Omics · Course 552EE · University of Pisa</span>
+<span class="eyebrow">Genetic and genomic data analysis · University of Pisa</span>
 <h1>From genotype data<br>to association analysis.</h1>
 <p class="lead">A practical GWAS tutorial you can follow in class and return to at your own pace. Understand the question, run a small step, check the result.</p>
-<p class="quiet">Manuel Gentiluomo · MSc in Biotechnologies and Applied Artificial Intelligence for Health</p>
+<p class="quiet">Manuel Gentiluomo · University of Pisa</p>
 <div class="actions"><a class="button" href="#setup">Prepare your computer</a><a class="button secondary" href="#qc">Start the QC walkthrough</a></div>
 <div class="cards">
-<article class="card"><span class="step-no">Lesson 01 · 4 hours</span><h3>Quality control</h3><p>Meet the files, investigate missing calls and document which samples and variants remain.</p><span class="pill">Guided web lesson</span><a class="card-link" href="#qc">Open the walkthrough →</a></article>
-<article class="card"><span class="step-no">Lesson 02 · 4 hours</span><h3>Population structure</h3><p>Explore genetic similarity with PCA and prepare a defensible analysis sample set.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/02_population_structure.Rmd">Open lesson 2 on GitHub →</a></article>
-<article class="card"><span class="step-no">Lesson 03 · 4 hours</span><h3>Association</h3><p>Compare logistic models and interpret odds ratios, Manhattan plots and QQ plots.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/03_association.Rmd">Open lesson 3 on GitHub →</a></article>
+<article class="card"><span class="step-no">Module 01 · Core pathway</span><h3>Quality control</h3><p>Meet the files, investigate missing calls and document which samples and variants remain.</p><span class="pill">Guided web lesson</span><a class="card-link" href="#qc">Open the walkthrough →</a></article>
+<article class="card"><span class="step-no">Module 02 · Core pathway</span><h3>Population structure</h3><p>Explore genetic similarity with PCA and prepare a defensible analysis sample set.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/02_population_structure.Rmd">Open lesson 2 on GitHub →</a></article>
+<article class="card"><span class="step-no">Module 03 · Core pathway</span><h3>Association</h3><p>Compare logistic models and interpret odds ratios, Manhattan plots and QQ plots.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/03_association.Rmd">Open lesson 3 on GitHub →</a></article>
 </div>
 <div class="hero"><h2>One task at a time. More than one way to keep up.</h2><p>Run the core steps first. If you are ready for more, try a challenge. If your computer is blocked, read the worked outputs or use a matching checkpoint and return to the error later.</p><a href="#help">Find a way back into the lesson →</a></div>
-<div class="two-col"><section><h2>What you need</h2><ul><li>Basic experience opening a table in R.</li><li>Your own Windows, macOS or Linux computer.</li><li>R, RStudio and PLINK 2 for the analytical work.</li></ul><p>You can read the tutorial and try its browser exercises without installing the analysis software.</p></section><section><h2>What you will produce</h2><ul><li>An auditable QC count table.</li><li>PCA and an explicit sample list.</li><li>Association results and a short interpretation.</li></ul><p>The three practical sessions are approximately four hours each, including breaks.</p></section></div>
+<div class="two-col"><section><h2>What you need</h2><ul><li>Basic experience opening a table in R.</li><li>Your own Windows, macOS or Linux computer.</li><li>R, RStudio and PLINK 2 for the analytical work.</li></ul><p>You can read the tutorial and try its browser exercises without installing the analysis software.</p></section><section><h2>What you will produce</h2><ul><li>An auditable QC count table.</li><li>PCA and an explicit sample list.</li><li>Association results and a short interpretation.</li></ul><p>The modules can be used separately or combined. One suggested teaching route uses three four-hour sessions, including breaks.</p></section></div>
 {callout('<strong>Practice data, clearly labelled.</strong> This web walkthrough uses a simulated dataset: 600 samples and 6,000 variants. The original class data use a separate access route. Demo results cannot support a claim about a real disease.', 'warning')}
-<h2>How to use a lesson</h2>{table(['Understand','Run','Check','Interpret'],[['Read the question and the figure.','Run one R chunk in the supplied notebook.','Compare the file, shape and count.','Explain what changed and why it matters.']])}
-{end(('home','Course home'),('setup','Prepare your computer'))}
+<h2>Use the modules across courses</h2><p>These are independent teaching materials by Manuel Gentiluomo for students at the University of Pisa. Use a single topic, follow the complete GWAS pathway, or return to an example for self-study.</p><p>One possible teaching context is <em>Omics: Biotechnology and AI for Health</em> (552EE), in the MSc in Biotechnologies and Applied Artificial Intelligence for Health. The resource has a broader scope and can support other genetics, genomics, biotechnology and bioinformatics teaching.</p><p>Choose the preparation and file-format sections if you are new to the tools. If you already know them, move to the analytical modules and optional challenges. Teaching time and module selection can be adapted to each course.</p><h2>How to use a lesson</h2>{table(['Understand','Run','Check','Interpret'],[['Read the question and the figure.','Run one R chunk in the supplied notebook.','Compare the file, shape and count.','Explain what changed and why it matters.']])}
+{end(('home','Tutorial home'),('setup','Prepare your computer'))}
 '''
 
 setup = f'''
@@ -216,7 +216,7 @@ setup = f'''
 {checkpoint('PLINK 2 reports a working version.','ready-plink')}
 {checkpoint('The demo BED/BIM/FAM set is present and preflight passes.','ready-data')}
 {checkpoint('I can distinguish the R console, terminal and notebook editor.','ready-panes')}
-{end(('home','Course home'),('qc','Open quality control'))}
+{end(('home','Tutorial home'),('qc','Open quality control'))}
 '''
 
 recovery = '''root <- if (file.exists("R/course.R")) "." else ".."
@@ -232,7 +232,7 @@ final <- file.path(cfg$qc, "qc_final")'''
 
 fam_head = [line.split() for line in (DEMO/'DB_demo.fam').read_text().splitlines()[:3]]
 bim_head = [line.split() for line in (DEMO/'DB_demo.bim').read_text().splitlines()[:3]]
-qc = '''<span class="eyebrow">Lesson 01 · Core walkthrough · 4 hours</span><h1>Quality control.<br>Keep track of every decision.</h1>
+qc = '''<span class="eyebrow">Module 01 · Core walkthrough</span><h1>Quality control.<br>Keep track of every decision.</h1>
 <p class="lead">Before testing association, ask whether the genotype data are sufficiently complete and whether the samples fit the planned analysis.</p>
 <p>Open <code>lessons/01_quality_control.Rmd</code> in RStudio. Read this page alongside it. Run one chunk at a time; the web page itself does not run R or PLINK.</p>
 <nav class="section-toc" aria-label="Quality control steps"><a href="#qc-start">1. Start a clean session</a><a href="#qc-files">2. Understand the files</a><a href="#qc-baseline">3. Establish the baseline</a><a href="#qc-missing">4. Inspect missingness</a><a href="#qc-filter">5. Filter and count</a><a href="#qc-het">6. Review heterozygosity</a><a href="#qc-related">7. Review relatedness</a><a href="#qc-finish">8. Save the checkpoint</a></nav>'''
@@ -304,7 +304,7 @@ qc += step('08','qc-finish','Save a checkpoint you can explain.',
     f'<a class="button" href="{REPO}/blob/{BRANCH}/lessons/02_population_structure.Rmd">Open the PCA notebook</a></div>')
 qc += end(('setup','Preparation'),('practice','Practice and explain'))
 
-practice = '''<span class="eyebrow">Lesson 01 · Practice</span><h1>Make the decisions yours.</h1>
+practice = '''<span class="eyebrow">Module 01 · Practice</span><h1>Make the decisions yours.</h1>
 <p class="lead">Predict first. Run a separate comparison if you can. Use the explanation only after you have tried.</p>
 <h2>1. Call rate is not missingness</h2><p>A new sample has a call rate of 94%. A protocol keeps samples with missingness at most 0.08. Does it pass this criterion? Show the conversion.</p>'''
 practice += details('Reveal a worked explanation','<p>Its missing fraction is <code>1 − 0.94 = 0.06</code>, or 6%. It passes the 8% missingness criterion. This says nothing about whether it passes other QC criteria.</p>')
@@ -369,9 +369,9 @@ terms = [
 glossary = '<span class="eyebrow">Quick reference</span><h1>A small glossary<br>for the practical work.</h1>' + table(['Term','Meaning'],terms)
 glossary += f'<p><a href="{REPO}/blob/{BRANCH}/docs/glossary.md">Open the extended repository glossary →</a></p>'
 glossary += '<h2>Reference documentation</h2><ul><li><a href="https://www.cog-genomics.org/plink/2.0/filter">PLINK filtering</a></li><li><a href="https://www.cog-genomics.org/plink/2.0/basic_stats">PLINK quality-control statistics</a></li><li><a href="https://www.cog-genomics.org/plink/2.0/distance">KING kinship</a></li><li><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html">R file delimiters and decimal marks</a></li></ul>'
-glossary += end(('help','Troubleshooting'),('home','Course home'))
+glossary += end(('help','Troubleshooting'),('home','Tutorial home'))
 
-PAGES = [('home','Course home',home),('setup','Before the class',setup),('qc','Quality control',qc),
+PAGES = [('home','Tutorial home',home),('setup','Before the class',setup),('qc','Quality control',qc),
          ('practice','Practice',practice),('downloads','Files and checkpoints',downloads),('help','Troubleshooting',help_page),('glossary','Glossary',glossary)]
 nav = ''.join(f'<a class="nav-link" href="#{key}"><span class="nav-number">{str(i+1).zfill(2)}</span>{title}</a>' for i,(key,title,_) in enumerate(PAGES))
 sections = ''.join(f'<article class="page" id="{key}" data-page="{key}" data-title="{esc(title)}">{body}</article>' for key,title,body in PAGES)
@@ -379,14 +379,14 @@ css = (ROOT/'tutorial_src/style.css').read_text()
 js = (ROOT/'tutorial_src/app.js').read_text()
 document = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GWAS Practical Tutorial · Manuel Gentiluomo</title><meta name="description" content="Guided GWAS practical work for Omics: Biotechnology and AI for Health, course 552EE. Quality control, RStudio setup and simulated-data checkpoints.">
+<title>GWAS Practical Tutorial · Manuel Gentiluomo</title><meta name="description" content="Independent GWAS teaching materials by Manuel Gentiluomo for students across University of Pisa courses. Quality control, RStudio setup and simulated-data checkpoints.">
 <style>{css}</style></head><body>
 <a class="skip" href="#main-content">Skip to content</a>
 <aside class="rail" id="course-navigation"><a class="brand" href="#home">GWAS<br>Practical Tutorial<small>MANUEL GENTILUOMO</small></a><p class="rail-label">Your learning path</p><nav aria-label="Course navigation">{nav}</nav>
-<div class="rail-foot"><strong>Omics · 552EE</strong><p>Biotechnology and AI for Health</p><div class="progress-wrap"><span id="progress-text"></span><div class="progress-track"><div class="progress-bar"></div></div><p id="progress-note"></p><button type="button" class="button secondary" id="reset-progress">Reset ticks</button></div></div></aside>
-<div class="shell"><header class="topbar"><div><button type="button" class="menu-button" aria-controls="course-navigation" aria-expanded="false">Menu</button> <strong>Omics: Biotechnology and AI for Health</strong><span class="course-subtitle"> · University of Pisa</span></div><div class="header-links"><a href="{REPO}/tree/{BRANCH}">GitHub</a><a href="https://www.manuelgentiluomo.it/">Personal site</a><span class="badge">Review draft</span></div></header>
+<div class="rail-foot"><strong>Open learning resources</strong><p>Genetic and genomic data analysis</p><div class="progress-wrap"><span id="progress-text"></span><div class="progress-track"><div class="progress-bar"></div></div><p id="progress-note"></p><button type="button" class="button secondary" id="reset-progress">Reset ticks</button></div></div></aside>
+<div class="shell"><header class="topbar"><div><button type="button" class="menu-button" aria-controls="course-navigation" aria-expanded="false">Menu</button> <strong>GWAS Practical Tutorial</strong><span class="course-subtitle"> · University of Pisa</span></div><div class="header-links"><a href="{REPO}/tree/{BRANCH}">GitHub</a><a href="https://www.manuelgentiluomo.it/">Personal site</a><span class="badge">Review draft</span></div></header>
 <main id="main-content" tabindex="-1"><noscript><p class="no-js">JavaScript is off. All written lessons remain below; the slider and interactive feedback need JavaScript. Download links require a connection.</p></noscript>{sections}</main>
-<footer class="footer"><p>Manuel Gentiluomo · University of Pisa · Omics, 552EE</p><p>Reading and browser exercises do not submit student responses. Checklist ticks are stored only in this browser when available. Demo data are simulated.</p><p>Draft web tutorial: preparation and lesson 1. Lessons 2–3 are available as RStudio notebooks. Linux analytical validation; Windows/macOS checks remain.</p></footer></div>
+<footer class="footer"><p>Manuel Gentiluomo · University of Pisa</p><p>Reading and browser exercises do not submit student responses. Checklist ticks are stored only in this browser when available. Demo data are simulated.</p><p>Draft web tutorial: preparation and lesson 1. Lessons 2–3 are available as RStudio notebooks. Linux analytical validation; Windows/macOS checks remain.</p></footer></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script type="application/json" id="sample-missingness-data">{json.dumps(sample_missing)}</script><script>{js}</script></body></html>'''
 (OUT/'index.html').write_text(document)

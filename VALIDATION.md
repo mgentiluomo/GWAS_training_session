@@ -50,6 +50,9 @@ analytical implementation.
   worked explanations, all six download cards and the mobile navigation menu.
 - Widths 390, 768 and 1440 pixels were checked for document-level horizontal overflow.
 - Desktop, mobile and a QC section were visually inspected.
+- The main heading/navigation identify independent University of Pisa learning
+  materials. Omics (552EE) appears once in the web page, as a possible teaching
+  context; the twelve-hour route is explicitly optional.
 - With JavaScript disabled, the written pages and all OS instructions remain
   readable. The quiz has no form submission, including in that mode.
 

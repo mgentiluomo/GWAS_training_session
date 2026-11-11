@@ -2,13 +2,9 @@
 
 *From genotype data to association analysis*
 
-**Omics: Biotechnology and AI for Health (552EE)**
-
-MSc in Biotechnologies and Applied Artificial Intelligence for Health
-
 Manuel Gentiluomo · University of Pisa
 
-**Three practical lessons of four hours each**
+**Independent teaching materials for students across University of Pisa courses**
 
 Move from genotype files to an interpretable association analysis using
 **RStudio and PLINK 2**. Materials are in English. You only need basic experience
@@ -35,6 +31,18 @@ Browse these instructions on GitHub without installing anything. To run the
 analyses, download the **whole project**, not individual notebooks: select
 **Code → Download ZIP**, then extract the ZIP. When reviewing a proposed course
 revision, select its branch before downloading.
+
+## Use across courses
+
+These materials are authored by Manuel Gentiluomo for use across genetics,
+genomics, biotechnology and bioinformatics teaching, as well as independent study.
+Choose individual modules or follow the full pathway. The suggested three-session,
+twelve-hour plan is one possible teaching arrangement; adapt pace and depth to
+students' backgrounds and the course.
+
+One possible teaching context is **Omics: Biotechnology and AI for Health (552EE)**,
+within the MSc in Biotechnologies and Applied Artificial Intelligence for Health.
+The tutorial is an independent resource with a wider audience and scope.
 
 ## Your learning path
 

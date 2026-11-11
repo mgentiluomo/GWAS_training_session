@@ -1,8 +1,9 @@
-# Three lessons, twelve hours
+# Suggested teaching route: three sessions, twelve hours
 
 [Course home](../README.md) · [Prepare your computer](setup.md)
 
-This suggested plan includes two ten-minute breaks per four-hour session. Adapt
+The independent modules can be used across courses or for self-study. This is one
+possible twelve-hour route, with two ten-minute breaks per four-hour session. Adapt
 the timings to the class and full-dataset runtimes. Complete the core walkthrough
 before choosing extensions. Keep commands, counts, plots and interpretations in
 a short lab notebook.

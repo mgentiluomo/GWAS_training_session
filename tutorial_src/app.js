@@ -104,7 +104,7 @@
     });
   });
   const checklist = [...document.querySelectorAll('[data-progress]')];
-  const progressKey = 'gwas-552ee-qc-progress-v1';
+  const progressKey = 'gwas-tutorial-qc-progress-v1';
   let storageAvailable = true;
   try {
     const stored = JSON.parse(localStorage.getItem(progressKey) || '{}');
