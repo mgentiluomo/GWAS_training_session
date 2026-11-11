@@ -70,7 +70,10 @@ About 2,000 individuals (1,000 cases, 1,000 controls) on 21 plates of 96, about 
 
 ## Writing and presentation
 
-- UK English (colour, analyse, summarise), short sentences, one idea per sentence, active voice, no idioms. Explain every technical term at first use and link it to the glossary.
+- Everything that goes to GitHub or the site is in UK English with -ise spelling (analyse, summarise, normalise, randomisation, colour, behaviour). This covers text, README, docs, notebooks, code comments, error and warning messages of R functions, commit messages, file names, release notes and alt text.
+- Never change the names of software functions and options to fit this rule (for example `hcl.colors`, `--covar-variance-standardize`, `normalizePath`, `color=`).
+- The author may be addressed in Italian in conversation. Only committed or published material must follow the UK English rule.
+- Short sentences, one idea per sentence, active voice, no idioms. Explain every technical term at first use and link it to the glossary.
 - Never use the em dash as punctuation.
 - Accessibility to WCAG 2.2 AA: keyboard navigation, adequate contrast, resizable text, mobile layout, light and dark themes, descriptive alt text, a text summary for main plots, never meaning by colour alone, colour-blind-safe palettes.
 - Do not generate illustrations. For figures, write a prompt for Gemini and leave a placeholder.
