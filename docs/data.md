@@ -28,6 +28,11 @@ uniqueness; this does not prove biological annotation or provenance.
 
 ## Input dictionary
 
+Course metadata use UTF-8 text, tabs between columns, decimal points and no
+thousands separators. Keep identifiers as text. A semicolon-separated CSV or a
+decimal-comma numeric field needs a separately documented import, not a renamed
+extension or a blanket find-and-replace. See [international settings](international_setup.md).
+
 | Input | Role | Format |
 |---|---|---|
 | `DB_A.bed/.bim/.fam` or `DB_demo.bed/.bim/.fam` | Genotypes and ordering | Matching SNP-major PLINK binary set |

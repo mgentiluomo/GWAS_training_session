@@ -1,4 +1,12 @@
-# GWAS Training Session
+# GWAS Practical Tutorial
+
+*From genotype data to association analysis*
+
+**Omics: Biotechnology and AI for Health (552EE)**
+
+MSc in Biotechnologies and Applied Artificial Intelligence for Health
+
+Manuel Gentiluomo · University of Pisa
 
 **Genetic and genomic analyses · Three practical lessons of four hours each**
 
@@ -46,6 +54,7 @@ modes are saved in separate directories.
 **[Data files and coding](docs/data.md)** ·
 **[Troubleshooting and recovery](docs/troubleshooting.md)** ·
 **[Glossary](docs/glossary.md)** ·
+**[International computer settings](docs/international_setup.md)** ·
 **[1000 Genomes extension](docs/reference_panel.md)**
 
 ## Working in the project

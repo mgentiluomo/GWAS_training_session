@@ -104,7 +104,7 @@ stopifnot(nrow(comparison) == nrow(baseline), nrow(comparison) == nrow(adjusted)
 stopifnot(all(comparison$OBS_CT_baseline == comparison$OBS_CT_adjusted, na.rm = TRUE))
 head(comparison[order(comparison$P_adjusted), ], 10)
 write.table(comparison, file.path(cfg$assoc, "model_comparison.tsv"),
-            sep = "\t", quote = FALSE, row.names = FALSE)
+            sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE)
 ```
 
 Even with a common eligible sample set, `OBS_CT` can vary between variants because
@@ -154,7 +154,7 @@ valid <- adjusted[valid_p(adjusted$P) & adjusted$ERRCODE == ".", ]
 valid <- valid[order(valid$P), ]
 top <- head(valid, 20)
 write.table(top, file.path(cfg$assoc, "top20_for_review.tsv"),
-            sep = "\t", quote = FALSE, row.names = FALSE)
+            sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE)
 cat("Valid additive tests:", nrow(valid), "\n")
 cat("Tests below the conventional 5e-8 threshold:", sum(valid$P < 5e-8), "\n")
 head(top)

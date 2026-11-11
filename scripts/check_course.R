@@ -39,6 +39,30 @@ shuffled <- data.frame(FID = c("002", "001"), IID = c("02", "01"), Age = c(70, 4
 joined <- join_by_id(sample_order, shuffled)
 stopifnot(identical(joined$Age, c(40, 70)), identical(joined$FID, c("001", "002")))
 unlink(temporary, recursive = TRUE)
+local({
+  old <- options(OutDec = ",")
+  on.exit(options(old))
+  stopifnot(identical(plink_number(0.05), "0.05"))
+  stopifnot(identical(course_number(c("12.5", "5e-8", "NA")), c(12.5, 5e-8, NA_real_)))
+  expect_error(course_number(c("12,5", "1,234"), "Age"))
+  expect_error(course_number("1.234,5", "Age"))
+  expect_error(course_number("Inf", "Age"))
+  folder <- tempfile("gwas text ")
+  dir.create(folder)
+  on.exit(unlink(folder, recursive = TRUE), add = TRUE)
+  tabfile <- file.path(folder, "locale.tsv")
+  # UTF-8 BOM and Windows CRLF, without losing zero-padded IDs or decimal values.
+  con <- file(tabfile, "wb")
+  writeBin(c(as.raw(c(239, 187, 191)), charToRaw("FID\tIID\tAge\tGroup\r\n001\t01\t23.5\tcaf\u00e9\r\n")), con)
+  close(con)
+  tab <- read_course_tsv(tabfile)
+  stopifnot(identical(tab$FID, "001"), identical(tab$Group, "caf\u00e9"), course_number(tab$Age) == 23.5)
+  # Canonical exports must retain decimal points even when display uses commas.
+  write.table(data.frame(Age = 23.5), tabfile, sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE)
+  stopifnot(any(grepl("23.5", readLines(tabfile), fixed = TRUE)))
+  writeLines(c("FID;IID;Age", "001;01;23,5"), tabfile)
+  expect_error(read_course_tsv(tabfile))
+})
 cat("Syntax and identifier/p-value safeguards passed.\n")
 
 # Optional full execution. This intentionally overwrites the demo run only.

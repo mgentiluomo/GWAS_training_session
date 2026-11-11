@@ -39,8 +39,8 @@ bim <- data.frame(chr = rep(1:22, length.out = m), id = paste0("demo_rs", seq_le
                   cm = 0, bp = (seq_len(m) %/% 22 + 1L) * 10000L, A1 = "A", A2 = "G")
 ord <- order(bim$chr, bim$bp)
 bim <- bim[ord, ]; g <- g[, ord]
-write.table(fam, paste0(cfg$input, ".fam"), quote = FALSE, row.names = FALSE, col.names = FALSE)
-write.table(bim, paste0(cfg$input, ".bim"), quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(fam, paste0(cfg$input, ".fam"), dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE, col.names = FALSE)
+write.table(bim, paste0(cfg$input, ".bim"), dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE, col.names = FALSE)
 # SNP-major BED encoding: AA=00, AG=10, GG=11, missing=01; four samples per byte.
 con <- file(paste0(cfg$input, ".bed"), "wb")
 writeBin(as.raw(c(108, 27, 1)), con)
@@ -54,11 +54,11 @@ for (j in seq_len(m)) {
 close(con)
 meta <- dirname(cfg$input)
 write.table(data.frame(FID = ids, IID = ids, pheno = disease), file.path(meta, "pheno.txt"),
-            sep = "\t", row.names = FALSE, quote = FALSE)
+            sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE, quote = FALSE)
 write.table(data.frame(FID = ids, IID = ids, sex = sex), file.path(meta, "Sex.txt"),
-            sep = "\t", row.names = FALSE, quote = FALSE)
+            sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE, quote = FALSE)
 write.table(data.frame(FID = ids, IID = ids, Age = age, Group = group),
-            file.path(meta, "general_covar.txt"), sep = "\t", row.names = FALSE, quote = FALSE)
+            file.path(meta, "general_covar.txt"), sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE, quote = FALSE)
 writeLines(c("SIMULATED PRACTICE DATA", "Seed: 20261111", "600 samples; 6000 variants; 22 autosomes.",
              "Two simulated frequency groups, missing calls, rare variants and two duplicate pairs.",
              "Phenotype simulated from age, sex, group and demo_rs2000.",

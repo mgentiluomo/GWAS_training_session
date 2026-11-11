@@ -16,6 +16,7 @@ chunks. Later errors are often consequences of that first failure.
 | PLINK stopped | Read the named `.console.txt` and `.log`, checking flags, inputs and memory. |
 | Constant / collinear covariate | Review cohort and model design; do not blindly increase VIF limits. |
 | No valid p-values | Inspect ERRCODE, phenotype counts and covariate coding. |
+| Expected decimal points / wrong number of columns | Check the actual delimiter and decimal mark; use supplied UTF-8 TSV inputs unchanged. See [international settings](international_setup.md). |
 | Missing checkpoint | Verify mode, preceding lesson and paths; rerun it or obtain its checkpoint. |
 | Knit fails but chunks work | Prepare `knitr`, `rmarkdown` and Pandoc; RStudio normally supplies Pandoc. |
 

@@ -95,6 +95,10 @@ HTML previews. The notebooks remain editable text even without it.
 
 ## 6. Start lesson 1
 
+Before class, check [language, decimals and file conventions](international_setup.md)
+and run `source("scripts/preflight.R")`. Keep your system in its preferred language;
+the course checks its file conventions explicitly.
+
 Open `lessons/01_quality_control.Rmd`, restart R and run its first chunk. Continue
 one chunk at a time. **Knit** reruns the whole notebook and updates outputs for
 that mode; use it only when you are ready to rerun the analyses.

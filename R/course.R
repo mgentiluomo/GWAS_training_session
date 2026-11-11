@@ -2,6 +2,9 @@
 
 course_config <- function(root = ".") {
   root <- normalizePath(root, mustWork = TRUE)
+  # Session display only: do not change OS language, input methods or LC_CTYPE.
+  original_outdec <- getOption("OutDec")
+  options(OutDec = ".")
   env <- new.env(parent = baseenv())
   sys.source(file.path(root, "config.R"), envir = env)
   cfg <- env$course_settings
@@ -25,10 +28,47 @@ course_config <- function(root = ".") {
   if (!is.null(attr(version, "status")) || !any(grepl("PLINK v2", version, fixed = TRUE)))
     stop("The selected executable is not a working PLINK 2 binary. See docs/troubleshooting.md.")
   cfg$version <- version
-  writeLines(c(version, paste("Mode:", cfg$mode), capture.output(sessionInfo())),
+  writeLines(c(version, paste("Mode:", cfg$mode), paste("Original R OutDec:", original_outdec),
+               paste("Course R OutDec:", getOption("OutDec")),
+               paste("Numeric locale:", Sys.getlocale("LC_NUMERIC")),
+               paste("Character locale:", Sys.getlocale("LC_CTYPE")), capture.output(sessionInfo())),
              file.path(cfg$out, "software_versions.txt"))
   message("Data mode: ", cfg$mode, if (cfg$mode == "demo") " (SIMULATED data)" else " (class data)")
   cfg
+}
+
+# Numeric boundaries are explicit: never silently reinterpret 1,234 as 1.234/1234.
+course_number <- function(x, column = "Numeric field") {
+  x <- trimws(as.character(x))
+  missing <- is.na(x) | x %in% c("", "NA", "NaN")
+  syntax <- "^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)([eE][+-]?[0-9]+)?$"
+  invalid <- !missing & !grepl(syntax, x)
+  if (any(invalid)) stop(column, ": expected decimal points (e.g. 12.5), no thousands separators. ",
+                         "Check the file delimiter and decimal convention; see docs/international_setup.md.")
+  result <- rep(NA_real_, length(x))
+  result[!missing] <- as.numeric(x[!missing])
+  if (any(!missing & !is.finite(result))) stop(column, ": non-finite numeric value.")
+  result
+}
+
+plink_number <- function(x) {
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x)) stop("A PLINK threshold must be one finite number.")
+  format(x, decimal.mark = ".", scientific = FALSE, trim = TRUE, digits = 15)
+}
+
+read_course_tsv <- function(path) {
+  require_files(path)
+  x <- withCallingHandlers(
+    read.table(path, header = TRUE, sep = "\t", dec = ".", fileEncoding = "UTF-8-BOM",
+               quote = "", comment.char = "", check.names = FALSE, colClasses = "character",
+               row.names = NULL, fill = FALSE, na.strings = c("NA", "NaN", "")),
+    warning = function(w) stop("Could not safely read ", basename(path), ": ", conditionMessage(w),
+                                ". Use UTF-8 tab-separated text; see docs/international_setup.md.")
+  )
+  names(x) <- sub("^#", "", trimws(names(x)))
+  if (ncol(x) < 2L || anyDuplicated(names(x)))
+    stop("Expected distinct tab-separated columns in ", basename(path), "; see docs/international_setup.md.")
+  x
 }
 
 require_files <- function(paths, advice = "Check the preceding step and docs/troubleshooting.md.") {
@@ -40,6 +80,7 @@ require_files <- function(paths, advice = "Check the preceding step and docs/tro
 read_ws <- function(path, header = TRUE) {
   require_files(path)
   x <- read.table(path, header = header, sep = "", quote = "", comment.char = "",
+                  dec = ".", fileEncoding = "UTF-8-BOM",
                   check.names = FALSE, stringsAsFactors = FALSE, colClasses = "character",
                   na.strings = c("NA", "NaN"))
   names(x) <- sub("^#", "", names(x))
@@ -106,13 +147,13 @@ record_counts <- function(cfg, prefix, stage) {
   path <- file.path(cfg$qc, "sample_variant_counts.tsv")
   old <- if (file.exists(path)) read.delim(path, stringsAsFactors = FALSE) else counts[FALSE, ]
   old <- old[old$stage != stage, , drop = FALSE]
-  write.table(rbind(old, counts), path, sep = "\t", row.names = FALSE, quote = FALSE)
+  write.table(rbind(old, counts), path, sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE, quote = FALSE)
   counts
 }
 
 write_ids <- function(x, path) {
   check_ids(x, "Sample list")
-  write.table(x[c("FID", "IID")], path, sep = "\t", quote = FALSE,
+  write.table(x[c("FID", "IID")], path, sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE,
               row.names = FALSE, col.names = FALSE)
 }
 
@@ -124,8 +165,7 @@ prepare_metadata <- function(cfg) {
   if (ncol(ph) != 3L || ncol(sx) != 3L) stop("Phenotype and sex files must each have three columns.")
   names(ph) <- c("FID", "IID", "Disease")
   names(sx) <- c("FID", "IID", "SEX")
-  cv <- read.delim(file.path(cfg$metadata, "general_covar.txt"), check.names = FALSE,
-                    colClasses = "character", quote = "", comment.char = "", na.strings = c("NA", ""))
+  cv <- read_course_tsv(file.path(cfg$metadata, "general_covar.txt"))
   names(cv) <- trimws(names(cv))
   if (!all(c("FID", "IID", "Age", "Group") %in% names(cv))) stop("Covariates need FID, IID, Age and Group.")
   for (entry in list(ph, sx, cv)) check_ids(entry, "Metadata")
@@ -139,25 +179,24 @@ prepare_metadata <- function(cfg) {
   sx$SEX[is.na(sx$SEX) | sx$SEX %in% c("0", "-9")] <- NA_character_
   if (any(!is.na(ph$Disease) & !ph$Disease %in% c("1", "2"))) stop("Disease: use 1=control, 2=case, NA=missing.")
   if (any(!is.na(sx$SEX) & !sx$SEX %in% c("1", "2"))) stop("SEX: use 1, 2 or NA; see docs/data.md.")
-  age <- suppressWarnings(as.numeric(cv$Age))
-  if (any(!is.na(cv$Age) & !cv$Age %in% c("-9", "0") & is.na(age))) stop("Age must be numeric or missing.")
+  age <- course_number(cv$Age, "Age")
   age[age %in% c(-9, 0)] <- NA_real_
   if (any(age < 0 | age > 120, na.rm = TRUE)) stop("Review implausible Age values before analysis.")
   metadata <- data.frame(FID = fam$FID, IID = fam$IID, Disease = as.integer(ph$Disease),
                           SEX = as.integer(sx$SEX), Age = age, Group = cv$Group)
-  write.table(metadata, file.path(cfg$out, "metadata.tsv"), sep = "\t", quote = FALSE,
+  write.table(metadata, file.path(cfg$out, "metadata.tsv"), sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE,
               row.names = FALSE, na = "NA")
   write.table(metadata[c("FID", "IID", "Disease")], file.path(cfg$out, "phenotype.tsv"),
-              sep = "\t", quote = FALSE, row.names = FALSE, na = "-9")
+              sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE, na = "-9")
   # update-sex expects ID columns followed by sex; omit the header explicitly.
   write.table(transform(metadata[c("FID", "IID", "SEX")], SEX = ifelse(is.na(SEX), 0L, SEX)),
-              file.path(cfg$out, "sex.tsv"), sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
+              file.path(cfg$out, "sex.tsv"), sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE, col.names = FALSE)
   metadata
 }
 
 load_metadata <- function(cfg) {
   x <- read_ws(file.path(cfg$out, "metadata.tsv"))
-  for (n in c("Disease", "SEX", "Age")) x[[n]] <- as.numeric(x[[n]])
+  for (n in c("Disease", "SEX", "Age")) x[[n]] <- course_number(x[[n]], n)
   check_ids(x, "Prepared metadata")
   x
 }
@@ -172,7 +211,7 @@ join_by_id <- function(samples, metadata, require_all = TRUE) {
 read_pcs <- function(cfg) {
   x <- read_ws(file.path(cfg$pca, "study.eigenvec"))
   check_ids(x, "PCA")
-  for (n in grep("^PC[0-9]+$", names(x), value = TRUE)) x[[n]] <- as.numeric(x[[n]])
+  for (n in grep("^PC[0-9]+$", names(x), value = TRUE)) x[[n]] <- course_number(x[[n]], n)
   x
 }
 
@@ -192,7 +231,7 @@ build_covariates <- function(cfg) {
   if (qr(design)$rank < ncol(design)) stop("Covariates are collinear. Review the planned model.")
   write_ids(x, file.path(cfg$pca, "analysis_samples.tsv"))
   write.table(x[c("FID", "IID", wanted)], file.path(cfg$pca, "covariates.tsv"),
-              sep = "\t", row.names = FALSE, quote = FALSE)
+              sep = "\t", dec = ".", fileEncoding = "UTF-8", row.names = FALSE, quote = FALSE)
   x
 }
 
@@ -207,7 +246,7 @@ read_association <- function(prefix) {
   x <- x[x$TEST == "ADD", , drop = FALSE]
   if (anyDuplicated(x$ID)) stop("Multiple additive results per variant; review allele coding.")
   for (n in intersect(c("CHROM", "POS", "OBS_CT", "OR", "P", "L95", "U95"), names(x)))
-    x[[n]] <- suppressWarnings(as.numeric(x[[n]]))
+    x[[n]] <- course_number(x[[n]], n)
   cat("Additive rows:", nrow(x), "\n")
   print(table(x$ERRCODE, useNA = "ifany"))
   x

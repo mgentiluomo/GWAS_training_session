@@ -37,6 +37,17 @@ results for the original dataset.
 
 ## Remaining classroom checks
 
+### International-settings regression checks
+
+The full demo and preflight were rerun with R's initial decimal-display option
+set to a comma. They also passed under a French-language Linux environment, with
+the project and PLINK executable in paths containing spaces, accents, Greek and
+Chinese characters. Separate checks cover a UTF-8 BOM, Windows CRLF line endings,
+zero-padded identifiers, canonical decimal-point exports and rejection of
+decimal-comma numeric fields and semicolon-separated input passed as course TSV.
+
+These checks do not replace execution on Windows and macOS.
+
 The original class BED is access-controlled and was not available for a complete
 original-data run. Validate its matching release, provenance, genome build,
 population structure and study-specific exclusions before teaching with it.

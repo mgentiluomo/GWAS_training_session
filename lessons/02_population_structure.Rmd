@@ -123,7 +123,7 @@ draw_pca <- function() {
 }
 draw_pca()
 save_plot(file.path(cfg$pca, "pc1_pc2.png"), draw_pca, width = 2000)
-write.table(plot_data, file.path(cfg$pca, "pca_with_metadata.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+write.table(plot_data, file.path(cfg$pca, "pca_with_metadata.tsv"), sep = "\t", dec = ".", fileEncoding = "UTF-8", quote = FALSE, row.names = FALSE)
 ```
 
 **Try it yourself — Q5:** describe two features you observe before proposing an

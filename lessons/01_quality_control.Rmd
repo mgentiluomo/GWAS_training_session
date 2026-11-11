@@ -125,13 +125,13 @@ Changing the order can change the retained set because the denominators change.
 
 ```{r qc-filters}
 geno <- file.path(cfg$qc, "02_geno")
-run_plink(cfg, c("--bfile", start, "--geno", cfg$geno, "--make-bed", "--out", geno))
+run_plink(cfg, c("--bfile", start, "--geno", plink_number(cfg$geno), "--make-bed", "--out", geno))
 record_counts(cfg, geno, "02_geno")
 mind <- file.path(cfg$qc, "03_mind")
-run_plink(cfg, c("--bfile", geno, "--mind", cfg$mind, "--make-bed", "--out", mind))
+run_plink(cfg, c("--bfile", geno, "--mind", plink_number(cfg$mind), "--make-bed", "--out", mind))
 record_counts(cfg, mind, "03_mind")
 maf <- file.path(cfg$qc, "04_maf")
-run_plink(cfg, c("--bfile", mind, "--maf", cfg$maf, "--make-bed", "--out", maf))
+run_plink(cfg, c("--bfile", mind, "--maf", plink_number(cfg$maf), "--make-bed", "--out", maf))
 record_counts(cfg, maf, "04_maf")
 ```
 
@@ -166,7 +166,7 @@ remove every sample beyond a pooled mean ±3 SD.
 ```{r qc-relatedness}
 king <- file.path(cfg$qc, "relatedness")
 run_plink(cfg, c("--bfile", maf, "--extract", paste0(prune, ".prune.in"),
-                "--king-cutoff", cfg$kinship, "--out", king), paste0(king, ".king.cutoff.in.id"))
+                "--king-cutoff", plink_number(cfg$kinship), "--out", king), paste0(king, ".king.cutoff.in.id"))
 final <- file.path(cfg$qc, "qc_final")
 # Apply the sample list to ALL QC-passing variants, not just the pruned subset.
 run_plink(cfg, c("--bfile", maf, "--keep", paste0(king, ".king.cutoff.in.id"),
