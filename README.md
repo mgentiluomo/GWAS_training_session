@@ -8,7 +8,7 @@ MSc in Biotechnologies and Applied Artificial Intelligence for Health
 
 Manuel Gentiluomo · University of Pisa
 
-**Genetic and genomic analyses · Three practical lessons of four hours each**
+**Three practical lessons of four hours each**
 
 Move from genotype files to an interpretable association analysis using
 **RStudio and PLINK 2**. Materials are in English. You only need basic experience
@@ -16,6 +16,14 @@ importing a table into R and finding the terminal; the walkthrough explains the
 remaining steps.
 
 ## Start here
+
+**Browser tutorial (review draft):** save
+[tutorial/index.html](https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/course/2026-guided-training/tutorial/index.html)
+as an HTML file and open it in a browser. It includes the setup guide, the complete
+QC walkthrough, figures, browser exercises and checkpoint downloads. Reading and
+browser exercises work without R; running analyses still requires RStudio and
+PLINK. Download links require an internet connection. A hosted course URL has not
+been published yet.
 
 1. **[Prepare your computer](docs/setup.md).** Download the project, open its
    RStudio project, add PLINK 2 and generate the simulated practice data.

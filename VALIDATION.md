@@ -35,9 +35,30 @@ Sys.unsetenv("GWAS_RUN_DEMO_CHECK")
 The full check requires `mode = "demo"`. Do not use demo figures as expected
 results for the original dataset.
 
-## Remaining classroom checks
+## Browser tutorial checks
 
-### International-settings regression checks
+The draft in `tutorial/index.html` covers the course home, setup, the full QC
+walkthrough, practice, recovery downloads and a glossary. Scientific R blocks
+are extracted from the tested QC notebook rather than maintained as a second
+analytical implementation.
+
+- Six synthetic-only ZIPs pass archive CRC and SHA-256 manifest checks.
+- Restoring only the final QC ZIP into a clean project allowed lessons 2 and 3
+  to execute in fresh R processes without the initial genotype input or an R workspace.
+- Chromium headless browser checks cover navigation, operating-system panels,
+  copy fallback, local checklist persistence, missingness slider, quiz feedback,
+  worked explanations, all six download cards and the mobile navigation menu.
+- Widths 390, 768 and 1440 pixels were checked for document-level horizontal overflow.
+- Desktop, mobile and a QC section were visually inspected.
+- With JavaScript disabled, the written pages and all OS instructions remain
+  readable. The quiz has no form submission, including in that mode.
+
+Run `node scripts/check_tutorial.cjs` with Playwright and compatible Chromium
+installed; `TUTORIAL_BROWSER` selects an executable. This browser QA is an
+authoring check, not a student prerequisite. It does not certify every browser
+or assistive-technology combination. No website deployment is included.
+
+## International-settings regression checks
 
 The full demo and preflight were rerun with R's initial decimal-display option
 set to a comma. They also passed under a French-language Linux environment, with
@@ -47,6 +68,8 @@ zero-padded identifiers, canonical decimal-point exports and rejection of
 decimal-comma numeric fields and semicolon-separated input passed as course TSV.
 
 These checks do not replace execution on Windows and macOS.
+
+## Remaining classroom checks
 
 The original class BED is access-controlled and was not available for a complete
 original-data run. Validate its matching release, provenance, genome build,
