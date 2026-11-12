@@ -46,25 +46,71 @@ manuelgentiluomo.it. It sends the password automatically only to addresses endin
 in `@unipi.it` or `@studenti.unipi.it`. The classroom QR code opens that same
 form. Other users write to `manuel.gentiluomo@unipi.it`.
 
-## 2. Stage the verified main path again
+## 2. Verified final classroom staging
 
-The package must contain the checkpoint files that the final notebooks write,
-including the summary statistics checkpoint of step 6.8. The old staging
-folder `classroom-stage-2026.1` was made before step 6.8 existed, so make a
-new one from a run of the final notebooks. A new destination is required: the
-staging script refuses a folder that already exists.
+The final staging folder was created on 12 November 2026. It is ready for the
+author to build the encrypted archive. No archive or release was created.
+
+| Item | Verified value |
+| --- | --- |
+| Source commit | `1dac31bc7ea8ba6ebd8287dfc9198e27d6b1ce58` on `course/2026-guided-training`. |
+| Complete run | `C:/WEB_site/data_sources/codex_work/main_path_release_20261112/` |
+| Official student inputs | `C:/WEB_site/data_sources/sim2026/student/` |
+| Run input copy | `C:/WEB_site/data_sources/codex_work/main_path_release_20261112/student_inputs/` |
+| Official chain | `C:/WEB_site/data_sources/codex_work/classroom-stage-2026.1/grch37_exercise/hg19ToHg38.over.chain.gz` |
+| Final staging folder | `C:/WEB_site/data_sources/codex_work/classroom-stage-2026.1-final/` |
+| SHA-256 inventory | `C:/WEB_site/data_sources/codex_work/classroom-stage-2026.1-final.MANIFEST.tsv` |
+| Files inside staging | **108**. The external inventory is not included in this count. |
+| Total size inside staging | **656,298,229 bytes**. |
+
+The following command created this folder. It is a record of the completed
+operation. Do not run it again with the same destination. The script requires
+a new folder and refuses an existing one.
 
 ```powershell
 python -B scripts\author\stage_main_path.py `
-  --run "C:\WEB_site\data_sources\codex_work\PATH_TO_VERIFIED_RUN" `
+  --run "C:\WEB_site\data_sources\codex_work\main_path_release_20261112" `
   --chain "C:\WEB_site\data_sources\codex_work\classroom-stage-2026.1\grch37_exercise\hg19ToHg38.over.chain.gz" `
   --destination "C:\WEB_site\data_sources\codex_work\classroom-stage-2026.1-final"
 ```
 
-Replace `PATH_TO_VERIFIED_RUN` with the output folder of the last complete run
-of modules 0 to 7. Look inside the new folder before you continue. It must
-contain `array`, `checkpoints`, `final_report`, `grch37_exercise`,
-`lab_export`, `pca_reference` and `phenotypes`, and nothing from `instructor`.
+The staging folder contains `array`, `checkpoints`, `final_report`,
+`grch37_exercise`, `lab_export`, `pca_reference` and `phenotypes`.
+It also contains `README_simulated.txt`. It excludes instructor keys,
+manufacturer manifests and imputation material. All 108 inventory hashes were
+verified. Student input copies and the chain match their source hashes.
+
+Modules 0 to 7 ran from the source commit above. Each module used a fresh
+R 4.5.2 process on Windows. Every runnable notebook chunk passed. Chunks marked
+`eval=FALSE` cover manual actions and were excluded. The input copy contains
+the official student files and the official chain. Original inputs were unchanged.
+PLINK identified itself as `PLINK v2.0.0-b.1.4 AVX2 (7 Nov 2026)`, matching
+`config.R`. The course helper cleared unsupported inherited locale variables
+for each R session. No system language settings changed.
+
+All genotype-state and sample-removal counts agree with the external instructor
+key and reference report. Notebook diagnostic counts also agree. Final results
+are 1,811 samples (900 cases, 911 controls), 238,513 post-QC variants, 236,815
+finite tests, 8 significant variants, lambda 1.016465 and 3 clumps. The two
+comparison models have 15 and 19 significant variants. No analytical count
+differences were found.
+
+`scripts/tests/test_main_path_recovery.R` passed all seven restart targets
+against the final staging folder and the new canonical run. Metadata matched
+and PLINK reported zero genotype differences at each target. The 7.7 restart
+included the 6.8 summary file. An additional independent restore at 7.1 verified
+the completed 6.8 checkpoint. Its manifest hashes, 236,815 summary rows, eleven
+columns, column dictionary and `beta = log(odds_ratio)` checks all passed.
+No test or helper correction was needed.
+
+Logs and verification scripts remain in the complete run folder:
+`module_00.log` through `module_07.log`, `count_verification.log`, `recovery.log`
+and `checkpoint68_verification.log`.
+
+The old staging folder had 105 files. The new checkpoint 6.8 adds its summary
+file, dictionary and manifest, giving 108 files. Before publication, update the
+105-file download example in module 0 step 0.5 to the new package count.
+The download step was a manual action and was not executed in this run.
 
 ## 3. Build the encrypted archive
 
