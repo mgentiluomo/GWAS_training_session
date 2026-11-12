@@ -516,7 +516,7 @@ Each column has one clear meaning. Read the table before you use the file.
 
 To get the 95% confidence interval of an odds ratio, use `exp(log(odds_ratio) +/- 1.96 * standard_error)`. The standard error is on the log scale, so the formula takes the logarithm of the odds ratio first.
 
-The file is plain text with a header row. Tabs separate the columns. It uses UTF-8 encoding (a standard way to store text characters) and decimal points. It holds only results for each variant. It has no genotypes and no sample IDs. Even so, keep it out of the repository, like every other result file.
+The file is plain text with a header row. Tabs separate the columns. It uses UTF-8 encoding (a standard way to store text characters) and decimal points. It holds only results for each variant. It has no genotypes and no sample IDs. Even so, it stays in your `results` folder. Do not share it outside the course unless your instructor says so.
 
 ### You need
 
