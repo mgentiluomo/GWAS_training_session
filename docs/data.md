@@ -15,8 +15,8 @@ Inputs: `data/demo/`. Outputs: `results/demo/`.
 ## Original course mode
 
 1. Obtain the matching `DB_A.bed/.bim/.fam` set and its metadata through the
-   authorised course channel. The stage 1 test package does not contain this
-   historical full-size dataset. Do not save a login webpage as a BED file.
+   authorised course channel. The guided 2026 classroom package does not contain
+   this historical full-size dataset. Do not save a login webpage as a BED file.
 2. Put the genotype files and their matching metadata in `data/legacy/`.
 3. Set `mode = "course"` in `config.R` and start at lesson 1.
 
@@ -27,10 +27,19 @@ uniqueness; this does not prove biological annotation or provenance.
 ## Guided 2026 course data
 
 The guided modules use the simulated 2026 dataset, separate from the older
-600-sample demo and the historical DB_A dataset. Use `download_course_data()`
-after configuring the approved release in `config.R`, or supply `zip_path` for
-the local stage 1 test. See [encrypted data setup](troubleshooting.md#downloading-the-encrypted-course-data).
-The final classroom staging folder contains 108 files. The classroom package
+600-sample demo and the historical DB_A dataset. The encrypted package is available
+in [release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1).
+Its download URLs and SHA-256 values are configured in `config.R`. In the RStudio
+console, run:
+
+```r
+source("R/course.R")
+download_course_data()
+```
+
+Enter the password at the masked prompt. The package contains 108 files.
+If you already have the published ZIP and its `MANIFEST.tsv`, you can supply
+`zip_path` as a local fallback. See [encrypted data setup](troubleshooting.md#downloading-the-encrypted-course-data). The classroom package
 contains `lab_export/`, `array/`, `phenotypes/`, `pca_reference/`,
 `grch37_exercise/`, `final_report/` and `checkpoints/`.
 Imputation material is not part of the main-path classroom package.

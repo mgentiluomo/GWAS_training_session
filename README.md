@@ -28,12 +28,14 @@ and run the numbered steps in order.
 | 6 | [Association](lessons/module_06_association.Rmd) |
 | 7 | [Plots and final summary](lessons/module_07_plots_and_reporting.Rmd) |
 
-**The data release is not published yet.** The repository holds code and text,
+**The classroom data are available in [release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1).**
+The repository holds code and text,
 never genotype data. The verified simulated main path starts with 2,016 wells
 and 299,523 array entries; its final cohort has 1,811 samples, 238,513 post-QC
-variants and 236,815 association tests. Approved data URLs and SHA-256 values
-belong in `config.R`; its current hashes identify the local stage 1 test ZIP.
-The final classroom staging folder contains 108 files.
+variants and 236,815 association tests. Release download URLs and SHA-256 values
+are configured in `config.R`. After opening the project and preparing the packages,
+run `source("R/course.R")`, then `download_course_data()` in the RStudio console.
+Enter the password at the masked prompt. The package contains 108 files.
 See [data setup](docs/troubleshooting.md#downloading-the-encrypted-course-data).
 
 After preparing the tools and verified data, run the generated complete script

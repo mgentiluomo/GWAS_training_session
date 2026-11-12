@@ -33,7 +33,7 @@ The course is an independent teaching resource for students across University of
 - The repository was recreated with a clean history. No data files exist in any commit. Keep it that way.
 - `main` still holds the original 2025 course. It is archived in the tag `2025-original`. Link to that tag, never to `main`, when referring to 2025 material.
 - Work happens on `course/2026-guided-training`. `01_Codes/` has been removed from it.
-- Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Browser data links point to setup until the encrypted release exists; no repository-hosted data downloads are offered.
+- Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Classroom data are available as encrypted GitHub Release assets under `data-2026.1`. No data files are stored in Git.
 - Keep and extend: `R/course.R` (PLINK execution from R, decimal, encoding and identifier safeguards), `scripts/preflight.R`, `scripts/check_course.R`, `VALIDATION.md`, the single-source principle of `scripts/build_tutorial.py` (site pages are generated from tested notebooks, never maintained as a second copy of the code), SHA-256 manifests for packages.
 
 ## Current status
@@ -44,15 +44,15 @@ The course is an independent teaching resource for students across University of
 - rs4988235, rs12913832 and rs1426654 leave at step 4.4 and do not reach module 5.
 - L1 has one genome-wide variant only: use L2 or L3 for the regional plot at 7.6.
 - The release uses GSA-style Illumina names and real GRCh38 positions. The array manifest stays local only and is not included in the repository or release.
-- AES-256 release packaging exists in `scripts/package_release.py`, with manifest checks and a local test package. The classroom release has not been published.
+- The author has published `data-2026.1` with `course-data-2026.1.zip`, `MANIFEST.tsv` and `SHA256SUMS.txt`. The package has 108 files. Published download URLs and checksum pins are in `config.R`. Passwords stay outside the repository and site.
 - Windows extraction with `archive` 1.1.14 passed all 55 payload SHA-256 checks and rejected a wrong password.
 - The author reports the same extraction checks passed on Ubuntu 24.04.4 LTS with R 4.6.1 in 7.78 seconds. Posit Package Manager binaries from the Noble repository installed without a compiler or administrator rights after setting R's `HTTPUserAgent`. CRAN source builds failed without `libarchive-dev` and `libuv1-dev`. Other Linux distributions, macOS extraction and the masked RStudio prompt remain untested.
 - Decision: keep AES-256 ZIP with `archive` for extraction. No 7-Zip installation or fallback for students; the author-side packager uses 7-Zip only to create the archive.
 - Modules 0 to 7 are implemented in `lessons/module_00_*.Rmd` through `module_07_*.Rmd` and executed on Windows against the external instructor key/reference run. Final cohort: 1,811 samples (900 cases, 911 controls), 238,513 post-QC variants, 236,815 association tests, eight significant variants in three clumps; autosomal lambda 1.016465.
 - `download_course_data`, `restore_checkpoint`, `check_step` and `where_am_i` exist. Unicode PLINK paths and seven intermediate restart states passed Windows integration checks. Full genotype boundaries are 2.8, 3.8, 4.6 and 5.7; other states use replay lists and diagnostic artifacts.
-- A new main-path staging folder exists at `C:\WEB_site\data_sources\codex_work\classroom-stage-2026.1\` (105 files, 634,410,035 bytes), with a SHA-256 sidecar. It includes the official lift-over chain and excludes instructor keys and imputation inputs. The original 55-file local test ZIP is unchanged.
+- A new main-path staging folder exists at `C:\WEB_site\data_sources\codex_work\classroom-stage-2026.1-final\` (108 files, 656,298,229 bytes), with a SHA-256 sidecar. It includes the official lift-over chain and excludes instructor keys and imputation inputs. The original 55-file local test ZIP is unchanged.
 - `scripts/run_main_path.R` is generated from the notebooks and has been executed on the new staging folder. `scripts/build_tutorial.py` can export 60 JSON steps (step 6.8 writes the GWAS summary statistics file) without accessing data; their schema is in `docs/site_content_schema.md`. Do not edit generated code/content as a second source.
-- Beginner text pass, step 6.8 (summary statistics file), a four-pass student rehearsal and release preparation are done. See `docs/session_report.md`, `docs/student_rehearsal.md` and `docs/release_checklist.md`. Next steps: stage and package the classroom release with a new password (checklist), replace the test URLs/checksums in `config.R`, complete macOS/Linux and masked-prompt checks, then the website (mockup first). Do not start modules A/B or post-GWAS work without a new request.
+- Beginner text pass, step 6.8 (summary statistics file), a four-pass student rehearsal and release preparation are done. See `docs/session_report.md`, `docs/student_rehearsal.md` and `docs/release_checklist.md`. Next steps: check the published release from a clean installation (checklist), complete macOS/Linux and masked-prompt checks, then the website (mockup first). Do not start modules A/B or post-GWAS work without a new request.
 
 ## Technical decisions
 

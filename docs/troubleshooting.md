@@ -22,7 +22,7 @@ chunks. Later errors are often consequences of that first failure.
 | Linux package installation fails | Run `source("scripts/preflight.R")`. It selects a matching Posit Package Manager repository and sets the R HTTP user agent. See the Linux notes below if binaries are unavailable. |
 | The password is wrong / Incorrect passphrase | Check the password for typing errors. If it still fails, ask the instructor. Do not include your password in a screenshot, error report or shared script. |
 | Course download failed its SHA-256 check | Download again. If it still fails, ask the instructor for the approved configuration. Do not bypass the check or replace the expected checksum with the downloaded file's hash. |
-| Classroom data release is not configured | The local stage 1 archive is a test package. Ask the instructor for the approved classroom release configuration. |
+| Classroom data release is not configured | Download the current course project. Its `config.R` contains the published classroom release settings. |
 | Destination already exists | Choose a new destination folder. The download helper keeps existing work unchanged. |
 | Windows startup warnings about `C.UTF-8`, or errors reading accented text | Run `source("scripts/preflight.R")`. Inherited locale variables can request a locale unavailable to Windows R. The preflight clears invalid requests for this R session and recovers the Windows user locale. Your system language and settings stay unchanged. |
 
@@ -68,10 +68,9 @@ Request the password with your university email through the [data access form](h
 
 `course_settings$data_release` in `config.R` is the single place for release
 URLs and expected checksums. Its fields are `archive_url`, `manifest_url`,
-`archive_sha256` and `manifest_sha256`. The current checksums identify the stage 1
-test package; both URLs are empty because the GitHub Release does not exist yet.
-Replace all four fields with the approved classroom release settings before
-publication. Remote URLs must use HTTPS. No password belongs in this file.
+`archive_sha256` and `manifest_sha256`. They identify the published classroom
+release `data-2026.1`, which contains 108 files. Remote URLs must use HTTPS.
+No password belongs in this file.
 
 After package preparation, run these commands in the R console:
 
@@ -80,7 +79,8 @@ source("R/course.R")
 download_course_data()
 ```
 
-Until the release exists, supply a local ZIP instead. The following R command
+Local fallback: if you already have the published ZIP and its manifest, supply
+the local ZIP instead. The following R command
 opens the password prompt and looks for `MANIFEST.tsv` beside the ZIP. It makes
 no network request:
 
