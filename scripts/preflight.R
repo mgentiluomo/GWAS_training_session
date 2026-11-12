@@ -1,4 +1,6 @@
 # Run from the project root before class: source("scripts/preflight.R")
+source("R/package_setup.R")
+install_course_packages()
 source("R/course.R")
 cfg <- course_config(".")
 lines <- c("GWAS preflight", paste("System:", Sys.info()[["sysname"]]),
