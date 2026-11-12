@@ -6,19 +6,19 @@
   "anchor": "step-2-1",
   "title": "The starting files",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
+  "source_sha256": "dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Identify the complete laboratory export and keep an immutable input copy.",
-    "why": "A binary genotype matrix is interpreted using its variant and sample files. Matching counts alone cannot detect reordered identities. The simulated initial data include low-quality wells and variants deliberately retained for QC; they are starting inputs, not an already cleaned analysis cohort.",
-    "you_need": "Module 0 passed; the module 1 export inspection.",
-    "command": "```{r s2-1}\nprint(check_bed(cfg$input))\nhead(read_fam(cfg$input))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "2,016 sample wells and 299,523 variant entries before QC. Each well has its own FID/IID pair.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Why must the FAM stay with the BED and BIM?\n\n<details><summary>Show the answer</summary>\n\nIt gives the sample identities and ordering used to decode the matrix.\n\n</details>",
+    "what_we_do": "We identify the complete set of files exported by the laboratory. We keep these input files unchanged.",
+    "why": "A genotype file in [binary format](../docs/glossary.md#bed-bim-fam) is a compact table that people cannot read directly. Two other files explain it: one describes the [variants](../docs/glossary.md#variant) (the positions on the DNA that were tested) and one describes the samples. If these files do not match, the genotypes are assigned to the wrong people or positions. Equal counts are not enough, because the same rows could be in a different order.\n\nThe simulated data contain some low-quality [wells](../docs/glossary.md#well) and some low-quality variants. A well is one spot on a laboratory plate, and it holds one DNA sample. We keep the poor ones on purpose, so that you can find them during [quality control](../docs/glossary.md#quality-control) (QC), the checking of data quality. These are starting files, not a cleaned cohort.",
+    "you_need": "You need module 0 completed and the export inspection from module 1.",
+    "command": "```{r s2-1}\nprint(check_bed(cfg$input))\nhead(read_fam(cfg$input))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R code above is the complete command.\n\nR reads the files and shows the values. It does not change the genotype files.",
+    "expected_result": "You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Why must the FAM file stay together with the BED and BIM files?\n\n<details><summary>Show the answer</summary>\n\nThe FAM file gives the sample identities and their order. PLINK needs this information to decode the genotype matrix.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s2-1",

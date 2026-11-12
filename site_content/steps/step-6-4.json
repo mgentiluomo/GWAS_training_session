@@ -6,19 +6,19 @@
   "anchor": "step-6-4",
   "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "7be3c133dc4ea1057f40b34ba12225a659412388f057af5ed2a2f2622127a8ec",
+  "source_sha256": "2841ba64c1a2230cf762018bd20b09bdd311aeb67ef21f898366f9c00b69aae0",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Fit the prespecified additive logistic model with age, sex and ten PCs at every retained analysable site.",
-    "why": "The scan tests one genetic predictor at a time while keeping the covariate specification fixed. The null hypothesis for the additive test is beta = 0. A small p-value is evidence against that null under the model and its assumptions; it does not measure effect size, causality or the probability the null is true. Firth fallback provides a more stable calculation when ordinary logistic fitting encounters separation. We do not select the covariates after inspecting the resulting peaks.",
-    "you_need": "The final 5.7 genotype state and covariates from 6.3.",
-    "command": "```{r s6-4}\nout <- guided_path(cfg, \"6.4\", \"association\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--maf\", \"0.01\", \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"sex\", \"hide-covar\", \"firth-fallback\", \"--out\", out))\nresults <- guided_association(out)\nvalid <- valid_p(results$P)\nstopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)\nguided_write(results, guided_path(cfg, \"6.4\", \"results.tsv\"))\nguided_artifact_checkpoint(cfg, \"6.4\", c(paste0(out, \".Disease.glm.logistic.hybrid\"), guided_path(cfg, \"6.4\", \"results.tsv\")), parent = \"6.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048\n```\n\n`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "The final-cohort MAF check removes another 1,698 variants, leaving 236,815 finite additive p-values and eight below 0.00000005. A retained pre-association variant is not automatically eligible after the cohort changes. Inspect the output and log rather than replacing absent results with zero.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Does a tiny p-value imply a large odds ratio?\n\n<details><summary>Show the answer</summary>\n\nNo. Evidence depends on effect, uncertainty and sample size; report the effect estimate and interval too.\n\n</details>",
-    "files_created": "`s6-4_association.Disease.glm.logistic.hybrid`, logs and a parsed `s6-4_results.tsv`."
+    "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",
+    "why": "The scan tests one variant at a time. The covariates stay the same for every test. The [null hypothesis](../docs/glossary.md#null-hypothesis) of the additive test is beta = 0, which means no effect. A small p-value is evidence against the null hypothesis, if the model and its assumptions are right. It does not measure the size of the effect. It does not prove a cause. It is not the probability that the null hypothesis is true. Firth fallback means that PLINK switches to Firth correction when the ordinary fit fails, which gives a more stable result. The ordinary fit can fail because of [separation](../docs/glossary.md#separation). We never choose the covariates after we look at the peaks in the results.",
+    "you_need": "The final genotype files from 5.7 and the covariates from 6.3.",
+    "command": "```{r s6-4}\nout <- guided_path(cfg, \"6.4\", \"association\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--maf\", \"0.01\", \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"sex\", \"hide-covar\", \"firth-fallback\", \"--out\", out))\nresults <- guided_association(out)\nvalid <- valid_p(results$P)\nstopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)\nguided_write(results, guided_path(cfg, \"6.4\", \"results.tsv\"))\nguided_artifact_checkpoint(cfg, \"6.4\", c(paste0(out, \".Disease.glm.logistic.hybrid\"), guided_path(cfg, \"6.4\", \"results.tsv\")), parent = \"6.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048\n```\n\n`--maf 0.01` checks the frequency rule again in the final cohort. `--covar` loads the covariate table, which is keyed by sample ID. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales the numerical covariates so that the fit is stable. It does not change the genetic hypothesis that is tested. `--glm sex` adds the recorded sex to the model. `hide-covar` reports only the genetic tests, not the coefficient of every covariate. `firth-fallback` uses Firth correction when it is needed. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
+    "expected_result": "The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Does a tiny p-value imply a large odds ratio?\n\n<details><summary>Show the answer</summary>\n\nNo. The p-value depends on the effect, the uncertainty and the sample size. Also report the effect estimate and its interval.\n\n</details>",
+    "files_created": "`s6-4_association.Disease.glm.logistic.hybrid`, the log files and `s6-4_results.tsv`, a cleaned copy of the results."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s6-4",
@@ -35,7 +35,7 @@
     "options": [
       {
         "name": "--covar",
-        "explanation_markdown": "`--covar` loads the ID-keyed table."
+        "explanation_markdown": "`--covar` loads the covariate table, which is keyed by sample ID."
       },
       {
         "name": "--covar-name",
@@ -43,31 +43,31 @@
       },
       {
         "name": "--covar-variance-standardize",
-        "explanation_markdown": "`--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis."
+        "explanation_markdown": "`--covar-variance-standardize` rescales the numerical covariates so that the fit is stable."
       },
       {
         "name": "--glm",
-        "explanation_markdown": "`--glm sex` includes recorded sex"
+        "explanation_markdown": "`--glm sex` adds the recorded sex to the model."
       },
       {
         "name": "--maf",
-        "explanation_markdown": "`--maf 0.01` rechecks the frequency rule in the final cohort."
+        "explanation_markdown": "`--maf 0.01` checks the frequency rule again in the final cohort."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the report prefix."
+        "explanation_markdown": "`--out` sets the prefix of the report files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads the final genotype state"
+        "explanation_markdown": "`--pfile` reads the final genotype files."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },

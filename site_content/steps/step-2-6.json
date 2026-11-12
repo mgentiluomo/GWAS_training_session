@@ -6,24 +6,24 @@
   "anchor": "step-2-6",
   "title": "Genome builds and lift-over",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
+  "source_sha256": "dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Convert the separate GRCh37 exercise to GRCh38 with a direction-specific chain in R; keep it separate from the main analysis.",
-    "why": "GRCh37 and GRCh38 are different reference assemblies. A coordinate means a chromosome and position in a specified assembly. Renaming the build label or changing an rsID does not transform coordinates. A chain records aligned genome intervals; lift-over can leave sites unmapped, change chromosome or reverse strand. UCSC intervals are zero-based half-open, whereas course positions are one-based. Review unmapped and reverse-strand sites instead of accepting an undocumented conversion.",
-    "you_need": "The small GRCh37 exercise supplied at 0.5 and the official hg19-to-hg38 chain. The final course package must include the chain under grch37_exercise/. Author validation may set COURSE_CHAIN_FILE to the existing local chain. The main array is already GRCh38 and is not lifted again.",
-    "command": "```{r s2-6}\nlegacy <- file.path(cfg$data_dir, \"grch37_exercise\", \"legacy_grch37\")\nbim37 <- read_ws(paste0(legacy, \".bim\"), header = FALSE)\nchain <- Sys.getenv(\"COURSE_CHAIN_FILE\", unset = file.path(cfg$data_dir, \"grch37_exercise\", \"hg19ToHg38.over.chain.gz\"))\nrequire_files(chain)\nlifted <- guided_liftover(paste0(\"chr\", bim37[[1]]), bim37[[4]], chain)\nkeep <- !is.na(lifted$position) & lifted$chromosome == paste0(\"chr\", bim37[[1]])\nmap <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])\nmap_file <- guided_path(cfg, \"2.6\", \"update_map.tsv\")\nwrite.table(map, map_file, sep = \"\\t\", quote = FALSE, row.names = FALSE, col.names = FALSE)\nkeep_file <- guided_list(map$ID, guided_path(cfg, \"2.6\", \"mapped.txt\"))\nargs <- c(\"--bfile\", legacy, \"--extract\", keep_file, \"--update-map\", map_file)\nreverse <- bim37[[2]][keep & lifted$strand == \"-\"]\nif (length(reverse)) args <- c(args, \"--flip\", guided_list(reverse, guided_path(cfg, \"2.6\", \"reverse.txt\")))\nrun_plink(cfg, c(args, \"--make-pgen\", \"--out\", guided_path(cfg, \"2.6\", \"grch38\")))\nann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nk <- match(map$ID, ann$Name)\nstopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))\nprint(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048\n```\n\n`--extract` retains the successfully mapped IDs; `--update-map` reads ID and new position from two columns. If the R calculation finds reverse-strand mappings, add `--flip` with the generated reverse list. The exercise retains same-chromosome mappings only and reports exclusions. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.",
-    "expected_result": "10,000 exercise sites are inspected; 9,970 map to the same chromosome and eight of these reverse strand in this chain. The resulting exercise variants are not position-sorted; sort explicitly before an operation that requires sorted input. Mapped positions sharing an identifier with the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. General lift-over can lose sites, so record the reported mapping counts.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Build mismatches, gaps and reverse mappings. A chain is not an allele-validation or genotype-imputation tool.",
-    "quick_check": "Does a successful position lift-over guarantee that REF and ALT now match the destination reference?\n\n<details><summary>Show the answer</summary>\n\nNo. Alleles and reverse-strand mappings still require checking.\n\n</details>",
-    "files_created": "`s2-6_update_map.tsv`, mapped/reverse lists and the separate `s2-6_grch38` fileset."
+    "what_we_do": "We convert the separate GRCh37 exercise to GRCh38 in R. We use a chain file for this one direction. We keep the exercise apart from the main analysis.",
+    "why": "GRCh37 and GRCh38 are two different reference assemblies of the human genome. A coordinate is a chromosome and a position in one named assembly. Changing the build label or the rsID does not change the coordinates.\n\nA [lift-over](../docs/glossary.md#lift-over) converts coordinates from one assembly to the other. It uses a [chain file](../docs/glossary.md#chain-file), which records which intervals of the two genomes are aligned. After a lift-over, a site can be unmapped (it has no match), it can move to another chromosome, or it can map to the reverse strand.\n\nUCSC intervals are zero-based and half-open, which means they start counting at 0 and exclude the end point. The course positions are one-based, which means they start counting at 1. Review the unmapped sites and the reverse-strand sites. Do not accept a conversion that nobody documented.",
+    "you_need": "You need the small GRCh37 exercise supplied at 0.5. You also need the official hg19-to-hg38 chain file. It is part of the course data, in the folder `data/course/grch37_exercise/`. You do not need to download it. The main array is already GRCh38, so we do not lift it again.",
+    "command": "```{r s2-6}\nlegacy <- file.path(cfg$data_dir, \"grch37_exercise\", \"legacy_grch37\")\nbim37 <- read_ws(paste0(legacy, \".bim\"), header = FALSE)\nchain <- file.path(cfg$data_dir, \"grch37_exercise\", \"hg19ToHg38.over.chain.gz\")\nrequire_files(chain)\nlifted <- guided_liftover(paste0(\"chr\", bim37[[1]]), bim37[[4]], chain)\nkeep <- !is.na(lifted$position) & lifted$chromosome == paste0(\"chr\", bim37[[1]])\nmap <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])\nmap_file <- guided_path(cfg, \"2.6\", \"update_map.tsv\")\nwrite.table(map, map_file, sep = \"\\t\", quote = FALSE, row.names = FALSE, col.names = FALSE)\nkeep_file <- guided_list(map$ID, guided_path(cfg, \"2.6\", \"mapped.txt\"))\nargs <- c(\"--bfile\", legacy, \"--extract\", keep_file, \"--update-map\", map_file)\nreverse <- bim37[[2]][keep & lifted$strand == \"-\"]\nif (length(reverse)) args <- c(args, \"--flip\", guided_list(reverse, guided_path(cfg, \"2.6\", \"reverse.txt\")))\nrun_plink(cfg, c(args, \"--make-pgen\", \"--out\", guided_path(cfg, \"2.6\", \"grch38\")))\nann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nk <- match(map$ID, ann$Name)\nstopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))\nprint(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048\n```\n\n`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. If R finds reverse-strand mappings, add `--flip` with the reverse list that R generates. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.",
+    "expected_result": "The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. PLINK prints a warning that the base-pair positions are now unsorted. This warning is expected: the new GRCh38 positions are not in the old order. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "It can reveal build mismatches, gaps and reverse mappings. A chain file does not check alleles and does not impute genotypes.",
+    "quick_check": "Does a successful position lift-over guarantee that REF and ALT now match the destination reference?\n\n<details><summary>Show the answer</summary>\n\nNo. You must still check the alleles and the reverse-strand mappings.\n\n</details>",
+    "files_created": "`s2-6_update_map.tsv`, the mapped and reverse lists, and the separate `s2-6_grch38` files."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s2-6",
-      "code": "legacy <- file.path(cfg$data_dir, \"grch37_exercise\", \"legacy_grch37\")\nbim37 <- read_ws(paste0(legacy, \".bim\"), header = FALSE)\nchain <- Sys.getenv(\"COURSE_CHAIN_FILE\", unset = file.path(cfg$data_dir, \"grch37_exercise\", \"hg19ToHg38.over.chain.gz\"))\nrequire_files(chain)\nlifted <- guided_liftover(paste0(\"chr\", bim37[[1]]), bim37[[4]], chain)\nkeep <- !is.na(lifted$position) & lifted$chromosome == paste0(\"chr\", bim37[[1]])\nmap <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])\nmap_file <- guided_path(cfg, \"2.6\", \"update_map.tsv\")\nwrite.table(map, map_file, sep = \"\\t\", quote = FALSE, row.names = FALSE, col.names = FALSE)\nkeep_file <- guided_list(map$ID, guided_path(cfg, \"2.6\", \"mapped.txt\"))\nargs <- c(\"--bfile\", legacy, \"--extract\", keep_file, \"--update-map\", map_file)\nreverse <- bim37[[2]][keep & lifted$strand == \"-\"]\nif (length(reverse)) args <- c(args, \"--flip\", guided_list(reverse, guided_path(cfg, \"2.6\", \"reverse.txt\")))\nrun_plink(cfg, c(args, \"--make-pgen\", \"--out\", guided_path(cfg, \"2.6\", \"grch38\")))\nann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nk <- match(map$ID, ann$Name)\nstopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))\nprint(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))",
+      "code": "legacy <- file.path(cfg$data_dir, \"grch37_exercise\", \"legacy_grch37\")\nbim37 <- read_ws(paste0(legacy, \".bim\"), header = FALSE)\nchain <- file.path(cfg$data_dir, \"grch37_exercise\", \"hg19ToHg38.over.chain.gz\")\nrequire_files(chain)\nlifted <- guided_liftover(paste0(\"chr\", bim37[[1]]), bim37[[4]], chain)\nkeep <- !is.na(lifted$position) & lifted$chromosome == paste0(\"chr\", bim37[[1]])\nmap <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])\nmap_file <- guided_path(cfg, \"2.6\", \"update_map.tsv\")\nwrite.table(map, map_file, sep = \"\\t\", quote = FALSE, row.names = FALSE, col.names = FALSE)\nkeep_file <- guided_list(map$ID, guided_path(cfg, \"2.6\", \"mapped.txt\"))\nargs <- c(\"--bfile\", legacy, \"--extract\", keep_file, \"--update-map\", map_file)\nreverse <- bim37[[2]][keep & lifted$strand == \"-\"]\nif (length(reverse)) args <- c(args, \"--flip\", guided_list(reverse, guided_path(cfg, \"2.6\", \"reverse.txt\")))\nrun_plink(cfg, c(args, \"--make-pgen\", \"--out\", guided_path(cfg, \"2.6\", \"grch38\")))\nann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nk <- match(map$ID, ann$Name)\nstopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))\nprint(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))",
       "run_by_default": true
     }
   ],
@@ -36,12 +36,12 @@
     "options": [
       {
         "name": "--bfile",
-        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set.",
+        "explanation_markdown": "`--bfile` takes the shared file-name prefix of the BED, BIM and FAM files.",
         "explained_at": "2.2"
       },
       {
         "name": "--extract",
-        "explanation_markdown": "`--extract` retains the successfully mapped IDs"
+        "explanation_markdown": "`--extract` keeps only the IDs that were mapped successfully"
       },
       {
         "name": "--make-pgen",
@@ -50,19 +50,19 @@
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the memory budget to 2048 MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the output prefix"
+        "explanation_markdown": "`--out` sets the prefix of the output file names."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       },
       {
         "name": "--update-map",
-        "explanation_markdown": "`--update-map` reads ID and new position from two columns."
+        "explanation_markdown": "`--update-map` reads the ID and the new position from two columns."
       }
     ]
   },

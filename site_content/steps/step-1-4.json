@@ -6,19 +6,19 @@
   "anchor": "step-1-4",
   "title": "From sample to scanned chip",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "2e77f0fcb1e320faaf4ee86e88b280841ec331ad31a3651745765616bcdbd57d",
+  "source_sha256": "b1bad8d75756854a24b127c080b1ec93364af4ad91fdfe813c7e006aa5645150",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Trace sample identity through a plate and laboratory well.",
-    "why": "DNA extraction, concentration checks, amplification, fragmentation, hybridisation, staining and scanning precede the export. A plate groups laboratory wells processed together. A well can contain a technical replicate of a person. Consequently a row in a laboratory export is not always a unique person. Batch effects are systematic differences associated with processing, such as a faulty plate, rather than the phenotype of interest.",
-    "you_need": "The sample sheet from 0.5.",
-    "command": "```{r s1-4}\nsheet <- read.csv(file.path(cfg$data_dir, \"lab_export\", \"sample_sheet.csv\"), colClasses = \"character\")\ntable(sheet$Plate)\nsum(nzchar(sheet$Replicate_of))\nstopifnot(nrow(sheet) == 2016L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "Twenty-one plates, each with 96 wells, for 2,016 measurements. Sixteen wells are labelled technical replicates; 2,000 original people were simulated.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
+    "what_we_do": "Follow the identity of a sample through a plate and a laboratory well.",
+    "why": "Several laboratory steps come before the export. The laboratory extracts the DNA, checks its concentration, copies it, cuts it into pieces, hybridises it to the chip, stains it and scans it.\n\nA [plate](../docs/glossary.md#plate-and-well) is a tray that holds laboratory wells processed together. A well is one small hole in the tray that holds one sample. A well can contain a [technical replicate](../docs/glossary.md#technical-replicate), which is a second measurement of the same person. So one row in a laboratory file is not always one unique person.\n\nA [batch effect](../docs/glossary.md#batch-effect) is a systematic difference caused by how samples were processed, for example by a faulty plate. It is not caused by the [phenotype](../docs/glossary.md#phenotype), the trait that we study.",
+    "you_need": "The sample sheet from step 0.5. The [sample sheet](../docs/glossary.md#sample-sheet) lists every well with its plate, its sample name and any replicate label.",
+    "command": "```{r s1-4}\nsheet <- read.csv(file.path(cfg$data_dir, \"lab_export\", \"sample_sheet.csv\"), colClasses = \"character\")\ntable(sheet$Plate)\nsum(nzchar(sheet$Replicate_of))\nstopifnot(nrow(sheet) == 2016L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "Twenty-one plates, each with 96 wells, give 2,016 measurements. Sixteen wells are labelled as technical replicates. The simulation started from 2,000 people.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "A plate has 96 wells and two are replicates of other wells. Must it contain 96 different people?\n\n<details><summary>Show the answer</summary>\n\nNo. Wells count measurements; people count biological individuals.\n\n</details>",
+    "quick_check": "A plate has 96 wells and two are replicates of other wells. Must it contain 96 different people?\n\n<details><summary>Show the answer</summary>\n\nNo. A well is one measurement. A person is one biological individual.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s1-4",

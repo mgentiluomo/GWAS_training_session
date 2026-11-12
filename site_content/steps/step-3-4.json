@@ -6,24 +6,24 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3",
+  "source_sha256": "008528f76047a117a73ef4a4407077c00eddf29c91a67abf6256237fab9878c6",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Select a less-correlated autosomal subset for heterozygosity, relatedness and later PCA.",
-    "why": "Linkage disequilibrium (LD) is association between alleles at nearby sites. Dense correlated regions would otherwise receive more weight simply because they contain many probes. Pruning keeps a representative subset; it is not permanent deletion from the association matrix. Exclude long-range LD regions from this diagnostic subset. The GRCh38 intervals are explicit in the helper and are not a universal catalogue.",
+    "what_we_do": "We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](../docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.",
+    "why": "[Linkage disequilibrium](../docs/glossary.md#ld) (LD) means that alleles at nearby sites are correlated. A dense region with many correlated sites would count too much, only because the array has many [probes](../docs/glossary.md#probe) there. A probe is the piece of DNA on the array that measures one site.\n\n[LD pruning](../docs/glossary.md#ld-pruning) keeps one representative subset of sites. It does not delete the other sites from the association data.\n\nWe also leave out the long-range LD regions, where the correlation reaches over very long distances. The GRCh38 intervals are listed in the helper function. They are not a complete catalogue for all studies.",
     "you_need": "State 3.3.",
-    "command": "```{r s3-4}\nregions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1.",
-    "expected_result": "69,539 sites in `.prune.in`. The complete analysis state still has 296,360 variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Regions that dominate correlated-marker summaries. The retained subset depends on the input sample set and exact algorithm/version.",
-    "quick_check": "Should the association scan later test only the pruned sites?\n\n<details><summary>Show the answer</summary>\n\nNo. Pruning is for specified diagnostics and PCA; association uses the full post-QC set.\n\n</details>",
-    "files_created": "`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and logs."
+    "command": "```{r s3-4}\nregions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](../docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed1` leaves out the sites inside the listed regions. The file gives them as one-based inclusive intervals (positions counted from 1, with both ends included). `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](../docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
+    "expected_result": "The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Regions that would otherwise dominate summaries made from correlated markers. The subset that you keep depends on the input samples and on the exact version of the algorithm.",
+    "quick_check": "Should the later association scan test only the pruned sites?\n\n<details><summary>Show the answer</summary>\n\nNo. We use pruning only for specific checks and for the PCA. The association scan uses the full set of variants that pass QC.\n\n</details>",
+    "files_created": "`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and the logs."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s3-4",
-      "code": "regions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")",
+      "code": "regions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")",
       "run_by_default": true
     }
   ],
@@ -36,43 +36,43 @@
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes"
+        "explanation_markdown": "`--chr 1-22` keeps only the autosomes."
       },
       {
         "name": "--exclude",
-        "explanation_markdown": "`--exclude bed1` reads one-based inclusive intervals."
+        "explanation_markdown": "`--exclude bed1` leaves out the sites inside the listed regions."
       },
       {
         "name": "--geno",
-        "explanation_markdown": "`--geno 0.02` requires 98% variant call rate for this subset."
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%."
       },
       {
         "name": "--indep-pairwise",
-        "explanation_markdown": "`--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2."
+        "explanation_markdown": "`--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](../docs/glossary.md#r-squared)."
       },
       {
         "name": "--maf",
-        "explanation_markdown": "`--maf 0.05` keeps common variants"
+        "explanation_markdown": "`--maf 0.05` keeps common variants, which means a [minor allele frequency](../docs/glossary.md#maf) (MAF) of at least 5%."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB.",
-        "explained_at": "3.3"
+        "explanation_markdown": "`--memory 2048` sets the memory limit to 2048 MiB (about 2 gigabytes).",
+        "explained_at": "3.1"
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets its prefix.",
-        "explained_at": "3.3"
+        "explanation_markdown": "`--out` sets the name prefix of the output files.",
+        "explained_at": "3.1"
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` selects the input native fileset",
-        "explained_at": "3.3"
+        "explanation_markdown": "`--pfile` selects the input fileset in the PLINK 2 native format.",
+        "explained_at": "3.1"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads.",
-        "explained_at": "3.3"
+        "explanation_markdown": "`--threads 2` limits the number of worker threads (parallel jobs).",
+        "explained_at": "3.1"
       }
     ]
   },

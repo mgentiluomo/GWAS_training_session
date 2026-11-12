@@ -6,23 +6,23 @@
   "anchor": "step-7-2",
   "title": "Genomic inflation factor",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "a494ef8489e2a7af36ef71d264e9382eb651f4d3e2075207a78e02ec1f6fd9bb",
+  "source_sha256": "d271edfaa1e989b6c938b79ff1fdf7ca70792b1b026ddd0ea3b215e75380a850",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Calculate autosomal lambda and interpret it alongside the QQ plot.",
-    "why": "Genomic inflation factor lambda is the median one-degree-of-freedom chi-square statistic divided by its null median, approximately 0.4549. We convert each valid p-value using the chi-square upper-tail quantile. A value near one is consistent with median calibration, not proof of no confounding. Lambda depends on sample size, polygenicity, phenotype model and tested variant set. Do not automatically divide every test by lambda or treat one threshold as a pass/fail diagnosis.",
-    "you_need": "The same autosomal p-values used at 7.1.",
-    "command": "```{r s7-2}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\np <- results$P[results$CHROM %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "Lambda approximately 1.016, computed from valid autosomal tests. The test uses the same definition as the reference run.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Can lambda near one prove that a particular lead is causal?\n\n<details><summary>Show the answer</summary>\n\nNo. Lambda summarises the median test distribution, not the validity or causal interpretation of an individual association.\n\n</details>",
+    "what_we_do": "Calculate lambda for the autosomal variants. Then read it together with the QQ plot.",
+    "why": "The genomic inflation factor, [lambda](../docs/glossary.md#lambda-gc), is one number that tells if the p-values are too small overall. This problem is called [inflation](../docs/glossary.md#inflation). We calculate lambda in three steps. First, we convert each valid p-value into a [chi-square statistic](../docs/glossary.md#chi-square-statistic). Second, we take the [median](../docs/glossary.md#median) of these statistics, the middle value after sorting. Third, we divide this median by the value expected by chance, which is approximately 0.4549.\n\nA lambda near one means that the middle of the results looks as expected. It does not prove that there is no confounding. Lambda also depends on the sample size, on how many variants have small true effects, on the model and on the set of variants tested. Do not divide every test by lambda without thinking. Do not treat one cut-off as a simple pass or fail.",
+    "you_need": "The same autosomal p-values that we used at 7.1. R reads them from the summary statistics file made at step 6.8.",
+    "command": "```{r s7-2}\nstats <- guided_summary_stats(cfg)\np <- stats$p_value[stats$chromosome %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "Lambda is approximately 1.016. R calculates it from the valid autosomal tests.\n\nThe tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the input file that R names and the previous step. Keep the command and the messages from the console. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Can a lambda near one prove that a particular top variant is causal?\n\n<details><summary>Show the answer</summary>\n\nNo. Lambda summarises the middle of all the tests. It does not show that one single association is valid or causal.\n\n</details>",
     "files_created": "`s7-2_lambda.tsv`."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s7-2",
-      "code": "results <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\np <- results$P[results$CHROM %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))",
+      "code": "stats <- guided_summary_stats(cfg)\np <- stats$p_value[stats$chromosome %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))",
       "run_by_default": true
     }
   ],

@@ -6,19 +6,19 @@
   "anchor": "step-4-6",
   "title": "Variant QC summary and checkpoint",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0",
+  "source_sha256": "a2bec2a3c47cdbca2238ae2cfdc405588b5554e9e3718d81b97c8e43821f7a60",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Save the complete post-variant-QC boundary and review what the filters achieved.",
-    "why": "QC thresholds trade retained information against technical risk. Record counts, software, build, exclusions and known limitations so that a reader can reproduce the same state. The retained set is ready for population structure assessment, not automatically free from confounding.",
-    "you_need": "State 4.5 and intermediate exclusion records.",
-    "command": "```{r s4-6}\nguided_snapshot(cfg, \"4.6\", guided_path(cfg, \"4.5\"), 1844, 238513, parent = \"4.5\")\ncheck_step(\"4.6\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "Full module 4 boundary: 1,844 samples, 238,513 variants; counts and SHA-256 agree with the snapshot.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Which separate source of bias still needs explicit assessment before association?\n\n<details><summary>Show the answer</summary>\n\nPopulation structure and ancestry differences between cases and controls.\n\n</details>",
-    "files_created": "`s4-6_state.*`, full `checkpoints/4.6/state.*`, updated replay index and count table."
+    "what_we_do": "We save the complete dataset after variant QC. Then we review what the filters did.",
+    "why": "Every QC threshold is a trade. We keep more information, or we lower the technical risk. Record the counts, the software, the genome build, the exclusions and the known limits. Then another reader can rebuild the same state.\n\nThe final set is ready for the study of population structure. It is not automatically free from confounding. Confounding means that another factor, such as ancestry, creates a false link between a variant and the disease.",
+    "you_need": "The dataset from step 4.5, which we call state 4.5, and the records of the earlier exclusions.",
+    "command": "```{r s4-6}\nguided_snapshot(cfg, \"4.6\", guided_path(cfg, \"4.5\"), 1844, 238513, parent = \"4.5\")\ncheck_step(\"4.6\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Which other source of bias must we still check before the association test?\n\n<details><summary>Show the answer</summary>\n\nPopulation structure, which means differences in ancestry between cases and controls.\n\n</details>",
+    "files_created": "`s4-6_state.*`, the full `checkpoints/4.6/state.*`, the updated replay index and the count table."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s4-6",

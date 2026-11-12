@@ -6,12 +6,12 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f
+# SHA-256: 0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693
 
-# Chunk: module0_knit_root
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
+setwd(start_dir)
 
 
 # Chunk: s0-1_system
@@ -42,21 +42,24 @@ source("scripts/preflight.R")
 
 
 # Chunk: s0-8_progress
+source("R/guided.R")
+cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 2e77f0fcb1e320faaf4ee86e88b280841ec331ad31a3651745765616bcdbd57d
+# SHA-256: b1bad8d75756854a24b127c080b1ec93364af4ad91fdfe813c7e006aa5645150
 
-# Chunk: module1_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s1-1
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+cat(nrow(ann), "rows in the annotation\n")
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 
 
@@ -97,14 +100,14 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22
+# SHA-256: dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330
 
-# Chunk: module2_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s2-1
@@ -162,7 +165,7 @@ guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 # Chunk: s2-6
 legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
-chain <- Sys.getenv("COURSE_CHAIN_FILE", unset = file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz"))
+chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
 require_files(chain)
 lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
@@ -198,14 +201,14 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3
+# SHA-256: 008528f76047a117a73ef4a4407077c00eddf29c91a67abf6256237fab9878c6
 
-# Chunk: module3_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s3-1
@@ -243,6 +246,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
+cat(length(pruned), "variants kept by LD pruning\n")
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 
 
@@ -311,14 +315,14 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0
+# SHA-256: a2bec2a3c47cdbca2238ae2cfdc405588b5554e9e3718d81b97c8e43821f7a60
 
-# Chunk: module4_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s4-1
@@ -391,14 +395,14 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: b6782a845ba573cd44ccbba19247b7028df855a220a4ef7ab626dc3734f26a19
+# SHA-256: c914335a2834807036b4871a35fb40d9e3d649afcf640491f429095edb1bd882
 
-# Chunk: module5_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s5-1
@@ -414,6 +418,7 @@ reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
 stopifnot(length(common) == 48614L)
+cat(length(common), "shared autosomal sites kept\n")
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 
 
@@ -426,6 +431,7 @@ a <- match(common, study$ID); b <- match(common, ref$ID)
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
 stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
   all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
+cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
 
 
 # Chunk: s5-4
@@ -456,12 +462,13 @@ plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch 
   xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
 points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
 legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-dev.off()
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
 
 
 # Chunk: s5-5_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "5.5", "reference_projection.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -493,7 +500,8 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, 
 eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
 png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
 plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
-dev.off()
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
 guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
 file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
 check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
@@ -501,18 +509,18 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Chunk: s5-7_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "5.7", "scree.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.7", "scree.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 7be3c133dc4ea1057f40b34ba12225a659412388f057af5ed2a2f2622127a8ec
+# SHA-256: 2841ba64c1a2230cf762018bd20b09bdd311aeb67ef21f898366f9c00b69aae0
 
-# Chunk: module6_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s6-1
@@ -551,6 +559,7 @@ design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
 guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+cat(nrow(covar), "complete covariate rows written\n")
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 
 
@@ -603,32 +612,54 @@ files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic
 guided_artifact_checkpoint(cfg, "6.7", files)
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
-# Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: a494ef8489e2a7af36ef71d264e9382eb651f4d3e2075207a78e02ec1f6fd9bb
 
-# Chunk: module7_setup
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+# Chunk: s6-8
+results <- guided_association(guided_path(cfg, "6.4", "association"))
+stats <- guided_standardise_scan(results)
+guided_check_summary(stats, rows = nrow(results))
+stats_file <- guided_summary_path(cfg)
+guided_write_summary(stats, stats_file)
+dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
+guided_write(guided_summary_dictionary(), dictionary_file)
+# Read the file back, as the plots will, and check that nothing was lost.
+saved <- guided_summary_stats(cfg)
+guided_check_summary(saved, rows = nrow(results))
+stopifnot(isTRUE(all.equal(saved, stats)))
+first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
+finite <- valid_p(saved$p_value)
+stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
+print(head(saved, 5))
+print(c(rows = nrow(saved), finite_tests = sum(finite), missing_p_values = sum(is.na(saved$p_value)),
+  genome_wide = sum(saved$p_value[finite] < 5e-8)))
+guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = "6.7")
+check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
+
+# Source: lessons/module_07_plots_and_reporting.Rmd
+# SHA-256: d271edfaa1e989b6c938b79ff1fdf7ca70792b1b026ddd0ea3b215e75380a850
+
+# Chunk: setup
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 
 
 # Chunk: s7-1
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-autosomal <- results$CHROM %in% as.character(1:22)
-save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(results$P[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
+stats <- guided_summary_stats(cfg)
+autosomal <- stats$chromosome %in% as.character(1:22)
+save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
 
 
 # Chunk: s7-1_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.1", "qq.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.1", "qq.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
 # Chunk: s7-2
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-p <- results$P[results$CHROM %in% as.character(1:22)]
+stats <- guided_summary_stats(cfg)
+p <- stats$p_value[stats$chromosome %in% as.character(1:22)]
 lambda <- lambda_gc(p)
 print(lambda)
 stopifnot(abs(lambda - 1.016) < 0.001)
@@ -636,22 +667,22 @@ guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path
 
 
 # Chunk: s7-3
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-plot_data <- results
-plot_data$CHROM <- suppressWarnings(as.numeric(plot_data$CHROM))
+stats <- guided_summary_stats(cfg)
+plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
+  POS = stats$base_pair_location, P = stats$p_value)
 save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
-stopifnot(sum(results$P[valid_p(results$P)] < 5e-8) == 8L)
+stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 
 
 # Chunk: s7-3_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.3", "manhattan.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.3", "manhattan.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
 # Chunk: s7-4
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-p <- results$P[valid_p(results$P)]
+stats <- guided_summary_stats(cfg)
+p <- stats$p_value[valid_p(stats$p_value)]
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
@@ -675,29 +706,30 @@ report <- guided_path(cfg, "7.6", "ld")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
   "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
 ld <- guided_table(paste0(report, ".vcor"))
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-region <- results[results$CHROM == "9" & abs(results$POS - 96426973) <= 500000 & valid_p(results$P), ]
+stats <- guided_summary_stats(cfg)
+region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
 r2_column <- grep("R2$", names(ld), value = TRUE)
 stopifnot(length(r2_column) == 1L)
-r2 <- as.numeric(ld[[r2_column]][match(region$ID, ld$ID_B)])
-r2[region$ID == lead] <- 1
+r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
+r2[region$variant_id == lead] <- 1
 bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
 colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
 shapes <- c(1, 2, 3, 4, 16)
 png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
-plot(region$POS / 1e6, -log10(region$P), col = ifelse(is.na(bin), "#666666", colours[bin]),
+plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
   pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
 abline(h = -log10(5e-8), lty = 2)
 legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
-dev.off()
-stopifnot(sum(region$P < 5e-8) == 4L)
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
+stopifnot(sum(region$p_value < 5e-8) == 4L)
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 
 
 # Chunk: s7-6_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.6", "regional.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -713,29 +745,31 @@ baseline <- guided_path(cfg, "2.8")
 if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
 run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
-main <- guided_association(guided_path(cfg, "6.4", "association"))
-a <- guided_association(no_pc); b <- guided_association(no_qc)
-k <- match(main$ID, a$ID)
-stopifnot(!anyNA(k), all(main$OBS_CT == a$OBS_CT[k]))
-summarise <- function(x) c(finite_tests = sum(valid_p(x$P)), hits = sum(x$P[valid_p(x$P)] < 5e-8),
-  lambda = lambda_gc(x$P[x$CHROM %in% as.character(1:22)]))
+main <- guided_summary_stats(cfg)
+a <- guided_standardise_scan(guided_association(no_pc))
+b <- guided_standardise_scan(guided_association(no_qc))
+k <- match(main$variant_id, a$variant_id)
+stopifnot(!anyNA(k), all(main$n == a$n[k]))
+autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
+summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
+  lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
-  plotted <- list(main$P[main$CHROM %in% as.character(1:22)], a$P[a$CHROM %in% as.character(1:22)], b$P[b$CHROM %in% as.character(1:22)])
+  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
   limits <- c(0, max(-log10(unlist(plotted))))
-  plot_qq(main$P[main$CHROM %in% as.character(1:22)], "QC + ten PCs", ylim = limits)
-  plot_qq(a$P[a$CHROM %in% as.character(1:22)], "QC, no PCs", ylim = limits)
-  plot_qq(b$P[b$CHROM %in% as.character(1:22)], "No sample/variant QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
 }, width = 2100, height = 750)
 
 
 # Chunk: s7-7_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.7", "qq_comparison.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "qq_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -743,10 +777,10 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-lead <- results[match(clumps$ID, results$ID), c("CHROM", "POS", "ID", "A1", "OR", "LOG(OR)_SE", "P", "OBS_CT")]
-lead$CI_LOW <- exp(log(lead$OR) - 1.96 * lead[["LOG(OR)_SE"]])
-lead$CI_HIGH <- exp(log(lead$OR) + 1.96 * lead[["LOG(OR)_SE"]])
+stats <- guided_summary_stats(cfg)
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "standard_error", "p_value", "n")]
+lead$ci_low <- exp(log(lead$odds_ratio) - 1.96 * lead$standard_error)
+lead$ci_high <- exp(log(lead$odds_ratio) + 1.96 * lead$standard_error)
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),
@@ -755,7 +789,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "After QC: 238,513 variants; 236,815 finite additive association tests.",
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
-  "Report A1, OR, 95% interval, p-value and per-variant OBS_CT from s7-8_leads.tsv.",
+  "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
   "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
@@ -768,6 +802,6 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
   guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
-guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.7")
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
 cat(paste(summary, collapse = "\n"), "\n")

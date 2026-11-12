@@ -6,19 +6,19 @@
   "anchor": "step-6-1",
   "title": "One variant by hand",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "7be3c133dc4ea1057f40b34ba12225a659412388f057af5ed2a2f2622127a8ec",
+  "source_sha256": "2841ba64c1a2230cf762018bd20b09bdd311aeb67ef21f898366f9c00b69aae0",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Calculate a simple carrier odds ratio at a retained autosomal site.",
-    "why": "Odds are the number with an outcome divided by the number without it. An odds ratio (OR) compares odds between two groups; OR = 1 means equal odds. Here we compare carriers of the allele explicitly named in the exported column with non-carriers. This dominant carrier contrast is a teaching calculation, not the additive adjusted GWAS model. Allele coding matters: reversing the counted allele changes the contrast.",
-    "you_need": "Full 5.7 cohort; the retained site 9:96426973:A:G.",
-    "command": "```{r s6-1}\nreport <- guided_path(cfg, \"6.1\", \"example\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", \"9:96426973:A:G\", \"--export\", \"A\", \"--out\", report))\nx <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE)\ndose <- as.numeric(x[[7]])\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\ncase <- psam$Disease[match(x$IID, psam$IID)] == \"2\"\ntab <- table(case = case, carrier = dose > 0)\nprint(tab)\ncarrier_or <- tab[\"TRUE\", \"TRUE\"] * tab[\"FALSE\", \"FALSE\"] / (tab[\"FALSE\", \"TRUE\"] * tab[\"TRUE\", \"FALSE\"])\nprint(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))\nguided_artifact_checkpoint(cfg, \"6.1\", paste0(report, \".raw\"), parent = \"5.7\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048\n```\n\n`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2-by-2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "A carrier/non-carrier table in the retained cohort and a finite odds ratio. Interpret its direction using the allele in the exported column; this need not be the allele that increases risk.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "An OR of 2 means that disease probability doubled. Is this statement generally correct?\n\n<details><summary>Show the answer</summary>\n\nNo. Odds and probability differ; an odds ratio is not generally a risk ratio.\n\n</details>",
-    "files_created": "`s6-1_example.raw` and logs."
+    "what_we_do": "Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.",
+    "why": "The [odds](../docs/glossary.md#odds) of an outcome are the number of people with the outcome divided by the number without it. An odds ratio (OR) compares the odds in two groups. An OR of 1 means the odds are equal. A carrier has at least one copy of an [allele](../docs/glossary.md#allele) (one version of the variant). We compare carriers of the allele named in the exported column with non-carriers. This is a teaching calculation. It is not the additive, adjusted model that the real GWAS uses. The counted allele matters: if you count the other allele, the contrast changes.",
+    "you_need": "The full cohort from 5.7 and the retained variant 9:96426973:A:G.",
+    "command": "```{r s6-1}\nreport <- guided_path(cfg, \"6.1\", \"example\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", \"9:96426973:A:G\", \"--export\", \"A\", \"--out\", report))\nx <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE)\ndose <- as.numeric(x[[7]])\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\ncase <- psam$Disease[match(x$IID, psam$IID)] == \"2\"\ntab <- table(case = case, carrier = dose > 0)\nprint(tab)\ncarrier_or <- tab[\"TRUE\", \"TRUE\"] * tab[\"FALSE\", \"FALSE\"] / (tab[\"FALSE\", \"TRUE\"] * tab[\"TRUE\", \"FALSE\"])\nprint(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))\nguided_artifact_checkpoint(cfg, \"6.1\", paste0(report, \".raw\"), parent = \"5.7\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048\n```\n\n`--snp` selects one variant by its exact current ID. `--export A` writes the [dosage](../docs/glossary.md#dosage) of the named allele: the number of copies, 0, 1 or 2, with missing values kept separate. R then builds the 2-by-2 carrier table. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
+    "expected_result": "A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "An OR of 2 means that the probability of disease doubled. Is this statement generally correct?\n\n<details><summary>Show the answer</summary>\n\nNo. Odds and probability are different things. An odds ratio is usually not the same as a risk ratio.\n\n</details>",
+    "files_created": "`s6-1_example.raw` and the log files."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s6-1",
@@ -35,19 +35,19 @@
     "options": [
       {
         "name": "--export",
-        "explanation_markdown": "`--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate)."
+        "explanation_markdown": "`--export A` writes the [dosage](../docs/glossary.md#dosage) of the named allele: the number of copies, 0, 1 or 2, with missing values kept separate."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the report prefix."
+        "explanation_markdown": "`--out` sets the prefix of the report files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads the final genotype state"
+        "explanation_markdown": "`--pfile` reads the final genotype files."
       },
       {
         "name": "--snp",
@@ -55,7 +55,7 @@
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },

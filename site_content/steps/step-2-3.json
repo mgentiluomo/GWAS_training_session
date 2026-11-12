@@ -6,19 +6,19 @@
   "anchor": "step-2-3",
   "title": "Sample and variant tables",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
+  "source_sha256": "dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Read the sample and variant descriptions without altering them.",
-    "why": "FID and IID are text identifiers, not row numbers. Preserve leading zeros and join by identifiers. PVAR columns include chromosome, position, site ID and alleles. An rs identifier can be shared across resources while their coordinates use different assemblies; an Illumina name may identify an array assay rather than a unique genomic site.",
-    "you_need": "The native fileset from 2.2.",
-    "command": "```{r s2-3}\nsamples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\nhead(samples)\nhead(variants)\ncheck_ids(samples, \"Laboratory samples\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "A PSAM with 2,016 rows and PVAR with 299,523 rows. Distinct assay IDs do not rule out duplicated genomic sites.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Should two tables be joined by their row number if their lengths match?\n\n<details><summary>Show the answer</summary>\n\nNo. Match the explicit FID/IID or site identifier and check that every required record matched.\n\n</details>",
+    "what_we_do": "We read the sample table and the variant table. We do not change them.",
+    "why": "FID and IID are text identifiers, not row numbers. Keep any leading zeros, such as in 007. Always join tables by these identifiers.\n\nThe variant table (PVAR) has columns for the chromosome, the position, the site ID and the alleles. An [rs identifier](../docs/glossary.md#rs-identifier) can be shared by several resources, even when each resource uses a different genome assembly (a full reference sequence of the genome) for the coordinates. An Illumina name may name an array assay (one test on the chip) and not a unique place in the genome.",
+    "you_need": "You need the native files from 2.2.",
+    "command": "```{r s2-3}\nsamples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\nhead(samples)\nhead(variants)\ncheck_ids(samples, \"Laboratory samples\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R code above is the complete command.\n\nR reads the files and shows the values. It does not change the genotype files.",
+    "expected_result": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Should you join two tables by row number when they have the same length?\n\n<details><summary>Show the answer</summary>\n\nNo. Match the FID/IID pair or the site identifier. Then check that every required record found its match.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s2-3",

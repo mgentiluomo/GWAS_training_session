@@ -6,19 +6,19 @@
   "anchor": "step-6-6",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "7be3c133dc4ea1057f40b34ba12225a659412388f057af5ed2a2f2622127a8ec",
+  "source_sha256": "2841ba64c1a2230cf762018bd20b09bdd311aeb67ef21f898366f9c00b69aae0",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Compare an explicitly forced Firth fit at a low-frequency retained autosomal site.",
-    "why": "Rare genotypes can have very few case or control observations. Ordinary logistic fitting uses maximum likelihood: it chooses coefficients that make the observed outcomes most plausible under the model. If a predictor separates outcomes completely, that coefficient can diverge. Firth penalisation reduces small-sample bias and can give finite estimates. It does not create information or fix confounding, miscalled genotypes or a poor study design. The main scan in this dataset did not actually require Firth fallback; we force it for a transparent teaching comparison at one retained low-frequency site. Sites below the 1% main-path filter are not reintroduced.",
-    "you_need": "The final cohort, main results and covariates from 6.3.",
-    "command": "```{r s6-6}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048\n```\n\nThe R command uses `--snp` with the selected ID; the equivalent terminal command uses `--extract` with its one-ID file. `--glm firth` requests Firth for that variant rather than waiting for fallback. Other covariate and resource options match 6.4. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "One finite forced-Firth result, compared with the ordinary main-scan estimate for the same A1 allele. Small numerical differences are expected; forced Firth is not a new preferred genome-wide scan.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Does using Firth make an association based on very few carriers precise?\n\n<details><summary>Show the answer</summary>\n\nNo. It can stabilise fitting while uncertainty remains large.\n\n</details>",
-    "files_created": "Selected variant ID, the forced-Firth report and logs."
+    "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",
+    "why": "A rare genotype can have very few cases or controls. The ordinary logistic fit uses [maximum likelihood](../docs/glossary.md#maximum-likelihood). It chooses the coefficients that make the observed outcomes most likely under the model. Sometimes one genotype group contains only cases or only controls. This is separation, and the coefficient can then grow without limit. [Firth correction](../docs/glossary.md#firth-regression) reduces the bias of small samples and can give finite estimates. It does not add information. It does not fix confounding, wrong genotype calls or a poor study design. The main scan of this dataset did not need the Firth fallback. We force Firth here so that you can compare the two results at one variant. Variants below the 1% frequency filter do not come back.",
+    "you_need": "The final cohort, the main results from 6.4 and the covariates from 6.3.",
+    "command": "```{r s6-6}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048\n```\n\nThe R command uses `--snp` with the chosen ID. The terminal command uses `--extract` with a file that holds this one ID. `--glm firth` asks for Firth correction at this variant, without waiting for the fallback. The covariate options and the resource options are the same as at 6.4. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
+    "expected_result": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Does Firth correction make an association precise when it rests on very few carriers?\n\n<details><summary>Show the answer</summary>\n\nNo. It makes the fit more stable, but the uncertainty can stay large.\n\n</details>",
+    "files_created": "The chosen variant ID, the forced Firth report and the log files."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s6-6",
@@ -35,7 +35,7 @@
     "options": [
       {
         "name": "--covar",
-        "explanation_markdown": "`--covar` loads the ID-keyed table.",
+        "explanation_markdown": "`--covar` loads the covariate table, which is keyed by sample ID.",
         "explained_at": "6.4"
       },
       {
@@ -45,32 +45,32 @@
       },
       {
         "name": "--covar-variance-standardize",
-        "explanation_markdown": "`--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis.",
+        "explanation_markdown": "`--covar-variance-standardize` rescales the numerical covariates so that the fit is stable.",
         "explained_at": "6.4"
       },
       {
         "name": "--extract",
-        "explanation_markdown": "the equivalent terminal command uses `--extract` with its one-ID file."
+        "explanation_markdown": "The terminal command uses `--extract` with a file that holds this one ID."
       },
       {
         "name": "--glm",
-        "explanation_markdown": "`--glm firth` requests Firth for that variant rather than waiting for fallback."
+        "explanation_markdown": "`--glm firth` asks for Firth correction at this variant, without waiting for the fallback."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the report prefix."
+        "explanation_markdown": "`--out` sets the prefix of the report files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads the final genotype state"
+        "explanation_markdown": "`--pfile` reads the final genotype files."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },

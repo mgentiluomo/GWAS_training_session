@@ -6,20 +6,20 @@
   "anchor": "step-4-4",
   "title": "Hardy-Weinberg and sample size",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0",
+  "source_sha256": "a2bec2a3c47cdbca2238ae2cfdc405588b5554e9e3718d81b97c8e43821f7a60",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Calculate a control-only exact mid-p Hardy-Weinberg test and apply an explicit sample-size-aware screening rule.",
-    "why": "Hardy-Weinberg equilibrium (HWE) predicts genotype proportions a^2, 2a(1-a) and (1-a)^2 under random mating and other idealised assumptions. Here a is the frequency of one allele; it is not the HWE test p-value. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(-6 - 0.001 * max(0, n_control - 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.",
-    "you_need": "State 4.3 and its PSAM phenotype; no association results are used to choose the cutoff.",
-    "command": "```{r s4-4}\npsam <- guided_table(paste0(guided_path(cfg, \"4.3\"), \".psam\"))\ncontrols <- guided_list(psam$IID[psam$Disease == \"1\"], guided_path(cfg, \"4.4\", \"controls.txt\"), TRUE)\nreport <- guided_path(cfg, \"4.4\", \"hardy\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--keep\", controls, \"--chr\", \"1-22\", \"--hardy\", \"midp\", \"--out\", report))\nhwe <- guided_table(paste0(report, \".hardy\"))\nn_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)\ncutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))\np <- as.numeric(hwe$MIDP)\nexclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, \"4.4\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.4\")))\nretained <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))$ID\nstopifnot(!any(c(\"rs4988235\", \"rs12913832\", \"rs1426654\") %in% retained))\nops <- guided_replay_lists(cfg, \"4.4\", \"4.3\")\nguided_register(cfg, \"4.4\", \"4.3\", 1844, 238852, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048\n```\n\n`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "167 variants excluded, leaving 238,852. Strong planted errors are not the only failures: eight unplanted sites and seven altered duplicate copies also fail, while some mild errors survive. rs4988235, rs12913832 and rs1426654 leave here and cannot be used as surviving module 5 markers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Calling errors and population mixture. The unplanted failures demonstrate why HWE failure is not proof of technical error, and why association loci cannot be rescued after seeing their p-values.",
-    "quick_check": "Can a mixture of two groups, each in HWE but with different allele frequencies, show a heterozygote deficit when pooled?\n\n<details><summary>Show the answer</summary>\n\nYes. Pooling can produce a deficit even without genotyping error.\n\n</details>",
-    "files_created": "Control ID list, `.hardy`, exclusion list and `s4-4_state.*`."
+    "what_we_do": "We run an exact Hardy–Weinberg test in the controls only, using the mid-p version. Then we apply a threshold that depends on the sample size.",
+    "why": "Hardy–Weinberg equilibrium (HWE) predicts how common each genotype should be. Take one allele with frequency a. Then the three genotypes should have the proportions a^2, 2a(1-a) and (1-a)^2. This holds if people mate at random and a few other simple conditions are true. Here a is an allele frequency. It is not the p-value of the test.\n\nA lack of [heterozygotes](../docs/glossary.md#heterozygosity) (people with two different alleles) can have three causes. It can come from genotype calling errors. It can come from parents who are relatives. It can come from a mix of populations in one sample ([population stratification](../docs/glossary.md#population-stratification)).\n\nWe test the [autosomes](../docs/glossary.md#autosome) only (chromosomes 1 to 22) and use only the controls. In this way a real disease effect in the cases is less likely to cause a removal.\n\nThe test is exact, which means it counts every possible outcome instead of using an approximation. An exact test on discrete counts is often too strict. The [mid-p](../docs/glossary.md#mid-p-value) version corrects part of this.\n\nA larger sample can detect smaller departures from HWE. So one fixed cutoff does not suit every study. Our rule is set before the analysis: 10^(-6 - 0.001 * max(0, n_control - 1000)). Here n_control is the number of controls with a call at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. With more controls, the cutoff becomes stricter.\n\nThis rule is a clear teaching choice. It is not a universal recommended threshold. Before you use it elsewhere, compare the distributions and look at the excess or deficit of heterozygotes.",
+    "you_need": "The dataset from step 4.3, which we call state 4.3, and its PSAM file. The PSAM file lists the samples and their phenotype. We do not use any association results to choose the cutoff.",
+    "command": "```{r s4-4}\npsam <- guided_table(paste0(guided_path(cfg, \"4.3\"), \".psam\"))\ncontrols <- guided_list(psam$IID[psam$Disease == \"1\"], guided_path(cfg, \"4.4\", \"controls.txt\"), TRUE)\nreport <- guided_path(cfg, \"4.4\", \"hardy\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--keep\", controls, \"--chr\", \"1-22\", \"--hardy\", \"midp\", \"--out\", report))\nhwe <- guided_table(paste0(report, \".hardy\"))\nn_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)\ncutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))\np <- as.numeric(hwe$MIDP)\nexclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, \"4.4\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.4\")))\nretained <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))$ID\nstopifnot(!any(c(\"rs4988235\", \"rs12913832\", \"rs1426654\") %in% retained))\nops <- guided_replay_lists(cfg, \"4.4\", \"4.3\")\nguided_register(cfg, \"4.4\", \"4.3\", 1844, 238852, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048\n```\n\nThe first command runs the test and the second command removes the failing variants.\n\n`--keep` limits the test to the controls, and only the first command uses it.\n\n`--chr 1-22` keeps chromosomes 1 to 22 and leaves out the sex chromosomes for this test.\n\n`--hardy midp` reports the exact mid-p test.\n\nR then applies the sample-size rule to the mid-p values and makes the list of failing variants.\n\n`--exclude` removes the failing variants from the full set of cases and controls.\n\n`--pfile` selects the PLINK 2 input files.\n\n`--make-pgen` writes a new copy of the data in PLINK 2 format.\n\n`--out` sets the start of the names of the new files.\n\n`--threads 2` limits PLINK to two worker threads.\n\n`--memory 2048` sets the memory PLINK may use, in MiB.",
+    "expected_result": "167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "It can reveal genotype calling errors and a mix of populations. The unplanted failures show that a HWE failure is not proof of a technical error. They also show that we must not rescue association loci after we have seen their p-values.",
+    "quick_check": "Two groups each follow HWE but have different allele frequencies. If we pool them, can we see a deficit of heterozygotes?\n\n<details><summary>Show the answer</summary>\n\nYes. Pooling can create a deficit even when there is no genotyping error.\n\n</details>",
+    "files_created": "The list of control IDs, the `.hardy` file, the exclusion list and `s4-4_state.*`."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s4-4",
@@ -37,39 +37,39 @@
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--chr 1-22` excludes sex chromosomes from this HWE calculation."
+        "explanation_markdown": "`--chr 1-22` keeps chromosomes 1 to 22 and leaves out the sex chromosomes for this test."
       },
       {
         "name": "--exclude",
-        "explanation_markdown": "R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix."
+        "explanation_markdown": "`--exclude` removes the failing variants from the full set of cases and controls."
       },
       {
         "name": "--hardy",
-        "explanation_markdown": "`--hardy midp` reports the exact mid-p statistic"
+        "explanation_markdown": "`--hardy midp` reports the exact mid-p test."
       },
       {
         "name": "--keep",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls"
+        "explanation_markdown": "`--keep` limits the test to the controls, and only the first command uses it."
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--make-pgen` writes a new copy"
+        "explanation_markdown": "`--make-pgen` writes a new copy of the data in PLINK 2 format."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the memory PLINK may use, in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` names its files."
+        "explanation_markdown": "`--out` sets the start of the names of the new files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` selects the native input"
+        "explanation_markdown": "`--pfile` selects the PLINK 2 input files."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },

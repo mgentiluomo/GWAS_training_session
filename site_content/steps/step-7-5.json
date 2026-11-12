@@ -6,19 +6,19 @@
   "anchor": "step-7-5",
   "title": "Clump correlated results",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "a494ef8489e2a7af36ef71d264e9382eb651f4d3e2075207a78e02ec1f6fd9bb",
+  "source_sha256": "d271edfaa1e989b6c938b79ff1fdf7ca70792b1b026ddd0ea3b215e75380a850",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Group correlated significant variants around index variants using study-cohort LD.",
-    "why": "Clumping starts with the smallest p-value, assigns nearby correlated variants, and continues greedily. It describes approximately independent regions under chosen radius and LD settings. It is not fine-mapping, causal inference or proof of one causal effect per clump. Use LD from the analysed cohort rather than an unmatched external population.",
-    "you_need": "The full 5.7 genotype set and unaltered PLINK association report from 6.4.",
-    "command": "```{r s7-5}\nreport <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` names the variant ID column. `--clump-p-field P` names the p-value column. `--clump-p1 5e-8` sets index eligibility. `--clump-p2 1e-5` sets the secondary-report threshold. `--clump-r2 0.1` sets the squared-correlation threshold. `--clump-kb 250` sets the distance limit in kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--pfile` reads the native genotype fileset. `--out` names the report. `--threads 2` limits worker threads. `--memory 2048` sets the main workspace budget in MiB.",
-    "expected_result": "Three clumps describing the strong chromosome 3, 9 and 12 regions. Their index IDs and p-values are reported; this does not establish three causal variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "If the LD threshold or radius changes, can the clump membership change even though the association scan is identical?\n\n<details><summary>Show the answer</summary>\n\nYes. Clump membership is conditional on those settings and the LD sample.\n\n</details>",
-    "files_created": "`s7-5_clump.clumps` and logs."
+    "what_we_do": "Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.",
+    "why": "[Clumping](../docs/glossary.md#clumping) starts with the variant that has the smallest p-value. This is the [lead variant](../docs/glossary.md#lead-variant), also called the index variant. PLINK adds the nearby variants that are correlated with it. Then PLINK takes the next smallest p-value that is still free and repeats the process. The result is a list of regions that are approximately independent. The settings for the distance and the correlation decide what counts as a region.\n\nClumping is not [fine-mapping](../docs/glossary.md#fine-mapping). It does not show causes, and it does not prove one causal effect in each clump. Measure the correlation in the cohort that you analysed, not in an external population that does not match.",
+    "you_need": "The full genotype set from step 5.7 and the PLINK association report from step 6.4, unchanged. This step still reads the PLINK report and not the summary statistics file. The reason is that the `--clump` option of PLINK expects the format of its own report.",
+    "command": "```{r s7-5}\nreport <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` names the column that holds the variant ID. `--clump-p-field P` names the column that holds the p-value. `--clump-p1 5e-8` sets the p-value that a variant needs to be a lead variant. `--clump-p2 1e-5` sets the p-value that other variants need to be listed in a clump. `--clump-r2 0.1` sets the [r^2](../docs/glossary.md#r-squared) threshold: a variant joins a clump only if its squared correlation with the lead is above 0.1. `--clump-kb 250` sets the distance limit in kilobases (250 kb on each side of the lead). `--clump-unphased` uses the squared correlation of the genotype dosages, so the definition of LD is clear. `--pfile` reads the genotype files in the PLINK 2 format. `--out` names the report. `--threads 2` limits the number of worker threads. `--memory 2048` sets the working memory in MiB.",
+    "expected_result": "There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.\n\nThe tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the input file that R names and the previous step. Keep the command and the messages from the console. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "If we change the LD threshold or the distance, can the clumps change even though the association scan stays the same?\n\n<details><summary>Show the answer</summary>\n\nYes. The clumps depend on these settings and on the samples used to measure LD.\n\n</details>",
+    "files_created": "`s7-5_clump.clumps` and the log files."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s7-5",
@@ -39,35 +39,35 @@
       },
       {
         "name": "--clump-id-field",
-        "explanation_markdown": "`--clump-id-field ID` names the variant ID column."
+        "explanation_markdown": "`--clump-id-field ID` names the column that holds the variant ID."
       },
       {
         "name": "--clump-kb",
-        "explanation_markdown": "`--clump-kb 250` sets the distance limit in kilobases."
+        "explanation_markdown": "`--clump-kb 250` sets the distance limit in kilobases (250 kb on each side of the lead)."
       },
       {
         "name": "--clump-p-field",
-        "explanation_markdown": "`--clump-p-field P` names the p-value column."
+        "explanation_markdown": "`--clump-p-field P` names the column that holds the p-value."
       },
       {
         "name": "--clump-p1",
-        "explanation_markdown": "`--clump-p1 5e-8` sets index eligibility."
+        "explanation_markdown": "`--clump-p1 5e-8` sets the p-value that a variant needs to be a lead variant."
       },
       {
         "name": "--clump-p2",
-        "explanation_markdown": "`--clump-p2 1e-5` sets the secondary-report threshold."
+        "explanation_markdown": "`--clump-p2 1e-5` sets the p-value that other variants need to be listed in a clump."
       },
       {
         "name": "--clump-r2",
-        "explanation_markdown": "`--clump-r2 0.1` sets the squared-correlation threshold."
+        "explanation_markdown": "`--clump-r2 0.1` sets the [r^2](../docs/glossary.md#r-squared) threshold: a variant joins a clump only if its squared correlation with the lead is above 0.1."
       },
       {
         "name": "--clump-unphased",
-        "explanation_markdown": "`--clump-unphased` uses squared dosage correlation, making its LD definition explicit."
+        "explanation_markdown": "`--clump-unphased` uses the squared correlation of the genotype dosages, so the definition of LD is clear."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the main workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the working memory in MiB."
       },
       {
         "name": "--out",
@@ -75,11 +75,11 @@
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads the native genotype fileset."
+        "explanation_markdown": "`--pfile` reads the genotype files in the PLINK 2 format."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits the number of worker threads."
       }
     ]
   },

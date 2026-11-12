@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "module": 7,
+  "title": "plots and reporting",
+  "source": "lessons/module_07_plots_and_reporting.Rmd",
+  "source_sha256": "d271edfaa1e989b6c938b79ff1fdf7ca70792b1b026ddd0ea3b215e75380a850",
+  "overview_markdown": "**What you will do.** You will turn the results of the association test into plots and tables. You will check that the results are trustworthy. Then you will find the strong signals and write a short report.\n\n**What you will learn.**\n\n- How to draw and read the two main GWAS plots.\n- How to check if the test results are too strong overall.\n- How to choose a p-value threshold when you run many tests.\n- How to group nearby signals and look closely at one region.\n- How to report results honestly, including their limits.\n\n**How long it takes.** About 75 minutes. The slowest step is 7.7, because PLINK runs two new association scans.",
+  "recap_markdown": "- You drew a QQ plot and calculated an autosomal lambda of approximately 1.016.\n- You drew a Manhattan plot. Eight variants are below 5e-8, in three regions on chromosomes 3, 9 and 12.\n- You compared thresholds: 5e-8 for the usual rule and approximately 2.11e-7 from Bonferroni for 236,815 tests.\n- You grouped the eight variants into three clumps and looked at the L2 region on chromosome 9.\n- Without PCs the lambda rose to about 1.546, and without sample or variant QC as well it rose to about 1.655.\n- You wrote a final summary and a table of the lead variants.\n\n**Next:** this is the last module of the main path. You can now report your findings, with their limits. Modules A (imputation) and B (mixed models) are optional extras and are not part of the main path."
+}

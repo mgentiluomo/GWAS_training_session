@@ -6,19 +6,19 @@
   "anchor": "step-5-4",
   "title": "Reference PCA and study projection",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "b6782a845ba573cd44ccbba19247b7028df855a220a4ef7ab626dc3734f26a19",
+  "source_sha256": "c914335a2834807036b4871a35fb40d9e3d649afcf640491f429095edb1bd882",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Fit PCs in the reference and project both datasets onto the same axes.",
-    "why": "A joint PCA can be pulled towards a much larger study group. Projection fixes the reference axes first. The same reference allele frequencies, allele weights and standardisation must then be used for reference and study scores. Scaling and signs of PCs are arbitrary; compare patterns on the same scoring scale. We disable mean imputation so missingness remains visible in the scoring denominator.",
-    "you_need": "Shared audited sites from 5.3 and the full 4.6 fileset.",
-    "command": "```{r s5-4}\nreference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\ncommon <- guided_path(cfg, \"5.2\", \"common.txt\")\nfit <- guided_path(cfg, \"5.4\", \"reference\")\nrun_plink(cfg, c(\"--pfile\", reference, \"--extract\", common, \"--freq\", \"--pca\", \"10\", \"allele-wts\", \"--out\", fit))\nweights <- guided_table(paste0(fit, \".eigenvec.allele\"))\nid_column <- match(\"ID\", names(weights)); allele_column <- match(\"A1\", names(weights))\nfirst_pc <- match(\"PC1\", names(weights))\nscore <- c(\"--read-freq\", paste0(fit, \".afreq\"), \"--score\", paste0(fit, \".eigenvec.allele\"),\n  id_column, allele_column, \"header-read\", \"no-mean-imputation\", \"variance-standardize\",\n  \"--score-col-nums\", paste0(first_pc, \"-\", first_pc + 9L))\nrun_plink(cfg, c(\"--pfile\", reference, \"--extract\", common, score, \"--out\", guided_path(cfg, \"5.4\", \"ref_scores\")))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.6\"), \"--extract\", common, score, \"--out\", guided_path(cfg, \"5.4\", \"study_scores\")))\nguided_artifact_checkpoint(cfg, \"5.4\", c(paste0(fit, c(\".afreq\", \".eigenvec\", \".eigenval\", \".eigenvec.allele\")), paste0(guided_path(cfg, \"5.4\", \"ref_scores\"), \".sscore\"), paste0(guided_path(cfg, \"5.4\", \"study_scores\"), \".sscore\")), parent = \"5.2\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --freq --pca 10 allele-wts --out results/guided/s5-4_reference --threads 2 --memory 2048\nbin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_ref_scores --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048\n```\n\n`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1 to PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "Reference eigenvectors/eigenvalues, allele weights and two `.sscore` files with PC1_AVG through PC10_AVG. The study projection contains 1,844 samples.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Why must the study projection use reference frequencies rather than recomputing standardisation from the study alone?\n\n<details><summary>Show the answer</summary>\n\nOtherwise the two sets of scores would not use the same coordinate system.\n\n</details>",
+    "what_we_do": "Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.",
+    "why": "If we ran one PCA on reference and study together, a much larger study group could pull the axes towards itself. So we fix the axes on the reference first. Placing new samples on fixed axes is called [projection](../docs/glossary.md#projection).\n\nEach site has an allele weight (called a loading), which says how much that allele contributes to a PC. The score of a person is the sum of these weights over the alleles the person carries. The reference and the study scores must use the same allele frequencies, the same weights and the same standardisation. Standardisation means rescaling each genotype by the allele frequency, so that common and rare alleles count fairly. The scale and the sign (plus or minus) of a PC are arbitrary. Compare patterns only when both sets of scores use the same scale.\n\nThe weight file names the counted allele in a column called [A1](../docs/glossary.md#a1). We switch off mean imputation. This means a missing call is not replaced by the average, so the missing calls stay visible in the score.",
+    "you_need": "The checked shared sites from step 5.3, and the full saved state from step 4.6.",
+    "command": "```{r s5-4}\nreference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\ncommon <- guided_path(cfg, \"5.2\", \"common.txt\")\nfit <- guided_path(cfg, \"5.4\", \"reference\")\nrun_plink(cfg, c(\"--pfile\", reference, \"--extract\", common, \"--freq\", \"--pca\", \"10\", \"allele-wts\", \"--out\", fit))\nweights <- guided_table(paste0(fit, \".eigenvec.allele\"))\nid_column <- match(\"ID\", names(weights)); allele_column <- match(\"A1\", names(weights))\nfirst_pc <- match(\"PC1\", names(weights))\nscore <- c(\"--read-freq\", paste0(fit, \".afreq\"), \"--score\", paste0(fit, \".eigenvec.allele\"),\n  id_column, allele_column, \"header-read\", \"no-mean-imputation\", \"variance-standardize\",\n  \"--score-col-nums\", paste0(first_pc, \"-\", first_pc + 9L))\nrun_plink(cfg, c(\"--pfile\", reference, \"--extract\", common, score, \"--out\", guided_path(cfg, \"5.4\", \"ref_scores\")))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.6\"), \"--extract\", common, score, \"--out\", guided_path(cfg, \"5.4\", \"study_scores\")))\nguided_artifact_checkpoint(cfg, \"5.4\", c(paste0(fit, c(\".afreq\", \".eigenvec\", \".eigenval\", \".eigenvec.allele\")), paste0(guided_path(cfg, \"5.4\", \"ref_scores\"), \".sscore\"), paste0(guided_path(cfg, \"5.4\", \"study_scores\"), \".sscore\")), parent = \"5.2\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --freq --pca 10 allele-wts --out results/guided/s5-4_reference --threads 2 --memory 2048\nbin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_ref_scores --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048\n```\n\n`--extract` keeps only the checked shared sites. `--freq` writes the allele frequencies of the reference. `--pca 10 allele-wts` computes ten axes and saves the allele weights. `--read-freq` gives the same frequencies to both projections. `--score` names the weight file and the columns that hold the variant ID and the A1 allele (columns 2 and 5 here, counted from one). `header-read` tells PLINK to use the header line of the weight file. `no-mean-imputation` stops PLINK replacing missing calls with the average. `variance-standardize` scales the genotypes with the allele frequencies. `--score-col-nums 6-15` selects PC1 to PC10. The R command finds these column numbers from the real header line. `--pfile` reads the named genotype files in PLINK 2 format. `--out` sets the name of the output files. `--threads 2` limits the number of worker threads. `--memory 2048` sets the working memory to 2048 MiB.",
+    "expected_result": "Reference eigenvectors and eigenvalues, allele weights, and two `.sscore` files (score tables) with the columns PC1_AVG to PC10_AVG. The study projection contains 1,844 samples.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Why must the study projection use the reference frequencies, and not recalculate the standardisation from the study alone?\n\n<details><summary>Show the answer</summary>\n\nOtherwise the two sets of scores would not share the same coordinate system.\n\n</details>",
     "files_created": "`s5-4_reference.*`, `s5-4_ref_scores.sscore`, `s5-4_study_scores.sscore` and logs."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s5-4",
@@ -37,35 +37,35 @@
     "options": [
       {
         "name": "--extract",
-        "explanation_markdown": "`--extract` retains audited shared sites"
+        "explanation_markdown": "`--extract` keeps only the checked shared sites."
       },
       {
         "name": "--freq",
-        "explanation_markdown": "`--freq` writes reference frequencies."
+        "explanation_markdown": "`--freq` writes the allele frequencies of the reference."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the working memory to 2048 MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` names reports."
+        "explanation_markdown": "`--out` sets the name of the output files."
       },
       {
         "name": "--pca",
-        "explanation_markdown": "`--pca 10 allele-wts` computes ten axes and allele weights."
+        "explanation_markdown": "`--pca 10 allele-wts` computes ten axes and saves the allele weights."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads the specified native genotype set"
+        "explanation_markdown": "`--pfile` reads the named genotype files in PLINK 2 format."
       },
       {
         "name": "--read-freq",
-        "explanation_markdown": "`--read-freq` supplies the same frequencies to both projections."
+        "explanation_markdown": "`--read-freq` gives the same frequencies to both projections."
       },
       {
         "name": "--score",
-        "explanation_markdown": "`--score` names the weights and the one-based ID/A1 columns (2 and 5 here)"
+        "explanation_markdown": "`--score` names the weight file and the columns that hold the variant ID and the A1 allele (columns 2 and 5 here, counted from one)."
       },
       {
         "name": "--score-col-nums",
@@ -73,7 +73,7 @@
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits the number of worker threads."
       }
     ]
   },

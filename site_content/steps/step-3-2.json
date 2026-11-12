@@ -6,20 +6,20 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3",
+  "source_sha256": "008528f76047a117a73ef4a4407077c00eddf29c91a67abf6256237fab9878c6",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Apply a 98% sample call-rate requirement after rough cleaning.",
-    "why": "Call rate estimates completeness across the retained sites. A threshold of 98% corresponds to at most 2% missingness, not 98% missingness. Low completeness can reduce effective sample size and can be associated with laboratory or recruitment groups. Compare the distribution before adopting the threshold in another study.",
-    "you_need": "State 3.1; call-rate definition from 2.4.",
-    "command": "```{r s3-2}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048\n```\n\n`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "42 additional wells removed; 1,971 samples and 296,360 variants remain.\n\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Moderate sample failures that survived the rough screen. Missingness may be related to case/control status or batch, so exclusions must be documented.",
-    "quick_check": "A well with 1% missing calls has what call rate, and does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\n99%; it passes the 98% call-rate requirement.\n\n</details>",
-    "files_created": "`s3-2_state.*`, sample removal list and replay metadata."
+    "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",
+    "why": "The call rate of a sample is the share of its sites that were read successfully. A threshold (cut-off value) of 98% means at most 2% missing results. It does not mean 98% missing results.\n\nA sample with a low call rate gives less information. This reduces the effective sample size, which is the amount of usable data. A low call rate can also be linked to a laboratory group or a recruitment group.\n\nIn another study, look at the distribution of call rates before you choose a threshold.",
+    "you_need": "State 3.1 and the call-rate definition from step 2.4.",
+    "command": "```{r s3-2}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048\n```\n\n`--mind 0.02` removes samples with more than 2% missing calls. This is the same as a call rate below 98%. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
+    "expected_result": "42 more wells are removed. 1,971 samples and 296,360 variants remain.\n\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Moderate sample failures that the rough screen did not catch. Missingness can be linked to the [phenotype](../docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be linked to a [batch](../docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.",
+    "quick_check": "A well has 1% missing calls. What is its call rate? Does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\nThe call rate is 99%. The well passes the 98% call-rate rule.\n\n</details>",
+    "files_created": "`s3-2_state.*`, the list of removed samples and the replay metadata."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s3-2",
@@ -36,27 +36,32 @@
     "options": [
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--make-pgen` saves a new state"
+        "explanation_markdown": "`--make-pgen` saves the result as a new fileset (a saved state).",
+        "explained_at": "3.1"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the memory limit to 2048 MiB (about 2 gigabytes).",
+        "explained_at": "3.1"
       },
       {
         "name": "--mind",
-        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%."
+        "explanation_markdown": "`--mind 0.02` removes samples with more than 2% missing calls."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets its prefix."
+        "explanation_markdown": "`--out` sets the name prefix of the output files.",
+        "explained_at": "3.1"
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` selects the input native fileset"
+        "explanation_markdown": "`--pfile` selects the input fileset in the PLINK 2 native format.",
+        "explained_at": "3.1"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits the number of worker threads (parallel jobs).",
+        "explained_at": "3.1"
       }
     ]
   },

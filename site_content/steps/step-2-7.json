@@ -6,19 +6,19 @@
   "anchor": "step-2-7",
   "title": "Add phenotype and covariates",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
+  "source_sha256": "dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Join metadata by well identity, resolving labelled technical replicates to their original person.",
-    "why": "The phenotype is the outcome being studied. Here Disease is 1 for controls and 2 for cases. Age is a covariate, a measured predictor used to account for other influences in the model. Recorded sex is supplied for the sex check, not inferred from row order. A technical replicate inherits its original person's metadata but remains a distinct measured well until duplicate review.",
-    "you_need": "The corrected fileset from 2.5, sample sheet and phenotype table from 0.5.",
-    "command": "```{r s2-7}\nmetadata <- guided_metadata(cfg)\npheno <- metadata[c(\"FID\", \"IID\", \"SEX\", \"Age\", \"Disease\")]\nnames(pheno)[1] <- \"#FID\"\npheno_file <- guided_path(cfg, \"2.7\", \"phenotypes.tsv\")\nguided_write(pheno, pheno_file)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.5\"), \"--update-sex\", pheno_file,\n  \"--pheno\", pheno_file, \"--pheno-name\", \"Disease\", \"--make-pgen\", \"--out\", guided_path(cfg, \"2.7\")))\nstopifnot(all(guided_counts(guided_path(cfg, \"2.7\")) == c(2016, 296510)))\nops <- data.frame(option = c(\"--update-sex\", \"--pheno\", \"--pheno-name\"), value = c(pheno_file, pheno_file, \"Disease\"))\nguided_register(cfg, \"2.7\", \"2.5\", 2016, 296510, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048\n```\n\n`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.",
-    "expected_result": "All 2,016 wells matched; 296,510 variants remain. There are 2,000 people before removal of low-quality wells, relatives and ancestry outliers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "quick_check": "Why must labelled replicate wells be joined to their original person before phenotype assignment?\n\n<details><summary>Show the answer</summary>\n\nThe phenotype describes the person, while the export rows describe measured wells.\n\n</details>",
-    "files_created": "`s2-7_phenotypes.tsv` and native `s2-7_state` files."
+    "what_we_do": "We join the extra information to each well by its identity. A well that holds a labelled technical replicate gets the information of the original person.",
+    "why": "The [phenotype](../docs/glossary.md#phenotype) is the outcome that we study. Here the variable Disease is 1 for controls and 2 for cases. A case is a person with the disease and a control is a person without it.\n\nAge is a [covariate](../docs/glossary.md#covariate). A covariate is a measured variable that the model uses to account for other influences.\n\nRecorded sex is supplied for the sex check. We never guess it from the row order.\n\nA [technical replicate](../docs/glossary.md#technical-replicate) is the same person measured in a second well. It inherits the information of the original person. It stays a separate well until the duplicate review.",
+    "you_need": "You need the corrected files from 2.5, and the sample sheet and phenotype table from 0.5.",
+    "command": "```{r s2-7}\nmetadata <- guided_metadata(cfg)\npheno <- metadata[c(\"FID\", \"IID\", \"SEX\", \"Age\", \"Disease\")]\nnames(pheno)[1] <- \"#FID\"\npheno_file <- guided_path(cfg, \"2.7\", \"phenotypes.tsv\")\nguided_write(pheno, pheno_file)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.5\"), \"--update-sex\", pheno_file,\n  \"--pheno\", pheno_file, \"--pheno-name\", \"Disease\", \"--make-pgen\", \"--out\", guided_path(cfg, \"2.7\")))\nstopifnot(all(guided_counts(guided_path(cfg, \"2.7\")) == c(2016, 296510)))\nops <- data.frame(option = c(\"--update-sex\", \"--pheno\", \"--pheno-name\"), value = c(pheno_file, pheno_file, \"Disease\"))\nguided_register(cfg, \"2.7\", \"2.5\", 2016, 296510, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048\n```\n\n`--update-sex` loads the recorded sex of each sample by its ID; `--pheno` selects the phenotype table; `--pheno-name Disease` names the yes-or-no outcome to use. `--make-pgen` stores the joined phenotype in the PSAM file. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.",
+    "expected_result": "All 2,016 wells are matched, and 296,510 variants remain. There are 2,000 people before we remove low-quality wells, relatives and ancestry outliers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Why must you join labelled replicate wells to their original person before you assign the phenotype?\n\n<details><summary>Show the answer</summary>\n\nThe phenotype describes the person. The rows of the export describe measured wells.\n\n</details>",
+    "files_created": "`s2-7_phenotypes.tsv` and the native `s2-7_state` files."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s2-7",
@@ -35,19 +35,19 @@
     "options": [
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--make-pgen` preserves the joined phenotype in PSAM."
+        "explanation_markdown": "`--make-pgen` stores the joined phenotype in the PSAM file."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the memory budget to 2048 MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the output prefix"
+        "explanation_markdown": "`--out` sets the prefix of the output file names."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix.",
+        "explanation_markdown": "`--pfile` reads a set of native files by their shared prefix.",
         "explained_at": "2.4"
       },
       {
@@ -56,15 +56,15 @@
       },
       {
         "name": "--pheno-name",
-        "explanation_markdown": "`--pheno-name Disease` identifies the binary outcome."
+        "explanation_markdown": "`--pheno-name Disease` names the yes-or-no outcome to use."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       },
       {
         "name": "--update-sex",
-        "explanation_markdown": "`--update-sex` loads recorded sex by ID"
+        "explanation_markdown": "`--update-sex` loads the recorded sex of each sample by its ID"
       }
     ]
   },

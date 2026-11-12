@@ -6,19 +6,19 @@
   "anchor": "step-0-7",
   "title": "Run the setup check",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f",
-  "verification": "windows_executed",
+  "source_sha256": "0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693",
+  "verification": "unverified",
   "blocks": {
-    "what_we_do": "Check packages, locale, genotype file integrity and a small PLINK read/write operation.",
-    "why": "A program can print its version while still failing to read data or write\nresults in a path containing spaces and non-English characters. Testing a\nreal operation catches these failures before a long analysis.",
-    "you_need": "The executable from 0.4 and verified data from 0.5. The standard guided folder\nis `data/course/`. For an existing external installation, `COURSE_DATA_DIR`\nmay identify the extracted data and `COURSE_OUTPUT_DIR` a separate output folder.\nThese optional environment variables contain paths, never passwords.",
-    "command": "```{r s0-7_preflight}\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper runs PLINK with these options. `--bfile` selects the\ninput BED/BIM/FAM prefix. `--autosome` selects autosomal sites.\n`--thin-count 20` selects a small subset. `--seed 20261111` makes sampling\nrepeatable. `--freq` reports allele frequencies. `--out` sets the output prefix. The exact command,\nincluding your paths and resource settings, is printed and recorded.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely.",
-    "expected_result": "The guided starting data have 2,016 sample wells and 299,523 variants. Wells\ninclude replicates; there are 2,000 simulated people. PLINK completes the\n20-variant frequency probe and R prints `Preflight passed. Report:` followed\nby the report path. The package installation check may print additional messages.",
-    "troubleshooting": "Stop at the first error. The setup check explains unavailable packages or a\nmissing PLINK binary. On Windows it clears inherited locale requests that R\ncannot use, for this session only; startup warnings can appear before the\nscript has a chance to run. Your Windows language stays unchanged. On Linux,\nthe package preparation selects matching Posit binaries where available and\nexplains development libraries if source installation is needed. Do not run\nlater analytical steps until the setup check succeeds.",
+    "what_we_do": "Run the setup check. It tests the R packages, the [locale](../docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](../docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`",
+    "why": "A program can print its version and still fail to read data. It can also fail to write results in a folder path that has spaces or non-English letters. A test with a real operation finds these failures before a long analysis.",
+    "you_need": "The executable from step 0.4 and the verified data from step 0.5. The standard guided data folder is `data/course/`. Some people use an existing external installation. For them, the environment variable `COURSE_DATA_DIR` can name the extracted data, and `COURSE_OUTPUT_DIR` can name a separate output folder. These optional variables contain paths and never passwords.",
+    "command": "```{r s0-7_preflight}\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. The option `--vanilla` starts R without saved workspaces and startup files. Inside the setup check, the R helper runs PLINK with these options. The exact command, with your paths and resource settings, is printed and recorded.\n\n- `--bfile` selects the input files by their shared name prefix. The prefix covers files in the [BED/BIM/FAM](../docs/glossary.md#bed-bim-fam) format.\n\n- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22.\n\n- `--thin-count 20` keeps a small subset of 20 variants, chosen at random.\n\n- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable.\n\n- `--freq` reports allele frequencies, which show how common each allele is.\n\n- `--out` sets the prefix of the output files.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time; `--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes). On Windows, the executable is `bin\\plink2.exe`. The helper also runs a second test on purpose, with a folder name that has non-English letters. It translates that path in a safe way.",
+    "expected_result": "The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.",
+    "troubleshooting": "Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need.",
     "quick_check": "Why does the setup check write a frequency report rather than only print a version?\n\n<details><summary>Show the answer</summary>It tests actual data reading and file writing, including a path containing spaces and non-English characters.</details>",
-    "files_created": "`results/guided/software_versions.txt`, `results/guided/preflight.txt` and\nPLINK probe reports under its `path check/` folder. If `COURSE_OUTPUT_DIR` is\nset, the same files are written there instead. No source input is changed."
+    "files_created": "`results/guided/software_versions.txt`, `results/guided/preflight.txt` and PLINK test reports in its `path check/` folder. If `COURSE_OUTPUT_DIR` is set, the same files go there instead. No source input is changed."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s0-7_preflight",
@@ -35,35 +35,35 @@
     "options": [
       {
         "name": "--autosome",
-        "explanation_markdown": "`--autosome` selects autosomal sites."
+        "explanation_markdown": "- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22."
       },
       {
         "name": "--bfile",
-        "explanation_markdown": "`--bfile` selects the\ninput BED/BIM/FAM prefix."
+        "explanation_markdown": "- `--bfile` selects the input files by their shared name prefix."
       },
       {
         "name": "--freq",
-        "explanation_markdown": "`--freq` reports allele frequencies."
+        "explanation_markdown": "- `--freq` reports allele frequencies, which show how common each allele is."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the main workspace\nbudget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes)."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` sets the output prefix."
+        "explanation_markdown": "- `--out` sets the prefix of the output files."
       },
       {
         "name": "--seed",
-        "explanation_markdown": "`--seed 20261111` makes sampling\nrepeatable."
+        "explanation_markdown": "- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable."
       },
       {
         "name": "--thin-count",
-        "explanation_markdown": "`--thin-count 20` selects a small subset."
+        "explanation_markdown": "- `--thin-count 20` keeps a small subset of 20 variants, chosen at random."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads"
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time"
       }
     ]
   },

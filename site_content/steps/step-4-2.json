@@ -6,20 +6,20 @@
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0",
+  "source_sha256": "a2bec2a3c47cdbca2238ae2cfdc405588b5554e9e3718d81b97c8e43821f7a60",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Test whether missing calls differ between cases and controls.",
-    "why": "An overall high call rate can hide unequal missingness between outcome groups. Such a pattern can create spurious association if call failures correlate with genotype. A p-value measures how incompatible the observed group difference is with the equal-missingness model; it is not the probability that a site is an error. With many sites, some small p-values occur by chance. The course uses a prespecified screening cutoff of 0.00001.",
-    "you_need": "State 4.1 and Disease phenotype joined at 2.7.",
-    "command": "```{r s4-2}\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048\n```\n\n`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "120 variants excluded; 295,439 variants and 1,844 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
-    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Case/control-dependent calling, processing differences and some genotype-dependent missingness. A significant test does not itself identify the laboratory mechanism.",
-    "quick_check": "Can a variant pass the overall 98% call-rate rule and still fail this check?\n\n<details><summary>Show the answer</summary>\n\nYes. Its few missing calls can be concentrated in one phenotype group.\n\n</details>",
-    "files_created": "`.missing`, the reviewed exclusion list and `s4-2_state.*`."
+    "what_we_do": "We test whether missing calls differ between cases and controls.",
+    "why": "A variant can have a high overall call rate and still have unequal missingness in the two groups. Cases are people with the disease. Controls are people without it. Together they form the [phenotype](../docs/glossary.md#phenotype) groups. If failed calls depend on the genotype, this can create a false association.\n\nThe test gives a [p-value](../docs/glossary.md#p-value). The p-value tells us how unlikely the observed difference would be if both groups had the same amount of missing data. It is not the probability that the variant is an error.\n\nWith many variants, some small p-values appear by chance. So we use a screening cutoff that we fixed before the analysis. The cutoff is 0.00001.",
+    "you_need": "The dataset from step 4.1, which we call state 4.1. You also need the Disease column, which you joined in step 2.7.",
+    "command": "```{r s4-2}\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048\n```\n\nThe first command runs the test. R then makes a list of the variant IDs with p below 0.00001. The second command removes the variants on that list.\n\n`--test-missing` compares the missing calls of cases and controls.\n\n`--exclude` removes the variants named in the list file. This list is called an [exclusion list](../docs/glossary.md#exclusion-list).\n\n`--pfile` selects the PLINK 2 input files.\n\n`--make-pgen` writes a new copy of the data in PLINK 2 format.\n\n`--out` sets the start of the names of the new files.\n\n`--threads 2` limits PLINK to two worker threads.\n\n`--memory 2048` sets the memory PLINK may use, in MiB.",
+    "expected_result": "120 variants are excluded. 295,439 variants and 1,844 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "It can reveal calling that depends on case or control status, differences in how the groups were processed, and some missingness that depends on the genotype. A significant result does not tell you the cause in the laboratory.",
+    "quick_check": "Can a variant pass the overall 98% call-rate rule and still fail this check?\n\n<details><summary>Show the answer</summary>\n\nYes. Its few missing calls can all fall in one group, for example only in the cases.\n\n</details>",
+    "files_created": "The `.missing` file, the reviewed exclusion list and `s4-2_state.*`."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s4-2",
@@ -37,31 +37,31 @@
     "options": [
       {
         "name": "--exclude",
-        "explanation_markdown": "`--exclude` applies that list."
+        "explanation_markdown": "`--exclude` removes the variants named in the list file."
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--make-pgen` writes a new copy"
+        "explanation_markdown": "`--make-pgen` writes a new copy of the data in PLINK 2 format."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
+        "explanation_markdown": "`--memory 2048` sets the memory PLINK may use, in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--out` names its files."
+        "explanation_markdown": "`--out` sets the start of the names of the new files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` selects the native input"
+        "explanation_markdown": "`--pfile` selects the PLINK 2 input files."
       },
       {
         "name": "--test-missing",
-        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype."
+        "explanation_markdown": "`--test-missing` compares the missing calls of cases and controls."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads."
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },

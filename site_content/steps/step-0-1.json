@@ -6,19 +6,19 @@
   "anchor": "step-0-1",
   "title": "What you need",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f",
-  "verification": "windows_executed",
+  "source_sha256": "0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693",
+  "verification": "unverified",
   "blocks": {
-    "what_we_do": "Prepare a computer, a project folder and the tools used throughout the course.",
-    "why": "R is the language that runs our commands. RStudio provides a console, file\nbrowser and editor around R. PLINK 2 is a separate program that processes\ngenotypes. A genotype records the alleles observed at a DNA site. R starts\nPLINK for you, but installing R does not install PLINK.",
-    "you_need": "A Windows, macOS or Linux computer; an internet connection for software and\nthe approved data download; and a writable folder. The local data test does\nnot require a network download. Keep space for the encrypted archive, an\nextracted copy and intermediate results. Required space grows as you work.",
-    "command": "Once R is installed, this safe command identifies your operating system:\n\n```{r s0-1_system}\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\n```\n\nTerminal equivalent: `Rscript -e \"print(Sys.info())\"`. `-e` evaluates the R\nexpression in quotes. Do not paste terminal commands into the R console.",
-    "expected_result": "A named list of system information: Windows, Darwin (macOS), or Linux, with\nyour own system release and processor. These values depend on your computer.\nThey are not genotype counts.",
-    "troubleshooting": "If `Sys.info()` is not recognised, check that you are typing in the R console,\nwhich normally displays `>`. Continue with step 0.2 if R is not installed yet.",
+    "what_we_do": "Prepare a computer, a project folder and the tools used in the whole course. In this step you only find out which system and processor you have.\n\nYou can see this without R. On Windows, open Settings, then System, then About, and read \"System type\". On a Mac, click the Apple menu, then About This Mac. A line \"Chip\" with a name such as Apple M1 means Apple Silicon. A line \"Processor\" means an Intel Mac.",
+    "why": "R is the language that runs our commands. RStudio gives you a console, a file browser and an editor around R. PLINK 2 is a separate program that processes genotypes. A genotype records the [alleles](../docs/glossary.md#allele) found at one DNA site. An allele is one version of the DNA letter at that site. R starts PLINK for you. Installing R does not install PLINK.",
+    "you_need": "A Windows, macOS or Linux computer. You need an internet connection to download the software and the approved data. You also need a folder where you can save files. The local data test does not need a network download. Keep free space for three things: the [encrypted archive](../docs/glossary.md#encrypted-archive) (a locked data file that needs a password), an extracted copy of it, and your results. The space you need grows as you work.",
+    "command": "Once R is installed, this safe command shows your operating system:\n\n```{r s0-1_system}\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\n```\n\nTerminal equivalent: `Rscript -e \"print(Sys.info())\"`. A [terminal](../docs/glossary.md#terminal) is a window where you type commands for the computer, outside R. The option `-e` tells Rscript to run the R expression in quotes. Do not paste terminal commands into the R console.",
+    "expected_result": "R prints three named values. The value `sysname` is Windows, Darwin (macOS) or Linux. The value `release` is the version of your system. The value `machine` is your processor type. These values depend on your computer. They are not genotype counts.",
+    "troubleshooting": "If R says that `Sys.info()` is not recognised, check where you are typing. You must type in the R console, which normally shows `>` at the start of the line. If R is not installed yet, continue with step 0.2.",
     "quick_check": "Does installing R also install the program that analyses the genotype files?\n\n<details><summary>Show the answer</summary>No. PLINK 2 is installed separately at step 0.4.</details>",
     "files_created": "None."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s0-1_system",

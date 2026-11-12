@@ -6,19 +6,19 @@
   "anchor": "step-0-6",
   "title": "Open the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f",
-  "verification": "windows_executed",
+  "source_sha256": "0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693",
+  "verification": "unverified",
   "blocks": {
-    "what_we_do": "Open `GWAS_training_session.Rproj` from the extracted folder. In RStudio,\nopen this notebook from `lessons/`. Run commands in the console at the project root.",
-    "why": "Relative paths are interpreted from the working directory. Keeping one project\nroot avoids copying your personal absolute paths into every command.",
-    "you_need": "The complete extracted project from 0.5, not an individual downloaded notebook.",
-    "command": "```{r s0-6_project}\ngetwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\n```\n\nTerminal equivalent: from the project directory, run\n`Rscript -e \"stopifnot(file.exists('config.R'))\"`. `stopifnot` stops when a\nrequired condition is false. No output means this check passed.",
-    "expected_result": "Your project folder is printed. The file checks finish without an error.\nYour personal folder path will differ from the author's path.",
-    "troubleshooting": "If `config.R` is absent, reopen the project from the extracted source folder.\nDo not create a blank replacement or rename a downloaded HTML page to `.R`.",
+    "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the extracted folder, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.",
+    "why": "A [relative path](../docs/glossary.md#relative-path) gives the place of a file starting from the working directory. The working directory is the folder where R looks first. One project root means you never copy your personal full paths into commands.",
+    "you_need": "The complete extracted project from step 0.5, not one downloaded notebook.",
+    "command": "```{r s0-6_project}\ngetwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\n```\n\nTerminal equivalent: from the project directory, run `Rscript -e \"stopifnot(file.exists('config.R'))\"`. The function `stopifnot` stops with an error when a required condition is false. If the check passes, it prints nothing.",
+    "expected_result": "R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.",
+    "troubleshooting": "If `config.R` is missing, close RStudio and open the project again from the extracted source folder. Do not create an empty replacement file. Do not rename a downloaded HTML page to `.R`.",
     "quick_check": "Does a relative path starting `R/` refer to a folder on every computer's C drive?\n\n<details><summary>Show the answer</summary>No. It refers to the R folder under the current project root.</details>",
-    "files_created": "RStudio may create local project settings under `.Rproj.user/`; they are ignored by Git."
+    "files_created": "RStudio may create local project settings in `.Rproj.user/`. Git ignores them."
   },
-  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
   "r_commands": [
     {
       "label": "s0-6_project",
