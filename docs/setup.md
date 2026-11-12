@@ -2,10 +2,31 @@
 
 [Course home](../README.md) · [Data guide](data.md) · [Troubleshooting](troubleshooting.md)
 
-Start with the small demo before the first lesson if possible. There is no need
-to create the old `Class_folder` layout or move individual notebooks.
+**Start with module 0.** The guided course explains every installation step in
+plain words, with a check after each one. Open
+[module 0, Computer preparation](../lessons/module_00_preparation.Rmd) and follow
+it from step 0.1.
 
-## 1. Install R and RStudio
+Module 0 covers these steps:
+
+1. What you need (0.1).
+2. Install R (0.2) and RStudio (0.3).
+3. Download PLINK 2 (0.4) and the course package (0.5).
+4. Open the project (0.6) and run the setup check (0.7).
+5. How to use the guide (0.8).
+
+Keep your computer in its own language. The course checks decimal marks and file
+conventions by itself. See [international settings](international_setup.md).
+
+If a problem appears, read [troubleshooting](troubleshooting.md).
+
+## Older 600-sample demonstration (separate from the main path)
+
+The rest of this page belongs to an older demonstration. **Skip it if you follow
+the guided course.** The demonstration has its own data and lessons. See the
+[demonstration overview](legacy_demo.md).
+
+### 1. Install R and RStudio
 
 Install [R from CRAN](https://cran.r-project.org/) first, then
 [RStudio Desktop](https://posit.co/download/rstudio-desktop/). Use a current
@@ -16,7 +37,7 @@ starting point. Full class analyses and reference merges can require much more.
 The default PLINK settings request a 2 GB workspace and two threads; these are
 settings, not measured total memory requirements for every dataset.
 
-## 2. Open the complete project
+### 2. Open the complete project
 
 On GitHub, select **Code → Download ZIP** and extract the archive into a local
 writable folder. Keep all folders together. Double-click
@@ -33,7 +54,7 @@ file.exists("config.R")
 The second command must return `TRUE`. Otherwise, reopen the project rather than
 editing paths in every notebook.
 
-## 3. Add PLINK 2
+### 3. Add PLINK 2
 
 Download from the [official PLINK page](https://www.cog-genomics.org/plink/2.0/).
 This revision is checked against **PLINK 2 build 7 November 2026 (beta 1.4)** on
@@ -68,7 +89,7 @@ cfg$version
 
 **Check:** a PLINK v2 version appears and the data mode is `demo (SIMULATED data)`.
 
-## 4. Create the practice data
+### 4. Create the practice data
 
 Leave `mode = "demo"` in `config.R`, then run:
 
@@ -81,7 +102,7 @@ source("scripts/create_demo.R")
 do not represent human ancestry. Switch to the original dataset only after
 following [the data guide](data.md).
 
-## 5. Prepare previews
+### 5. Prepare previews
 
 Run once with an internet connection:
 
@@ -93,7 +114,7 @@ This installs `knitr` and `rmarkdown` if needed. Analytical chunks use base R an
 do not install packages during a lesson. RStudio normally supplies Pandoc for
 HTML previews. The notebooks remain editable text even without it.
 
-## 6. Start lesson 1
+### 6. Start lesson 1
 
 Before class, check [language, decimals and file conventions](international_setup.md)
 and run `source("scripts/preflight.R")`. Keep your system in its preferred language;
@@ -103,7 +124,7 @@ Open `lessons/01_quality_control.Rmd`, restart R and run its first chunk. Contin
 one chunk at a time. **Knit** reruns the whole notebook and updates outputs for
 that mode; use it only when you are ready to rerun the analyses.
 
-### Ready checklist
+#### Ready checklist
 
 - [ ] The project opens and `file.exists("config.R")` is `TRUE`.
 - [ ] A working PLINK 2 version is reported.
