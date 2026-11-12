@@ -1,3 +1,38 @@
+# Author policies and final verification, 12 November 2026
+
+This section updates the earlier session records below. Work stayed on
+`course/2026-guided-training`. Each new item was committed and pushed separately.
+
+- Checked the existing Part 1 commits: `80a1a0c` (beta), `93897f8` (module openings)
+  and `6154ea9` (guided README). Moved the remaining legacy setup instructions
+  into `docs/legacy_demo.md` in `f969f37`. No demo files were deleted.
+- Recorded the author's confirmed licences, annual password form policy and
+  gradual website release in `CLAUDE.md`. Added MIT and CC BY-NC-SA 4.0 notices,
+  a README citation and the module 0 licence note in `f0080df`.
+- Added university email form instructions and kept the masked prompt text in
+  `272d0d8`. The form URL remains a placeholder. This session did not create it.
+- Added deployment variable `COURSE_DATA_PASSWORD`, annual rotation and a test
+  email to the release checklist in `43bbeb6`. The website keeps its staged
+  release and "beta 2026" label. Repository and data releases stay complete.
+- Reran modules 6 and 7 on Windows with R 4.5.2 and the tested PLINK build in
+  `C:/WEB_site/data_sources/codex_work/beta_verified_20261112/`.
+  Copied the verified earlier prerequisites into this new folder. The notebook
+  chunks ran again and wrote new module 6 and 7 outputs. Their log is
+  `modules67_run.log`. All expected numbers stayed unchanged: 236,815 tests,
+  8 hits, lambda 1.016465, 3 clumps, and comparison hit counts of 15 and 19.
+  The exported summary file passed the eleven-column order and beta checks.
+- Regenerated all 60 step JSON files, 8 module JSON files and
+  `scripts/run_main_path.R`. Text checks reported 0 errors and 0 warnings.
+  All 9 export tests passed. Course checks and synthetic summary-statistics
+  tests passed. The initial direct course check failed because Windows inherited
+  the unsupported `C.UTF-8` locale. Rerunning both R checks after the existing
+  `normalise_course_locale()` helper passed. No system settings changed.
+
+No data files or passwords were committed. The other website repository was
+not accessed. No website deployment, form email test or classroom data release
+was performed. The generated full-path script was regenerated, not executed
+end to end in this session. macOS and Linux were not tested.
+
 # Follow-up session, 12 November 2026 (beta column, beginner openings, README)
 
 Branch `course/2026-guided-training`, one commit per item, all pushed.
