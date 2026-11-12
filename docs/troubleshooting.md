@@ -23,7 +23,7 @@ chunks. Later errors are often consequences of that first failure.
 | The password is wrong / Incorrect passphrase | Check the password for typing errors. If it still fails, ask the instructor. Do not include your password in a screenshot, error report or shared script. |
 | Course download failed its SHA-256 check | Download again. If it still fails, ask the instructor for the approved configuration. Do not bypass the check or replace the expected checksum with the downloaded file's hash. |
 | Classroom data release is not configured | Download the current course project. Its `config.R` contains the published classroom release settings. |
-| Destination already exists | Choose a new destination folder. The download helper keeps existing work unchanged. |
+| Existing data cannot be verified | Read the missing or changed file details. Run `download_course_data(overwrite = TRUE)` for the standard folder. A dated backup keeps the old data and manifest. |
 | Windows startup warnings about `C.UTF-8`, or errors reading accented text | Run `source("scripts/preflight.R")`. Inherited locale variables can request a locale unavailable to Windows R. The preflight clears invalid requests for this R session and recovers the Windows user locale. Your system language and settings stay unchanged. |
 
 ## Linux package installation
@@ -85,21 +85,23 @@ opens the password prompt and looks for `MANIFEST.tsv` beside the ZIP. It makes
 no network request:
 
 ```r
-download_course_data(
-  zip_path = file.path(Sys.getenv("COURSE_WORK_DIR"), "release", "course-data-2026.1.zip"),
-  destination = file.path(Sys.getenv("COURSE_WORK_DIR"), "local-data-check")
-)
+download_course_data(zip_path = file.choose())
 ```
 
-Set `COURSE_WORK_DIR` to the existing authorised work folder first. Choose a new
-destination on each run. If the manifest is elsewhere, supply `manifest_path`
-too. Local inputs receive the same configured SHA-256 and payload checks as
-remote downloads; expected hashes are never inferred from the input files.
+Choose the published `course-data-2026.1.zip`. Keep `MANIFEST.tsv` beside it.
+The helper reports the attempted path if a local ZIP cannot be found. If the
+manifest is elsewhere, supply `manifest_path` too. Local inputs receive the
+same configured SHA-256 and payload checks as remote downloads.
 
 The helper downloads and verifies the ZIP and its separate manifest, requests
 the password through a masked prompt, extracts into a temporary folder and
 checks every extracted file's size and SHA-256. Only verified files are moved
-to `data/course`. An existing destination is refused. In a non-interactive
+to `data/course`. It keeps a pinned verification manifest beside the folder
+at `data/course.MANIFEST.tsv`. A complete rerun checks every file without a
+download or a password prompt. If verification fails, the message gives an
+exact recovery command. `overwrite = TRUE` verifies new data first, then keeps
+the old folder and manifest in a dated backup before replacing them. Older
+installations without the saved manifest need this recovery once. In a non-interactive
 session, pass a password obtained securely at runtime through the `password`
 argument; do not save it in a script or command history. Extraction uses
 `archive`, with no 7-Zip installation for students.

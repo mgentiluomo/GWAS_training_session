@@ -35,6 +35,30 @@ course_manifest <- function(path) {
   manifest
 }
 
+course_existing_data <- function(destination, manifest_path, manifest_sha256) {
+  fail <- function(reason) list(complete = FALSE, reason = reason)
+  if (!dir.exists(destination)) return(fail("The data folder is missing or its path is a file."))
+  if (!file.exists(manifest_path) || dir.exists(manifest_path)) {
+    return(fail(paste0("The verification manifest is missing: ", manifest_path, ".")))
+  }
+  tryCatch({
+    hash <- function(path) digest::digest(path, algo = "sha256", file = TRUE)
+    if (hash(manifest_path) != tolower(manifest_sha256)) {
+      return(fail("The saved manifest does not match the approved SHA-256."))
+    }
+    manifest <- course_manifest(manifest_path)
+    paths <- file.path(destination, manifest$path)
+    missing <- !file.exists(paths) | dir.exists(paths)
+    if (any(missing)) return(fail(paste0(sum(missing), " of ", nrow(manifest),
+      " expected files are missing (first: ", manifest$path[which(missing)[1]], ").")))
+    changed <- file.info(paths)$size != as.numeric(manifest$bytes) |
+      vapply(paths, hash, character(1)) != tolower(manifest$sha256)
+    if (any(changed)) return(fail(paste0(sum(changed), " of ", nrow(manifest),
+      " files do not match their size or SHA-256 (first: ", manifest$path[which(changed)[1]], ").")))
+    list(complete = TRUE, files = nrow(manifest))
+  }, error = function(e) fail("The saved manifest or a data file could not be read safely."))
+}
+
 course_password_prompt <- function() {
   if (!interactive()) stop("Supply the course password through the password argument in a non-interactive session.", call. = FALSE)
   if (!requireNamespace("getPass", quietly = TRUE)) {
@@ -44,7 +68,7 @@ course_password_prompt <- function() {
 }
 
 download_course_data <- function(password = NULL, destination = "data/course", release = NULL,
-                                 zip_path = NULL, manifest_path = NULL) {
+                                 zip_path = NULL, manifest_path = NULL, overwrite = FALSE) {
   if (is.null(release)) {
     settings <- new.env(parent = baseenv())
     sys.source("config.R", envir = settings)
@@ -56,12 +80,53 @@ download_course_data <- function(password = NULL, destination = "data/course", r
     stop("The classroom data release is not configured. Ask the instructor for the approved course configuration.",
          call. = FALSE)
   }
+  if (!all(grepl("^[a-fA-F0-9]{64}$", unlist(release[c("archive_sha256", "manifest_sha256")])))) {
+    stop("The course configuration needs approved SHA-256 checksums for both downloads.", call. = FALSE)
+  }
+  if (!is.character(destination) || length(destination) != 1L || is.na(destination) || !nzchar(destination)) {
+    stop("Choose a new folder for the course data.", call. = FALSE)
+  }
+  if (!is.logical(overwrite) || length(overwrite) != 1L || is.na(overwrite)) {
+    stop("Use overwrite = TRUE or overwrite = FALSE.", call. = FALSE)
+  }
+  if (!requireNamespace("digest", quietly = TRUE)) stop("Install the digest course package first.", call. = FALSE)
+  saved_manifest <- paste0(sub("[/\\\\]+$", "", destination), ".MANIFEST.tsv")
+  existed <- file.exists(destination) || file.exists(saved_manifest)
+  if (existed) {
+    verification_manifest <- saved_manifest
+    if (!file.exists(saved_manifest) && file.exists(file.path(destination, "MANIFEST.tsv"))) {
+      verification_manifest <- file.path(destination, "MANIFEST.tsv")
+    }
+    status <- course_existing_data(destination, verification_manifest, release$manifest_sha256)
+    if (status$complete) {
+      message("Course data are already ready: ", status$files, " files verified. Nothing to do.")
+      return(invisible(normalizePath(destination, winslash = "/", mustWork = TRUE)))
+    }
+    if (!overwrite) {
+      command <- if (identical(destination, "data/course")) "download_course_data(overwrite = TRUE)" else
+        paste0("download_course_data(destination = ", encodeString(destination, quote = '"'), ", overwrite = TRUE)")
+      stop("Existing course data at ", destination, " could not be verified. ", status$reason,
+        "\nRun: ", command,
+        "\nThis verifies a fresh copy, then moves the old folder and manifest to a dated backup before replacing them.",
+        call. = FALSE)
+    }
+    # Never move the working project, its ancestors, a filesystem root or a link.
+    absolute <- normalizePath(destination, winslash = "/", mustWork = FALSE)
+    current <- normalizePath(getwd(), winslash = "/", mustWork = TRUE)
+    if (tolower(absolute) == tolower(current) ||
+        startsWith(tolower(current), paste0(tolower(absolute), "/")) ||
+        dirname(absolute) == absolute || nzchar(Sys.readlink(destination))) {
+      stop("Choose a separate data folder. The project, its parent folders and links cannot be replaced.", call. = FALSE)
+    }
+  }
   local_archive <- !is.null(zip_path)
   local_manifest <- manifest_path
   if (local_archive) {
     if (!is.character(zip_path) || length(zip_path) != 1L || is.na(zip_path) ||
         !nzchar(zip_path) || !file.exists(zip_path) || dir.exists(zip_path)) {
-      stop("The local ZIP file was not found. Check zip_path.", call. = FALSE)
+      tried <- paste(zip_path, collapse = ", ")
+      stop("The local ZIP file was not found: ", tried,
+        ". Choose the published ZIP with download_course_data(zip_path = file.choose()).", call. = FALSE)
     }
     if (is.null(local_manifest)) local_manifest <- file.path(dirname(zip_path), "MANIFEST.tsv")
     if (!is.character(local_manifest) || length(local_manifest) != 1L || is.na(local_manifest) ||
@@ -76,19 +141,10 @@ download_course_data <- function(password = NULL, destination = "data/course", r
     }
     if (!all(grepl("^https://", urls))) stop("Course downloads must use HTTPS URLs.", call. = FALSE)
   }
-  if (!all(grepl("^[a-fA-F0-9]{64}$", unlist(release[c("archive_sha256", "manifest_sha256")])))) {
-    stop("The course configuration needs approved SHA-256 checksums for both downloads.", call. = FALSE)
-  }
   for (package in c("archive", "digest")) {
     if (!requireNamespace(package, quietly = TRUE)) {
       stop("Required course packages are missing. Run source('scripts/preflight.R') first.", call. = FALSE)
     }
-  }
-  if (!is.character(destination) || length(destination) != 1L || is.na(destination) || !nzchar(destination)) {
-    stop("Choose a new folder for the course data.", call. = FALSE)
-  }
-  if (file.exists(destination) || dir.exists(destination)) {
-    stop("The destination already exists. Choose a new folder to keep your existing work.", call. = FALSE)
   }
   parent <- dirname(destination)
   if (!dir.exists(parent) && !dir.create(parent, recursive = TRUE)) {
@@ -96,6 +152,7 @@ download_course_data <- function(password = NULL, destination = "data/course", r
   }
   parent <- normalizePath(parent, winslash = "/", mustWork = TRUE)
   destination <- file.path(parent, basename(destination))
+  saved_manifest <- paste0(destination, ".MANIFEST.tsv")
   work <- tempfile("course-download-", tmpdir = parent)
   if (!dir.create(work)) stop("A temporary download folder could not be created.", call. = FALSE)
   on.exit(unlink(work, recursive = TRUE), add = TRUE)
@@ -136,7 +193,29 @@ download_course_data <- function(password = NULL, destination = "data/course", r
       !all(vapply(paths, hash, character(1)) == tolower(manifest$sha256))) {
     stop("Extracted course files failed verification. Ask the instructor for help.", call. = FALSE)
   }
-  if (file.exists(destination) || !file.rename(payload, destination)) {
+  if (!existed && (file.exists(destination) || file.exists(saved_manifest))) {
+    stop("The destination appeared during the download. Existing work was kept. Run the command again.", call. = FALSE)
+  }
+  if (existed) {
+    # The resolved backup must remain beside the resolved destination.
+    backup <- paste0(destination, ".backup-", format(Sys.time(), "%Y%m%d-%H%M%S"))
+    counter <- 0L
+    candidate <- backup
+    while (file.exists(candidate) || file.exists(paste0(candidate, ".MANIFEST.tsv"))) {
+      counter <- counter + 1L
+      candidate <- paste0(backup, "-", counter)
+    }
+    backup <- candidate
+    stopifnot(identical(dirname(backup), parent))
+    had_folder <- file.exists(destination)
+    if (had_folder && !file.rename(destination, backup)) stop("The old data could not be backed up. Nothing was replaced.", call. = FALSE)
+    if (file.exists(saved_manifest) && !file.rename(saved_manifest, paste0(backup, ".MANIFEST.tsv"))) {
+      if (had_folder) file.rename(backup, destination)
+      stop("The old manifest could not be backed up. Nothing was replaced.", call. = FALSE)
+    }
+    message("Previous course data kept at: ", backup)
+  }
+  if (!file.rename(manifest_path, saved_manifest) || !file.rename(payload, destination)) {
     stop("Verified data could not be moved to the destination. Check folder permissions and try again.", call. = FALSE)
   }
   message("Course data are ready: ", nrow(manifest), " files verified.")

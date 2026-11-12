@@ -252,38 +252,70 @@ The complete project folder, R and an internet connection. The command below dow
 
 Request the password with your university email through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access). In class, you can scan the QR code to open the same form. The form accepts University of Pisa email addresses at `unipi.it` and all its subdomains. Examples include `studenti.unipi.it`, `phd.unipi.it` and `biologia.unipi.it`. It sends the password automatically to these addresses. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
 
-### Command
+Prepare the packages and helper once in the RStudio console after opening the
+project. If you have not opened it yet, do step 0.6 first and return here.
 
-Run the following commands in the RStudio console after you open the project. If you have not opened it yet, do step 0.6 first and then return here. The commands do not run automatically when this notebook is rendered:
-
-```{r s0-5_data, eval=FALSE}
+```r
 source("R/package_setup.R")
 install_course_packages()
 source("R/course.R")
+```
+
+The first run of `install_course_packages()` can take several minutes. Wait
+until the `>` prompt returns.
+
+### Command
+
+Run this command in the RStudio console. It does not run automatically when the
+notebook is rendered:
+
+```{r s0-5_data, eval=FALSE}
 download_course_data()
 ```
 
-The first run of `install_course_packages()` can take several minutes and print many lines. Wait until the `>` prompt returns.
-
-Local fallback: if you already have the published ZIP and its `MANIFEST.tsv`, use this command instead of the download command above. It reads the archive from your computer and makes no network download. Replace the text in quotes with the place where you saved the ZIP file. Write the path with forward slashes (/), also on Windows:
-
-```{r s0-5_local, eval=FALSE}
-download_course_data(
-  zip_path = "C:/Users/yourname/Downloads/course-data-2026.1.zip"
-)
-```
-
-For the local fallback, `MANIFEST.tsv` must be in the same folder as the ZIP file. The function `download_course_data` uses `getPass` to ask for a masked password. A prompt asks for the password. Type it and press Enter. You will not see the letters appear. Do not write the password in this notebook, in a shared script or in your command history. Students have no separate terminal command to decrypt the archive. Both routes use the same R helper and the `archive` package. You do not need to install 7-Zip.
+The function uses `getPass` to ask for a masked password. Type it and press
+Enter. You will not see the letters appear. Do not write the password in this
+notebook, a shared script or your command history. You do not need 7-Zip.
 
 <details><summary>Show the expected result</summary>
 
-R prints `Course data are ready: 108 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
+On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If R says that the release is not configured, download the current course project again. If the download fails, check your internet connection. You can use the local fallback with files from the published release. If the password is wrong, R shows a message that asks you to check your typing and to contact the instructor if needed. Never bypass a checksum failure. If the destination folder already exists, R refuses to continue. This protects your work. See [troubleshooting](../docs/troubleshooting.md).
+If the download fails, check your internet connection. As a local fallback,
+open the release page linked above. Save `course-data-2026.1.zip` and
+`MANIFEST.tsv` together in one folder. Then run:
+
+```r
+download_course_data(zip_path = file.choose())
+```
+
+A file selection window opens. Choose the published ZIP file. Do not choose
+the manifest or the project ZIP. The helper checks the same SHA-256 values.
+
+If the data folder exists but cannot be verified, R reports what it found.
+This includes a missing manifest, missing files or changed files. For the
+standard folder, run the exact recovery command:
+
+```r
+download_course_data(overwrite = TRUE)
+```
+
+The helper verifies a fresh copy first. It then moves the old folder and its
+manifest to a dated backup before replacing them. It prints the backup path.
+It never silently deletes the old data. Use that backup if you need earlier work.
+
+Older installations did not keep the verification manifest. They need this
+backup and reinstall once. Later runs verify the saved manifest and all data
+files without a download or a password prompt.
+
+If R says that the release is not configured, download the current course
+project again. If the password is wrong, check your typing and contact the
+instructor if needed. Never bypass a checksum failure. See
+[troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
@@ -295,7 +327,10 @@ If the checksum differs but the password is accepted, should you use that downlo
 
 ### Files created
 
-Verified data in `data/course/`. R removes the temporary download and extraction files. Data and passwords are never added to Git.
+Verified data in `data/course/` and the verification manifest at
+`data/course.MANIFEST.tsv`. The manifest stays beside the folder, so the
+package still contains 108 files. R removes temporary download and extraction
+files. Data, manifests and passwords are never added to Git.
 
 ## 0.6 Open the project {#step-0-6}
 

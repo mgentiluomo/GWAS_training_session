@@ -172,7 +172,9 @@ local({
     before <- downloads
     msg <- error_message(course$download_course_data(secret, release = release,
       zip_path = file.path(root, "absent.zip")))
-    stopifnot(grepl("local ZIP", msg, fixed = TRUE))
+    stopifnot(grepl("local ZIP", msg, fixed = TRUE),
+              grepl(file.path(root, "absent.zip"), msg, fixed = TRUE),
+              grepl("file.choose()", msg, fixed = TRUE))
     msg <- error_message(course$download_course_data(secret, release = release,
       zip_path = zip, manifest_path = file.path(root, "absent.tsv")))
     stopifnot(grepl("local manifest", msg, fixed = TRUE))
@@ -199,11 +201,121 @@ local({
       stopifnot(prompted == 1L)
     }, finally = { course$course_password_prompt <- original_prompt })
   })
-  test("existing destination is retained without downloading", {
+  test("complete rerun verifies saved manifest without downloads, prompt or file chooser", {
     before <- downloads
-    msg <- error_message(course$download_course_data(secret, file.path(root, "verified"), release))
-    stopifnot(grepl("already exists", msg, fixed = TRUE), downloads == before,
-              identical(hash(file.path(root, "verified", "example.txt")), original_manifest$sha256))
+    dest <- file.path(root, "verified")
+    messages <- capture.output(result <- course$download_course_data(
+      password = stop("Password must not be evaluated"), destination = dest, release = release,
+      zip_path = stop("File chooser must not be evaluated")), type = "message")
+    stopifnot(downloads == before, identical(normalizePath(dest, winslash = "/"), result),
+      any(grepl("Course data are already ready: 1 files verified. Nothing to do.", messages, fixed = TRUE)),
+      identical(hash(file.path(dest, "example.txt")), original_manifest$sha256),
+      identical(hash(paste0(dest, ".MANIFEST.tsv")), release$manifest_sha256))
+  })
+  test("complete 108-file synthetic rerun prints the classroom result without a prompt", {
+    dest <- file.path(root, "synthetic-108")
+    dir.create(dest)
+    for (i in 1:108) writeLines(paste("Synthetic fixture", i), file.path(dest, paste0(i, ".txt")))
+    paths <- list.files(dest, full.names = TRUE)
+    manifest108 <- data.frame(path = basename(paths), bytes = file.info(paths)$size,
+      sha256 = vapply(paths, hash, character(1)))
+    sidecar <- paste0(dest, ".MANIFEST.tsv")
+    write.table(manifest108, sidecar, sep = "\t", quote = FALSE, row.names = FALSE)
+    release108 <- release
+    release108$manifest_sha256 <- hash(sidecar)
+    before <- downloads
+    messages <- capture.output(course$download_course_data(destination = dest, release = release108), type = "message")
+    stopifnot(downloads == before,
+      any(grepl("Course data are already ready: 108 files verified. Nothing to do.", messages, fixed = TRUE)))
+  })
+  test("incomplete rerun identifies missing files and gives a backup command", {
+    dest <- file.path(root, "incomplete")
+    dir.create(dest)
+    file.copy(manifest_file, paste0(dest, ".MANIFEST.tsv"))
+    before <- downloads
+    msg <- error_message(course$download_course_data(destination = dest, release = release))
+    stopifnot(grepl("1 of 1 expected files are missing", msg, fixed = TRUE),
+      grepl("example.txt", msg, fixed = TRUE), grepl("overwrite = TRUE", msg, fixed = TRUE),
+      grepl(encodeString(dest, quote = '"'), msg, fixed = TRUE), downloads == before, dir.exists(dest))
+  })
+  test("same-size corruption and untrusted manifests cannot pass a rerun", {
+    dest <- file.path(root, "tampered")
+    course$download_course_data(secret, dest, release, zip_path = zip)
+    writeBin(rep(as.raw(120), original_manifest$bytes), file.path(dest, "example.txt"))
+    before <- downloads
+    msg <- error_message(course$download_course_data(destination = dest, release = release))
+    stopifnot(grepl("SHA-256", msg, fixed = TRUE), grepl("example.txt", msg, fixed = TRUE), downloads == before)
+    writeLines("Untrusted manifest", paste0(dest, ".MANIFEST.tsv"))
+    msg <- error_message(course$download_course_data(destination = dest, release = release))
+    stopifnot(grepl("saved manifest does not match", msg, fixed = TRUE), downloads == before)
+  })
+  test("older installations without a saved manifest receive a precise recovery command", {
+    dest <- file.path(root, "older-installation")
+    dir.create(dest)
+    file.copy(file.path(source_dir, "example.txt"), file.path(dest, "example.txt"))
+    before <- downloads
+    msg <- error_message(course$download_course_data(destination = dest, release = release))
+    stopifnot(grepl("verification manifest is missing", msg, fixed = TRUE),
+      grepl(paste0(dest, ".MANIFEST.tsv"), msg, fixed = TRUE), grepl("overwrite = TRUE", msg, fixed = TRUE),
+      downloads == before, identical(hash(file.path(dest, "example.txt")), original_manifest$sha256))
+  })
+  test("overwrite keeps the old folder and manifest in a dated backup", {
+    dest <- file.path(root, "tampered")
+    old_payload <- hash(file.path(dest, "example.txt"))
+    old_manifest <- hash(paste0(dest, ".MANIFEST.tsv"))
+    before <- downloads
+    course$download_course_data(secret, dest, release, zip_path = zip, overwrite = TRUE)
+    backups <- list.dirs(root, recursive = FALSE, full.names = TRUE)
+    backups <- backups[startsWith(basename(backups), "tampered.backup-")]
+    stopifnot(length(backups) == 1L, identical(hash(file.path(backups, "example.txt")), old_payload),
+      identical(hash(paste0(backups, ".MANIFEST.tsv")), old_manifest), downloads == before,
+      identical(hash(file.path(dest, "example.txt")), original_manifest$sha256))
+  })
+  test("failed replacement leaves the original folder and manifest untouched", {
+    dest <- file.path(root, "incomplete")
+    before <- downloads
+    old_manifest <- hash(paste0(dest, ".MANIFEST.tsv"))
+    bad <- release
+    bad$archive_sha256 <- paste(rep("0", 64), collapse = "")
+    error_message(course$download_course_data(secret, dest, bad, zip_path = zip, overwrite = TRUE))
+    stopifnot(dir.exists(dest), downloads == before,
+      identical(hash(paste0(dest, ".MANIFEST.tsv")), old_manifest),
+      !length(list.files(root, pattern = "^incomplete[.]backup-")))
+  })
+  test("local file chooser route accepts the selected fixture", {
+    before <- downloads
+    local({
+      file.choose <- function() zip
+      course$download_course_data(secret, file.path(root, "chooser"), release, zip_path = file.choose())
+    })
+    stopifnot(downloads == before, file.exists(file.path(root, "chooser", "example.txt")))
+  })
+  test("a pinned manifest inside an existing folder also supports an offline rerun", {
+    dest <- file.path(root, "manifest-inside")
+    dir.create(dest)
+    file.copy(file.path(source_dir, "example.txt"), file.path(dest, "example.txt"))
+    file.copy(manifest_file, file.path(dest, "MANIFEST.tsv"))
+    before <- downloads
+    course$download_course_data(destination = dest, release = release)
+    stopifnot(downloads == before)
+  })
+  test("repeated replacements keep distinct backups and all earlier work", {
+    dest <- file.path(root, "tampered")
+    writeLines("Second old copy", file.path(dest, "example.txt"))
+    second <- hash(file.path(dest, "example.txt"))
+    course$download_course_data(secret, dest, release, zip_path = zip, overwrite = TRUE)
+    backups <- list.dirs(root, recursive = FALSE, full.names = TRUE)
+    backups <- backups[startsWith(basename(backups), "tampered.backup-")]
+    stopifnot(length(backups) == 2L,
+      second %in% vapply(file.path(backups, "example.txt"), hash, character(1)),
+      identical(hash(file.path(dest, "example.txt")), original_manifest$sha256))
+  })
+  test("overwrite refuses the project and its parent without downloading", {
+    before <- downloads
+    for (dest in c(".", "..")) {
+      msg <- error_message(course$download_course_data(destination = dest, release = release, overwrite = TRUE))
+      stopifnot(grepl("cannot be replaced", msg, fixed = TRUE), downloads == before)
+    }
   })
   test("archive and manifest download checksums are both enforced", {
     for (key in c("archive_sha256", "manifest_sha256")) {

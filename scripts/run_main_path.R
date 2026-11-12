@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 7bacb415a96195af5b4bf6fe0d005fd871b85e17bbf5abc194df52c002cb35f2
+# SHA-256: 25bfd2301b719c8648c358728ec930e84ce38cb069ea3e20ae99f0a4cfada1e0
 
 # Chunk: s0-6_project
 getwd()

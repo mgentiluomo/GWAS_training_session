@@ -124,6 +124,15 @@ class CourseExportsTests(unittest.TestCase):
         self.assertIn("R.version.string", code)
         self.assertIn('source("scripts/preflight.R")', code)
 
+    def test_data_download_has_one_main_command_and_a_file_chooser_fallback(self):
+        record = next(r for r in self.records if r["id"] == "0.5")
+        self.assertEqual([c["code"] for c in record["r_commands"]], ["download_course_data()"])
+        self.assertNotIn("zip_path", record["blocks"]["command"])
+        self.assertNotIn("yourname", json.dumps(record))
+        self.assertIn("download_course_data(zip_path = file.choose())", record["blocks"]["troubleshooting"])
+        self.assertIn("download_course_data(overwrite = TRUE)", record["blocks"]["troubleshooting"])
+        self.assertIn("108 files verified. Nothing to do.", record["blocks"]["expected_result"])
+
     def test_site_setup_keeps_helpers_and_excludes_notebook_rendering(self):
         for record in self.records:
             with self.subTest(step=record["id"]):
