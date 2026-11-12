@@ -2,14 +2,12 @@
 course_settings <- list(
   # "demo" = reproducible, simulated practice data; "course" = original class data.
   mode = "demo",
-  # These checksums identify the local stage 1 test archive, not a published release.
-  # Replace them when the data-2026.1 release is created, together with its approved URLs.
-  # The GitHub Release does not exist yet. Never store a password here.
+  # Published classroom data release data-2026.1. Never store a password here.
   data_release = list(
-    archive_url = "",
-    manifest_url = "",
-    archive_sha256 = "3f62faf8b63ce1835dbfdbaed3b4a1ec1149bd4d913eaff419fc1a90917f5a94",
-    manifest_sha256 = "5a3943e793b9a37b8873833c259325d078d261ba4b82b108a812a266e6fe8fd0"
+    archive_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/data-2026.1/course-data-2026.1.zip",
+    manifest_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/data-2026.1/MANIFEST.tsv",
+    archive_sha256 = "56d79a5b4c33b7f94b3ae1661ca0e3ee3bda3a51a458ce09e02ecfef490eb04d",
+    manifest_sha256 = "50cba1db8927314bdf4443a4ddf8730fdaff82c1e895c409ff1da9e36c45ec1c"
   ),
   plink2 = Sys.getenv("PLINK2_BIN", unset = ""),
   tested_plink_version = "PLINK v2.0.0-b.1.4 (7 Nov 2026)",
