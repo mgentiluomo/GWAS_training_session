@@ -43,8 +43,11 @@ The course is an independent teaching resource for students across University of
 - The generator and its checks are in `scripts/author/` (`python -I scripts/author/tests/test_sim2026.py`, 36 tests).
 - rs4988235, rs12913832 and rs1426654 leave at step 4.4 and do not reach module 5.
 - L1 has one genome-wide variant only: use L2 or L3 for the regional plot at 7.6.
-- Open decision: the Illumina names and GRCh38 positions of the array sites in the release.
-- Next steps: the encrypted release and the R helpers (`download_course_data`, `restore_checkpoint`, `check_step`), then the notebooks module by module, then the website (mockup first).
+- The release uses GSA-style Illumina names and real GRCh38 positions. The array manifest stays local only and is not included in the repository or release.
+- AES-256 release packaging exists in `scripts/package_release.py`, with manifest checks and a local test package. The classroom release has not been published.
+- Windows extraction with `archive` 1.1.14 passed all 55 payload SHA-256 checks and rejected a wrong password. Linux and macOS extraction still need testing.
+- Decision: keep AES-256 ZIP with `archive` for extraction. No 7-Zip installation or fallback for students; the author-side packager uses 7-Zip only to create the archive.
+- Next steps: test extraction on Linux and macOS, prepare the classroom release and the R helpers (`download_course_data`, `restore_checkpoint`, `check_step`), then the notebooks module by module, then the website (mockup first).
 
 ## Technical decisions
 
