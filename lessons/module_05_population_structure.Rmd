@@ -1,0 +1,492 @@
+---
+title: "Module 5: population structure"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root. Read each step before running its R chunk. All data
+are simulated; these exercises cannot establish a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
+loads its inputs from disk; a saved R workspace is not required.
+
+```{r module5_setup, include=FALSE}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
+}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## 5.1 Why ancestry matters {#step-5-1}
+
+### What we do
+
+Explain how population structure can confound an association study.
+
+### Why
+
+If case recruitment and control recruitment sample different ancestry proportions, allele frequencies can differ even at sites unrelated to disease. A principal component (PC) summarises a direction of genetic variation across many sites. Principal component analysis (PCA) describes patterns; its axes are not diagnoses, nationality or ethnicity. Reference labels are contextual metadata, not a biological ranking. We define an ancestry-matched teaching cohort before examining association p-values.
+
+### You need
+
+The module 4 boundary, plus the supplied GRCh38 reference subset.
+
+### Command
+
+```{r s5-1}
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+reference_samples <- guided_table(paste0(reference, ".psam"))
+table(reference_samples$SuperPop)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS. The labels describe reference sampling metadata; the table shows the groups actually present, not every possible 1000 Genomes group.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Can a disease-associated allele-frequency difference arise from unequal ancestry proportions even when a site has no disease effect?
+
+<details><summary>Show the answer</summary>
+
+Yes. Ancestry can be a common cause of group membership and allele-frequency differences.
+
+</details>
+
+### Files created
+
+None.
+
+## 5.2 Prepare variants for reference PCA {#step-5-2}
+
+### What we do
+
+Identify common autosomal sites in the supplied reference subset and the cleaned study.
+
+### Why
+
+PCA should not be dominated by long stretches of correlated probes. The supplied reference was constructed from common, LD-pruned autosomal array sites, with an r? threshold of 0.15 in 200-kb windows and a 50,000-site cap. We intersect it with the study after QC rather than reintroduce sites that failed earlier checks. Study-specific PCs will be pruned again after defining the final cohort.
+
+### You need
+
+State 4.6; the reference subset supplied at 0.5.
+
+### Command
+
+```{r s5-2}
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
+reference_sites <- guided_table(paste0(reference, ".pvar"))
+common <- sort(intersect(study_sites$ID, reference_sites$ID))
+guided_list(common, guided_path(cfg, "5.2", "common.txt"))
+stopifnot(length(common) == 48614L)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+48,614 shared sites retained for reference PCA and projection.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Should sites excluded for variant QC be added back merely because they exist in the reference?
+
+<details><summary>Show the answer</summary>
+
+No. The reference comparison uses the retained study sites.
+
+</details>
+
+### Files created
+
+`s5-2_common.txt`.
+
+## 5.3 Match build, position and alleles {#step-5-3}
+
+### What we do
+
+Audit shared variant identities before projection.
+
+### Why
+
+A shared rsID alone does not establish a match. Confirm the assembly, chromosome, coordinate and allele pair. GSA-style names have been changed at 4.5 to position-and-allele IDs. A swapped allele order can be compatible, but a mismatched pair or unresolved strand cannot be accepted blindly. Projection uses the named allele in each loading, not the order of rows in two files.
+
+### You need
+
+The common list from 5.2 and both PVAR tables.
+
+### Command
+
+```{r s5-3}
+common <- readLines(guided_path(cfg, "5.2", "common.txt"))
+study <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+ref <- guided_table(paste0(reference, ".pvar"))
+a <- match(common, study$ID); b <- match(common, ref$ID)
+pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
+  all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks compatibility between the supplied files; it is not independent validation against a genomic FASTA.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Is it safe to match only by row position if both PVAR files contain 48,614 rows?
+
+<details><summary>Show the answer</summary>
+
+No. Match explicit IDs and verify position/alleles.
+
+</details>
+
+### Files created
+
+None; a mismatch stops execution before projection.
+
+## 5.4 Reference PCA and study projection {#step-5-4}
+
+### What we do
+
+Fit PCs in the reference and project both datasets onto the same axes.
+
+### Why
+
+A joint PCA can be pulled towards a much larger study group. Projection fixes the reference axes first. The same reference allele frequencies, allele weights and standardisation must then be used for reference and study scores. Scaling and signs of PCs are arbitrary; compare patterns on the same scoring scale. We disable mean imputation so missingness remains visible in the scoring denominator.
+
+### You need
+
+Shared audited sites from 5.3 and the full 4.6 fileset.
+
+### Command
+
+```{r s5-4}
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+common <- guided_path(cfg, "5.2", "common.txt")
+fit <- guided_path(cfg, "5.4", "reference")
+run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))
+weights <- guided_table(paste0(fit, ".eigenvec.allele"))
+id_column <- match("ID", names(weights)); allele_column <- match("A1", names(weights))
+first_pc <- match("PC1", names(weights))
+score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),
+  id_column, allele_column, "header-read", "no-mean-imputation", "variance-standardize",
+  "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
+run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --freq --pca 10 allele-wts --out results/guided/s5-4_reference --threads 2 --memory 2048
+bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_ref_scores --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048
+```
+
+`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1?PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+Reference eigenvectors/eigenvalues, allele weights and two `.sscore` files with PC1_AVG through PC10_AVG. The study projection contains 1,844 samples.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Why must the study projection use reference frequencies rather than recomputing standardisation from the study alone?
+
+<details><summary>Show the answer</summary>
+
+Otherwise the two sets of scores would not use the same coordinate system.
+
+</details>
+
+### Files created
+
+`s5-4_reference.*`, `s5-4_ref_scores.sscore`, `s5-4_study_scores.sscore` and logs.
+
+## 5.5 Plot the reference and projected study {#step-5-5}
+
+### What we do
+
+Visualise the first two reference axes, with labels and symbols for reference groups.
+
+### Why
+
+A two-dimensional plot helps detect gross discrepancies, but later PCs can reveal patterns that PC1/PC2 hide. Differences can also reflect platform, missingness or allele errors. The plotted study points are projected scores, not an independent PCA. Reference groups and study status use symbols as well as colour.
+
+### You need
+
+Score files from 5.4 and reference metadata.
+
+### Command
+
+```{r s5-5}
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
+levels <- sort(unique(group)); code <- match(group, levels)
+colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
+png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
+plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
+  xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
+points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
+legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+dev.off()
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+A labelled reference/projection plot. Most study samples overlap European reference patterns, with a small number extending elsewhere. The exact orientation of a PC can reverse sign without changing its meaning.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Does overlap with a reference group prove a person's nationality?
+
+<details><summary>Show the answer</summary>
+
+No. The plot summarises genetic variation relative to a selected reference, not nationality or ethnicity.
+
+</details>
+
+### Files created
+
+`s5-5_reference_projection.png`.
+
+Figure placeholder. Gemini prompt: Create a schematic reference PCA beside a projection PCA, with a clear legend explaining fixed reference axes, arbitrary PC signs and study projection. Label all axes; use both shapes and a colour-blind-safe palette. Do not reproduce individual data points or infer ethnic identity.
+
+## 5.6 Define an ancestry-matched cohort {#step-5-6}
+
+### What we do
+
+Apply the predefined six-standard-deviation rule on the first four projected PCs.
+
+### Why
+
+This teaching design focuses the main analysis on a broadly European-reference-matched cohort. For each of PC1?PC4, standardise the study score using the European reference mean and population standard deviation. Flag a sample if its largest absolute standardised distance exceeds six. This is a study-specific inclusion policy, not a universal ancestry classification. Apply it before inspecting association results and report exclusions.
+
+### You need
+
+Reference and study projections from 5.4; reference labels from 5.5.
+
+### Command
+
+```{r s5-6}
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"
+columns <- paste0("PC", 1:4, "_AVG")
+r <- sapply(ref[eur, columns, drop = FALSE], as.numeric)
+s <- sapply(study[columns], as.numeric)
+centre <- colMeans(r)
+spread <- sqrt(colMeans(sweep(r, 2, centre, "-")^2))
+z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
+bad <- study$IID[apply(abs(z), 1, max) > 6]
+remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))
+ops <- guided_replay_lists(cfg, "5.6", "4.6")
+guided_register(cfg, "5.6", "4.6", 1811, 238513, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
+```
+
+R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+33 remaining outlier records excluded; 1,811 samples and 238,513 variants remain. Some originally simulated outliers left during earlier QC, so this is not the initial total outlier count.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Large reference-relative ancestry differences and possible technical outliers. A mismatch demands review and a documented study design, not a claim that excluded people are biologically unsuitable in general.
+
+### Quick check
+
+Why is the rule calculated on four PCs rather than only the two shown in the plot?
+
+<details><summary>Show the answer</summary>
+
+Separation that is weak or invisible on the first two axes can appear on later axes.
+
+</details>
+
+### Files created
+
+`s5-6_remove.txt`, `s5-6_state.*` and replay metadata.
+
+## 5.7 Cohort PCs and how many to include {#step-5-7}
+
+### What we do
+
+Recompute PCs in the retained study cohort, inspect eigenvalues and save the full boundary.
+
+### Why
+
+Reference axes describe broad structure; within-cohort PCs can capture finer differences relevant to association. Re-prune after changing the cohort. An eigenvalue measures variation along a PC; a scree plot displays the ordered eigenvalues. The course prespecifies ten PCs for the main model, rather than choosing their number to obtain attractive p-values. Too few can leave confounding; too many can cost precision. Compare sensitivity in module 7 without retrospectively optimising significance.
+
+### You need
+
+Retained cohort from 5.6 and the explicit GRCh38 long-range LD exclusions.
+
+### Command
+
+```{r s5-7}
+regions <- guided_high_ld(cfg)
+prune <- guided_path(cfg, "5.7", "prune")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
+  "--indep-pairwise", "200kb", "0.2", "--out", prune))
+report <- guided_path(cfg, "5.7", "pca")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
+eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
+png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
+plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
+dev.off()
+guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
+file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
+check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
+```
+
+`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+Ten cohort PCs, a scree plot and a complete 5.7 boundary with 1,811 samples and 238,513 variants. The first cohort eigenvalue is approximately 14; eigenvector signs can differ without changing association adjustment.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Should the number of PCs be chosen by trying many models and retaining the one with the most genome-wide hits?
+
+<details><summary>Show the answer</summary>
+
+No. Specify the main model independently of association significance and report sensitivity analyses transparently.
+
+</details>
+
+### Files created
+
+Pruning lists, eigenvectors/eigenvalues, scree PNG, working state and full 5.7 checkpoint.

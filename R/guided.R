@@ -15,9 +15,14 @@ guided_path <- function(cfg, step, name = "state") {
 
 guided_table <- function(path) {
   con <- file(path, "rt")
-  first <- readLines(con, n = 100L, warn = FALSE)
+  first <- readLines(con, n = 1000L, warn = FALSE)
+  skipped <- 0L
+  while (length(first) && all(startsWith(first, "##"))) {
+    skipped <- skipped + length(first)
+    first <- readLines(con, n = 1000L, warn = FALSE)
+  }
   close(con)
-  skip <- match(FALSE, startsWith(first, "##")) - 1L
+  skip <- skipped + match(FALSE, startsWith(first, "##")) - 1L
   if (is.na(skip)) stop("A table header was not found: ", path)
   result <- read.table(path, skip = skip, header = TRUE, sep = "", quote = "", comment.char = "",
     check.names = FALSE, colClasses = "character", na.strings = c("NA", "NaN"))

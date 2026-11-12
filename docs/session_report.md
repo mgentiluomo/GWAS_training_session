@@ -58,3 +58,10 @@ modules and unresolved checks will be recorded below before the final push.
   calibrated at 1,000 controls with a 10^(-6) mid-p cutoff and tightens for
   larger samples; at this dataset size it reproduces the reference rule.
   This teaching policy must not be presented as a universal research threshold.
+
+- Module 5: Windows reference PCA/projection passed with 48,614 shared sites.
+  After removing 33 projected outliers, the retained cohort has 1,811 samples
+  and 238,513 variants. Ten within-cohort PCs and a scree plot were generated.
+  A first attempt found a long PVAR metadata header; streaming over all header
+  lines fixed the reader. The PCA figure was visually inspected and its legend
+  was corrected to use the four groups actually present in the supplied subset.
