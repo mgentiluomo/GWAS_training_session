@@ -19,8 +19,8 @@ class CourseExportsTests(unittest.TestCase):
         cls.records = exports.export_steps()
 
     def test_complete_main_path(self):
-        self.assertEqual(len(self.records), 59)
-        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 7, 8, 8, 6, 7, 7, 8])
+        self.assertEqual(len(self.records), 60)
+        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 7, 8, 8, 6, 7, 8, 8])
         self.assertEqual(self.records[0]["id"], "0.1")
         self.assertEqual(self.records[-1]["id"], "7.8")
 
@@ -32,7 +32,7 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_committed_json_matches_canonical_sources(self):
         paths = list((ROOT / "site_content" / "steps").glob("*.json"))
-        self.assertEqual(len(paths), 59)
+        self.assertEqual(len(paths), 60)
         for record in self.records:
             with self.subTest(step=record["id"]):
                 saved = json.loads((ROOT / "site_content" / "steps" / (record["anchor"] + ".json")).read_text(encoding="utf-8"))

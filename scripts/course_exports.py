@@ -146,8 +146,8 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             if interactive:
                 record["interactive_data"] = json.loads(interactive.group(1))
             records.append(record)
-    if len(records) != 59 or len({r["id"] for r in records}) != 59:
-        raise ValueError("The main path must have 59 unique steps.")
+    if len(records) != 60 or len({r["id"] for r in records}) != 60:
+        raise ValueError("The main path must have 60 unique steps.")
     return records
 
 

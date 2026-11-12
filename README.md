@@ -45,7 +45,7 @@ QQ and regional plots, lead variants with effect alleles/intervals, comparisons
 and `s7-8_summary.md`. See [Windows validation](VALIDATION.md) and the
 [session report](docs/session_report.md) for results and limits.
 
-The [website JSON schema](docs/site_content_schema.md) documents the 59 exported
+The [website JSON schema](docs/site_content_schema.md) documents the 60 exported
 steps. No new website is deployed; site design still requires a mockup.
 Modules A/B and post-GWAS analysis were not started.
 

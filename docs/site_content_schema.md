@@ -8,7 +8,7 @@ Regenerate both without reading genotype data or building the older demo site:
 python -B scripts/build_tutorial.py --export-steps site_content/steps --export-main-script scripts/run_main_path.R
 ```
 
-The command creates 59 JSON files, one per main-path step. It does not generate
+The command creates 60 JSON files, one per main-path step. It does not generate
 images, download data, publish a website or create an encrypted release.
 
 | Field | Type | Meaning |
