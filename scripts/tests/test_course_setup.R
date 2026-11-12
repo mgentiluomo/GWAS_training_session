@@ -131,9 +131,11 @@ local({
     from <- if (identical(url, release$archive_url)) zip else manifest_file
     stopifnot(file.copy(from, destination))
   }
-  test("unpublished release refuses URL access before any download", {
+  test("empty release URL refuses access before any download", {
     before <- downloads
-    msg <- error_message(course$download_course_data(secret))
+    unconfigured <- release
+    unconfigured$archive_url <- ""
+    msg <- error_message(course$download_course_data(secret, release = unconfigured))
     stopifnot(grepl("not configured", msg, fixed = TRUE), downloads == before)
   })
   test("insecure URLs and missing checksum pins stop before downloading", {
@@ -246,22 +248,26 @@ local({
     stopifnot(grepl("do not match", msg, fixed = TRUE), !dir.exists(dest))
     save_manifest(original_manifest)
   })
-  # Optional local AES-256 integration test. The password is supplied at runtime only.
-  test_archive_dir <- Sys.getenv("COURSE_TEST_ARCHIVE_DIR")
+  # The old 55-file stage 1 archive is no longer used.
+  # Opt in only with the published 108-file archive. Supply its password at runtime.
+  test_archive_dir <- Sys.getenv("COURSE_TEST_RELEASE_ARCHIVE_DIR")
   if (nzchar(test_archive_dir)) {
-    test("local stage 1 AES-256 archive, correct and wrong password", {
+    test("published 108-file AES-256 archive, correct and wrong password", {
       zip <- file.path(test_archive_dir, "course-data-2026.1.zip")
       manifest_file <- file.path(test_archive_dir, "MANIFEST.tsv")
       supplied <- Sys.getenv("COURSE_RELEASE_PASSWORD")
       stopifnot(nzchar(supplied))
       before <- downloads
       # Use the checksum pins from config.R, not hashes calculated from these inputs.
-      course$download_course_data(supplied, file.path(root, "stage1"), zip_path = zip)
+      dest <- file.path(root, "published-release")
+      course$download_course_data(supplied, dest, zip_path = zip)
+      stopifnot(length(list.files(dest, recursive = TRUE, all.files = TRUE, no.. = TRUE)) == 108L)
       msg <- error_message(course$download_course_data(secret, file.path(root, "wrong-passphrase"), zip_path = zip))
       stopifnot(grepl("The password is wrong", msg, fixed = TRUE),
                 !grepl(supplied, msg, fixed = TRUE), !dir.exists(file.path(root, "wrong-passphrase")),
                 downloads == before)
     })
   }
+  if (!nzchar(test_archive_dir)) cat("SKIP: published AES-256 integration requires explicit local archive opt-in.\n")
   cat(count, "course setup tests passed.\n")
 })

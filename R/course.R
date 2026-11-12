@@ -72,7 +72,7 @@ download_course_data <- function(password = NULL, destination = "data/course", r
     if (!is.null(local_manifest)) stop("Supply zip_path when using a local manifest.", call. = FALSE)
     urls <- unlist(release[c("archive_url", "manifest_url")])
     if (any(!nzchar(urls))) {
-      stop("The classroom data release is not configured. Supply a local zip_path to test the stage 1 archive.", call. = FALSE)
+      stop("The classroom data release is not configured. Download the current course project or ask the instructor for help.", call. = FALSE)
     }
     if (!all(grepl("^https://", urls))) stop("Course downloads must use HTTPS URLs.", call. = FALSE)
   }

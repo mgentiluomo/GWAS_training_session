@@ -120,17 +120,13 @@ Use `check_step("3.1")` to compare supplied outputs and `where_am_i()` to list
 verified progress. All three helpers accept `data_dir` and `work_dir` for a
 local installation outside the project.
 
-The unchanged stage 1 test ZIP has complete genotype checkpoints only at 4.6 and 5.6.
-Other checkpoint folders contain removal lists; the helpers report these as
-partial references and refuse to use them as restart filesets. Ask the
-instructor for a complete checkpoint when the requested restart is unavailable.
-
-The newly tested notebook outputs use a boundary layout, with complete filesets
+The published `data-2026.1` package uses a boundary layout, with complete filesets
 at 2.8, 3.8, 4.6 and 5.7. `checkpoints/index.tsv` records expected counts and
 parent states. Intermediate folders store replay operations rather than another
 full genotype copy. `check_step` verifies counts; at full boundaries it also
 compares SHA-256. Intermediate count agreement is not a byte-level genotype
-comparison. The author must stage this new checkpoint tree for the final release.
+comparison. The published package includes this checkpoint tree and the summary
+statistics checkpoint at 6.8.
 
 1. Keep the failed run and record its first error.
 2. For demo data, regenerate checkpoints by running the preceding notebooks,
