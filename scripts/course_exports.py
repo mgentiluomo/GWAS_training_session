@@ -10,6 +10,9 @@ import shlex
 
 ROOT = Path(__file__).resolve().parents[1]
 STEP = re.compile(r"^## (\d+)\.(\d+) (.*?) \{#(step-\d+-\d+)\}\s*$", re.M)
+HEADING = re.compile(r"^## .*$", re.M)
+OVERVIEW = re.compile(r"^## Module (\d+) at a glance \{#module-\d+-overview\}\s*$", re.M)
+RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
 BLOCKS = [
     ("what_we_do", "### What we do"), ("why", "### Why"),
@@ -83,7 +86,9 @@ def export_steps(root: Path = ROOT) -> list[dict]:
         explained = {}
         setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])]
         for i, match in enumerate(matches):
-            body = text[match.end():matches[i + 1].start() if i + 1 < len(matches) else len(text)]
+            # A step ends at the next level-2 heading, which may be a module recap.
+            following = [h.start() for h in HEADING.finditer(text) if h.start() > match.start()]
+            body = text[match.end():following[0] if following else len(text)]
             blocks = split_blocks(body)
             commands = []
             for fence in re.findall(r"^```sh\s*\n(.*?)^```\s*$", blocks["command"], re.M | re.S):
@@ -146,6 +151,30 @@ def export_steps(root: Path = ROOT) -> list[dict]:
     return records
 
 
+def section_text(text: str, start: re.Match) -> str:
+    following = [h.start() for h in HEADING.finditer(text) if h.start() > start.start()]
+    first_step = STEP.search(text, start.end())
+    ends = following[:1] + ([first_step.start()] if first_step else [])
+    return text[start.end():min(ends) if ends else len(text)].strip()
+
+
+def export_modules(root: Path = ROOT) -> list[dict]:
+    """Module overview and recap sections, for the website's module pages."""
+    records = []
+    for path in notebook_paths(root):
+        text = path.read_text(encoding="utf-8")
+        overview, recap = OVERVIEW.search(text), RECAP.search(text)
+        if not overview or not recap:
+            raise ValueError(f"{path.name} needs a 'Module N at a glance' and a 'Module N recap' section.")
+        records.append({"schema_version": "1.0", "module": int(overview.group(1)),
+                        "title": re.search(r'^title: "Module \d+: (.*)"', text, re.M).group(1),
+                        "source": path.relative_to(root).as_posix(),
+                        "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
+                        "overview_markdown": re.sub(r"<!--.*?-->", "", section_text(text, overview), flags=re.S).strip(),
+                        "recap_markdown": re.sub(r"<!--.*?-->", "", section_text(text, recap), flags=re.S).strip()})
+    return records
+
+
 def main_script(root: Path = ROOT) -> str:
     lines = ["# Generated from the tested modules 0 to 7; do not edit this copy.",
              "# Regenerate: python -B scripts/build_tutorial.py --export-main-script scripts/run_main_path.R",
@@ -175,7 +204,13 @@ def main() -> None:
         for record in records:
             destination = args.export_steps / (record["anchor"] + ".json")
             destination.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        print(f"Exported {len(records)} steps; no data files or website deployment created.")
+        modules = export_modules()
+        module_dir = args.export_steps.parent / "modules"
+        module_dir.mkdir(parents=True, exist_ok=True)
+        for record in modules:
+            (module_dir / f"module-{record['module']}.json").write_text(
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(f"Exported {len(records)} steps and {len(modules)} module pages; no data files or website deployment created.")
     if args.export_main_script:
         args.export_main_script.write_text(main_script(), encoding="utf-8")
         print(f"Exported {args.export_main_script} from canonical notebook chunks.")
