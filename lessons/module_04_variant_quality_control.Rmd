@@ -522,7 +522,7 @@ check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 

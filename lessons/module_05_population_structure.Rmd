@@ -62,7 +62,7 @@ table(reference_samples$SuperPop)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -127,7 +127,7 @@ guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), pa
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -191,7 +191,7 @@ stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -332,7 +332,7 @@ dev.off()
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 
