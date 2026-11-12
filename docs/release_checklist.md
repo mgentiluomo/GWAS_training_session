@@ -30,6 +30,22 @@ stop at the first one that fails.
    characters. Do not reuse the throwaway passwords of earlier tests. Keep it
    out of files, chat messages, shell history and screenshots.
 
+## Password for the form
+
+Set the classroom password only as the website deployment environment variable
+`COURSE_DATA_PASSWORD`. Never put its value in a file, the repository or a page.
+Use the same password for the encrypted classroom archive. The packaging tool
+reads it separately at runtime through `COURSE_RELEASE_PASSWORD`, as shown below.
+
+Update `COURSE_DATA_PASSWORD` every academic year together with the new data
+release. Then test the form once with your own university address. Check that
+the automatic email arrives and that its password opens the matching archive.
+
+The form uses the placeholder path `/teaching/gwas/data-access` on
+manuelgentiluomo.it. It sends the password automatically only to addresses ending
+in `@unipi.it` or `@studenti.unipi.it`. The classroom QR code opens that same
+form. Other users write to `manuel.gentiluomo@unipi.it`.
+
 ## 2. Stage the verified main path again
 
 The package must contain the checkpoint files that the final notebooks write,
@@ -121,7 +137,7 @@ Use the web page:
 3. Set the target to the branch `course/2026-guided-training`.
 4. Title: `Course data 2026.1`.
 5. Description: one paragraph saying that the files are simulated, the archive is
-   encrypted, the password is given in class or on the course channel, and the
+   encrypted, students request the password through the university email form, and the
    SHA-256 values are in `config.R`. Do not write the password.
 6. Drag in exactly three files: `course-data-2026.1.zip`, `MANIFEST.tsv` and
    `SHA256SUMS.txt`.
@@ -188,8 +204,14 @@ python -I -B scripts\check_text.py
 
 ## 8. After the release
 
-- Give the password to students in class or on the course channel only.
+- Direct students to the university email form. In class, show a QR code for
+  the same form. Never display or publish the password.
 - Keep the throwaway test archives and the old staging folder outside the
   repository. They are not for students.
 - The next academic year, build `data-2027.1` with a new password and delete this
   release.
+
+## Website release stages
+
+Label the website "beta 2026". Release modules 0 to 2 first, then 3 to 4,
+then 5 to 7. Keep the repository and the data release complete at each stage.
