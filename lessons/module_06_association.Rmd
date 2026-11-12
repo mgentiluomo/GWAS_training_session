@@ -9,10 +9,10 @@ output:
     theme: readable
 ---
 
-Work from the project root. Read each step before running its R chunk. All data
-are simulated; these exercises cannot establish a finding about a real disease.
-See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
-loads its inputs from disk; a saved R workspace is not required.
+Work from the project root. Read each step before you run its R chunk. All data
+are simulated, so these exercises cannot show a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course words. Each module
+loads its inputs from disk, so you do not need a saved R workspace.
 
 ```{r module6_setup, include=FALSE}
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -22,19 +22,33 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+## Module 6 at a glance {#module-6-overview}
+
+**What you will do.** You will test one genetic variant by hand, then test all variants with a statistical model. You will read the output, check a rare variant and save the results in a standard file.
+
+**What you will learn.**
+
+- How to calculate an [odds ratio](../docs/glossary.md#or) from a simple table.
+- How a model adjusts the comparison for [covariates](../docs/glossary.md#covariate), such as age.
+- How to read one row of an [association](../docs/glossary.md#association) result.
+- Why a rare variant needs [Firth correction](../docs/glossary.md#firth-regression).
+- How to build a [summary statistics](../docs/glossary.md#summary-statistics) file that you can share.
+
+**How long it takes.** About 60 minutes. The slowest step is 6.4, where PLINK tests every variant.
+
 ## 6.1 One variant by hand {#step-6-1}
 
 ### What we do
 
-Calculate a simple carrier odds ratio at a retained autosomal site.
+Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.
 
 ### Why
 
-Odds are the number with an outcome divided by the number without it. An odds ratio (OR) compares odds between two groups; OR = 1 means equal odds. Here we compare carriers of the allele explicitly named in the exported column with non-carriers. This dominant carrier contrast is a teaching calculation, not the additive adjusted GWAS model. Allele coding matters: reversing the counted allele changes the contrast.
+The [odds](../docs/glossary.md#odds) of an outcome are the number of people with the outcome divided by the number without it. An odds ratio (OR) compares the odds in two groups. An OR of 1 means the odds are equal. A carrier has at least one copy of an [allele](../docs/glossary.md#allele) (one version of the variant). We compare carriers of the allele named in the exported column with non-carriers. This is a teaching calculation. It is not the additive, adjusted model that the real GWAS uses. The counted allele matters: if you count the other allele, the contrast changes.
 
 ### You need
 
-Full 5.7 cohort; the retained site 9:96426973:A:G.
+The full cohort from 5.7 and the retained variant 9:96426973:A:G.
 
 ### Command
 
@@ -58,11 +72,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
 ```
 
-`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2-by-2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--snp` selects one variant by its exact current ID. `--export A` writes the [dosage](../docs/glossary.md#dosage) of the named allele: the number of copies, 0, 1 or 2, with missing values kept separate. R then builds the 2-by-2 carrier table. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.
 
 <details><summary>Show the expected result</summary>
 
-A carrier/non-carrier table in the retained cohort and a finite odds ratio. Interpret its direction using the allele in the exported column; this need not be the allele that increases risk.
+A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -71,37 +85,37 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-An OR of 2 means that disease probability doubled. Is this statement generally correct?
+An OR of 2 means that the probability of disease doubled. Is this statement generally correct?
 
 <details><summary>Show the answer</summary>
 
-No. Odds and probability differ; an odds ratio is not generally a risk ratio.
+No. Odds and probability are different things. An odds ratio is usually not the same as a risk ratio.
 
 </details>
 
 ### Files created
 
-`s6-1_example.raw` and logs.
+`s6-1_example.raw` and the log files.
 
 ## 6.2 The additive logistic model {#step-6-2}
 
 ### What we do
 
-Fit a one-variant logistic regression in R and connect dosage to the odds ratio.
+Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.
 
 ### Why
 
-For binary outcome Y, logistic regression models log(p/(1-p)) = intercept + beta * dosage, where p is the probability of being a case. An additive model assumes the same change in log odds for each additional counted allele. exp(beta) is the per-allele OR; it differs from the carrier contrast at 6.1. The standard error measures uncertainty in the estimated log OR. This unadjusted one-site example is not the final association result.
+Logistic regression suits an outcome with two values, here case or control. It models log(p/(1-p)) = intercept + beta * dosage. Here p is the probability of being a case, and beta is the effect of each extra copy of the allele. An [additive model](../docs/glossary.md#additive-model) assumes that each extra copy changes the log odds by the same amount. exp(beta) is the odds ratio per copy of the allele. It differs from the carrier odds ratio at 6.1. The [standard error](../docs/glossary.md#standard-error) shows how uncertain the estimate of the log odds ratio is. This example uses one variant and no adjustment. It is not the final association result.
 
 ### You need
 
-The one-variant export from 6.1 and the final PSAM.
+The one-variant export from 6.1 and the final PSAM file (the table of samples).
 
 ### Command
 
@@ -116,13 +130,13 @@ exp(coef(fit)["dosage"])
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable. This step needs no PLINK operation. The R chunk is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads or calculates the values it shows. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-An intercept and dosage coefficient, with a standard error and p-value. The unadjusted per-allele OR and carrier OR need not be equal.
+An intercept and a dosage coefficient, each with a standard error and a [p-value](../docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -131,7 +145,7 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
@@ -141,27 +155,27 @@ What does beta = 0 imply for the per-allele odds ratio?
 
 <details><summary>Show the answer</summary>
 
-exp(0) = 1: no estimated per-allele change in odds.
+exp(0) = 1. The estimate shows no change in the odds for each extra copy of the allele.
 
 </details>
 
 ### Files created
 
-The example model exists in R memory only; the genotype export remains on disk.
+The example model exists only in R memory. The genotype export from 6.1 stays on disk.
 
 ## 6.3 Prepare covariates {#step-6-3}
 
 ### What we do
 
-Join age and ten within-cohort PCs to the retained sample IDs, and check completeness and rank.
+Join age and ten principal components ([PCs](../docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).
 
 ### Why
 
-Covariates adjust the comparison for measured predictors and structure. Misaligned covariates can invalidate every variant test while still producing plausible-looking output. Missing covariates remove observations from a model. Collinearity occurs when one column can be predicted exactly from others, preventing a unique estimate. We verify matching IDs and a full-rank design before scanning. Sex is read from PSAM and requested in the PLINK model.
+Covariates are extra measured factors, such as age. They adjust the comparison between cases and controls. PCs describe ancestry differences between people. If the covariates belong to the wrong samples, every test is wrong, yet the output still looks normal. A sample with a missing covariate is dropped from the model. [Collinearity](../docs/glossary.md#collinearity) means that one column can be predicted exactly from the other columns. Then the model cannot give a single answer. Full rank means that no column has this problem. We check the IDs and the rank before the scan. PLINK reads sex from the PSAM file and adds it to the model.
 
 ### You need
 
-State 5.7; cohort eigenvectors from 5.7; metadata from 2.7.
+The state saved at 5.7, the cohort eigenvectors (the PC values of each sample) from 5.7 and the metadata from 2.7.
 
 ### Command
 
@@ -183,13 +197,13 @@ guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv")
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable. This step needs no PLINK operation. The R chunk is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads or calculates the values it shows. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-1,811 complete matched covariate rows with Age and PC1 to PC10. No duplicate or unmatched IDs; the design has full column rank.
+1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -198,17 +212,17 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Why is a complete covariate table with the right number of rows insufficient by itself?
+Why is a complete covariate table with the right number of rows not enough by itself?
 
 <details><summary>Show the answer</summary>
 
-The rows must belong to the correct sample IDs and be aligned to those samples.
+The rows must belong to the correct sample IDs. Each row must match its own sample.
 
 </details>
 
@@ -220,15 +234,15 @@ The rows must belong to the correct sample IDs and be aligned to those samples.
 
 ### What we do
 
-Fit the prespecified additive logistic model with age, sex and ten PCs at every retained analysable site.
+Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.
 
 ### Why
 
-The scan tests one genetic predictor at a time while keeping the covariate specification fixed. The null hypothesis for the additive test is beta = 0. A small p-value is evidence against that null under the model and its assumptions; it does not measure effect size, causality or the probability the null is true. Firth fallback provides a more stable calculation when ordinary logistic fitting encounters separation. We do not select the covariates after inspecting the resulting peaks.
+The scan tests one variant at a time. The covariates stay the same for every test. The [null hypothesis](../docs/glossary.md#null-hypothesis) of the additive test is beta = 0, which means no effect. A small p-value is evidence against the null hypothesis, if the model and its assumptions are right. It does not measure the size of the effect. It does not prove a cause. It is not the probability that the null hypothesis is true. Firth fallback means that PLINK switches to Firth correction when the ordinary fit fails, which gives a more stable result. The ordinary fit can fail because of [separation](../docs/glossary.md#separation). We never choose the covariates after we look at the peaks in the results.
 
 ### You need
 
-The final 5.7 genotype state and covariates from 6.3.
+The final genotype files from 5.7 and the covariates from 6.3.
 
 ### Command
 
@@ -249,11 +263,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
 ```
 
-`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--maf 0.01` checks the frequency rule again in the final cohort. `--covar` loads the covariate table, which is keyed by sample ID. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales the numerical covariates so that the fit is stable. It does not change the genetic hypothesis that is tested. `--glm sex` adds the recorded sex to the model. `hide-covar` reports only the genetic tests, not the coefficient of every covariate. `firth-fallback` uses Firth correction when it is needed. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.
 
 <details><summary>Show the expected result</summary>
 
-The final-cohort MAF check removes another 1,698 variants, leaving 236,815 finite additive p-values and eight below 0.00000005. A retained pre-association variant is not automatically eligible after the cohort changes. Inspect the output and log rather than replacing absent results with zero.
+The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -262,7 +276,7 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
@@ -272,23 +286,23 @@ Does a tiny p-value imply a large odds ratio?
 
 <details><summary>Show the answer</summary>
 
-No. Evidence depends on effect, uncertainty and sample size; report the effect estimate and interval too.
+No. The p-value depends on the effect, the uncertainty and the sample size. Also report the effect estimate and its interval.
 
 </details>
 
 ### Files created
 
-`s6-4_association.Disease.glm.logistic.hybrid`, logs and a parsed `s6-4_results.tsv`.
+`s6-4_association.Disease.glm.logistic.hybrid`, the log files and `s6-4_results.tsv`, a cleaned copy of the results.
 
 ## 6.5 Read association output {#step-6-5}
 
 ### What we do
 
-Identify effect allele, sample count, uncertainty, test type and fitting status.
+Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.
 
 ### Why
 
-A1 is the allele whose dosage is tested, not automatically ALT, minor or harmful. OR estimates its multiplicative effect on odds. OBS_CT is the number of samples used at that variant and may vary with missing calls. ERRCODE describes model failures; a missing p-value must remain missing. A 95% confidence interval is exp(log(OR) +/- 1.96 * SE) under the fitted approximation. The interval describes estimation uncertainty under assumptions, not the chance this single interval contains a fixed truth.
+A1 is the [effect allele](../docs/glossary.md#effect-allele): the allele whose dosage is tested. It is not automatically the ALT allele, the minor allele or the harmful allele. OR is the odds ratio. It shows how much each copy of A1 multiplies the odds of disease. OBS_CT is the number of samples used at that variant. It can change from variant to variant because of missing calls. ERRCODE describes model failures. A missing p-value must stay missing. A 95% [confidence interval](../docs/glossary.md#ci) is exp(log(OR) +/- 1.96 * SE), where SE is the standard error. This formula is an approximation. The interval shows how uncertain the estimate is, if the assumptions hold. It does not give the chance that this one interval contains the true value.
 
 ### You need
 
@@ -310,13 +324,13 @@ guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), par
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable. This step needs no PLINK operation. The R chunk is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads or calculates the values it shows. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-The leading regions are on chromosomes 9, 3 and 12. The table preserves the effect allele and variant-specific OBS_CT. P-values and ORs refer to the tested A1 allele, regardless of how the identifier was constructed.
+The leading regions are on chromosomes 9, 3 and 12. The table keeps the effect allele and the OBS_CT of each variant. Every p-value and odds ratio refers to the tested A1 allele, whatever the variant ID looks like.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -325,37 +339,37 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-What should you do with a row whose ERRCODE indicates failure and whose p-value is missing?
+What should you do with a row that has an ERRCODE for a failure and a missing p-value?
 
 <details><summary>Show the answer</summary>
 
-Inspect its failure reason and retain it as missing; do not replace it with a significant or non-significant numerical value.
+Read the reason for the failure. Keep the p-value as missing. Do not replace it with a number, whether significant or not.
 
 </details>
 
 ### Files created
 
-`s6-5_top20.tsv` with effect estimates and intervals.
+`s6-5_top20.tsv`, with the effect estimates and their intervals.
 
 ## 6.6 Sparse genotypes and Firth correction {#step-6-6}
 
 ### What we do
 
-Compare an explicitly forced Firth fit at a low-frequency retained autosomal site.
+Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.
 
 ### Why
 
-Rare genotypes can have very few case or control observations. Ordinary logistic fitting uses maximum likelihood: it chooses coefficients that make the observed outcomes most plausible under the model. If a predictor separates outcomes completely, that coefficient can diverge. Firth penalisation reduces small-sample bias and can give finite estimates. It does not create information or fix confounding, miscalled genotypes or a poor study design. The main scan in this dataset did not actually require Firth fallback; we force it for a transparent teaching comparison at one retained low-frequency site. Sites below the 1% main-path filter are not reintroduced.
+A rare genotype can have very few cases or controls. The ordinary logistic fit uses [maximum likelihood](../docs/glossary.md#maximum-likelihood). It chooses the coefficients that make the observed outcomes most likely under the model. Sometimes one genotype group contains only cases or only controls. This is separation, and the coefficient can then grow without limit. [Firth correction](../docs/glossary.md#firth-regression) reduces the bias of small samples and can give finite estimates. It does not add information. It does not fix confounding, wrong genotype calls or a poor study design. The main scan of this dataset did not need the Firth fallback. We force Firth here so that you can compare the two results at one variant. Variants below the 1% frequency filter do not come back.
 
 ### You need
 
-The final cohort, main results and covariates from 6.3.
+The final cohort, the main results from 6.4 and the covariates from 6.3.
 
 ### Command
 
@@ -379,11 +393,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
 ```
 
-The R command uses `--snp` with the selected ID; the equivalent terminal command uses `--extract` with its one-ID file. `--glm firth` requests Firth for that variant rather than waiting for fallback. Other covariate and resource options match 6.4. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+The R command uses `--snp` with the chosen ID. The terminal command uses `--extract` with a file that holds this one ID. `--glm firth` asks for Firth correction at this variant, without waiting for the fallback. The covariate options and the resource options are the same as at 6.4. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.
 
 <details><summary>Show the expected result</summary>
 
-One finite forced-Firth result, compared with the ordinary main-scan estimate for the same A1 allele. Small numerical differences are expected; forced Firth is not a new preferred genome-wide scan.
+One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -392,37 +406,37 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Does using Firth make an association based on very few carriers precise?
+Does Firth correction make an association precise when it rests on very few carriers?
 
 <details><summary>Show the answer</summary>
 
-No. It can stabilise fitting while uncertainty remains large.
+No. It makes the fit more stable, but the uncertainty can stay large.
 
 </details>
 
 ### Files created
 
-Selected variant ID, the forced-Firth report and logs.
+The chosen variant ID, the forced Firth report and the log files.
 
 ## 6.7 First look and association checkpoint {#step-6-7}
 
 ### What we do
 
-Summarise the valid tests and save the key association outputs for recovery.
+Summarise the valid tests. Save the key association files so that you can restart from here.
 
 ### Why
 
-A list of small p-values is not yet an interpretation. Record the model, cohort, test counts and fitting status before plotting. The next module explains multiple testing, correlated peaks and confounding comparisons. Never call a simulated lead a clinical finding or assume the nearest gene is causal.
+A list of small p-values is not yet an interpretation. Before you plot, write down the model, the cohort, the number of tests and the fitting status. The next module explains [multiple testing](../docs/glossary.md#multiple-testing), correlated peaks and confounding. Never call a simulated top result a clinical finding. Never assume that the nearest gene is the cause.
 
 ### You need
 
-Association output from 6.4 and reviewed table from 6.5.
+The association output from 6.4 and the table you reviewed at 6.5.
 
 ### Command
 
@@ -441,13 +455,13 @@ check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable. This step needs no PLINK operation. The R chunk is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads or calculates the values it shows. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-1,811 retained samples, 238,513 retained variants, 236,815 finite tests, eight genome-wide significant variants and autosomal lambda approximately 1.016. Key analysis files receive a SHA-256 artifact manifest.
+1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -456,23 +470,23 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Do eight significant variants necessarily represent eight independent association signals?
+Do eight significant variants always mean eight independent association signals?
 
 <details><summary>Show the answer</summary>
 
-No. Nearby variants can share a signal through LD; clumping at 7.5 groups correlated associations.
+No. Nearby variants can share one signal because of [LD](../docs/glossary.md#ld). Clumping at 7.5 groups the correlated associations.
 
 </details>
 
 ### Files created
 
-`s6-7_summary.tsv`, association checkpoint files and `checkpoints/6.7/MANIFEST.tsv`.
+`s6-7_summary.tsv`, the association checkpoint files and `checkpoints/6.7/MANIFEST.tsv`.
 
 ## 6.8 Create the summary statistics file {#step-6-8}
 
@@ -482,26 +496,26 @@ Save the results of the association scan in one clearly named file with standard
 
 ### Why
 
-The raw PLINK output is long and uses PLINK column names. A summary statistics file is the standard way to share GWAS results. It holds one row per tested variant and no individual-level data. Colleagues use it to plot results, to combine studies in a meta-analysis and to look up a variant. This file keeps only the ten columns that others expect, with the same names in the same order. From now on the Manhattan and QQ plots are built from this file, not from the raw scan output.
+The raw PLINK output is long and uses PLINK column names. A summary statistics file is the standard way to share GWAS results. It has one row for each tested variant and no data about individual people. Colleagues use it to plot results, to combine several studies into one analysis (a meta-analysis) and to look up a variant. This file keeps only the ten columns that others expect, with the same names in the same order. From now on we build the [Manhattan plot](../docs/glossary.md#manhattan-plot) and the [QQ plot](../docs/glossary.md#qq-plot) from this file, not from the raw scan output.
 
 Each column has one clear meaning. Read the table before you use the file.
 
 | Column | What it is | What values look like | A common mistake |
 | --- | --- | --- | --- |
-| `chromosome` | Chromosome of the variant. | `1` to `22`, then `X`, `Y` or `MT`. | Treating it as a number. `X` is text. |
-| `base_pair_location` | Position on the chromosome, in base pairs, on genome build GRCh38. | A whole number such as `96426973`. | Comparing it with positions from another genome build. |
+| `chromosome` | The chromosome of the variant. | `1` to `22`, then `X`, `Y` or `MT`. | Treating it as a number. `X` is text. |
+| `base_pair_location` | The position on the chromosome, in base pairs, on genome build [GRCh38](../docs/glossary.md#grch38). | A whole number such as `96426973`. | Comparing it with positions from another genome build. |
 | `variant_id` | The name of the variant in this course. | `9:96426973:A:G`: chromosome, position and the two alleles. | Expecting an rs number. This course does not use rs numbers as identifiers. |
-| `effect_allele` | The allele whose copies were counted in the model. PLINK calls it A1. | One letter, such as `A`. | Assuming it is the minor allele or the ALT allele. It is neither by definition. |
+| `effect_allele` | The allele whose copies the model counted. PLINK calls it A1. | One letter, such as `A`. | Assuming it is the minor allele or the ALT allele. By definition it is neither. |
 | `other_allele` | The other allele of the variant. | One letter, such as `G`. | Swapping the two alleles. The odds ratio then points the other way. |
-| `effect_allele_frequency` | How common the effect allele is in the analysed samples. | A number from 0 to 1, such as `0.2`. | Reading it as the minor allele frequency. It can be above 0.5. |
+| `effect_allele_frequency` | How common the effect allele is in the analysed samples. | A number from 0 to 1, such as `0.2`. | Reading it as the minor allele frequency ([MAF](../docs/glossary.md#maf)). It can be above 0.5. |
 | `odds_ratio` | The odds ratio per copy of the effect allele. | A positive number. Above 1 means higher odds of disease with each copy. | Reading it as a risk ratio. |
 | `standard_error` | The standard error of the natural logarithm of the odds ratio. | A small positive number, such as `0.09`. | Using it as the standard error of the odds ratio itself. It belongs to the log odds ratio. |
 | `p_value` | The p-value of the additive test. | A number above 0 and at most 1. A test that failed is `NA`. | Replacing `NA` with 1 or 0. A missing result stays missing. |
 | `n` | The number of samples used for this variant. | A whole number up to 1,811. | Assuming every variant uses all samples. Missing genotypes lower it. |
 
-To get the 95% confidence interval of an odds ratio, use `exp(log(odds_ratio) +/- 1.96 * standard_error)`. This is why the standard error is on the log scale.
+To get the 95% confidence interval of an odds ratio, use `exp(log(odds_ratio) +/- 1.96 * standard_error)`. The standard error is on the log scale, so the formula takes the logarithm of the odds ratio first.
 
-The file is tab-separated text with a header row, UTF-8 encoding and decimal points. It holds only results per variant. It has no genotypes and no sample IDs. Even so, keep it out of the repository, like every other result file.
+The file is plain text with a header row. Tabs separate the columns. It uses UTF-8 encoding (a standard way to store text characters) and decimal points. It holds only results for each variant. It has no genotypes and no sample IDs. Even so, keep it out of the repository, like every other result file.
 
 ### You need
 
@@ -533,15 +547,15 @@ check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable. This step needs no PLINK operation. The R chunk is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads or calculates the values it shows. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-The summary statistics file has 236,815 rows, one for each tested variant, and the ten columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A` with effect allele `A`, other allele `G` and n = 1807. No p-value is missing in this dataset, and eight are below 0.00000005, as at 6.7. The file is about 17 MB. The column file has one row for each of the ten columns. The last table shows `matches` for both files in the 6.8 checkpoint.
+The summary statistics file has 236,815 rows, one for each tested variant. It has the ten columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G` and n = 1807. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.7. The file is about 17 MB. The column file has one row for each of the ten columns. The last table shows `matches` for both files in the 6.8 checkpoint.
 
-A p-value that PLINK could not calculate would stay `NA` in the file. It would never become 0 or 1.
+If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -550,20 +564,31 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. If R says that the scan output is missing, run step 6.4 first. If a check names a column or a value, do not edit the file by hand. Run the step again. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. If R says that the scan output is missing, run step 6.4 first. If a check names a column or a value, do not edit the file by hand. Run the step again. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Your colleague wants the 95% confidence interval for an odds ratio. Which column do they use together with `odds_ratio`, and on which scale?
+A colleague wants the 95% confidence interval for an odds ratio. Which column do they use with `odds_ratio`, and on which scale?
 
 <details><summary>Show the answer</summary>
 
-They use `standard_error`. It is the standard error of the natural logarithm of the odds ratio. The interval is calculated on the log scale and then converted back with `exp()`.
+They use `standard_error`. It is the standard error of the natural logarithm of the odds ratio. They calculate the interval on the log scale and then convert it back with `exp()`.
 
 </details>
 
 ### Files created
 
 `s6-8_gwas_summary_statistics.tsv`, `s6-8_gwas_summary_statistics_columns.tsv` and `checkpoints/6.8/MANIFEST.tsv`.
+
+## Module 6 recap {#module-6-recap}
+
+- You calculated a carrier odds ratio by hand and compared it with the odds ratio per allele from a logistic regression.
+- You built a covariate table for 1,811 samples with age and PC1 to PC10, and checked it.
+- You ran the association scan. The frequency check removed another 1,698 variants, which left 236,815 tests with finite p-values.
+- Eight variants had a p-value below 0.00000005. The leading regions are on chromosomes 9, 3 and 12.
+- The autosomal lambda is about 1.016.
+- You saved the results in a summary statistics file with ten columns and a file that explains each column.
+
+**Next:** Module 7 draws the QQ plot and the Manhattan plot, sets the thresholds, groups the correlated signals and reports the results.
