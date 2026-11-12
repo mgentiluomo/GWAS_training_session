@@ -447,6 +447,8 @@ If you run all commands at once, the first mistake is hard to find. Saved files 
 
 A successful check at step 0.7. Keep the output files and the notebook together in their documented places. The [glossary](../docs/glossary.md) explains the terms used in the course, including quality control, alleles and association.
 
+Every file that the steps create is saved in the folder `results/guided/` of the project. The list "Files created" at the end of each step gives the file names. To look at a file in RStudio, open the Files pane, click `results`, then `guided`.
+
 ### Command
 
 Read the list of checkpoints that came with your package. This command changes no files:

@@ -581,7 +581,7 @@ They use `standard_error`. It is the standard error of the natural logarithm of 
 
 ### Files created
 
-`s6-8_gwas_summary_statistics.tsv`, `s6-8_gwas_summary_statistics_columns.tsv` and `checkpoints/6.8/MANIFEST.tsv`.
+In the folder `results/guided/`: `s6-8_gwas_summary_statistics.tsv` (the summary statistics file), `s6-8_gwas_summary_statistics_columns.tsv` (the column dictionary) and `checkpoints/6.8/MANIFEST.tsv`.
 
 ## Module 6 recap {#module-6-recap}
 
