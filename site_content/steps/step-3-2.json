@@ -6,14 +6,14 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
+  "source_sha256": "17e24e3c21300c2b0eb162876f6458303f8fb8a49c9f70ec79f8f76257c2ed26",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Apply a 98% sample call-rate requirement after rough cleaning.",
     "why": "Call rate estimates completeness across the retained sites. A threshold of 98% corresponds to at most 2% missingness, not 98% missingness. Low completeness can reduce effective sample size and can be associated with laboratory or recruitment groups. Compare the distribution before adopting the threshold in another study.",
     "you_need": "State 3.1; call-rate definition from 2.4.",
     "command": "```{r s3-2}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048\n```\n\n`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
-    "expected_result": "42 additional wells removed; 1,971 samples and 296,360 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "expected_result": "42 additional wells removed; 1,971 samples and 296,360 variants remain.\n\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Moderate sample failures that survived the rough screen. Missingness may be related to case/control status or batch, so exclusions must be documented.",
     "quick_check": "A well with 1% missing calls has what call rate, and does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\n99%; it passes the 98% call-rate requirement.\n\n</details>",
@@ -60,5 +60,95 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "interactive_data": {
+    "kind": "sample_call_rate_threshold_counts",
+    "source_state": "3.1",
+    "sample_count": 2013,
+    "comparison": "strictly_below",
+    "call_rate_definition": "100 * (OBS_CT - MISSING_CT) / OBS_CT",
+    "source_report_sha256": "7fb0e410c48c9310458d376c6293680b4430d5da2ca4d3b151ca458615268b55",
+    "rows": [
+      {
+        "threshold_percent": 90.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 90.5,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 91.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 91.5,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 92.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 92.5,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 93.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 93.5,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 94.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 94.5,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 95.0,
+        "samples_below": 0
+      },
+      {
+        "threshold_percent": 95.5,
+        "samples_below": 5
+      },
+      {
+        "threshold_percent": 96.0,
+        "samples_below": 12
+      },
+      {
+        "threshold_percent": 96.5,
+        "samples_below": 15
+      },
+      {
+        "threshold_percent": 97.0,
+        "samples_below": 21
+      },
+      {
+        "threshold_percent": 97.5,
+        "samples_below": 22
+      },
+      {
+        "threshold_percent": 98.0,
+        "samples_below": 42
+      },
+      {
+        "threshold_percent": 98.5,
+        "samples_below": 71
+      },
+      {
+        "threshold_percent": 99.0,
+        "samples_below": 118
+      },
+      {
+        "threshold_percent": 99.5,
+        "samples_below": 128
+      }
+    ]
+  }
 }

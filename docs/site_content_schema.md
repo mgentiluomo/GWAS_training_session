@@ -25,6 +25,7 @@ images, download data, publish a website or create an encrypted release.
 | `r_commands` | array | Source chunk `label`, literal R `code`, and boolean `run_by_default`. |
 | `notebook_only_expected_code` | array | Render-only R helpers extracted from expected-result blocks; never display these as student instructions on the website. |
 | `plink` | object | Boolean `applicable`, literal `commands`, and one explanation per unique option name. |
+| `interactive_data` | optional object | Count-only threshold table at step 3.2; see below. |
 | `figures` | array | Placeholder records: `kind`, nullable `asset`, `gemini_prompt`, `alt_text`, `reviewed`. |
 
 The block keys are `what_we_do`, `why`, `you_need`, `command`,
@@ -60,8 +61,9 @@ not rely on colour alone; the renderer must preserve text summaries and labels.
 Gemini production prompts are stored in notebook HTML comments and exported
 only as figure metadata. They are not displayed in student-facing text blocks.
 
-JSON contains code and teaching text only, never the instructor key, phenotype
-records, passwords, archive bytes or generated analytical tables. The R script
+JSON contains code, teaching text and the explicitly allowed aggregate table
+below, never the instructor key, phenotype records, sample identifiers,
+passwords, archive bytes or individual analytical records. The R script
 omits `eval=FALSE` chunks for interactive installation and data retrieval. It
 starts from already installed tools and verified data, and executes modules
 0â€“7 in order. Set `COURSE_DATA_DIR`, `COURSE_OUTPUT_DIR` and, if needed,
@@ -69,3 +71,35 @@ starts from already installed tools and verified data, and executes modules
 
 This export prepares source content only. It is not a website implementation;
 the visual mockup still requires approval before site work.
+
+Step 3.2 has an `interactive_data` object with these fields:
+
+| Field | Meaning |
+| --- | --- |
+| `kind` | `sample_call_rate_threshold_counts`. |
+| `source_state` | `3.1`, after both rough sample and variant filters, before step 3.2. |
+| `sample_count` | 2,013 measured wells in that fixed input state. |
+| `comparison` | `strictly_below`: equality passes. Counts are cumulative, not histogram bins. |
+| `call_rate_definition` | `100 * (OBS_CT - MISSING_CT) / OBS_CT`, using the PLINK sample report's integer counts and default hardcall missingness. |
+| `source_report_sha256` | SHA-256 of the external `.smiss` report used for authoring. The report itself is never committed. |
+| `rows` | 20 records with `threshold_percent` (90 to 99.5 inclusive, increment 0.5) and integer `samples_below`. No sample IDs or per-sample rates. |
+
+All thresholds use the same state-3.1 denominator and variant set. They do not
+rerun preceding QC filters. At 98%, the count is 42, matching the exclusions at
+step 3.2. Other steps omit `interactive_data` when no aggregate is supplied.
+
+The canonical aggregate is stored in a notebook HTML comment, removed from
+student-facing blocks and exported as metadata. Ordinary JSON regeneration
+still needs no data access. To refresh the aggregate after a validated data
+change, generate a report outside the repository and update the notebook:
+
+```sh
+bin/plink2 --pfile <external-state-3.1-prefix> --missing sample-only --out <external-report-prefix> --threads 2 --memory 2048
+python -B scripts/author/export_call_rate_counts.py --smiss <external-report-prefix>.smiss
+python -B scripts/build_tutorial.py --export-steps site_content/steps --export-main-script scripts/run_main_path.R
+```
+
+The author tool checks the 2,013 input wells and the 42 exclusions at 98%.
+It compares integer cross-products to avoid rounding `F_MISS` at boundaries.
+The source report uses PLINK 2.0 b.1.4 (7 November 2026), on the verified Windows
+main-path state. It stays external alongside its PLINK command and log.

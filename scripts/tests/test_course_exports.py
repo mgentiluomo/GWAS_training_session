@@ -5,6 +5,7 @@ from pathlib import Path
 import shlex
 import re
 import unittest
+import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location("course_exports", ROOT / "scripts" / "course_exports.py")
@@ -60,6 +61,37 @@ class CourseExportsTests(unittest.TestCase):
                                      option["explanation_markdown"])
                     references.append(option)
         self.assertTrue(references)
+
+    def test_interactive_counts_are_aggregate_only(self):
+        record = next(r for r in self.records if r["id"] == "3.2")
+        data = record["interactive_data"]
+        self.assertEqual(set(data), {"kind", "source_state", "sample_count", "comparison",
+                                     "call_rate_definition", "source_report_sha256", "rows"})
+        self.assertEqual(data["source_state"], "3.1")
+        self.assertEqual(data["sample_count"], 2013)
+        self.assertEqual(data["comparison"], "strictly_below")
+        self.assertEqual([r["threshold_percent"] for r in data["rows"]], [x / 2 for x in range(180, 200)])
+        counts = [r["samples_below"] for r in data["rows"]]
+        self.assertEqual(counts, sorted(counts))
+        self.assertEqual(counts[16], 42)
+        self.assertTrue(all(set(row) == {"threshold_percent", "samples_below"} for row in data["rows"]))
+        self.assertNotIn("interactive_data:", record["blocks"]["expected_result"])
+        self.assertEqual([r["id"] for r in self.records if "interactive_data" in r], ["3.2"])
+
+    def test_call_rate_counts_use_strict_integer_boundaries(self):
+        spec = importlib.util.spec_from_file_location("aggregate_counts", ROOT / "scripts/author/export_call_rate_counts.py")
+        author = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(author)
+        with tempfile.TemporaryDirectory() as folder:
+            report = Path(folder) / "test.smiss"
+            report.write_text("IID\tMISSING_CT\tOBS_CT\n" +
+                              "".join(f"private{i}\t3\t100\n" for i in range(42)) +
+                              "boundary\t2\t100\n" + "complete\t0\t100\n" * 1970)
+            data = author.aggregate(report)
+            self.assertEqual(data["rows"][14]["samples_below"], 0)  # exactly 97% passes
+            self.assertEqual(data["rows"][16]["samples_below"], 42)  # exactly 98% passes
+            self.assertEqual(data["rows"][17]["samples_below"], 43)
+            self.assertNotIn("private", json.dumps(data))
 
     def test_required_blocks_and_figure_prompts(self):
         for record in self.records:

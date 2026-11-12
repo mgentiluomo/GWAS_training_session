@@ -137,6 +137,9 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                       "notebook_only_expected_code": expected_render_code,
                       "plink": {"applicable": bool(commands), "commands": commands, "options": options},
                       "figures": figures}
+            interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
+            if interactive:
+                record["interactive_data"] = json.loads(interactive.group(1))
             records.append(record)
     if len(records) != 59 or len({r["id"] for r in records}) != 59:
         raise ValueError("The main path must have 59 unique steps.")

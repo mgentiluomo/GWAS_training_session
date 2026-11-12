@@ -6,7 +6,7 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
+  "source_sha256": "17e24e3c21300c2b0eb162876f6458303f8fb8a49c9f70ec79f8f76257c2ed26",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Estimate excess or deficit of heterozygous calls using the pruned subset.",
