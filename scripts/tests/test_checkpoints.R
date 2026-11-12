@@ -1,0 +1,33 @@
+source("R/course.R")
+local({
+  root <- tempfile("course-checkpoint-tests-")
+  dir.create(root)
+  on.exit(unlink(root, recursive = TRUE))
+  data <- file.path(root, "data")
+  work <- file.path(root, "work")
+  full <- file.path(data, "checkpoints", "3.1")
+  partial <- file.path(data, "checkpoints", "3.2")
+  dir.create(full, recursive = TRUE)
+  dir.create(partial)
+  # Synthetic format placeholders: this test verifies copy integrity, not PLINK parsing.
+  for (ext in c("pgen", "pvar", "psam")) writeLines(paste("Synthetic", ext), file.path(full, paste0("fixture.", ext)))
+  writeLines("Synthetic reference list", file.path(partial, "removed_samples.txt"))
+  expect_error <- function(expr, pattern) {
+    message <- tryCatch({force(expr); ""}, error = conditionMessage)
+    stopifnot(grepl(pattern, message, fixed = TRUE))
+  }
+  expect_error(restore_checkpoint("../3.2", data, work), "Choose the step")
+  expect_error(check_step("3.3", data, work), "No checkpoint")
+  before <- where_am_i(data, work)
+  stopifnot(identical(before$status, c("not started", "reference lists only")))
+  restored <- restore_checkpoint("3.2", data, work)
+  stopifnot(basename(restored) == "3.1", length(list.files(restored)) == 3L,
+            isTRUE(attr(check_step("3.1", data, work), "complete")))
+  expect_error(restore_checkpoint("3.2", data, work), "already exists")
+  expect_error(restore_checkpoint("3.3", data, work), "reference lists only")
+  writeLines("Changed fixture", file.path(restored, "s3-1_fixture.pvar"))
+  stopifnot(!isTRUE(attr(check_step("3.1", data, work), "complete")))
+  after <- where_am_i(data, work)
+  stopifnot(after$status[1] == "needs checking")
+  cat("Checkpoint copy, integrity, restart semantics and progress checks passed.\n")
+})

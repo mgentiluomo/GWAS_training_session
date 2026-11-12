@@ -143,6 +143,113 @@ download_course_data <- function(password = NULL, destination = "data/course", r
   invisible(destination)
 }
 
+course_step_order <- function() {
+  counts <- c(8L, 7L, 8L, 8L, 6L, 7L, 7L, 8L)
+  unlist(lapply(seq_along(counts), function(i) paste0(i - 1L, ".", seq_len(counts[i]))), use.names = FALSE)
+}
+
+course_checkpoint_files <- function(step, data_dir) {
+  if (!is.character(step) || length(step) != 1L || is.na(step) || !step %in% course_step_order()) {
+    stop("Use a course step such as '3.2'.", call. = FALSE)
+  }
+  folder <- file.path(data_dir, "checkpoints", step)
+  if (!dir.exists(folder)) stop("No checkpoint is supplied for step ", step, ". Ask the instructor for the matching checkpoint.", call. = FALSE)
+  files <- list.files(folder, recursive = TRUE, full.names = TRUE, all.files = TRUE, no.. = TRUE)
+  files <- files[!dir.exists(files) & !grepl("[.]log$", files)]
+  if (!length(files)) stop("The checkpoint folder is empty.", call. = FALSE)
+  if (any(nzchar(Sys.readlink(files)))) stop("Checkpoint links are not supported.", call. = FALSE)
+  files
+}
+
+course_checkpoint_complete <- function(files) {
+  prefixes <- sub("[.](pgen|bed)$", "", files[grepl("[.](pgen|bed)$", files)])
+  any(vapply(prefixes, function(prefix) {
+    all(paste0(prefix, c(".pgen", ".pvar", ".psam")) %in% files) ||
+      all(paste0(prefix, c(".bed", ".bim", ".fam")) %in% files)
+  }, logical(1)))
+}
+
+course_checkpoint_names <- function(files, step, data_dir) {
+  folder <- normalizePath(file.path(data_dir, "checkpoints", step), winslash = "/", mustWork = TRUE)
+  relative <- substring(normalizePath(files, winslash = "/", mustWork = TRUE), nchar(folder) + 2L)
+  prefix <- paste0("s", sub(".", "-", step, fixed = TRUE), "_")
+  ifelse(startsWith(basename(relative), prefix), relative,
+         file.path(dirname(relative), paste0(prefix, basename(relative))))
+}
+
+check_step <- function(step, data_dir = "data/course", work_dir = "results/course", quiet = FALSE) {
+  expected <- course_checkpoint_files(step, data_dir)
+  names <- course_checkpoint_names(expected, step, data_dir)
+  actual <- file.path(work_dir, step, names)
+  if (!requireNamespace("digest", quietly = TRUE)) stop("Install the digest course package first.", call. = FALSE)
+  status <- vapply(seq_along(expected), function(i) {
+    if (!file.exists(actual[i]) || dir.exists(actual[i])) return("missing")
+    if (file.info(expected[i])$size != file.info(actual[i])$size) return("different size")
+    hashes <- vapply(c(expected[i], actual[i]), digest::digest, character(1), algo = "sha256", file = TRUE)
+    if (hashes[1] != hashes[2]) "different contents" else "matches"
+  }, character(1))
+  result <- data.frame(file = names, status = unname(status), stringsAsFactors = FALSE)
+  # Removal lists alone cannot establish that the genotype step was completed.
+  full <- course_checkpoint_complete(expected)
+  attr(result, "complete") <- full && all(status == "matches")
+  attr(result, "reference_complete") <- full
+  if (!quiet) {
+    print(result, row.names = FALSE)
+    if (!full) message("This checkpoint contains reference lists only. Matching lists do not prove the analysis is complete.")
+    if (any(status == "missing")) message("Some expected files are missing. Run the step or restore a complete matching checkpoint.")
+    if (any(status %in% c("different size", "different contents"))) {
+      message("Some files differ. Check the input checkpoint, software version and command options. Keep your current files for diagnosis.")
+    }
+    if (isTRUE(attr(result, "complete"))) message("Step ", step, " matches its supplied checkpoint.")
+  }
+  invisible(result)
+}
+
+restore_checkpoint <- function(step, data_dir = "data/course", work_dir = "results/course") {
+  order <- course_step_order()
+  index <- match(step, order)
+  if (length(index) != 1L || is.na(index) || index == 1L) stop("Choose the step you want to restart, such as '3.2'.", call. = FALSE)
+  previous <- order[index - 1L]
+  files <- course_checkpoint_files(previous, data_dir)
+  if (!course_checkpoint_complete(files)) {
+    stop("The checkpoint for step ", previous, " contains reference lists only, not a restart fileset. Ask the instructor for a complete checkpoint.", call. = FALSE)
+  }
+  names <- course_checkpoint_names(files, previous, data_dir)
+  destination <- file.path(work_dir, previous)
+  if (file.exists(destination)) stop("The destination already exists. Choose a new work_dir to keep your existing work.", call. = FALSE)
+  dir.create(work_dir, recursive = TRUE, showWarnings = FALSE)
+  staging <- tempfile("checkpoint-", tmpdir = work_dir)
+  if (!dir.create(staging)) stop("Cannot create the temporary checkpoint folder.", call. = FALSE)
+  on.exit(unlink(staging, recursive = TRUE), add = TRUE)
+  for (i in seq_along(files)) {
+    target <- file.path(staging, names[i])
+    dir.create(dirname(target), recursive = TRUE, showWarnings = FALSE)
+    if (!file.copy(files[i], target)) stop("A checkpoint file could not be copied.", call. = FALSE)
+    if (digest::digest(files[i], algo = "sha256", file = TRUE) != digest::digest(target, algo = "sha256", file = TRUE)) {
+      stop("The checkpoint copy failed verification.", call. = FALSE)
+    }
+  }
+  if (!file.rename(staging, destination)) stop("The checkpoint could not be placed in the working folder.", call. = FALSE)
+  message("Restored step ", previous, ". Restart at step ", step, ". Files: ", destination)
+  invisible(destination)
+}
+
+where_am_i <- function(data_dir = "data/course", work_dir = "results/course") {
+  folders <- list.dirs(file.path(data_dir, "checkpoints"), recursive = FALSE, full.names = FALSE)
+  steps <- intersect(course_step_order(), folders)
+  if (!length(steps)) stop("No course checkpoints were found. Download the course data first.", call. = FALSE)
+  state <- vapply(steps, function(step) {
+    result <- check_step(step, data_dir, work_dir, quiet = TRUE)
+    if (!isTRUE(attr(result, "reference_complete"))) return("reference lists only")
+    if (isTRUE(attr(result, "complete"))) return("complete")
+    if (all(result$status == "missing")) "not started" else "needs checking"
+  }, character(1))
+  result <- data.frame(step = steps, status = unname(state))
+  print(result, row.names = FALSE)
+  message("Completion is based on supplied checkpoint files, not on saved R objects. Steps without a supplied checkpoint cannot be verified.")
+  invisible(result)
+}
+
 course_config <- function(root = ".") {
   root <- normalizePath(root, mustWork = TRUE)
   # Session display only: do not change OS language, input methods or LC_CTYPE.

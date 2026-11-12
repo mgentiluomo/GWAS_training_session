@@ -110,6 +110,18 @@ the external program and records its printed command.
 
 ## Rejoining the class
 
+For the guided 2026 course, `restore_checkpoint("3.2")` means restart step 3.2:
+it restores the last completed step, 3.1. Outputs go into
+`results/course/3.1/` with an `s3-1_` prefix. Existing folders are refused.
+Use `check_step("3.1")` to compare supplied outputs and `where_am_i()` to list
+verified progress. All three helpers accept `data_dir` and `work_dir` for a
+local installation outside the project.
+
+The stage 1 package has complete genotype checkpoints only at 4.6 and 5.6.
+Other checkpoint folders contain removal lists; the helpers report these as
+partial references and refuse to use them as restart filesets. Ask the
+instructor for a complete checkpoint when the requested restart is unavailable.
+
 1. Keep the failed run and record its first error.
 2. For demo data, regenerate checkpoints by running the preceding notebooks,
    or use a same-mode checkpoint supplied during class.
