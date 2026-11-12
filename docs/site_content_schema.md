@@ -103,3 +103,21 @@ The author tool checks the 2,013 input wells and the 42 exclusions at 98%.
 It compares integer cross-products to avoid rounding `F_MISS` at boundaries.
 The source report uses PLINK 2.0 b.1.4 (7 November 2026), on the verified Windows
 main-path state. It stays external alongside its PLINK command and log.
+
+## Module pages
+
+`site_content/modules/module-N.json` (N = 0 to 7) holds the text that sits around
+the steps of one module. It is exported from the same notebook, so it is never
+edited by hand.
+
+| Field | Meaning |
+| --- | --- |
+| `schema_version` | `1.0`. |
+| `module`, `title` | Module number and title from the notebook header. |
+| `source`, `source_sha256` | Notebook path and the SHA-256 of its text. |
+| `overview_markdown` | The "Module N at a glance" section: what the student will do, learn and how long it takes. |
+| `recap_markdown` | The "Module N recap" section: a short list of what was done, and a **Next:** line. |
+
+A step ends at the next level-2 heading, so the recap never becomes part of the
+last step's "Files created" block.
+
