@@ -8,6 +8,10 @@ Each entry has a short link name. Link to it from the course text like this: `[c
 
 The counted allele in the output; do not assume it is always minor.
 
+### Additive model {#additive-model}
+
+A model that assumes each extra copy of the allele changes the log odds of disease by the same amount. A person with two copies has twice the change of a person with one copy.
+
 ### Allele {#allele}
 
 One of the versions of a variant, written as a base: A, C, G or T. A person carries two alleles at each site, one from each parent.
@@ -40,6 +44,10 @@ A technical difference shared by samples that were processed together, for examp
 
 The older PLINK binary file set. The BED file holds the genotypes, the BIM file describes the variants and the FAM file describes the samples. The three files must stay together.
 
+### Bonferroni correction {#bonferroni}
+
+A strict way to handle multiple testing. The wanted error rate (for example 0.05) is divided by the number of tests, and this gives the p-value threshold.
+
 ### Call rate {#call-rate}
 
 Fraction of genotypes successfully called: one minus missingness.
@@ -60,9 +68,21 @@ A saved state of the course files at the end of a step. A checkpoint lets you re
 
 A short code calculated from the content of a file. If one byte of the file changes, the code changes, so a checksum shows whether a download is damaged or altered. This course uses SHA-256 checksums.
 
+### Chi-square statistic {#chi-square-statistic}
+
+A test statistic, a number that grows when the evidence against the null hypothesis grows. Each p-value can be converted into a chi-square value, and the median of these values gives lambda.
+
 ### CI {#ci}
 
 Confidence interval expressing uncertainty under model assumptions.
+
+### Clumping {#clumping}
+
+Grouping correlated variants that lie close together. Clumping starts from the variant with the smallest p-value and gathers its correlated neighbours into one group, called a clump.
+
+### Collinearity {#collinearity}
+
+A problem that occurs when one column of a table can be predicted exactly from the other columns. The model then cannot give a single answer for these columns.
 
 ### Confounding {#confounding}
 
@@ -88,9 +108,17 @@ The character that separates columns in a text file, for example a comma, a semi
 
 Failed calls that are more common in one group, for example the cases, than in the other. It can create a false association.
 
+### Dosage {#dosage}
+
+The number of copies of a chosen allele that a person carries: 0, 1 or 2. A missing genotype has no dosage.
+
 ### Duplicated variant {#duplicate-variant}
 
 Two or more array entries with different IDs that describe the same chromosome, position and pair of alleles.
+
+### Effect allele {#effect-allele}
+
+The allele whose copies are counted in the model. The odds ratio refers to it. PLINK calls it A1. It is not always the minor allele or the harmful allele.
 
 ### Eigenvalue {#eigenvalue}
 
@@ -116,6 +144,10 @@ A file that your computer can run as a program. For PLINK 2 it is `plink2.exe` o
 
 A number that compares the homozygous calls we observe with the number we expect from the allele frequencies. A negative value means too much heterozygosity. A high positive value means too little.
 
+### False discovery rate {#false-discovery-rate}
+
+The expected share of false results among all the results called significant. The Benjamini-Hochberg method controls it. It is less strict than Bonferroni.
+
 ### FID / IID {#fid-iid}
 
 The identifier pair used to match samples between files.
@@ -123,6 +155,10 @@ The identifier pair used to match samples between files.
 ### Final report {#final-report}
 
 A text file from the genotyping laboratory. It lists, for each sample and site, the genotype call and the GC score.
+
+### Fine-mapping {#fine-mapping}
+
+Statistical work that tries to find which variant in a region is the most likely cause of a signal. Clumping does not do this.
 
 ### First-degree relative {#first-degree-relative}
 
@@ -139,6 +175,10 @@ A number from 0 to 1 that describes the quality of one genotype call. It is not 
 ### Genome build {#genome-build}
 
 A numbered version of the human reference genome, such as GRCh37 or GRCh38. Positions are only meaningful together with the build that they refer to.
+
+### Genome-wide significance {#genome-wide-significance}
+
+The usual p-value threshold for a GWAS, 5e-8 (0.00000005). A variant below it is called genome-wide significant. It allows for the very large number of tests in a scan.
 
 ### Genotype {#genotype}
 
@@ -180,6 +220,10 @@ Hardy–Weinberg equilibrium: a population-genetic expectation for genotype prop
 
 Estimating unobserved genotypes using observed data and a reference panel.
 
+### Inflation {#inflation}
+
+Inflation means that the p-values are smaller overall than they should be if no variant were linked to the trait. It can come from confounding or from technical problems. The genomic inflation factor lambda measures it.
+
 ### Intensity cluster {#intensity-cluster}
 
 A group of points with similar light signals when many samples are plotted for one variant. There are normally three clusters: two homozygotes and one heterozygote.
@@ -208,6 +252,10 @@ Linkage disequilibrium: association between alleles at different loci.
 
 Selecting an approximately independent variant subset.
 
+### Lead variant {#lead-variant}
+
+The variant with the smallest p-value in a region or clump. Other names are index variant and top variant. It is the strongest signal that was measured, not necessarily the cause.
+
 ### Lift-over {#lift-over}
 
 Converting positions from one genome build to another, for example from GRCh37 to GRCh38. Some sites cannot be converted.
@@ -227,6 +275,10 @@ Minor allele frequency in the samples used for the estimate.
 ### Manhattan plot {#manhattan-plot}
 
 Genomic position against negative log10 association p-value.
+
+### Maximum likelihood {#maximum-likelihood}
+
+A way to fit a model. It chooses the numbers that make the observed data most likely under the model.
 
 ### Median {#median}
 
@@ -248,6 +300,10 @@ The share of genotypes that could not be read (no-calls). It equals one minus th
 
 A small circular DNA found in mitochondria, the energy units of the cell. It comes from the mother only. It is written MT in the data.
 
+### Multiple testing {#multiple-testing}
+
+Running many statistical tests at once. Each test has a small chance of a false positive, so with hundreds of thousands of tests some false positives are expected unless the threshold is made stricter.
+
 ### No-call {#no-call}
 
 A site where the calling algorithm did not give a genotype, because the signal was weak or the clusters were unclear. It is stored as missing.
@@ -255,6 +311,14 @@ A site where the calling algorithm did not give a genotype, because the signal w
 ### Notebook {#notebook}
 
 A file that mixes explanatory text with R commands. Each lesson in this course is a notebook.
+
+### Null hypothesis {#null-hypothesis}
+
+The statement that there is no effect. In a GWAS test, it says that the variant has no link with the disease, so beta = 0 and the odds ratio is 1.
+
+### Odds {#odds}
+
+The odds of an outcome are the number of people with the outcome divided by the number without it. For example, 20 cases and 80 controls give odds of 0.25.
 
 ### OR {#or}
 
@@ -308,10 +372,6 @@ A short DNA sequence fixed on the array. It is designed to bind to the DNA aroun
 
 Placing new samples on axes that were calculated from other samples. The axes do not change, so all samples are compared on the same scale.
 
-### Pseudo-autosomal region {#pseudo-autosomal-region}
-
-A small region that exists on both the X chromosome and the Y chromosome. It behaves like an autosome, so a man has two copies of it.
-
 ### Pseudoautosomal region {#pseudoautosomal-region}
 
 Small parts of the X and Y chromosomes that behave like autosomes. Men have two copies of them.
@@ -352,6 +412,10 @@ The allele that matches the reference genome at a site. It is often written REF.
 
 A set of samples with known origin, taken from the 1000 Genomes project. We use it as a map on which we place our study samples. It is a tool for comparison, not a ranking of people.
 
+### Regional plot {#regional-plot}
+
+A plot of one small part of the genome. Each point is a variant, placed by position and by -log10(p), and coloured by its correlation (r^2) with the lead variant.
+
 ### Relative path {#relative-path}
 
 The place of a file written from the working directory, for example `R/course.R`. It works on any computer that has the same project folder.
@@ -384,6 +448,10 @@ A table from the laboratory that lists every well, with its plate, well position
 
 A plot of the eigenvalues in order, from the largest to the smallest. It shows how quickly the importance of the components falls.
 
+### Separation {#separation}
+
+A situation in which a genotype group contains only cases or only controls. The ordinary logistic fit then cannot find a finite effect size.
+
 ### Sex chromosomes {#sex-chromosomes}
 
 The chromosomes X and Y. Women usually have two X chromosomes. Men usually have one X and one Y.
@@ -400,9 +468,21 @@ A single-nucleotide polymorphism.
 
 A number that tells how spread out values are around their mean. A value more than six standard deviations from the mean is very unusual.
 
+### Standard error {#standard-error}
+
+A number that shows how uncertain an estimate is. A small standard error means a precise estimate. A large one means that the estimate could change a lot with other samples.
+
+### Statistical power {#statistical-power}
+
+The chance that a study finds an effect of a given size when the effect is real. Small studies have low power and can miss real effects.
+
 ### Strand {#strand}
 
 DNA has two strands that carry complementary bases: A pairs with T, and C pairs with G. The same variant can be written on either strand, so two files can show different letters for the same site.
+
+### Summary statistics {#summary-statistics}
+
+A table with one row for each tested variant. It lists the chromosome, position, alleles, odds ratio, standard error, p-value and number of samples. It holds the results of the association test, but no genotypes of single people.
 
 ### Technical replicate {#technical-replicate}
 
