@@ -50,3 +50,11 @@ modules and unresolved checks will be recorded below before the final push.
   Eight high-F samples were flagged and retained. One failed first attempt
   exposed scientific notation in interval coordinates; explicit integer formatting
   fixed it, and the full module passed on the next attempt.
+
+- Module 4: Windows execution matched the reference counts, ending at
+  1,844 samples and 238,513 variants. HWE removed 167 sites, including the
+  three named ancestry markers; chromosome review removed 33 sites and
+  duplicate review another 306 entries. The sample-size-aware HWE policy is
+  calibrated at 1,000 controls with a 10^(-6) mid-p cutoff and tightens for
+  larger samples; at this dataset size it reproduces the reference rule.
+  This teaching policy must not be presented as a universal research threshold.

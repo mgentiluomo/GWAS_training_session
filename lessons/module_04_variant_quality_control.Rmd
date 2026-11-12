@@ -1,0 +1,434 @@
+---
+title: "Module 4: variant quality control"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root. Read each step before running its R chunk. All data
+are simulated; these exercises cannot establish a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
+loads its inputs from disk; a saved R workspace is not required.
+
+```{r module4_setup, include=FALSE}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
+}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## 4.1 Variant call rate {#step-4-1}
+
+### What we do
+
+Remove variants with call rate below 98% after sample QC.
+
+### Why
+
+Site missingness is recalculated in the retained cohort. A probe can perform poorly across many wells even when each well passes sample QC. The observed number of failing variants can exceed the number of deliberately planted failures because natural genotype patterns and earlier exclusions change the denominator.
+
+### You need
+
+Full sample-QC boundary 3.8.
+
+### Command
+
+```{r s4-1}
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
+ops <- guided_replay_lists(cfg, "4.1", "3.8")
+guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048
+```
+
+`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+801 variants removed, rather than exactly the 800 planted low-call sites. 1,844 samples and 295,559 variants remain.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Poor probes, cluster-calling problems and sample-dependent failures. Inspect which samples are affected rather than assuming every rejected site has the same cause.
+
+### Quick check
+
+Why can a simulation with 800 planted failures yield 801 observed exclusions?
+
+<details><summary>Show the answer</summary>
+
+The rule acts on observed data, including other sites, and its result is not constrained to the planted list.
+
+</details>
+
+### Files created
+
+`s4-1_state.*`, excluded IDs and replay metadata.
+
+## 4.2 Differential missingness {#step-4-2}
+
+### What we do
+
+Test whether missing calls differ between cases and controls.
+
+### Why
+
+An overall high call rate can hide unequal missingness between outcome groups. Such a pattern can create spurious association if call failures correlate with genotype. A p-value measures how incompatible the observed group difference is with the equal-missingness model; it is not the probability that a site is an error. With many sites, some small p-values occur by chance. The course uses a prespecified screening cutoff of 0.00001.
+
+### You need
+
+State 4.1 and Disease phenotype joined at 2.7.
+
+### Command
+
+```{r s4-2}
+report <- guided_path(cfg, "4.2", "missing")
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--test-missing", "--out", report))
+x <- guided_table(paste0(report, ".missing"))
+p <- as.numeric(x$P)
+exclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, "4.2", "exclude.txt"))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))
+ops <- guided_replay_lists(cfg, "4.2", "4.1")
+guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048
+```
+
+`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+120 variants excluded; 295,439 variants and 1,844 samples remain.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Case/control-dependent calling, processing differences and some genotype-dependent missingness. A significant test does not itself identify the laboratory mechanism.
+
+### Quick check
+
+Can a variant pass the overall 98% call-rate rule and still fail this check?
+
+<details><summary>Show the answer</summary>
+
+Yes. Its few missing calls can be concentrated in one phenotype group.
+
+</details>
+
+### Files created
+
+`.missing`, the reviewed exclusion list and `s4-2_state.*`.
+
+## 4.3 Allele frequency {#step-4-3}
+
+### What we do
+
+Keep variants with minor allele frequency of at least 1% for the main array scan.
+
+### Why
+
+Minor allele frequency (MAF) is the frequency of the less common allele in the analysed sample. Rare alleles give sparse genotype cells and unstable ordinary logistic estimates. A 1% filter is a course analysis choice, not a definition of biological relevance. Frequencies depend on ancestry, sample selection and how chromosome copy number is handled.
+
+### You need
+
+State 4.2.
+
+### Command
+
+```{r s4-3}
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
+ops <- guided_replay_lists(cfg, "4.3", "4.2")
+guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048
+```
+
+`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+56,420 variants excluded from the observed frequency distribution; 239,019 remain. No dedicated list of rare artefacts was planted.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Sparse variants with limited information in this sample. It does not establish whether a rare allele is genuine or whether it would be analysable in a larger study.
+
+### Quick check
+
+Can an allele's minor/major label change between populations?
+
+<details><summary>Show the answer</summary>
+
+Yes. The label describes frequency in the sample, not a fixed property of the allele.
+
+</details>
+
+### Files created
+
+`s4-3_state.*` and replay exclusion list.
+
+## 4.4 Hardy-Weinberg and sample size {#step-4-4}
+
+### What we do
+
+Calculate a control-only exact mid-p Hardy?Weinberg test and apply an explicit sample-size-aware screening rule.
+
+### Why
+
+Hardy?Weinberg equilibrium (HWE) predicts genotype proportions p?, 2p(1?p) and (1?p)? under random mating and other idealised assumptions. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(?6 ? 0.001 ? max(0, n_control ? 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.
+
+### You need
+
+State 4.3 and its PSAM phenotype; no association results are used to choose the cutoff.
+
+### Command
+
+```{r s4-4}
+psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))
+controls <- guided_list(psam$IID[psam$Disease == "1"], guided_path(cfg, "4.4", "controls.txt"), TRUE)
+report <- guided_path(cfg, "4.4", "hardy")
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--keep", controls, "--chr", "1-22", "--hardy", "midp", "--out", report))
+hwe <- guided_table(paste0(report, ".hardy"))
+n_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)
+cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
+p <- as.numeric(hwe$MIDP)
+exclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, "4.4", "exclude.txt"))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))
+retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID
+stopifnot(!any(c("rs4988235", "rs12913832", "rs1426654") %in% retained))
+ops <- guided_replay_lists(cfg, "4.4", "4.3")
+guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
+```
+
+`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+167 variants excluded, leaving 238,852. Strong planted errors are not the only failures: eight unplanted sites and seven altered duplicate copies also fail, while some mild errors survive. rs4988235, rs12913832 and rs1426654 leave here and cannot be used as surviving module 5 markers.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Calling errors and population mixture. The unplanted failures demonstrate why HWE failure is not proof of technical error, and why association loci cannot be rescued after seeing their p-values.
+
+### Quick check
+
+Can a mixture of two groups, each in HWE but with different allele frequencies, show a heterozygote deficit when pooled?
+
+<details><summary>Show the answer</summary>
+
+Yes. Pooling can produce a deficit even without genotyping error.
+
+</details>
+
+### Files created
+
+Control ID list, `.hardy`, exclusion list and `s4-4_state.*`.
+
+## 4.5 Sex chromosomes, MT and duplicated sites {#step-4-5}
+
+### What we do
+
+Review implausible chromosome-specific calls and collapse consistent duplicate genomic entries.
+
+### Why
+
+Non-PAR X in males, Y and mitochondrial DNA have different copy-number expectations from autosomes. The exercise screens excess heterozygous male X/MT calls and Y calls in recorded females, using a 1% site-level rule. Real interpretation requires deeper laboratory and karyotype review. Distinct array IDs can refer to the same chromosome, coordinate and allele pair. We replace IDs with chromosome:position:REF:ALT, keep one consistent copy and remove both when genotype copies conflict. The imported REF remains provisional unless independently validated against a reference genome.
+
+### You need
+
+State 4.4 with PAR splitting already performed at 3.3.
+
+### Command
+
+```{r s4-5}
+report <- guided_path(cfg, "4.5", "sexchr")
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--chr", "X,Y,MT", "--export", "A", "--out", report))
+header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]
+raw <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE, quote = "", comment.char = "",
+  colClasses = c(rep("character", 6), rep("integer", length(header) - 6L)), na.strings = "NA")
+genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L
+ids <- sub("_[^_]+$", "", names(raw)[-(1:6)])
+pvar <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))
+chromosome <- pvar$CHROM[match(ids, pvar$ID)]
+wrong <- numeric(length(ids))
+wrong[chromosome == "X"] <- colMeans(genotypes[raw$SEX == "1", chromosome == "X", drop = FALSE] == 1L)
+wrong[chromosome == "Y"] <- colMeans(genotypes[raw$SEX == "2", chromosome == "Y", drop = FALSE] >= 0L)
+wrong[chromosome == "MT"] <- colMeans(genotypes[, chromosome == "MT", drop = FALSE] == 1L)
+exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))
+sex_state <- guided_path(cfg, "4.5", "sex_state")
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--exclude", exclude, "--make-pgen", "--out", sex_state))
+stopifnot(all(guided_counts(sex_state) == c(1844, 238819)))
+run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",
+  "--make-pgen", "--out", guided_path(cfg, "4.5")))
+ops <- data.frame(option = c("--exclude", "--set-all-var-ids", "--rm-dup"), value = c(exclude, "@:#:$r:$a", "exclude-mismatch"))
+guided_register(cfg, "4.5", "4.4", 1844, 238513, operations = ops)
+rm(raw, genotypes); invisible(gc())
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s4-4_state --chr X,Y,MT --export A --out results/guided/s4-5_sexchr --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclude.txt --make-pgen --out results/guided/s4-5_sex_state --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048
+```
+
+`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+33 chromosome-specific failures removed. Duplicate review removes 306 entries: one of each of 280 concordant pairs and both members of 13 discordant pairs. Final variant count is 238,513.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Implausible haploid calls, annotation duplication and discordant duplicate genotyping. An ID change does not validate reference alleles or confer a new biological interpretation.
+
+### Quick check
+
+Why are both copies of a discordant duplicate removed rather than keeping the copy with the nicer association p-value?
+
+<details><summary>Show the answer</summary>
+
+The genotype discrepancy is unresolved; association evidence must not choose which technical record is trusted.
+
+</details>
+
+### Files created
+
+Chromosome export, exclusion list, duplicate reports and `s4-5_state.*`.
+
+## 4.6 Variant QC summary and checkpoint {#step-4-6}
+
+### What we do
+
+Save the complete post-variant-QC boundary and review what the filters achieved.
+
+### Why
+
+QC thresholds trade retained information against technical risk. Record counts, software, build, exclusions and known limitations so that a reader can reproduce the same state. The retained set is ready for population structure assessment, not automatically free from confounding.
+
+### You need
+
+State 4.5 and intermediate exclusion records.
+
+### Command
+
+```{r s4-6}
+guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")
+check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+Full module 4 boundary: 1,844 samples, 238,513 variants; counts and SHA-256 agree with the snapshot.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Which separate source of bias still needs explicit assessment before association?
+
+<details><summary>Show the answer</summary>
+
+Population structure and ancestry differences between cases and controls.
+
+</details>
+
+### Files created
+
+`s4-6_state.*`, full `checkpoints/4.6/state.*`, updated replay index and count table.
