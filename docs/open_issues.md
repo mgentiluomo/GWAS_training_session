@@ -18,7 +18,7 @@ The items below are delivery/platform limits, not silently accepted QC failures.
    classroom password supplied outside the repository. Create `data-2026.1` and
    replace both URLs and both trusted hashes in `config.R`. The current 55-file
    test ZIP and its password must not become the classroom release.
-4. Confirm the proposed licences and approve the classroom use of the current
+4. Approve the classroom use of the current
    dataset dimensions and documented study-specific review rules. The HWE rule
    is calibrated at 1,000 controls and becomes more stringent above that size;
    it reproduces the existing reference cutoff for this dataset. It is a

@@ -81,6 +81,16 @@ Official PLINK documentation:
 
 Original materials: Manuel Gentiluomo and Riccardo Farinella, University of Pisa.
 
+## Licence
+
+Code in `R/`, `scripts/` and code chunks uses the [MIT licence](LICENSE).
+Lesson text, docs, figures and simulated data use
+[CC BY-NC-SA 4.0](LICENSE-CONTENT.md). Third-party materials retain their own terms.
+
+To cite the course: Gentiluomo, M. (2026). *GWAS Practical Tutorial*.
+University of Pisa. Guided 2026 course. Cite this repository and include the
+commit hash or release version that you used.
+
 ## Older demonstration (separate from the guided course)
 
 The repository also holds an older demonstration with 600 simulated samples and

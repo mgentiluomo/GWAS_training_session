@@ -90,9 +90,14 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 
 ## Data distribution
 
-- Data are not public. They are distributed as AES-256 encrypted archives attached to a GitHub Release (for example `data-2026.1`), each with a SHA-256 checksum. The password is given in class or on the course channel and never appears in the repository or on the site.
+- Data are not public. They are distributed as AES-256 encrypted archives attached to a GitHub Release (for example `data-2026.1`), each with a SHA-256 checksum. Students request the password through the form at `https://manuelgentiluomo.it/teaching/gwas/data-access` (placeholder path). The form sends it automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. In class, a QR code opens the same form. Other users write to `manuel.gentiluomo@unipi.it`. The password changes every academic year. It must not be shared and never appears in the repository or on the site.
 - One new release with a new password each academic year; the previous one is deleted.
 - Contents: the new simulated GRCh38 dataset and the PCA reference (main path); DB_A with DB_1000G in GRCh37 (optional full-size dataset and conversion exercise).
+
+## Website release policy
+
+- The website carries a "beta 2026" label. Release modules 0 to 2 first, then 3 to 4, then 5 to 7.
+- The repository and the data release stay complete at every website stage.
 
 ## Writing and presentation
 
@@ -103,7 +108,7 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 - Never use the em dash as punctuation.
 - Accessibility to WCAG 2.2 AA: keyboard navigation, adequate contrast, resizable text, mobile layout, light and dark themes, descriptive alt text, a text summary for main plots, never meaning by colour alone, colour-blind-safe palettes.
 - Do not generate illustrations. For figures, write a prompt for Gemini and leave a placeholder.
-- Licence (proposed, not yet confirmed): CC BY 4.0 for text and figures, MIT for code.
+- Licence (confirmed by the author): lesson text, docs, figures and simulated data use CC BY-NC-SA 4.0. Code in `R/`, `scripts/` and code chunks uses MIT. See `LICENSE` and `LICENSE-CONTENT.md`.
 
 ## Ways of working
 
@@ -117,5 +122,4 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 ## Open decisions
 
 - Binary format for the course: PLINK 2 native (pgen/pvar/psam, with a box on bed/bim/fam) is proposed.
-- Licence: see above.
 - Final numbers of the simulated dataset.

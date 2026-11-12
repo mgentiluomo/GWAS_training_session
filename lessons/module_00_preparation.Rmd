@@ -21,6 +21,8 @@ Validation: the R commands in this module ran without errors on Windows. The sof
 
 This [notebook](../docs/glossary.md#notebook) is the source of the guided preparation module. A notebook is a file that mixes text and R commands. The older file `01_quality_control.Rmd` is a separate, smaller demonstration.
 
+Lesson text, figures and simulated data: [CC BY-NC-SA 4.0](../LICENSE-CONTENT.md). Code: [MIT](../LICENSE).
+
 ```{r setup, include=FALSE}
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
 if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
