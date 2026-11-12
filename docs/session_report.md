@@ -1,3 +1,16 @@
+# Contact address verification, 12 November 2026
+
+Checked `CLAUDE.md`, `README.md`, `lessons/module_00_preparation.Rmd`,
+`docs/troubleshooting.md`, `docs/release_checklist.md` and this report for
+incomplete contact sentences. No missing address or unresolved email reference
+was found. The contact address is `manuel.gentiluomo@unipi.it`.
+It was already correct in the data access instructions in CLAUDE.md, module 0,
+troubleshooting and the release checklist. No correction to those files was needed.
+
+Regenerated all 60 step JSON files and 8 module JSON files. Their content was
+unchanged. Text checks passed with 0 errors and 0 warnings. All 9 export tests
+passed.
+
 # Author policies and final verification, 12 November 2026
 
 This section updates the earlier session records below. Work stayed on
