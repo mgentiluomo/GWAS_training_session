@@ -30,8 +30,10 @@ The guided modules use the simulated 2026 dataset, separate from the older
 600-sample demo and the historical DB_A dataset. Use `download_course_data()`
 after configuring the approved release in `config.R`, or supply `zip_path` for
 the local stage 1 test. See [encrypted data setup](troubleshooting.md#downloading-the-encrypted-course-data).
-The extracted folder contains `lab_export/`, `array/`, `phenotypes/`,
-`pca_reference/`, `grch37_exercise/`, `imputation/` and `checkpoints/`.
+The final classroom staging folder contains 108 files. The classroom package
+contains `lab_export/`, `array/`, `phenotypes/`, `pca_reference/`,
+`grch37_exercise/`, `final_report/` and `checkpoints/`.
+Imputation material is not part of the main-path classroom package.
 No data archive is hosted in the repository or under the browser tutorial.
 
 ## Input dictionary

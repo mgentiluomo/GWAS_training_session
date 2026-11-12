@@ -6,7 +6,7 @@
   "anchor": "step-0-1",
   "title": "What you need",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "3b858257c9c20a0674ec3d6ff035a95f938d8689efeea4d1aef92b4068ad63f6",
+  "source_sha256": "57556ee52f4e5b582015b56d01f008ab6b530087654f08b600db8acc284d516a",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Prepare a computer, a project folder and the tools used in the whole course. In this step you only find out which system and processor you have.\n\nYou can see this without R. On Windows, open Settings, then System, then About, and read \"System type\". On a Mac, click the Apple menu, then About This Mac. A line \"Chip\" with a name such as Apple M1 means Apple Silicon. A line \"Processor\" means an Intel Mac.",

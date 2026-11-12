@@ -107,9 +107,8 @@ Logs and verification scripts remain in the complete run folder:
 `module_00.log` through `module_07.log`, `count_verification.log`, `recovery.log`
 and `checkpoint68_verification.log`.
 
-The old staging folder had 105 files. The new checkpoint 6.8 adds its summary
-file, dictionary and manifest, giving 108 files. Before publication, update the
-105-file download example in module 0 step 0.5 to the new package count.
+The final staging folder has 108 files. Module 0 step 0.5 and its recap use
+`Course data are ready: 108 files verified.` as the expected download result.
 The download step was a manual action and was not executed in this run.
 
 ## 3. Build the encrypted archive
@@ -225,7 +224,7 @@ text that still says the release is not published:
 | --- | --- |
 | `README.md` (the "data release is not published yet" paragraph) | State that the data come from the release `data-2026.1`. |
 | `docs/data.md` | Remove the remarks about the stage 1 test package. |
-| `lessons/module_00_preparation.Rmd` (step 0.5 and the "55 files" remarks) | Use the file count printed by the new manifest. Tell students to run `download_course_data()` without `zip_path`. |
+| `lessons/module_00_preparation.Rmd` (step 0.5 and the recap) | Confirm that the manifest and expected result both report 108 files. Tell students to run `download_course_data()` without `zip_path`. |
 | `R/course.R` | The message about a local `zip_path` can stay. Check that nothing else refers to stage 1. |
 | `scripts/tests/test_course_setup.R` | The test that uses the old 55-file archive needs the new local archive or must be skipped. |
 

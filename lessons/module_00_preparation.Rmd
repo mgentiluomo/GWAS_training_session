@@ -304,7 +304,7 @@ The file `MANIFEST.tsv` must be in the same folder as the ZIP file. The function
 
 <details><summary>Show the expected result</summary>
 
-R prints `Course data are ready: 105 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
+R prints `Course data are ready: 108 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
 
 </details>
 
@@ -497,7 +497,7 @@ To restart step 4.2, which completed step's files do you need?
 
 - You found your operating system and processor, and installed R, RStudio and PLINK 2.
 - You downloaded the course project and the encrypted data, and checked them with SHA-256 checksums.
-- The archive reported `Course data are ready: 105 files verified.`
+- The archive reported `Course data are ready: 108 files verified.`
 - The setup check ran PLINK on 20 variants and printed `Preflight passed.`
 - The starting data have 2,016 sample wells and 299,523 variants, which represent 2,000 simulated people.
 - You learned the routine for every step: read, run, compare.

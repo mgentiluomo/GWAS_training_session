@@ -33,6 +33,7 @@ never genotype data. The verified simulated main path starts with 2,016 wells
 and 299,523 array entries; its final cohort has 1,811 samples, 238,513 post-QC
 variants and 236,815 association tests. Approved data URLs and SHA-256 values
 belong in `config.R`; its current hashes identify the local stage 1 test ZIP.
+The final classroom staging folder contains 108 files.
 See [data setup](docs/troubleshooting.md#downloading-the-encrypted-course-data).
 
 After preparing the tools and verified data, run the generated complete script
