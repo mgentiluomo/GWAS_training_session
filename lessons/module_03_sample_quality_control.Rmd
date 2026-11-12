@@ -9,10 +9,10 @@ output:
     theme: readable
 ---
 
-Work from the project root. Read each step before running its R chunk. All data
-are simulated; these exercises cannot establish a finding about a real disease.
+Work from the project root, which is the main folder of the course. Read each step before you run its R chunk (a block of R code that you run). All data
+are simulated. These exercises cannot show a finding about a real disease.
 See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
-loads its inputs from disk; a saved R workspace is not required.
+loads its inputs from disk, so you do not need a saved R workspace.
 
 ```{r module3_setup, include=FALSE}
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -22,15 +22,35 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+## Module 3 at a glance {#module-3-overview}
+
+**What you will do.** You will check the quality of every sample in the data. A sample is the DNA of one person. You will remove samples that are poor, mislabelled, repeated, related to another sample or measured on a faulty plate. At the end you will save a clean set of 1,844 samples.
+
+**What you will learn.**
+
+- How to find samples that failed in the laboratory.
+- How to compare the recorded sex of a person with the sex shown by the DNA.
+- How to find related people and repeated samples.
+- How to find a plate that was measured badly.
+- How to keep a record of every sample you remove, and why.
+
+**How long it takes.** About 70 minutes. Step 3.6 is the slowest, because its rules for removing samples have the most detail.
+
 ## 3.1 Rough cleaning {#step-3-1}
 
 ### What we do
 
-Remove very poorly called wells first, then very poorly called sites.
+First we remove [wells](../docs/glossary.md#well) that were read very badly. A well is a small hole in a plate that holds the DNA of one sample. Then we remove [variants](../docs/glossary.md#variant) (also called sites) that were read very badly. A variant is a place in the DNA where people differ.
 
 ### Why
 
-Gross failures distort later missingness and heterozygosity summaries. We first remove samples with over 10% missing genotypes, recompute on the survivors, and remove variants with over 10% missingness. Order matters: removing poor wells can improve a site's apparent call rate. This is an initial screen, not the final 98% call-rate rule.
+Some wells fail in the laboratory. For these wells, many results are missing. [Missingness](../docs/glossary.md#missingness) is the share of [genotypes](../docs/glossary.md#genotype) that could not be read. A genotype is the pair of DNA letters that a person has at one site.
+
+Gross failures distort later summaries of missingness and of [heterozygosity](../docs/glossary.md#heterozygosity). Heterozygosity means that a person carries two different [alleles](../docs/glossary.md#allele) (versions of the DNA letter) at a site.
+
+First, we remove samples with more than 10% missing genotypes. Second, we recompute the missingness of each variant on the samples that remain. Third, we remove variants with more than 10% missingness.
+
+The order matters. Removing poor wells can improve the apparent [call rate](../docs/glossary.md#call-rate) of a site. The call rate is the share of genotypes that were read successfully. This step is only a first screen. It is not the final 98% call-rate rule.
 
 ### You need
 
@@ -54,54 +74,60 @@ bin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out resul
 bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048
 ```
 
-`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+There are two separate commands on purpose. The second command works on the samples that survive the first.
+
+`--mind 0.10` removes wells with more than 10% missingness. `--geno 0.10` removes sites with more than 10% missingness in the wells that remain. `--pfile` selects the input fileset in the PLINK 2 native format. `--make-pgen` saves the result as a new fileset (a saved state). `--out` sets the name prefix of the output files. `--threads 2` limits the number of worker threads (parallel jobs). `--memory 2048` sets the memory limit to 2048 MiB (about 2 gigabytes).
 
 <details><summary>Show the expected result</summary>
 
-Three wells and 150 variants removed: 2,013 samples and 296,360 variants remain.
+Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Failed wells and gross probe failures. The procedure does not identify the biological or technical cause by itself.
+Failed wells and sites that failed badly. This check cannot tell you the biological or technical cause by itself.
 
 ### Quick check
 
-Why do we recalculate variant missingness after removing very poor wells?
+Why do we recalculate variant missingness after we remove the very poor wells?
 
 <details><summary>Show the answer</summary>
 
-Poor wells can make otherwise usable sites appear to fail.
+Poor wells can make good sites look bad.
 
 </details>
 
 ### Files created
 
-`s3-1_samples.*`, `s3-1_state.*`, removal lists and replay metadata.
+`s3-1_samples.*`, `s3-1_state.*`, the lists of removed samples and variants, and the replay metadata (notes that let the course repeat this step).
 
 ## 3.2 Sample call rate {#step-3-2}
 
 ### What we do
 
-Apply a 98% sample call-rate requirement after rough cleaning.
+We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.
 
 ### Why
 
-Call rate estimates completeness across the retained sites. A threshold of 98% corresponds to at most 2% missingness, not 98% missingness. Low completeness can reduce effective sample size and can be associated with laboratory or recruitment groups. Compare the distribution before adopting the threshold in another study.
+The call rate of a sample is the share of its sites that were read successfully. A threshold (cut-off value) of 98% means at most 2% missing results. It does not mean 98% missing results.
+
+A sample with a low call rate gives less information. This reduces the effective sample size, which is the amount of usable data. A low call rate can also be linked to a laboratory group or a recruitment group.
+
+In another study, look at the distribution of call rates before you choose a threshold.
 
 ### You need
 
-State 3.1; call-rate definition from 2.4.
+State 3.1 and the call-rate definition from step 2.4.
 
 ### Command
 
@@ -117,11 +143,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
 ```
 
-`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--mind 0.02` removes samples with more than 2% missing calls. This is the same as a call rate below 98%. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
-42 additional wells removed; 1,971 samples and 296,360 variants remain.
+42 more wells are removed. 1,971 samples and 296,360 variants remain.
 
 <!-- interactive_data: {
   "kind": "sample_call_rate_threshold_counts",
@@ -215,47 +241,53 @@ bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out resul
 } -->
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Moderate sample failures that survived the rough screen. Missingness may be related to case/control status or batch, so exclusions must be documented.
+Moderate sample failures that the rough screen did not catch. Missingness can be linked to the [phenotype](../docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be linked to a [batch](../docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.
 
 ### Quick check
 
-A well with 1% missing calls has what call rate, and does it pass this rule?
+A well has 1% missing calls. What is its call rate? Does it pass this rule?
 
 <details><summary>Show the answer</summary>
 
-99%; it passes the 98% call-rate requirement.
+The call rate is 99%. The well passes the 98% call-rate rule.
 
 </details>
 
 ### Files created
 
-`s3-2_state.*`, sample removal list and replay metadata.
+`s3-2_state.*`, the list of removed samples and the replay metadata.
 
 ## 3.3 Recorded and genetic sex {#step-3-3}
 
 ### What we do
 
-Move pseudo-autosomal regions out of non-PAR X, compare recorded sex with X/Y patterns and review discordant wells.
+We move the [pseudo-autosomal regions](../docs/glossary.md#pseudo-autosomal-region) (PARs) out of the rest of the X chromosome. We then compare the recorded sex of each person with the X and Y patterns in the DNA. Finally, we review the wells where the two do not agree.
 
 ### Why
 
-Pseudo-autosomal regions (PARs) occur on both X and Y and can recombine. Their diploid behaviour must not be treated as ordinary male non-PAR X. PLINK's X inbreeding coefficient and Y call counts can reveal discordance. A flagged result may reflect a swap, unusual karyotype, poor calls or incomplete metadata; it is not a clinical diagnosis. This simulation removes the flagged wells for the main teaching analysis.
+The [sex chromosomes](../docs/glossary.md#sex-chromosomes) are X and Y. The PARs are small regions that exist on both X and Y. They can swap material (recombine) like other chromosomes. A man therefore has two copies of them. We must not treat these two copies as the single X of a man.
+
+PLINK computes an X inbreeding coefficient, called [F](../docs/glossary.md#f-statistic). It shows how [homozygous](../docs/glossary.md#homozygous) the X looks. Homozygous means that both copies of a site carry the same allele. PLINK also counts the Y calls. These two values can show that the recorded sex does not fit the DNA.
+
+A flagged well can have several causes. It can be a sample swap, an unusual [karyotype](../docs/glossary.md#karyotype) (an unusual number of sex chromosomes), poor calls or incomplete records. A flag is not a clinical diagnosis.
+
+In this simulation, we remove the flagged wells for the main teaching analysis.
 
 ### You need
 
-State 3.2 and recorded sex joined at 2.7.
+State 3.2 and the recorded sex that we joined to the data at step 2.7.
 
 ### Command
 
@@ -281,50 +313,54 @@ bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-mal
 bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048
 ```
 
-`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--split-par b38` gives the PAR sites their own region, using the PAR boundaries of GRCh38 (the version of the human reference genome that this course uses). `--check-sex` compares the recorded sex with the genotype patterns; `max-female-xf` and `min-male-xf` set the limits of the X coefficient for recorded females and males; the two `ycount` limits set the limits of the number of Y calls. `--remove` reads the reviewed list of samples and removes them. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
-Eight flagged wells removed; 1,963 samples remain. 520 sites are labelled PAR1/PAR2; variant count is unchanged.
+Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Sex discordance and unusual X/Y patterns, including an XXY-like simulated profile. Do not infer a real diagnosis from a course threshold.
+Sex mismatch and unusual X or Y patterns. This includes one simulated XXY-like profile (a person with two X chromosomes and one Y chromosome). Do not infer a real diagnosis from a course threshold.
 
 ### Quick check
 
-Should a discordant sex check automatically be corrected by changing the recorded sex field?
+Should we correct a sex mismatch automatically by changing the recorded sex?
 
 <details><summary>Show the answer</summary>
 
-No. Review identity, genotype quality and source metadata first.
+No. First review the identity of the sample, the genotype quality and the source records.
 
 </details>
 
 ### Files created
 
-PAR state, `.sexcheck`, review/removal list and `s3-3_state.*`.
+The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_state.*`.
 
 ## 3.4 LD pruning {#step-3-4}
 
 ### What we do
 
-Select a less-correlated autosomal subset for heterozygosity, relatedness and later PCA.
+We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](../docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.
 
 ### Why
 
-Linkage disequilibrium (LD) is association between alleles at nearby sites. Dense correlated regions would otherwise receive more weight simply because they contain many probes. Pruning keeps a representative subset; it is not permanent deletion from the association matrix. Exclude long-range LD regions from this diagnostic subset. The GRCh38 intervals are explicit in the helper and are not a universal catalogue.
+[Linkage disequilibrium](../docs/glossary.md#ld) (LD) means that alleles at nearby sites are correlated. A dense region with many correlated sites would count too much, only because the array has many [probes](../docs/glossary.md#probe) there. A probe is the piece of DNA on the array that measures one site.
+
+[LD pruning](../docs/glossary.md#ld-pruning) keeps one representative subset of sites. It does not delete the other sites from the association data.
+
+We also leave out the long-range LD regions, where the correlation reaches over very long distances. The GRCh38 intervals are listed in the helper function. They are not a complete catalogue for all studies.
 
 ### You need
 
@@ -347,54 +383,60 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
 
-`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1.
+`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](../docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed1` leaves out the sites inside the listed regions. The file gives them as one-based inclusive intervals (positions counted from 1, with both ends included). `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](../docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
-69,539 sites in `.prune.in`. The complete analysis state still has 296,360 variants.
+The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Regions that dominate correlated-marker summaries. The retained subset depends on the input sample set and exact algorithm/version.
+Regions that would otherwise dominate summaries made from correlated markers. The subset that you keep depends on the input samples and on the exact version of the algorithm.
 
 ### Quick check
 
-Should the association scan later test only the pruned sites?
+Should the later association scan test only the pruned sites?
 
 <details><summary>Show the answer</summary>
 
-No. Pruning is for specified diagnostics and PCA; association uses the full post-QC set.
+No. We use pruning only for specific checks and for the PCA. The association scan uses the full set of variants that pass QC.
 
 </details>
 
 ### Files created
 
-`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and logs.
+`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and the logs.
 
 ## 3.5 Heterozygosity {#step-3-5}
 
 ### What we do
 
-Estimate excess or deficit of heterozygous calls using the pruned subset.
+We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.
 
 ### Why
 
-A heterozygote carries two different alleles. PLINK's F statistic compares observed homozygosity with that expected from allele frequencies. Negative F can indicate excess heterozygosity, including contamination; high positive F can reflect related parents, population structure or technical effects. We remove F below mean minus three population standard deviations, and flag values above mean plus three deviations for review. High F is not an automatic exclusion rule here.
+A heterozygote carries two different alleles at a site. PLINK's F statistic compares the homozygosity that we observe with the homozygosity that we expect from the allele frequencies.
+
+A negative F can mean too much heterozygosity. One possible cause is [contamination](../docs/glossary.md#contamination), which means that the sample is mixed with DNA from another person. A high positive F can come from parents who are related to each other. It can also come from [population structure](../docs/glossary.md#population-stratification) (groups with different ancestry) or from technical effects.
+
+We remove samples with an F below the mean minus three population [standard deviations](../docs/glossary.md#standard-deviation). The standard deviation (SD) shows how spread out the values are. We flag samples with an F above the mean plus three standard deviations for review.
+
+In this module, a high F is not an automatic reason to exclude a sample.
 
 ### You need
 
-State 3.3 and the diagnostic subset from 3.4.
+State 3.3 and the diagnostic subset (the pruned list) from step 3.4.
 
 ### Command
 
@@ -421,54 +463,63 @@ bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
 ```
 
-`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--extract` limits the calculation to the sites on the pruning list. `--het` reports heterozygosity statistics for each sample. R calculates the review thresholds. `--remove` takes the selected low-F samples out of the complete data. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
-13 low-F wells removed; eight high-F wells flagged and retained. Mean F approximately 0.0078, population SD approximately 0.0298; 1,950 samples remain.
+13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Excess heterozygosity and homozygosity. These are hypotheses for review, not proof of contamination or consanguinity.
+Too much or too little heterozygosity. These are ideas to check, not proof of contamination or of related parents.
 
 ### Quick check
 
-Why does this course retain high-F wells pending review rather than remove both tails automatically?
+Why does this course keep wells with high F for review, and not remove both ends automatically?
 
 <details><summary>Show the answer</summary>
 
-A high value can be biological or ancestry-related; a symmetric numerical threshold does not establish an error.
+A high value can have a biological cause or an ancestry cause. A symmetric numerical threshold does not prove an error.
 
 </details>
 
 ### Files created
 
-`.het`, low-F removal list, high-F review list and `s3-5_state.*`.
+The `.het` report, the low-F removal list, the high-F review list and `s3-5_state.*`.
 
 ## 3.6 Relatedness and duplicates {#step-3-6}
 
 ### What we do
 
-Estimate pairwise kinship, review duplicates and retain an unrelated main-analysis set.
+We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.
 
 ### Why
 
-Kinship measures genetic sharing beyond the population baseline. Repeated measurements and close relatives violate the independence assumption of a simple unrelated-sample logistic model. Approximate KING boundaries classify duplicates above 0.354 and first-degree pairs above 0.177; these are screening thresholds. Labelled technical repeats lose the repeat well. Unlabelled duplicates with conflicting metadata lose both records in this teaching analysis. For a first-degree pair we retain one by a reproducible ID rule, not by disease status.
+[Kinship](../docs/glossary.md#kinship) measures how much DNA two people share, beyond what is normal in the population. Repeated measurements of one person violate an assumption of the simple logistic model that we use for association. Close relatives violate it too. The assumption is that the samples are independent, which means unrelated.
+
+We use approximate [KING](../docs/glossary.md#king) kinship values to sort the pairs. A value above 0.354 means a duplicate. A value above 0.177 means a [first-degree](../docs/glossary.md#first-degree-relative) pair, such as a parent and a child, or full siblings. These are screening thresholds, not exact rules.
+
+We apply these rules:
+
+- For a labelled technical repeat, we remove the repeat well.
+- For an unlabelled duplicate with conflicting [metadata](../docs/glossary.md#metadata), we remove both records. Metadata are the facts recorded about a sample, such as sex, age and disease status.
+- For an unlabelled duplicate with matching metadata, we remove one record.
+- For a first-degree pair, we keep one person. We choose by a reproducible rule based on the ID, never by disease status.
 
 ### You need
 
-State 3.5, pruning list from 3.4 and source metadata from 2.7.
+State 3.5, the pruning list from step 3.4 and the source metadata from step 2.7.
 
 ### Command
 
@@ -506,54 +557,58 @@ bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
 
-`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--make-king-table` estimates the kinship of pairs of samples. `--king-table-filter 0.0442` reports only the pairs above the approximate boundary of third-degree relatives (such as first cousins). R reviews the duplicate cases and the first-degree cases. Reporting a pair does not remove anyone by itself. `--remove` removes the listed samples. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
-19 duplicate-class pairs and ten first-degree pairs; 30 records removed in total, leaving 1,920. Pairs can overlap; pair counts are not counts of unique people.
+There are 19 duplicate-class pairs and ten first-degree pairs. In total, 30 records are removed. 1,920 samples remain. Pairs can overlap, because one person can be in more than one pair. For this reason, the pair counts are not counts of unique people.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Technical repeats, unlabelled duplicates, metadata conflict and close relatives. For research, the retention policy should consider consent, phenotype completeness and design before association results are inspected.
+Technical repeats, unlabelled duplicates, conflicts in the metadata and close relatives. In real research, decide the retention policy before you look at the association results. The policy should consider consent, completeness of the phenotype and the study design.
 
 ### Quick check
 
-Does removing one record for every related pair always yield the correct number of removals?
+If we remove one record for every related pair, do we always get the right number of removals?
 
 <details><summary>Show the answer</summary>
 
-No. Related pairs can share a person; review the graph of relationships and already removed records.
+No. One person can be part of several pairs. Review the whole network of relationships and the records that are already removed.
 
 </details>
 
 ### Files created
 
-`.kin0`, reviewed removal list and `s3-6_state.*`.
+The `.kin0` report, the reviewed removal list and `s3-6_state.*`.
 
 ## 3.7 Batch effects {#step-3-7}
 
 ### What we do
 
-Compare call rate by plate and remove the demonstrably faulty simulated plate.
+We compare the call rate of each plate. A plate is a tray of 96 wells. We remove the plate that is clearly faulty in the simulated data.
 
 ### Why
 
-Samples processed together can share artefacts. Compare laboratory grouping with genotype completeness and heterozygosity. A case-heavy plate must not be removed merely because it contains cases; the rationale here is the poor technical measurements. Reassess the case/control distribution after any batch exclusion.
+Samples that are processed together can share the same technical faults (artefacts). We call this a batch effect. We compare the laboratory groups with the call rate and with the heterozygosity.
+
+A plate with many cases must not be removed only because it has many cases. Here we remove a plate because its technical measurements are poor.
+
+After you remove any batch, check again how cases and controls are spread across the data.
 
 ### You need
 
-State 3.6 and the sample sheet from 1.4; heterozygosity report from 3.5.
+State 3.6 and the sample sheet from step 1.4. You also need the heterozygosity report from step 3.5.
 
 ### Command
 
@@ -580,26 +635,26 @@ bin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results
 bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048
 ```
 
-`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--missing sample-only` writes the report of missingness for each well and skips the report for variants. R matches this report to the plates by [IID](../docs/glossary.md#fid-iid) (the sample identifier). R then compares the [median](../docs/glossary.md#median) of each plate and writes the reviewed removal list. The median is the middle value of a list of numbers. `--pfile`, `--remove`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at steps 3.1 and 3.3.
 
 <details><summary>Show the expected result</summary>
 
-Plate P14 has median call rate approximately 98.56%, against 99.84% for the other plates. Its 76 remaining wells are removed, leaving 1,844 samples and 296,360 variants.
+Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-A shared laboratory effect. The same pattern can confound association if processing groups and phenotype groups overlap.
+A laboratory effect that a group of samples shares. The same pattern can confound an association (mix up the effect of the group with the effect of the disease) if the processing groups and the phenotype groups overlap.
 
 ### Quick check
 
@@ -607,27 +662,29 @@ Why are 76 wells removed from a plate that originally had 96?
 
 <details><summary>Show the answer</summary>
 
-Some wells on that plate were already removed by earlier QC steps.
+Earlier QC steps had already removed some wells of that plate.
 
 </details>
 
 ### Files created
 
-Sample missingness report, plate-based removal list and `s3-7_state.*`.
+The report of missingness for each sample, the plate-based removal list and `s3-7_state.*`.
 
 ## 3.8 Sample QC summary and checkpoint {#step-3-8}
 
 ### What we do
 
-Save the complete post-sample-QC fileset and review the sample flow.
+We save the complete fileset that remains after all sample QC. This saved fileset is a [checkpoint](../docs/glossary.md#checkpoint). Then we review how many samples each step removed.
 
 ### Why
 
-A count table should distinguish sequential exclusions from overlapping flags. At this boundary, 1,844 wells remain from the initial 2,016. This does not mean variant QC or population structure checks are complete. Keep the reason for every exclusion and the threshold used.
+A table of counts must separate removals that happen one after another from flags that overlap. At this point, 1,844 wells remain from the first 2,016. This does not mean that variant QC or the checks of population structure are finished.
+
+Keep the reason for every exclusion and the threshold that you used.
 
 ### You need
 
-State 3.7 and the recorded intermediate replay metadata.
+State 3.7 and the recorded replay metadata of the steps in between.
 
 ### Command
 
@@ -639,28 +696,28 @@ check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this is an R-only step, so it needs no PLINK command. The R chunk is the complete command.
 
 R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored. The complete main-path package supplies full genotype copies at 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are later module boundaries; intermediate states are rebuilt from a preceding full checkpoint and stored replay operations.
+Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Does a completed sample-QC checkpoint prove that every retained variant is suitable for association?
+Does a finished sample QC checkpoint prove that every kept variant is suitable for association?
 
 <details><summary>Show the answer</summary>
 
@@ -670,4 +727,15 @@ No. Variant QC follows in module 4.
 
 ### Files created
 
-Full checkpoint `checkpoints/3.8/state.*`, working `s3-8_state.*` and updated index/count table.
+The full checkpoint `checkpoints/3.8/state.*`, the working files `s3-8_state.*` and the updated index and count table.
+
+## Module 3 recap {#module-3-recap}
+
+- Rough cleaning removed three wells and 150 variants. The 98% call-rate rule then removed 42 more wells, leaving 1,971 samples.
+- The sex check removed eight flagged wells, leaving 1,963 samples.
+- The pruned subset has 69,539 sites. The heterozygosity check removed 13 low-F wells and flagged eight high-F wells, which we kept. 1,950 samples remained.
+- The kinship check found 19 duplicate-class pairs and ten first-degree pairs. We removed 30 records, leaving 1,920 samples.
+- Plate P14 had a lower call rate than the other plates. We removed its 76 remaining wells.
+- The module ends with 1,844 samples and 296,360 variants, saved as the checkpoint at step 3.8.
+
+**Next:** Module 4 checks the quality of the variants (variant QC).
