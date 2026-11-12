@@ -19,6 +19,69 @@ chunks. Later errors are often consequences of that first failure.
 | Expected decimal points / wrong number of columns | Check the actual delimiter and decimal mark; use supplied UTF-8 TSV inputs unchanged. See [international settings](international_setup.md). |
 | Missing checkpoint | Verify mode, preceding lesson and paths; rerun it or obtain its checkpoint. |
 | Knit fails but chunks work | Prepare `knitr`, `rmarkdown` and Pandoc; RStudio normally supplies Pandoc. |
+| Linux package installation fails | Run `source("scripts/preflight.R")`. It selects a matching Posit Package Manager repository and sets the R HTTP user agent. See the Linux notes below if binaries are unavailable. |
+| The password is wrong / Incorrect passphrase | Check the password for typing errors. If it still fails, ask the instructor. Do not include your password in a screenshot, error report or shared script. |
+| Course download failed its SHA-256 check | Download again. If it still fails, ask the instructor for the approved configuration. Do not bypass the check or replace the expected checksum with the downloaded file's hash. |
+| Classroom data release is not configured | The local stage 1 archive is a test package. Ask the instructor for the approved classroom release configuration. |
+| Destination already exists | Choose a new destination folder. The download helper keeps existing work unchanged. |
+
+## Linux package installation
+
+The preflight installs missing course packages before checking PLINK and the
+genotype files. On supported Linux distributions it selects a distribution-specific
+[Posit Package Manager binary repository](https://docs.posit.co/rspm/admin/serving-binaries.html).
+It sets `HTTPUserAgent` to include the R version and platform, and uses libcurl.
+Do not use `type = "binary"` on Linux: these repositories use R's source-style
+layout to deliver compiled packages. The preflight checks the server's package
+type headers for missing packages and their dependencies before installation.
+
+The author tested Ubuntu 24.04.4 LTS with R 4.6.1. All packages installed from
+the Noble repository without a compiler or administrator rights. Extraction
+passed all 55 SHA-256 checks, and a wrong password was rejected in 7.78 seconds.
+Other Linux distributions and macOS have not been tested. The masked password
+prompt in RStudio remains untested on all platforms.
+
+If a binary is unavailable for your distribution, R version or processor, the
+preflight stops with instructions. Source installation needs a compiler and
+development packages. `archive` needs `libarchive-dev`; `fs`, needed by
+`rmarkdown`, needs `libuv1-dev`. Having the runtime library `libarchive.so.13`
+does not provide the development files. On Ubuntu or Debian, ask an
+administrator to run this exact command in a terminal:
+
+```sh
+sudo apt update && sudo apt install build-essential r-base-dev libarchive-dev libuv1-dev
+```
+
+Other distributions have different package names and package managers. Ask the
+instructor or local administrator for the matching development packages. After
+they are installed, install the R packages from source in the R console:
+
+```r
+install.packages(c("archive", "digest", "getPass", "knitr", "rmarkdown"),
+                 repos = "https://cloud.r-project.org")
+```
+
+## Downloading the encrypted course data
+
+The instructor supplies an approved `course_settings$data_release` list in
+`config.R`. Its fields are `archive_url`, `manifest_url`, `archive_sha256` and
+`manifest_sha256`. Both URLs must use HTTPS. The two SHA-256 values must come
+from the approved release configuration. No password belongs in this file.
+
+After package preparation, run these commands in the R console:
+
+```r
+source("R/course.R")
+download_course_data()
+```
+
+The helper downloads and verifies the ZIP and its separate manifest, requests
+the password through a masked prompt, extracts into a temporary folder and
+checks every extracted file's size and SHA-256. Only verified files are moved
+to `data/course`. An existing destination is refused. In a non-interactive
+session, pass a password obtained securely at runtime through the `password`
+argument; do not save it in a script or command history. Extraction uses
+`archive`, with no 7-Zip installation for students.
 
 ## R console versus terminal
 
