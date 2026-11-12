@@ -43,3 +43,10 @@ modules and unresolved checks will be recorded below before the final push.
   shared annotation IDs were checked where mapped. The author-only chain path
   was supplied through COURSE_CHAIN_FILE; stage the official chain in the
   classroom package before publication. The isolated exercise is not position-sorted.
+
+- Module 3: Windows execution matched all reference sample counts, ending at
+  1,844 samples and 296,360 variants. Pruning retained 69,539 sites; 13 low-F
+  samples, 30 duplicate/related records and 76 remaining P14 wells were removed.
+  Eight high-F samples were flagged and retained. One failed first attempt
+  exposed scientific notation in interval coordinates; explicit integer formatting
+  fixed it, and the full module passed on the next attempt.

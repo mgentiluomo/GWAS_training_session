@@ -1,0 +1,582 @@
+---
+title: "Module 3: sample quality control"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root. Read each step before running its R chunk. All data
+are simulated; these exercises cannot establish a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
+loads its inputs from disk; a saved R workspace is not required.
+
+```{r module3_setup, include=FALSE}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
+}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## 3.1 Rough cleaning {#step-3-1}
+
+### What we do
+
+Remove very poorly called wells first, then very poorly called sites.
+
+### Why
+
+Gross failures distort later missingness and heterozygosity summaries. We first remove samples with over 10% missing genotypes, recompute on the survivors, and remove variants with over 10% missingness. Order matters: removing poor wells can improve a site's apparent call rate. This is an initial screen, not the final 98% call-rate rule.
+
+### You need
+
+The full 2.8 checkpoint.
+
+### Command
+
+```{r s3-1}
+input <- guided_path(cfg, "2.8")
+rough <- guided_path(cfg, "3.1", "samples")
+run_plink(cfg, c("--pfile", input, "--mind", "0.10", "--make-pgen", "--out", rough))
+run_plink(cfg, c("--pfile", rough, "--geno", "0.10", "--make-pgen", "--out", guided_path(cfg, "3.1")))
+ops <- guided_replay_lists(cfg, "3.1", "2.8")
+guided_register(cfg, "3.1", "2.8", 2013, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out results/guided/s3-1_samples --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048
+```
+
+`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+Three wells and 150 variants removed: 2,013 samples and 296,360 variants remain.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Failed wells and gross probe failures. The procedure does not identify the biological or technical cause by itself.
+
+### Quick check
+
+Why do we recalculate variant missingness after removing very poor wells?
+
+<details><summary>Show the answer</summary>
+
+Poor wells can make otherwise usable sites appear to fail.
+
+</details>
+
+### Files created
+
+`s3-1_samples.*`, `s3-1_state.*`, removal lists and replay metadata.
+
+## 3.2 Sample call rate {#step-3-2}
+
+### What we do
+
+Apply a 98% sample call-rate requirement after rough cleaning.
+
+### Why
+
+Call rate estimates completeness across the retained sites. A threshold of 98% corresponds to at most 2% missingness, not 98% missingness. Low completeness can reduce effective sample size and can be associated with laboratory or recruitment groups. Compare the distribution before adopting the threshold in another study.
+
+### You need
+
+State 3.1; call-rate definition from 2.4.
+
+### Command
+
+```{r s3-2}
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.1"), "--mind", "0.02", "--make-pgen", "--out", guided_path(cfg, "3.2")))
+ops <- guided_replay_lists(cfg, "3.2", "3.1")
+guided_register(cfg, "3.2", "3.1", 1971, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
+```
+
+`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+42 additional wells removed; 1,971 samples and 296,360 variants remain.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Moderate sample failures that survived the rough screen. Missingness may be related to case/control status or batch, so exclusions must be documented.
+
+### Quick check
+
+A well with 1% missing calls has what call rate, and does it pass this rule?
+
+<details><summary>Show the answer</summary>
+
+99%; it passes the 98% call-rate requirement.
+
+</details>
+
+### Files created
+
+`s3-2_state.*`, sample removal list and replay metadata.
+
+## 3.3 Recorded and genetic sex {#step-3-3}
+
+### What we do
+
+Move pseudo-autosomal regions out of non-PAR X, compare recorded sex with X/Y patterns and review discordant wells.
+
+### Why
+
+Pseudo-autosomal regions (PARs) occur on both X and Y and can recombine. Their diploid behaviour must not be treated as ordinary male non-PAR X. PLINK's X inbreeding coefficient and Y call counts can reveal discordance. A flagged result may reflect a swap, unusual karyotype, poor calls or incomplete metadata; it is not a clinical diagnosis. This simulation removes the flagged wells for the main teaching analysis.
+
+### You need
+
+State 3.2 and recorded sex joined at 2.7.
+
+### Command
+
+```{r s3-3}
+split <- guided_path(cfg, "3.3", "par")
+report <- guided_path(cfg, "3.3", "sexcheck")
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.2"), "--split-par", "b38", "--make-pgen", "--out", split))
+run_plink(cfg, c("--pfile", split, "--check-sex", "max-female-xf=0.2", "min-male-xf=0.8",
+  "max-female-ycount=100", "min-male-ycount=1000", "--out", report))
+sexcheck <- guided_table(paste0(report, ".sexcheck"))
+bad <- sexcheck$IID[sexcheck$STATUS != "OK"]
+remove_file <- guided_list(bad, guided_path(cfg, "3.3", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", split, "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.3")))
+ops <- guided_replay_lists(cfg, "3.3", "3.2", extra = data.frame(option = "--split-par", value = "b38"))
+guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-2_state --split-par b38 --make-pgen --out results/guided/s3-3_par --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/guided/s3-3_sexcheck --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048
+```
+
+`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+Eight flagged wells removed; 1,963 samples remain. 520 sites are labelled PAR1/PAR2; variant count is unchanged.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Sex discordance and unusual X/Y patterns, including an XXY-like simulated profile. Do not infer a real diagnosis from a course threshold.
+
+### Quick check
+
+Should a discordant sex check automatically be corrected by changing the recorded sex field?
+
+<details><summary>Show the answer</summary>
+
+No. Review identity, genotype quality and source metadata first.
+
+</details>
+
+### Files created
+
+PAR state, `.sexcheck`, review/removal list and `s3-3_state.*`.
+
+## 3.4 LD pruning {#step-3-4}
+
+### What we do
+
+Select a less-correlated autosomal subset for heterozygosity, relatedness and later PCA.
+
+### Why
+
+Linkage disequilibrium (LD) is association between alleles at nearby sites. Dense correlated regions would otherwise receive more weight simply because they contain many probes. Pruning keeps a representative subset; it is not permanent deletion from the association matrix. Exclude long-range LD regions from this diagnostic subset. The GRCh38 intervals are explicit in the helper and are not a universal catalogue.
+
+### You need
+
+State 3.3.
+
+### Command
+
+```{r s3-4}
+regions <- guided_high_ld(cfg)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
+  "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
+stopifnot(length(pruned) == 69539L)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
+```
+
+`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1.
+
+<details><summary>Show the expected result</summary>
+
+69,539 sites in `.prune.in`. The complete analysis state still has 296,360 variants.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Regions that dominate correlated-marker summaries. The retained subset depends on the input sample set and exact algorithm/version.
+
+### Quick check
+
+Should the association scan later test only the pruned sites?
+
+<details><summary>Show the answer</summary>
+
+No. Pruning is for specified diagnostics and PCA; association uses the full post-QC set.
+
+</details>
+
+### Files created
+
+`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and logs.
+
+## 3.5 Heterozygosity {#step-3-5}
+
+### What we do
+
+Estimate excess or deficit of heterozygous calls using the pruned subset.
+
+### Why
+
+A heterozygote carries two different alleles. PLINK's F statistic compares observed homozygosity with that expected from allele frequencies. Negative F can indicate excess heterozygosity, including contamination; high positive F can reflect related parents, population structure or technical effects. We remove F below mean minus three population standard deviations, and flag values above mean plus three deviations for review. High F is not an automatic exclusion rule here.
+
+### You need
+
+State 3.3 and the diagnostic subset from 3.4.
+
+### Command
+
+```{r s3-5}
+report <- guided_path(cfg, "3.5", "het")
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"), "--het", "--out", report))
+het <- guided_table(paste0(report, ".het"))
+f <- as.numeric(het$F)
+mean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))
+low <- het$IID[f < mean_f - 3 * sd_f]
+high <- het$IID[f > mean_f + 3 * sd_f]
+guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
+remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
+print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+ops <- guided_replay_lists(cfg, "3.5", "3.3")
+guided_register(cfg, "3.5", "3.3", 1950, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
+```
+
+`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+13 low-F wells removed; eight high-F wells flagged and retained. Mean F approximately 0.0078, population SD approximately 0.0298; 1,950 samples remain.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Excess heterozygosity and homozygosity. These are hypotheses for review, not proof of contamination or consanguinity.
+
+### Quick check
+
+Why does this course retain high-F wells pending review rather than remove both tails automatically?
+
+<details><summary>Show the answer</summary>
+
+A high value can be biological or ancestry-related; a symmetric numerical threshold does not establish an error.
+
+</details>
+
+### Files created
+
+`.het`, low-F removal list, high-F review list and `s3-5_state.*`.
+
+## 3.6 Relatedness and duplicates {#step-3-6}
+
+### What we do
+
+Estimate pairwise kinship, review duplicates and retain an unrelated main-analysis set.
+
+### Why
+
+Kinship measures genetic sharing beyond the population baseline. Repeated measurements and close relatives violate the independence assumption of a simple unrelated-sample logistic model. Approximate KING boundaries classify duplicates above 0.354 and first-degree pairs above 0.177; these are screening thresholds. Labelled technical repeats lose the repeat well. Unlabelled duplicates with conflicting metadata lose both records in this teaching analysis. For a first-degree pair we retain one by a reproducible ID rule, not by disease status.
+
+### You need
+
+State 3.5, pruning list from 3.4 and source metadata from 2.7.
+
+### Command
+
+```{r s3-6}
+report <- guided_path(cfg, "3.6", "king")
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"),
+  "--make-king-table", "--king-table-filter", "0.0442", "--out", report))
+kin <- guided_table(paste0(report, ".kin0"))
+kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+metadata <- guided_metadata(cfg)
+remove <- character()
+for (i in seq_len(nrow(kin))) {
+  a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
+  if (value > 0.354) {
+    if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
+      remove <- union(remove, if (endsWith(a, "_R2")) a else b)
+    } else {
+      ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
+      same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
+                        unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
+      remove <- union(remove, if (same) max(a, b) else c(a, b))
+    }
+  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+}
+remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))
+ops <- guided_replay_lists(cfg, "3.6", "3.5")
+guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
+```
+
+`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+19 duplicate-class pairs and ten first-degree pairs; 30 records removed in total, leaving 1,920. Pairs can overlap; pair counts are not counts of unique people.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+Technical repeats, unlabelled duplicates, metadata conflict and close relatives. For research, the retention policy should consider consent, phenotype completeness and design before association results are inspected.
+
+### Quick check
+
+Does removing one record for every related pair always yield the correct number of removals?
+
+<details><summary>Show the answer</summary>
+
+No. Related pairs can share a person; review the graph of relationships and already removed records.
+
+</details>
+
+### Files created
+
+`.kin0`, reviewed removal list and `s3-6_state.*`.
+
+## 3.7 Batch effects {#step-3-7}
+
+### What we do
+
+Compare call rate by plate and remove the demonstrably faulty simulated plate.
+
+### Why
+
+Samples processed together can share artefacts. Compare laboratory grouping with genotype completeness and heterozygosity. A case-heavy plate must not be removed merely because it contains cases; the rationale here is the poor technical measurements. Reassess the case/control distribution after any batch exclusion.
+
+### You need
+
+State 3.6 and the sample sheet from 1.4; heterozygosity report from 3.5.
+
+### Command
+
+```{r s3-7}
+report <- guided_path(cfg, "3.7", "missing")
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--missing", "sample-only", "--out", report))
+missing <- guided_table(paste0(report, ".smiss"))
+metadata <- guided_metadata(cfg)
+plate <- metadata$Plate[match(missing$IID, metadata$IID)]
+median_missing <- tapply(as.numeric(missing$F_MISS), plate, median)
+print(sort(1 - median_missing))
+worst <- names(which.max(median_missing))
+stopifnot(worst == "P14")
+remove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, "3.7", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.7")))
+ops <- guided_replay_lists(cfg, "3.7", "3.6")
+guided_register(cfg, "3.7", "3.6", 1844, 296360, operations = ops)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results/guided/s3-7_missing --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048
+```
+
+`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+Plate P14 has median call rate approximately 98.56%, against 99.84% for the other plates. Its 76 remaining wells are removed, leaving 1,844 samples and 296,360 variants.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### What this check can reveal
+
+A shared laboratory effect. The same pattern can confound association if processing groups and phenotype groups overlap.
+
+### Quick check
+
+Why are 76 wells removed from a plate that originally had 96?
+
+<details><summary>Show the answer</summary>
+
+Some wells on that plate were already removed by earlier QC steps.
+
+</details>
+
+### Files created
+
+Sample missingness report, plate-based removal list and `s3-7_state.*`.
+
+## 3.8 Sample QC summary and checkpoint {#step-3-8}
+
+### What we do
+
+Save the complete post-sample-QC fileset and review the sample flow.
+
+### Why
+
+A count table should distinguish sequential exclusions from overlapping flags. At this boundary, 1,844 wells remain from the initial 2,016. This does not mean variant QC or population structure checks are complete. Keep the reason for every exclusion and the threshold used.
+
+### You need
+
+State 3.7 and the recorded intermediate replay metadata.
+
+### Command
+
+```{r s3-8}
+guided_snapshot(cfg, "3.8", guided_path(cfg, "3.7"), 1844, 296360, parent = "3.7")
+print(read.delim(file.path(cfg$out, "step_counts.tsv")))
+check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored; only 2.8 and 3.8 hold full genotype copies in the release checkpoint tree so far.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Does a completed sample-QC checkpoint prove that every retained variant is suitable for association?
+
+<details><summary>Show the answer</summary>
+
+No. Variant QC follows in module 4.
+
+</details>
+
+### Files created
+
+Full checkpoint `checkpoints/3.8/state.*`, working `s3-8_state.*` and updated index/count table.

@@ -97,12 +97,30 @@ guided_snapshot <- function(cfg, step, input, samples, variants, parent = "") {
   guided_register(cfg, step, parent, samples, variants, full = TRUE)
 }
 
+guided_replay_lists <- function(cfg, step, parent, extra = NULL) {
+  before <- guided_path(cfg, parent)
+  after <- guided_path(cfg, step)
+  removed_samples <- setdiff(guided_table(paste0(before, ".psam"))$IID,
+    guided_table(paste0(after, ".psam"))$IID)
+  removed_variants <- setdiff(guided_table(paste0(before, ".pvar"))$ID,
+    guided_table(paste0(after, ".pvar"))$ID)
+  operations <- data.frame(option = character(), value = character())
+  if (length(removed_samples)) operations <- rbind(operations, data.frame(option = "--remove",
+    value = guided_list(removed_samples, guided_path(cfg, step, "removed_samples.txt"), TRUE)))
+  if (length(removed_variants)) operations <- rbind(operations, data.frame(option = "--exclude",
+    value = guided_list(removed_variants, guided_path(cfg, step, "removed_variants.txt"))))
+  if (!is.null(extra)) operations <- rbind(operations, extra)
+  operations
+}
+
 guided_high_ld <- function(cfg) {
   path <- guided_path(cfg, "3.4", "high_ld.bed1")
   # GRCh38 intervals, one-based, inclusive. They are excluded from PCA pruning only.
   intervals <- data.frame(CHROM = c(2, 5, 6, 8, 11, 17),
     START = c(134000000, 44000000, 25000000, 7000000, 46000000, 45000000),
     END = c(138000000, 51500000, 34000000, 13000000, 57000000, 48000000))
+  intervals$START <- format(intervals$START, scientific = FALSE, trim = TRUE)
+  intervals$END <- format(intervals$END, scientific = FALSE, trim = TRUE)
   write.table(intervals, path, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
   path
 }

@@ -18,7 +18,9 @@ local({
   })
   files <- list.files("lessons", pattern = "^module_[0-9]+.*[.]Rmd$", full.names = TRUE)
   maximum <- as.integer(Sys.getenv("COURSE_MODULE_MAX", unset = "7"))
-  files <- files[as.integer(sub("^module_([0-9]+).*", "\\1", basename(files))) <= maximum]
+  minimum <- as.integer(Sys.getenv("COURSE_MODULE_MIN", unset = "0"))
+  numbers <- as.integer(sub("^module_([0-9]+).*", "\\1", basename(files)))
+  files <- files[numbers <= maximum & numbers >= minimum]
   for (file in files) {
     lines <- readLines(file, warn = FALSE)
     steps <- grep("^## [0-9]+[.][0-9]+ ", lines)
