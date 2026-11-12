@@ -9,8 +9,11 @@ The items below are delivery/platform limits, not silently accepted QC failures.
 1. Run the new main-path notebooks and preflight package preparation on Linux
    and macOS. The earlier author-reported Ubuntu archive extraction result does
    not validate the whole new notebook path or every Posit binary repository.
-2. Test the masked `getPass` prompt interactively in RStudio on each platform.
-   Automated tests mock the prompt or supply the local test password at runtime.
+2. The masked `getPass` prompt, the first-time package installation and the Knit
+   button were checked by the author in RStudio on Windows with R 4.5.2 on
+   12 November 2026 (reported by the author, not repeated by the automated runs).
+   The same checks remain to do on macOS and Linux. Automated tests mock the
+   prompt or supply the local test password at runtime.
 3. Review the staged main-path package, then create its AES-256 archive with a
    classroom password supplied outside the repository. Create `data-2026.1` and
    replace both URLs and both trusted hashes in `config.R`. The current 55-file

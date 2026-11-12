@@ -109,7 +109,9 @@ End products, checked in the clean run:
 - RStudio was not used. The "Run chunk" button, the Files pane and the Knit button were not
   driven by a person. The Knit button was imitated with `rmarkdown::render()` from the
   `lessons/` folder.
-- The masked password prompt was not tested. The password came from the environment.
+- The masked password prompt was not tested in this rehearsal. The password came from the
+  environment. The author later checked the masked prompt, the first-time package
+  installation and the Knit button in RStudio on Windows with R 4.5.2 (12 November 2026).
 - PLINK 2 came from a local copy of the official ZIP, not from the website.
 - The data came from a local test archive, not from a GitHub Release.
 - Installing R and RStudio was not repeated. R 4.5.2 was already installed.

@@ -58,8 +58,11 @@ authoring session (kept below, unchanged). It was done on branch
 
 ## Not verified
 
-- RStudio itself (the rehearsal used `Rscript` and `rmarkdown::render`), the masked
-  password prompt, installation of R and RStudio, and a real download from a URL.
+- RStudio itself and the masked password prompt were not used in the rehearsal (it used
+  `Rscript` and `rmarkdown::render`). The author reports having checked the masked
+  `getPass` prompt, the first-time package installation and the Knit button in RStudio
+  on Windows with R 4.5.2 on 12 November 2026; I did not observe this. Installation of
+  R and RStudio and a real download from a URL remain unverified.
 - macOS and Linux for the new notebooks and for step 6.8.
 - Button and menu names on the CRAN, RStudio, PLINK and GitHub pages in module 0 were
   written from memory and must be checked against the live pages.
@@ -100,7 +103,7 @@ authoring session (kept below, unchanged). It was done on branch
 7. **Glossary quality.** The 23 original entries are terse and expert-style (for example
    Lambda GC and HWE). Rewriting them for beginners is not done.
 8. **Still open from before:** classroom password and release, licences, Linux and
-   macOS runs, the masked prompt in RStudio, and the website mockup (see
+   macOS runs, and the website mockup (see
    `docs/open_issues.md`).
 
 ---

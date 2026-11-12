@@ -180,8 +180,9 @@ python -I -B scripts\check_text.py
 1. Clone the repository into an empty folder and switch to the branch
    `course/2026-guided-training`.
 2. In R, run `source("scripts/preflight.R")` and then `download_course_data()`.
-   Type the password at the masked prompt (this prompt has only been tested
-   through automated runs so far, see `docs/open_issues.md`).
+   Type the password at the masked prompt (checked by the author in RStudio on
+   Windows on 12 November 2026; not yet tested on macOS or Linux, see
+   `docs/open_issues.md`).
 3. Run module 0 step 0.7 and check that it reports the expected file count.
 4. Commit `config.R` and the text changes in separate, small commits, and push.
 
