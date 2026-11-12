@@ -14,8 +14,11 @@ assumed. The guided steps explain the commands, files and statistical terms.
 
 The course follows modules 0 to 7. No programming experience is assumed.
 Start with module 0, which prepares your computer (see [setup](docs/setup.md)).
-Download the complete project and open `GWAS_training_session.Rproj`. Then read
-and run the numbered steps in order.
+Open the [repository home](https://github.com/mgentiluomo/GWAS_training_session), choose **Code > Download ZIP**
+and extract the complete project. The default branch is `course/2026-guided-training`.
+No branch selection is needed. If you already use Git, `git clone https://github.com/mgentiluomo/GWAS_training_session.git`
+gets the same 2026 course. Open `GWAS_training_session.Rproj` from the extracted
+or cloned folder. Then read and run the numbered steps in order.
 
 | Module | Canonical notebook |
 | --- | --- |

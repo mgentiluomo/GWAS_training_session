@@ -237,8 +237,9 @@ python -I -B scripts\check_text.py
 
 ## 7. Check the published release from a clean folder
 
-1. Clone the repository into an empty folder and switch to the branch
-   `course/2026-guided-training`.
+1. Clone the repository into an empty folder with
+   `git clone https://github.com/mgentiluomo/GWAS_training_session.git`.
+   The default branch is `course/2026-guided-training`. No branch change is needed.
 2. In R, run `source("scripts/preflight.R")` and then `download_course_data()`.
    Type the password at the masked prompt (checked by the author in RStudio on
    Windows on 12 November 2026; not yet tested on macOS or Linux, see

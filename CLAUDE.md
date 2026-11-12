@@ -32,7 +32,7 @@ The course is an independent teaching resource for students across University of
 
 - The repository was recreated with a clean history. No data files exist in any commit. Keep it that way.
 - `main` still holds the original 2025 course. It is archived in the tag `2025-original`. Link to that tag, never to `main`, when referring to 2025 material.
-- Work happens on `course/2026-guided-training`. `01_Codes/` has been removed from it.
+- The GitHub default branch is `course/2026-guided-training`. Both Code > Download ZIP from the repository home and a plain `git clone` give the guided 2026 course. No branch change is needed. Work happens on this branch. `01_Codes/` has been removed from it.
 - Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Classroom data are available as encrypted GitHub Release assets under `data-2026.1`. No data files are stored in Git.
 - Keep and extend: `R/course.R` (PLINK execution from R, decimal, encoding and identifier safeguards), `scripts/preflight.R`, `scripts/check_course.R`, `VALIDATION.md`, the single-source principle of `scripts/build_tutorial.py` (site pages are generated from tested notebooks, never maintained as a second copy of the code), SHA-256 manifests for packages.
 

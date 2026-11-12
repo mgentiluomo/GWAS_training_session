@@ -22,8 +22,9 @@ been published yet.
 
 Browse these instructions on GitHub without installing anything. To run the
 analyses, download the **whole project**, not individual notebooks: select
-**Code → Download ZIP**, then extract the ZIP. When reviewing a proposed course
-revision, select its branch before downloading.
+**Code > Download ZIP** from the [repository home](https://github.com/mgentiluomo/GWAS_training_session),
+then extract the ZIP. The default branch is `course/2026-guided-training`.
+It contains the guided course and this separate demo. No branch selection is needed.
 
 ## The three demo lessons
 
@@ -91,8 +92,9 @@ settings, not measured total memory requirements for every dataset.
 
 ### 2. Open the complete project
 
-On GitHub, select **Code → Download ZIP** and extract the archive into a local
-writable folder. Keep all folders together. Double-click
+At the [repository home](https://github.com/mgentiluomo/GWAS_training_session), select **Code > Download ZIP**
+and extract the archive into a local writable folder. The default branch supplies
+the 2026 course and the separate demo. No branch change is needed. Keep all folders together. Double-click
 `GWAS_training_session.Rproj`.
 
 **Check:** the Files pane shows `config.R`, `R/`, `scripts/`, `docs/` and `lessons/`.
