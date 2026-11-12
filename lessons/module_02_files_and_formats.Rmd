@@ -382,14 +382,14 @@ UCSC intervals are zero-based and half-open, which means they start counting at 
 
 ### You need
 
-You need the small GRCh37 exercise supplied at 0.5. You also need the official hg19-to-hg38 chain file. The final course package must include the chain file under grch37_exercise/. Authors may set COURSE_CHAIN_FILE to a chain file that already exists on their computer. The main array is already GRCh38, so we do not lift it again.
+You need the small GRCh37 exercise supplied at 0.5. You also need the official hg19-to-hg38 chain file. It is part of the course data, in the folder `data/course/grch37_exercise/`. You do not need to download it. The main array is already GRCh38, so we do not lift it again.
 
 ### Command
 
 ```{r s2-6}
 legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
-chain <- Sys.getenv("COURSE_CHAIN_FILE", unset = file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz"))
+chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
 require_files(chain)
 lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
@@ -417,7 +417,7 @@ bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/g
 
 <details><summary>Show the expected result</summary>
 
-The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.
+The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. PLINK prints a warning that the base-pair positions are now unsorted. This warning is expected: the new GRCh38 positions are not in the old order. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
