@@ -6,7 +6,7 @@
   "anchor": "step-1-7",
   "title": "The export",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "380478074dae95f75611738cf52346eb21381b46c7bd7b381b76cdba443e947b",
+  "source_sha256": "5e5711b85c81d25a373fe8b197e2b87cadc27d8d9b838792339aab39dd4d28f0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Understand how the reports relate to the genotype files used for the analysis.",

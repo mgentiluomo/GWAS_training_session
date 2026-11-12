@@ -1,5 +1,5 @@
 ---
-title: "Module 4: variant quality control"
+title: "Module 4: Variant quality control"
 author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:

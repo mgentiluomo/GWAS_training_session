@@ -6,7 +6,7 @@
   "anchor": "step-0-7",
   "title": "Run the setup check",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "2fed82eb3a37d8546fe067370eb3d57de30c4d4b08cc02190be96697cca8aaca",
+  "source_sha256": "0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Run the setup check. It tests the R packages, the [locale](../docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](../docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`",

@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 2fed82eb3a37d8546fe067370eb3d57de30c4d4b08cc02190be96697cca8aaca
+# SHA-256: 0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -47,7 +47,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 380478074dae95f75611738cf52346eb21381b46c7bd7b381b76cdba443e947b
+# SHA-256: 5e5711b85c81d25a373fe8b197e2b87cadc27d8d9b838792339aab39dd4d28f0
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -100,7 +100,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: ca06de8647b20a54aec0b5a0c1de028d66c1c9d97362b5c860d6a9f9599d62e2
+# SHA-256: 45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -201,7 +201,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 3f42b1b6337a1f5ea70d4176e50b16722b7dd67705a48c9113f47886057877e0
+# SHA-256: 9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -315,7 +315,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 85cdb8a1bcf1c1687db5607a02fe65ab4bcf4e4e2d15990e69c90ef26bc6516b
+# SHA-256: ad09fd3f0d7467d62f2ac42c26a2eda0f7f705b5a4d1493ea9eead11d51de1ed
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -395,7 +395,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: d206c4ce203c96c1f3327ec3e9fc12e2ba7544b819bca15ee2f97a975f379587
+# SHA-256: 8f5a26ab6607f700fd78a71db41d04750b76b51500e15831c07728cea3d62dc8
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -513,7 +513,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: f8fbb86db6034a0841406b3b955e760c8000fb1e191f69e75f2596d23fc02bd8
+# SHA-256: 2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -635,7 +635,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 6c8daaddedc892a9646dd98e09c0ca762a492c87ba70979dddf4ea132e2848b7
+# SHA-256: acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")

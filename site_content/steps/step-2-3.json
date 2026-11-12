@@ -6,7 +6,7 @@
   "anchor": "step-2-3",
   "title": "Sample and variant tables",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "ca06de8647b20a54aec0b5a0c1de028d66c1c9d97362b5c860d6a9f9599d62e2",
+  "source_sha256": "45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We read the sample table and the variant table. We do not change them.",

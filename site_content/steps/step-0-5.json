@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Download the course package",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "2fed82eb3a37d8546fe067370eb3d57de30c4d4b08cc02190be96697cca8aaca",
+  "source_sha256": "0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Download and extract the whole source project from its GitHub branch. Then download the matching encrypted data archive from release `data-2026.1`. Follow these actions for the project:\n\n1. Open the GitHub page of the course branch that your instructor gives you. GitHub is a website that stores project files. A branch is one line of versions of a project.\n2. Click the green \"Code\" button. Then click \"Download ZIP\".\n3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.\n4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. Do not move single files out of it.\n\nThe encrypted data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",

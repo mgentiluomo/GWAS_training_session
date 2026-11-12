@@ -1,5 +1,5 @@
 ---
-title: "Module 5: population structure"
+title: "Module 5: Population structure"
 author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:

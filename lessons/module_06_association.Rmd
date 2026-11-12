@@ -1,5 +1,5 @@
 ---
-title: "Module 6: association"
+title: "Module 6: Association"
 author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:

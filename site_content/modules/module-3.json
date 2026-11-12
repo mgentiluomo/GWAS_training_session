@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "module": 3,
-  "title": "sample quality control",
+  "title": "Sample quality control",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "3f42b1b6337a1f5ea70d4176e50b16722b7dd67705a48c9113f47886057877e0",
+  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
   "overview_markdown": "**What you will do.** You will check the quality of every sample in the data. A sample is the DNA of one person. You will remove samples that are poor, mislabelled, repeated, related to another sample or measured on a faulty plate. At the end you will save a clean set of 1,844 samples.\n\n**What you will learn.**\n\n- How to find samples that failed in the laboratory.\n- How to compare the recorded sex of a person with the sex shown by the DNA.\n- How to find related people and repeated samples.\n- How to find a plate that was measured badly.\n- How to keep a record of every sample you remove, and why.\n\n**How long it takes.** About 70 minutes. Step 3.6 is the slowest, because its rules for removing samples have the most detail.",
   "recap_markdown": "- Rough cleaning removed three wells and 150 variants. The 98% call-rate rule then removed 42 more wells, leaving 1,971 samples.\n- The sex check removed eight flagged wells, leaving 1,963 samples.\n- The pruned subset has 69,539 sites. The heterozygosity check removed 13 low-F wells and flagged eight high-F wells, which we kept. 1,950 samples remained.\n- The kinship check found 19 duplicate-class pairs and ten first-degree pairs. We removed 30 records, leaving 1,920 samples.\n- Plate P14 had a lower call rate than the other plates. We removed its 76 remaining wells.\n- The module ends with 1,844 samples and 296,360 variants, saved as the checkpoint at step 3.8.\n\n**Next:** Module 4 checks the quality of the variants (variant QC)."
 }

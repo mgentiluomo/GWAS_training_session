@@ -1,5 +1,5 @@
 ---
-title: "Module 2: files and formats"
+title: "Module 2: Files and formats"
 author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
