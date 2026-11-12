@@ -26,7 +26,7 @@ cfg <- guided_init()
 
 ### What we do
 
-Compare the distribution of observed autosomal association p-values with a uniform-null reference.
+Compare the distribution of observed autosomal association p-values with a uniform-null reference. The plot is built from the summary statistics file made at 6.8.
 
 ### Why
 
@@ -34,14 +34,14 @@ A quantile-quantile (QQ) plot pairs ordered observed values with the values expe
 
 ### You need
 
-The adjusted association scan from 6.4.
+The summary statistics file from 6.8. Run 6.8 first if R says that the file is missing.
 
 ### Command
 
 ```{r s7-1}
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-autosomal <- results$CHROM %in% as.character(1:22)
-save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(results$P[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
+stats <- guided_summary_stats(cfg)
+autosomal <- stats$chromosome %in% as.character(1:22)
+save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -99,13 +99,13 @@ Genomic inflation factor lambda is the median one-degree-of-freedom chi-square s
 
 ### You need
 
-The same autosomal p-values used at 7.1.
+The same autosomal p-values used at 7.1, read from the summary statistics file made at 6.8.
 
 ### Command
 
 ```{r s7-2}
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-p <- results$P[results$CHROM %in% as.character(1:22)]
+stats <- guided_summary_stats(cfg)
+p <- stats$p_value[stats$chromosome %in% as.character(1:22)]
 lambda <- lambda_gc(p)
 print(lambda)
 stopifnot(abs(lambda - 1.016) < 0.001)
@@ -151,7 +151,7 @@ No. Lambda summarises the median test distribution, not the validity or causal i
 
 ### What we do
 
-Plot association evidence along the autosomal genome.
+Plot association evidence along the autosomal genome. The plot is built from the summary statistics file made at 6.8.
 
 ### Why
 
@@ -159,16 +159,16 @@ A Manhattan plot places chromosome and position on the horizontal axis and -log1
 
 ### You need
 
-The full adjusted results from 6.4.
+The summary statistics file from 6.8. Run 6.8 first if R says that the file is missing.
 
 ### Command
 
 ```{r s7-3}
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-plot_data <- results
-plot_data$CHROM <- suppressWarnings(as.numeric(plot_data$CHROM))
+stats <- guided_summary_stats(cfg)
+plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
+  POS = stats$base_pair_location, P = stats$p_value)
 save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
-stopifnot(sum(results$P[valid_p(results$P)] < 5e-8) == 8L)
+stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -226,13 +226,13 @@ Testing many null hypotheses creates many opportunities for false positives. Bon
 
 ### You need
 
-Valid additive results from 6.4; no replacement of failed p-values.
+Valid additive results from the summary statistics file made at 6.8; no replacement of failed p-values.
 
 ### Command
 
 ```{r s7-4}
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-p <- results$P[valid_p(results$P)]
+stats <- guided_summary_stats(cfg)
+p <- stats$p_value[valid_p(stats$p_value)]
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
@@ -287,7 +287,7 @@ Clumping starts with the smallest p-value, assigns nearby correlated variants, a
 
 ### You need
 
-The full 5.7 genotype set and unaltered PLINK association report from 6.4.
+The full 5.7 genotype set and unaltered PLINK association report from 6.4. This step still reads the PLINK report, not the summary statistics file, because the `--clump` option of PLINK expects its own report format.
 
 ### Command
 
@@ -350,7 +350,7 @@ A regional plot separates position, association evidence and LD. L2 on chromosom
 
 ### You need
 
-Main results, final cohort and the lead 9:96426973:A:G from the chromosome 9 clump.
+The summary statistics file from 6.8, the final cohort and the lead 9:96426973:A:G from the chromosome 9 clump.
 
 ### Command
 
@@ -360,24 +360,24 @@ report <- guided_path(cfg, "7.6", "ld")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
   "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
 ld <- guided_table(paste0(report, ".vcor"))
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-region <- results[results$CHROM == "9" & abs(results$POS - 96426973) <= 500000 & valid_p(results$P), ]
+stats <- guided_summary_stats(cfg)
+region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
 r2_column <- grep("R2$", names(ld), value = TRUE)
 stopifnot(length(r2_column) == 1L)
-r2 <- as.numeric(ld[[r2_column]][match(region$ID, ld$ID_B)])
-r2[region$ID == lead] <- 1
+r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
+r2[region$variant_id == lead] <- 1
 bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
 colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
 shapes <- c(1, 2, 3, 4, 16)
 png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
-plot(region$POS / 1e6, -log10(region$P), col = ifelse(is.na(bin), "#666666", colours[bin]),
+plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
   pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
 abline(h = -log10(5e-8), lty = 2)
 legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
 dev.off()
-stopifnot(sum(region$P < 5e-8) == 4L)
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
+stopifnot(sum(region$p_value < 5e-8) == 4L)
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -435,7 +435,7 @@ First omit PCs while keeping the same cleaned cohort and covariates age/sex. Tha
 
 ### You need
 
-State 5.7, boundary 2.8, main association report, covariates and original metadata.
+State 5.7, boundary 2.8, the summary statistics file from 6.8 for the main analysis, covariates and original metadata. The two comparison scans are new PLINK reports. R turns them into the same standard columns in memory, so that all three analyses are summarised in the same way.
 
 ### Command
 
@@ -451,23 +451,25 @@ baseline <- guided_path(cfg, "2.8")
 if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
 run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
-main <- guided_association(guided_path(cfg, "6.4", "association"))
-a <- guided_association(no_pc); b <- guided_association(no_qc)
-k <- match(main$ID, a$ID)
-stopifnot(!anyNA(k), all(main$OBS_CT == a$OBS_CT[k]))
-summarise <- function(x) c(finite_tests = sum(valid_p(x$P)), hits = sum(x$P[valid_p(x$P)] < 5e-8),
-  lambda = lambda_gc(x$P[x$CHROM %in% as.character(1:22)]))
+main <- guided_summary_stats(cfg)
+a <- guided_standardise_scan(guided_association(no_pc))
+b <- guided_standardise_scan(guided_association(no_qc))
+k <- match(main$variant_id, a$variant_id)
+stopifnot(!anyNA(k), all(main$n == a$n[k]))
+autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
+summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
+  lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
-  plotted <- list(main$P[main$CHROM %in% as.character(1:22)], a$P[a$CHROM %in% as.character(1:22)], b$P[b$CHROM %in% as.character(1:22)])
+  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
   limits <- c(0, max(-log10(unlist(plotted))))
-  plot_qq(main$P[main$CHROM %in% as.character(1:22)], "QC + ten PCs", ylim = limits)
-  plot_qq(a$P[a$CHROM %in% as.character(1:22)], "QC, no PCs", ylim = limits)
-  plot_qq(b$P[b$CHROM %in% as.character(1:22)], "No sample/variant QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
 }, width = 2100, height = 750)
 ```
 
@@ -527,7 +529,7 @@ A report must connect the study design, QC decisions, model, effect estimates, u
 
 ### You need
 
-Verified modules 0 to 6, figures and comparisons from 7.1 to 7.7.
+Verified modules 0 to 6, the summary statistics file from 6.8, and the figures and comparisons from 7.1 to 7.7.
 
 ### Command
 
@@ -535,10 +537,10 @@ Verified modules 0 to 6, figures and comparisons from 7.1 to 7.7.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
-results <- guided_association(guided_path(cfg, "6.4", "association"))
-lead <- results[match(clumps$ID, results$ID), c("CHROM", "POS", "ID", "A1", "OR", "LOG(OR)_SE", "P", "OBS_CT")]
-lead$CI_LOW <- exp(log(lead$OR) - 1.96 * lead[["LOG(OR)_SE"]])
-lead$CI_HIGH <- exp(log(lead$OR) + 1.96 * lead[["LOG(OR)_SE"]])
+stats <- guided_summary_stats(cfg)
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "standard_error", "p_value", "n")]
+lead$ci_low <- exp(log(lead$odds_ratio) - 1.96 * lead$standard_error)
+lead$ci_high <- exp(log(lead$odds_ratio) + 1.96 * lead$standard_error)
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),
@@ -547,7 +549,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "After QC: 238,513 variants; 236,815 finite additive association tests.",
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
-  "Report A1, OR, 95% interval, p-value and per-variant OBS_CT from s7-8_leads.tsv.",
+  "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
   "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
@@ -560,7 +562,7 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
   guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
-guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.7")
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
 cat(paste(summary, collapse = "\n"), "\n")
 ```
