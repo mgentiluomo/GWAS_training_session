@@ -130,6 +130,33 @@ guided_high_ld <- function(cfg) {
   path
 }
 
+guided_association <- function(prefix) {
+  files <- list.files(dirname(prefix), full.names = TRUE)
+  files <- files[startsWith(basename(files), paste0(basename(prefix), ".")) &
+    grepl("[.]glm[.](logistic|firth)", files) & !grepl("[.]id$", files)]
+  if (length(files) != 1L) stop("Expected one association output for prefix: ", prefix)
+  x <- guided_table(files)
+  x <- x[x$TEST == "ADD", , drop = FALSE]
+  for (name in intersect(c("POS", "P", "OR", "LOG(OR)_SE", "OBS_CT", "A1_FREQ"), names(x))) x[[name]] <- as.numeric(x[[name]])
+  x
+}
+
+guided_artifact_checkpoint <- function(cfg, step, files, parent = "5.7") {
+  require_files(files)
+  folder <- file.path(cfg$out, "checkpoints", step)
+  dir.create(folder, recursive = TRUE, showWarnings = FALSE)
+  stopifnot(!anyDuplicated(basename(files)))
+  for (file in files) if (!file.copy(file, file.path(folder, basename(file)), overwrite = TRUE)) stop("Artifact copy failed.")
+  manifest <- data.frame(path = basename(files), bytes = file.info(files)$size,
+    sha256 = vapply(files, digest::digest, character(1), algo = "sha256", file = TRUE))
+  guided_write(manifest, file.path(folder, "MANIFEST.tsv"))
+  index_path <- file.path(cfg$out, "checkpoints", "index.tsv")
+  index <- read.delim(index_path, colClasses = "character", na.strings = NULL)
+  row <- data.frame(step = step, kind = "artifacts", parent = parent, samples = 1811, variants = 238513)
+  guided_write(rbind(index[index$step != step, ], row), index_path)
+  invisible(folder)
+}
+
 guided_liftover <- function(chromosome, position, chain_file) {
   # UCSC chain coordinates are zero-based half-open; course coordinates are one-based.
   lines <- readLines(gzfile(chain_file), warn = FALSE)

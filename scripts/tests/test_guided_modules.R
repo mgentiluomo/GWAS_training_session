@@ -55,6 +55,28 @@ local({
         stopifnot(all(guided_counts(state) == c(row$samples_left, row$variants_left)))
       }
     }
+    for (step in names(key$expected_sample_flow$removed)) {
+      list <- file.path(output, paste0("s", sub(".", "-", step, fixed = TRUE), "_removed_samples.txt"))
+      if (file.exists(list)) {
+        observed <- guided_table(list)$IID
+        expected <- unlist(key$expected_sample_flow$removed[[step]], use.names = FALSE)
+        stopifnot(length(observed) == length(expected))
+        if (step != "3.6") stopifnot(setequal(observed, expected))
+      }
+    }
+    association <- guided_path(list(out = output), "6.4", "association")
+    if (file.exists(paste0(association, ".Disease.glm.logistic.hybrid"))) {
+      x <- guided_association(association)
+      expected <- reference$association$with_qc_and_pcs
+      stopifnot(sum(valid_p(x$P)) == expected$variants_tested,
+        sum(x$P[valid_p(x$P)] < 5e-8) == expected$genome_wide_hits,
+        abs(lambda_gc(x$P[x$CHROM %in% as.character(1:22)]) - expected$lambda) < 0.001)
+      for (name in names(expected$loci)) {
+        lead <- expected$loci[[name]]
+        actual <- x[x$ID == lead$lead, ]
+        stopifnot(nrow(actual) == 1L, abs(log(actual$P / lead$lead_p)) < 0.01)
+      }
+    }
     cat("Initial and available step counts agree with the external instructor key and reference report.\n")
   }
   cat("Guided module execution passed on", Sys.info()[["sysname"]], ".\n")

@@ -284,6 +284,18 @@ course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
   index <- course_index(data_dir)
   row <- index[index$step == step, , drop = FALSE]
   if (nrow(row) != 1L) stop("No indexed checkpoint is supplied for that step.")
+  if (row$kind == "artifacts") {
+    manifest <- course_manifest(file.path(data_dir, "checkpoints", step, "MANIFEST.tsv"))
+    status <- vapply(seq_len(nrow(manifest)), function(i) {
+      file <- file.path(work_dir, manifest$path[i])
+      if (!file.exists(file)) return("missing")
+      if (digest::digest(file, file = TRUE, algo = "sha256") == manifest$sha256[i]) "matches" else "different contents"
+    }, character(1))
+    result <- data.frame(file = manifest$path, status = status)
+    attr(result, "complete") <- all(status == "matches")
+    if (!quiet) print(result, row.names = FALSE)
+    return(invisible(result))
+  }
   prefix <- file.path(work_dir, paste0("s", sub(".", "-", step, fixed = TRUE), "_state"))
   status <- "missing"
   if (all(file.exists(paste0(prefix, c(".pgen", ".pvar", ".psam"))))) {
@@ -320,6 +332,17 @@ course_index_restore <- function(step, data_dir, work_dir) {
     if (target %in% visiting) stop("The checkpoint index contains a cycle.")
     row <- index[index$step == target, , drop = FALSE]
     if (nrow(row) != 1L) stop("The checkpoint parent is unavailable.")
+    if (row$kind == "artifacts") {
+      input <- build(row$parent, c(visiting, target))
+      manifest <- course_manifest(file.path(data_dir, "checkpoints", target, "MANIFEST.tsv"))
+      for (name in manifest$path) {
+        destination <- file.path(work_dir, name)
+        if (file.exists(destination)) stop("An analysis output already exists. Choose a new work_dir.")
+        if (!file.copy(file.path(data_dir, "checkpoints", target, name), destination)) stop("Analysis checkpoint copy failed.")
+      }
+      if (!isTRUE(attr(course_index_check(target, data_dir, work_dir, TRUE), "complete"))) stop("Analysis checkpoint verification failed.")
+      return(input)
+    }
     prefix <- file.path(work_dir, paste0("s", sub(".", "-", target, fixed = TRUE), "_state"))
     if (any(file.exists(paste0(prefix, c(".pgen", ".pvar", ".psam"))))) stop("Checkpoint output already exists. Choose a new work_dir.")
     if (row$kind == "full") {

@@ -1,0 +1,478 @@
+---
+title: "Module 6: association"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root. Read each step before running its R chunk. All data
+are simulated; these exercises cannot establish a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
+loads its inputs from disk; a saved R workspace is not required.
+
+```{r module6_setup, include=FALSE}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
+}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## 6.1 One variant by hand {#step-6-1}
+
+### What we do
+
+Calculate a simple carrier odds ratio at a retained autosomal site.
+
+### Why
+
+Odds are the number with an outcome divided by the number without it. An odds ratio (OR) compares odds between two groups; OR = 1 means equal odds. Here we compare carriers of the allele explicitly named in the exported column with non-carriers. This dominant carrier contrast is a teaching calculation, not the additive adjusted GWAS model. Allele coding matters: reversing the counted allele changes the contrast.
+
+### You need
+
+Full 5.7 cohort; the retained site 9:96426973:A:G.
+
+### Command
+
+```{r s6-1}
+report <- guided_path(cfg, "6.1", "example")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", "9:96426973:A:G", "--export", "A", "--out", report))
+x <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE)
+dose <- as.numeric(x[[7]])
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+case <- psam$Disease[match(x$IID, psam$IID)] == "2"
+tab <- table(case = case, carrier = dose > 0)
+print(tab)
+carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
+print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
+```
+
+`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+A carrier/non-carrier table in the retained cohort and a finite odds ratio. Interpret its direction using the allele in the exported column; this need not be the allele that increases risk.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+An OR of 2 means that disease probability doubled. Is this statement generally correct?
+
+<details><summary>Show the answer</summary>
+
+No. Odds and probability differ; an odds ratio is not generally a risk ratio.
+
+</details>
+
+### Files created
+
+`s6-1_example.raw` and logs.
+
+## 6.2 The additive logistic model {#step-6-2}
+
+### What we do
+
+Fit a one-variant logistic regression in R and connect dosage to the odds ratio.
+
+### Why
+
+For binary outcome Y, logistic regression models log(p/(1?p)) = intercept + beta ? dosage, where p is the probability of being a case. An additive model assumes the same change in log odds for each additional counted allele. exp(beta) is the per-allele OR; it differs from the carrier contrast at 6.1. The standard error measures uncertainty in the estimated log OR. This unadjusted one-site example is not the final association result.
+
+### You need
+
+The one-variant export from 6.1 and the final PSAM.
+
+### Command
+
+```{r s6-2}
+x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
+fit <- glm(case ~ dosage, data = example, family = binomial())
+summary(fit)
+exp(coef(fit)["dosage"])
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+An intercept and dosage coefficient, with a standard error and p-value. The unadjusted per-allele OR and carrier OR need not be equal.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+What does beta = 0 imply for the per-allele odds ratio?
+
+<details><summary>Show the answer</summary>
+
+exp(0) = 1: no estimated per-allele change in odds.
+
+</details>
+
+### Files created
+
+The example model exists in R memory only; the genotype export remains on disk.
+
+## 6.3 Prepare covariates {#step-6-3}
+
+### What we do
+
+Join age and ten within-cohort PCs to the retained sample IDs, and check completeness and rank.
+
+### Why
+
+Covariates adjust the comparison for measured predictors and structure. Misaligned covariates can invalidate every variant test while still producing plausible-looking output. Missing covariates remove observations from a model. Collinearity occurs when one column can be predicted exactly from others, preventing a unique estimate. We verify matching IDs and a full-rank design before scanning. Sex is read from PSAM and requested in the PLINK model.
+
+### You need
+
+State 5.7; cohort eigenvectors from 5.7; metadata from 2.7.
+
+### Command
+
+```{r s6-3}
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
+metadata <- guided_metadata(cfg)
+a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)
+stopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))
+covar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))
+for (name in paste0("PC", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])
+stopifnot(!anyNA(covar))
+design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))
+stopifnot(qr(design)$rank == ncol(design))
+names(covar)[1] <- "#FID"
+guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+1,811 complete matched covariate rows with Age and PC1?PC10. No duplicate or unmatched IDs; the design has full column rank.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Why is a complete covariate table with the right number of rows insufficient by itself?
+
+<details><summary>Show the answer</summary>
+
+The rows must belong to the correct sample IDs and be aligned to those samples.
+
+</details>
+
+### Files created
+
+`s6-3_covariates.tsv`.
+
+## 6.4 Run the association scan {#step-6-4}
+
+### What we do
+
+Fit the prespecified additive logistic model with age, sex and ten PCs at every retained analysable site.
+
+### Why
+
+The scan tests one genetic predictor at a time while keeping the covariate specification fixed. The null hypothesis for the additive test is beta = 0. A small p-value is evidence against that null under the model and its assumptions; it does not measure effect size, causality or the probability the null is true. Firth fallback provides a more stable calculation when ordinary logistic fitting encounters separation. We do not select the covariates after inspecting the resulting peaks.
+
+### You need
+
+The final 5.7 genotype state and covariates from 6.3.
+
+### Command
+
+```{r s6-4}
+out <- guided_path(cfg, "6.4", "association")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+  "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
+results <- guided_association(out)
+valid <- valid_p(results$P)
+stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
+```
+
+`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table and `--covar-name` selects Age and PC1?PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+236,815 finite additive p-values and eight below 0.00000005. A genotype retained by QC does not guarantee an output test on every chromosome; inspect the output and log rather than replacing absent results with zero.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Does a tiny p-value imply a large odds ratio?
+
+<details><summary>Show the answer</summary>
+
+No. Evidence depends on effect, uncertainty and sample size; report the effect estimate and interval too.
+
+</details>
+
+### Files created
+
+`s6-4_association.Disease.glm.logistic.hybrid`, logs and a parsed `s6-4_results.tsv`.
+
+## 6.5 Read association output {#step-6-5}
+
+### What we do
+
+Identify effect allele, sample count, uncertainty, test type and fitting status.
+
+### Why
+
+A1 is the allele whose dosage is tested, not automatically ALT, minor or harmful. OR estimates its multiplicative effect on odds. OBS_CT is the number of samples used at that variant and may vary with missing calls. ERRCODE describes model failures; a missing p-value must remain missing. A 95% confidence interval is exp(log(OR) ? 1.96 ? SE) under the fitted approximation. The interval describes estimation uncertainty under assumptions, not the chance this single interval contains a fixed truth.
+
+### You need
+
+The full association output from 6.4.
+
+### Command
+
+```{r s6-5}
+results <- guided_association(guided_path(cfg, "6.4", "association"))
+print(table(results$ERRCODE, useNA = "ifany"))
+valid <- results[valid_p(results$P), ]
+valid$CI_LOW <- exp(log(valid$OR) - 1.96 * valid[["LOG(OR)_SE"]])
+valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
+top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
+print(head(top, 10))
+guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+The leading regions are on chromosomes 9, 3 and 12. The table preserves the effect allele and variant-specific OBS_CT. P-values and ORs refer to the tested A1 allele, regardless of how the identifier was constructed.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+What should you do with a row whose ERRCODE indicates failure and whose p-value is missing?
+
+<details><summary>Show the answer</summary>
+
+Inspect its failure reason and retain it as missing; do not replace it with a significant or non-significant numerical value.
+
+</details>
+
+### Files created
+
+`s6-5_top20.tsv` with effect estimates and intervals.
+
+## 6.6 Sparse genotypes and Firth correction {#step-6-6}
+
+### What we do
+
+Compare an explicitly forced Firth fit at a low-frequency retained autosomal site.
+
+### Why
+
+Rare genotypes can have very few case or control observations. If a predictor separates outcomes completely, the ordinary maximum-likelihood coefficient can diverge. Firth penalisation reduces small-sample bias and can give finite estimates. It does not create information or fix confounding, miscalled genotypes or a poor study design. The main scan in this dataset did not actually require Firth fallback; we force it for a transparent teaching comparison at one retained low-frequency site. Sites below the 1% main-path filter are not reintroduced.
+
+### You need
+
+The final cohort, main results and covariates from 6.3.
+
+### Command
+
+```{r s6-6}
+results <- guided_association(guided_path(cfg, "6.4", "association"))
+minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
+candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
+chosen <- results$ID[candidates[which.min(minor[candidates])]]
+guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+  "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
+comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
+print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
+print(comparison[, c("ID", "A1", "OR", "P")])
+stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
+```
+
+The R command uses `--snp` with the selected ID; the equivalent terminal command uses `--extract` with its one-ID file. `--glm firth` requests Firth for that variant rather than waiting for fallback. Other covariate and resource options match 6.4. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+
+<details><summary>Show the expected result</summary>
+
+One finite forced-Firth result, compared with the ordinary main-scan estimate for the same A1 allele. Small numerical differences are expected; forced Firth is not a new preferred genome-wide scan.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Does using Firth make an association based on very few carriers precise?
+
+<details><summary>Show the answer</summary>
+
+No. It can stabilise fitting while uncertainty remains large.
+
+</details>
+
+### Files created
+
+Selected variant ID, the forced-Firth report and logs.
+
+## 6.7 First look and association checkpoint {#step-6-7}
+
+### What we do
+
+Summarise the valid tests and save the key association outputs for recovery.
+
+### Why
+
+A list of small p-values is not yet an interpretation. Record the model, cohort, test counts and fitting status before plotting. The next module explains multiple testing, correlated peaks and confounding comparisons. Never call a simulated lead a clinical finding or assume the nearest gene is causal.
+
+### You need
+
+Association output from 6.4 and reviewed table from 6.5.
+
+### Command
+
+```{r s6-7}
+results <- guided_association(guided_path(cfg, "6.4", "association"))
+summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
+  genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
+  lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
+guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
+print(summary)
+files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
+  guided_path(cfg, "6.3", "covariates.tsv"), guided_path(cfg, "6.5", "top20.tsv"), guided_path(cfg, "6.7", "summary.tsv"))
+guided_artifact_checkpoint(cfg, "6.7", files)
+check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+1,811 retained samples, 238,513 retained variants, 236,815 finite tests, eight genome-wide significant variants and autosomal lambda approximately 1.016. Key analysis files receive a SHA-256 artifact manifest.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Do eight significant variants necessarily represent eight independent association signals?
+
+<details><summary>Show the answer</summary>
+
+No. Nearby variants can share a signal through LD; clumping at 7.5 groups correlated associations.
+
+</details>
+
+### Files created
+
+`s6-7_summary.tsv`, association checkpoint files and `checkpoints/6.7/MANIFEST.tsv`.

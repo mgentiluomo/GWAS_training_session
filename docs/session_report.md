@@ -65,3 +65,9 @@ modules and unresolved checks will be recorded below before the final push.
   A first attempt found a long PVAR metadata header; streaming over all header
   lines fixed the reader. The PCA figure was visually inspected and its legend
   was corrected to use the four groups actually present in the supplied subset.
+
+- Module 6: Windows main scan produced 236,815 finite tests and eight genome-wide
+  hits, with autosomal lambda 1.016465. The model includes age, sex and ten PCs.
+  All main-scan FIRTH flags were N; a separate low-frequency retained autosomal
+  site was deliberately analysed with forced Firth for teaching. A manifest
+  protects the 6.7 analysis checkpoint.
