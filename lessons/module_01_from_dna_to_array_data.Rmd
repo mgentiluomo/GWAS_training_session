@@ -22,19 +22,35 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+## Module 1 at a glance {#module-1-overview}
+
+**What you will do.** You will look at the files that come out of a genotyping laboratory. You will read a table of array sites, a laboratory report and a sample sheet. You will then check the size of the genotype files that the rest of the course uses.
+
+**What you will learn.**
+
+- What a SNP, an allele and a genotype are, and how they differ.
+- How a genotyping array turns fluorescent light into a genotype call.
+- What the Global Screening Array measures, and what it cannot measure.
+- Why one row in a laboratory file is not always one person.
+- Which laboratory problems the quality-control steps of later modules will look for.
+
+**How long it takes.** About 45 minutes. The slowest step is 1.5, because you read a report table and a summary of the scores.
+
 ## 1.1 SNPs and genotypes {#step-1-1}
 
 ### What we do
 
-Distinguish a DNA site, an allele and a genotype.
+Learn the difference between a DNA site, an allele and a genotype.
 
 ### Why
 
-A variant is a position where DNA differs between people. An allele is one of its possible sequences. A single nucleotide polymorphism (SNP) has single-base alternatives. At an ordinary autosomal site a person carries two copies: an A/G site can have A/A, A/G or G/G genotypes. Missing is not a fourth allele. X, Y and mitochondrial DNA need different copy-number assumptions, discussed at 4.5.
+A [variant](../docs/glossary.md#variant) is a position in the DNA where people differ. An [allele](../docs/glossary.md#allele) is one of the possible DNA letters at that position. A [single nucleotide polymorphism (SNP)](../docs/glossary.md#snp) is a variant where one single DNA base changes.
+
+At an ordinary [autosomal](../docs/glossary.md#autosome) site, a person carries two copies, one from each parent. A site with the alleles A and G can therefore give three [genotypes](../docs/glossary.md#genotype): A/A, A/G or G/G. A missing value is not a fourth allele. The X, Y and mitochondrial chromosomes need different rules for the number of copies. We discuss them at step 4.5.
 
 ### You need
 
-The verified array annotation from 0.5.
+The checked array annotation file from step 0.5. An [annotation](../docs/glossary.md#annotation) is a table that describes each site on the array.
 
 ### Command
 
@@ -51,7 +67,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-A table of site identifiers, chromosome, GRCh38 coordinate and plus-strand alleles. The annotation contains 299,523 rows. Array site names are not guaranteed to be rs identifiers.
+A table with the site name, the chromosome, the [GRCh38](../docs/glossary.md#grch38) position and the two alleles on the [plus strand](../docs/glossary.md#plus-strand). GRCh38 is the version of the human reference genome that gives the positions. The annotation contains 299,523 rows. Array site names are not always rs identifiers.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -70,7 +86,7 @@ At a C/T autosomal site, does C/T represent two variants or one genotype?
 
 <details><summary>Show the answer</summary>
 
-One genotype at one variant: one C allele and one T allele.
+One genotype at one variant. The person carries one C allele and one T allele.
 
 </details>
 
@@ -82,15 +98,19 @@ None.
 
 ### What we do
 
-Separate a fluorescence measurement from a genotype call.
+Learn why a fluorescence measurement is not the same as a genotype call.
 
 ### Why
 
-An array measures fluorescent signals from DNA hybridising to probes. Probes are short DNA sequences designed to recognise selected sites. Intensities from two channels tend to form clusters representing the two homozygotes and the heterozygote. A calling algorithm assigns a genotype or leaves the call missing. Signal strength is a measurement, not an allele count. Poor separation, background signal and unusual DNA mixtures can produce uncertain calls.
+A genotyping [array](../docs/glossary.md#genotyping-array) is a small chip that measures many sites at once. It measures fluorescent light from DNA that sticks to [probes](../docs/glossary.md#probe). This sticking is called hybridisation. Probes are short DNA sequences that are designed to recognise chosen sites.
+
+The chip reads the light in two colour channels. The signals from many samples tend to form three [clusters](../docs/glossary.md#intensity-cluster) of points. The clusters stand for the two [homozygotes](../docs/glossary.md#homozygote) (two equal alleles) and the [heterozygote](../docs/glossary.md#heterozygosity) (two different alleles). A calling algorithm then gives each sample a genotype, or leaves the call missing.
+
+The signal strength is a measurement. It is not a count of alleles. Weak separation between clusters, background light and mixed DNA can make a call uncertain.
 
 ### You need
 
-The array annotation from 1.1; the final report examples supplied at 0.5.
+The array annotation from step 1.1. You also need the example final reports supplied at step 0.5. A [final report](../docs/glossary.md#final-report) is a text file from the laboratory that lists the genotype calls.
 
 ### Command
 
@@ -108,7 +128,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-A simulated Final Report header and the start of its data section. The supplied reports have genotype calls and GC scores; they do not contain raw intensity data, so this exercise cannot redraw cluster plots.
+The top of a simulated Final Report: first the header, then the start of the data section. The supplied reports contain genotype calls and GC scores. They do not contain raw intensity data, so you cannot redraw cluster plots in this exercise.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -127,7 +147,7 @@ Can a low-quality fluorescence measurement be treated as a confidently observed 
 
 <details><summary>Show the answer</summary>
 
-No. Missing means no accepted genotype call; it is not a biological allele.
+No. Missing means that no genotype call was accepted. It is not a biological allele.
 
 </details>
 
@@ -141,15 +161,17 @@ None.
 
 ### What we do
 
-Recognise what an array includes and what it leaves unmeasured.
+Learn what the array measures and what it leaves unmeasured.
 
 ### Why
 
-The Illumina Global Screening Array (GSA) targets a selected set of sites. It is not whole-genome sequencing: an unmeasured site cannot be called absent. The simulated course subset uses GSA-style Illumina names and real GRCh38 positions. The local manufacturer manifest is not redistributed. The student annotation supplies only the fields needed for this course; it does not reproduce the full proprietary design.
+The Illumina Global Screening Array (GSA) measures a chosen set of sites. It is not [whole-genome sequencing](../docs/glossary.md#whole-genome-sequencing), which reads almost every base. If a site is not on the array, we know nothing about it. We cannot say that the variant is absent.
+
+The simulated course data use GSA-style Illumina site names and real GRCh38 positions. The manufacturer manifest is not shared with students. A manifest is the full design file of the array. The annotation for students has only the fields that this course needs. It does not copy the full proprietary design.
 
 ### You need
 
-The annotation inspected at 1.1.
+The annotation that you inspected at step 1.1.
 
 ### Command
 
@@ -166,7 +188,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Autosomes 1 to 22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.
+Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA). There are 299,523 array entries at the start. The same genomic site can appear under two different names. We review this at step 4.5.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -185,7 +207,7 @@ If a site is absent from the array, can you conclude that every participant has 
 
 <details><summary>Show the answer</summary>
 
-No. Absence from the array means the site was not directly measured.
+No. If a site is absent from the array, it was not measured directly.
 
 </details>
 
@@ -197,15 +219,19 @@ None.
 
 ### What we do
 
-Trace sample identity through a plate and laboratory well.
+Follow the identity of a sample through a plate and a laboratory well.
 
 ### Why
 
-DNA extraction, concentration checks, amplification, fragmentation, hybridisation, staining and scanning precede the export. A plate groups laboratory wells processed together. A well can contain a technical replicate of a person. Consequently a row in a laboratory export is not always a unique person. Batch effects are systematic differences associated with processing, such as a faulty plate, rather than the phenotype of interest.
+Several laboratory steps come before the export. The laboratory extracts the DNA, checks its concentration, copies it, cuts it into pieces, hybridises it to the chip, stains it and scans it.
+
+A [plate](../docs/glossary.md#plate-and-well) is a tray that holds laboratory wells processed together. A well is one small hole in the tray that holds one sample. A well can contain a [technical replicate](../docs/glossary.md#technical-replicate), which is a second measurement of the same person. So one row in a laboratory file is not always one unique person.
+
+A [batch effect](../docs/glossary.md#batch-effect) is a systematic difference caused by how samples were processed, for example by a faulty plate. It is not caused by the [phenotype](../docs/glossary.md#phenotype), the trait that we study.
 
 ### You need
 
-The sample sheet from 0.5.
+The sample sheet from step 0.5. The [sample sheet](../docs/glossary.md#sample-sheet) lists every well with its plate, its sample name and any replicate label.
 
 ### Command
 
@@ -224,7 +250,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Twenty-one plates, each with 96 wells, for 2,016 measurements. Sixteen wells are labelled technical replicates; 2,000 original people were simulated.
+Twenty-one plates, each with 96 wells, give 2,016 measurements. Sixteen wells are labelled as technical replicates. The simulation started from 2,000 people.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -243,7 +269,7 @@ A plate has 96 wells and two are replicates of other wells. Must it contain 96 d
 
 <details><summary>Show the answer</summary>
 
-No. Wells count measurements; people count biological individuals.
+No. A well is one measurement. A person is one biological individual.
 
 </details>
 
@@ -255,15 +281,19 @@ None.
 
 ### What we do
 
-Read the call and score columns without treating the score as certainty.
+Read the call and score columns, and do not treat the score as certainty.
 
 ### Why
 
-The calling algorithm compares intensities with expected clusters. A GC score is a calling-quality measure; it is not a probability that an association is true, nor a p-value. A no-call can reflect low signal or ambiguous clusters. The examples use semicolons and decimal points intentionally: check the delimiter instead of changing the computer language.
+The calling algorithm compares the measured intensities with the expected clusters. The [GC score](../docs/glossary.md#gc-score) measures the quality of one call. It is not the probability that an association is true. It is not a [p-value](../docs/glossary.md#p-value) either.
+
+A [no-call](../docs/glossary.md#no-call) is a site where the algorithm gave no genotype. It can come from a weak signal or from unclear clusters.
+
+The example files use semicolons between columns and decimal points in numbers. This is on purpose. A character that separates columns is called a [delimiter](../docs/glossary.md#delimiter). Check the delimiter in the file. Do not change the language of your computer.
 
 ### You need
 
-The example Final Reports from 1.2.
+The example final reports from step 1.2.
 
 ### Command
 
@@ -283,7 +313,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Columns SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are selected report excerpts, not the full 299,523-site matrix for every person.
+The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -302,7 +332,7 @@ Does GC Score = 0.9 mean a variant has a 90% chance of causing disease?
 
 <details><summary>Show the answer</summary>
 
-No. The score concerns genotype calling, not causal or association evidence.
+No. The score describes the quality of the genotype call. It says nothing about disease or association.
 
 </details>
 
@@ -314,15 +344,19 @@ None.
 
 ### What we do
 
-Connect laboratory problems to the later QC checks.
+Link laboratory problems to the quality-control checks of later modules.
 
 ### Why
 
-Low DNA yield can cause many no-calls. Contamination can increase heterozygous calls. Sample swaps can create disagreement between recorded and genetic sex or duplicates with conflicting metadata. A processing batch can affect many samples together. None of these patterns alone proves its cause: retain logs and seek laboratory confirmation before changing identities. QC means quality control, a set of checks that reduce avoidable errors before statistical testing.
+Little DNA in a well can cause many no-calls. Contamination, which means a mix with foreign DNA, can increase the number of heterozygous calls. A sample swap can make the recorded sex differ from the sex seen in the genotypes. It can also create duplicate samples with conflicting information.
+
+A processing batch can affect many samples together. One pattern alone does not prove its cause. Keep the logs and ask the laboratory to confirm before you change any sample identity.
+
+[QC](../docs/glossary.md#qc) means quality control. It is a set of checks that remove avoidable errors before the statistical tests.
 
 ### You need
 
-The sample sheet and score examples from 1.4 to 1.5.
+The sample sheet and the score examples from steps 1.4 and 1.5.
 
 ### Command
 
@@ -339,7 +373,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-The information needed to investigate batch membership and labelled replicates. No person is removed in module 1.
+The table has the information that you need to study batch membership and labelled replicates. No person is removed in module 1.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -358,7 +392,7 @@ If many samples from one plate have low call rates, what shared cause should you
 
 <details><summary>Show the answer</summary>
 
-A processing or batch problem; the plate pattern suggests a shared laboratory cause but does not establish it.
+A processing or batch problem. A plate pattern suggests a shared laboratory cause, but it does not prove one.
 
 </details>
 
@@ -370,15 +404,17 @@ None.
 
 ### What we do
 
-Identify the relationship between reports and the genotype matrix used for analysis.
+Understand how the reports relate to the genotype files used for the analysis.
 
 ### Why
 
-The report excerpts show how calls are labelled. The matching BED/BIM/FAM set holds the complete course genotype matrix. BED stores genotypes in binary; BIM describes variants; FAM describes sample order. These three files are a matched set. In module 2 we convert to the PLINK 2 native PGEN/PVAR/PSAM format while checking identity and order.
+The report excerpts show how calls are labelled. The complete genotype table for the course is stored in a matching [BED/BIM/FAM set](../docs/glossary.md#bed-bim-fam). The BED file stores the genotypes in a compact binary form. The BIM file describes the variants. The FAM file describes the samples and their order.
+
+These three files belong together as one set. In module 2 we convert them to the native PLINK 2 format, called PGEN/PVAR/PSAM. We check the sample identity and order during the conversion.
 
 ### You need
 
-The matched laboratory export from 0.5; concepts from 1.1 to 1.6.
+The matched laboratory export from step 0.5, and the ideas from steps 1.1 to 1.6.
 
 ### Command
 
@@ -396,7 +432,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-2,016 sample wells and 299,523 variants. No QC has yet been applied and no case/control phenotype is present in the initial FAM.
+2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -415,10 +451,20 @@ Can you combine a BED from one release with a FAM from another if their sample c
 
 <details><summary>Show the answer</summary>
 
-No. Equal counts do not establish matching sample identity, ordering or genotypes.
+No. Equal counts do not prove that the sample identity, the order or the genotypes match.
 
 </details>
 
 ### Files created
 
 None.
+
+## Module 1 recap {#module-1-recap}
+
+- You separated a variant, an allele and a genotype.
+- You saw that the array measures light, and that a calling algorithm turns it into genotypes.
+- The annotation lists 299,523 array entries on chromosomes 1 to 22, X, Y and MT.
+- The laboratory ran 21 plates of 96 wells, which gives 2,016 measurements; 16 wells are technical replicates of the 2,000 simulated people.
+- You checked that the genotype files hold 2,016 samples and 299,523 variants, with no QC applied and no person removed.
+
+**Next:** module 2 converts these files to the PLINK 2 format and checks them.
