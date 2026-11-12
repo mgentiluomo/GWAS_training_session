@@ -3,7 +3,7 @@
   "module": 0,
   "title": "prepare your computer",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693",
+  "source_sha256": "08b6acc7e92d38813750360f1678295759453cc77a2e64e0470e9eb382e2c121",
   "overview_markdown": "**What you will do.** You will install three free programs: [R](../docs/glossary.md#r) (the language that runs our commands), RStudio (a window that makes R easier to use) and [PLINK 2](../docs/glossary.md#plink-2) (a program that analyses genotype files). You will download the course files and the course data. Then you will run a setup check that shows your computer is ready.\n\n**What you will learn.**\n\n- How to find out which system and processor your computer has.\n- How to install R, RStudio and PLINK 2.\n- How to open a project and run a command in the console.\n- Why checksums and a setup check protect your work.\n- The routine you will use in every step: read, run, compare.\n\n**How long it takes.** About 90 minutes. The slowest step is 0.5, because the data archive is large and the R packages must be installed.",
   "recap_markdown": "- You found your operating system and processor, and installed R, RStudio and PLINK 2.\n- You downloaded the course project and the encrypted data, and checked them with SHA-256 checksums.\n- The archive reported `Course data are ready: 105 files verified.`\n- The setup check ran PLINK on 20 variants and printed `Preflight passed.`\n- The starting data have 2,016 sample wells and 299,523 variants, which represent 2,000 simulated people.\n- You learned the routine for every step: read, run, compare.\n\n**Next:** Module 1 explains how the array data arise, from a DNA sample to a scanned chip."
 }

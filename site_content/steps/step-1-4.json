@@ -6,7 +6,7 @@
   "anchor": "step-1-4",
   "title": "From sample to scanned chip",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "b1bad8d75756854a24b127c080b1ec93364af4ad91fdfe813c7e006aa5645150",
+  "source_sha256": "380478074dae95f75611738cf52346eb21381b46c7bd7b381b76cdba443e947b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Follow the identity of a sample through a plate and a laboratory well.",

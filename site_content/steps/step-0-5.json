@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Download the course package",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693",
+  "source_sha256": "08b6acc7e92d38813750360f1678295759453cc77a2e64e0470e9eb382e2c121",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Download and extract the whole source project from its GitHub branch. Then get the matching encrypted data archive through the approved course channel. Follow these actions for the project:\n\n1. Open the GitHub page of the course branch that your instructor gives you. GitHub is a website that stores project files. A branch is one line of versions of a project.\n2. Click the green \"Code\" button. Then click \"Download ZIP\".\n3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.\n4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. Do not move single files out of it.\n\nThe GitHub Release (the page that will hold the data archive) does not exist yet. The current archive is a local author test. Its checksums are marked as test values in `config.R`.",

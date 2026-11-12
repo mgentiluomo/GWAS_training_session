@@ -6,7 +6,7 @@
   "anchor": "step-5-7",
   "title": "Cohort PCs and how many to include",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "c914335a2834807036b4871a35fb40d9e3d649afcf640491f429095edb1bd882",
+  "source_sha256": "d206c4ce203c96c1f3327ec3e9fc12e2ba7544b819bca15ee2f97a975f379587",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate new PCs in the retained study cohort, look at the eigenvalues and save the full state.",

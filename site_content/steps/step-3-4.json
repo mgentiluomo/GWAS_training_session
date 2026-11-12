@@ -6,7 +6,7 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "008528f76047a117a73ef4a4407077c00eddf29c91a67abf6256237fab9878c6",
+  "source_sha256": "3f42b1b6337a1f5ea70d4176e50b16722b7dd67705a48c9113f47886057877e0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](../docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.",

@@ -1,3 +1,53 @@
+# Follow-up session, 12 November 2026 (beta column, beginner openings, README)
+
+Branch `course/2026-guided-training`, one commit per item, all pushed.
+
+## What changed
+
+- **Summary statistics.** A new column `beta` (natural log of `odds_ratio`) sits
+  before `standard_error`. The file now has **eleven columns**: chromosome,
+  base_pair_location, variant_id, effect_allele, other_allele,
+  effect_allele_frequency, odds_ratio, beta, standard_error, p_value, n. A missing
+  odds ratio gives `NA`, never a number. The R helpers, the column dictionary, the
+  validation (beta must equal the log of the odds ratio), the synthetic tests, the
+  step 6.8 table and expected result, step 7.8 (intervals now use `beta`) and
+  `docs/data.md` are updated. The file is about 22 MB (it was 17 MB).
+- **Module openings.** The opening paragraph of modules 0 to 7 is rewritten in short
+  sentences without semicolons. The content is the same.
+- **README and setup.** The README shows the guided path (modules 0 to 7) alone. The
+  older 600-sample demonstration moved to `docs/legacy_demo.md`, linked at the end.
+  `docs/setup.md` points to module 0 and keeps the demo setup in a labelled section.
+  No demo file was deleted.
+- **Exports.** The 60 step JSON files, 8 module JSON files and
+  `scripts/run_main_path.R` were regenerated. Most JSON changes are only new source
+  hashes. Step 6.8 has the real content change.
+
+## What ran (Windows 11, R 4.5.2, PLINK 2.0.0-b.1.4)
+
+- Modules 6 and 7 ran in a new external folder,
+  `C:/WEB_site/data_sources/codex_work/beta_rerun_20261112/`, starting from a copy of
+  the step 5.7 state with the old module 6 and 7 outputs removed.
+- `scripts/check_text.py`: 0 errors, 0 warnings.
+  `scripts/tests/test_course_exports.py`: 9 tests passed.
+  `scripts/check_course.R` and `scripts/tests/test_summary_stats.R`: passed.
+
+## Results
+
+- Every expected number is unchanged: 236,815 tests, 8 hits below 5e-8, lambda
+  1.016465, 3 clumps, 15 hits without PCs (lambda 1.546351) and 19 hits without PCs
+  and QC (lambda 1.654731).
+- The new file has 236,815 rows and no missing `beta`. The first row has odds ratio
+  1.03471 and `beta` 0.0341212.
+
+## Not done
+
+- `scripts/run_main_path.R` was regenerated but not run end to end. Modules 6 and 7
+  ran through the notebooks.
+- `test_main_path_recovery.R` and the classroom staging folder were not rerun. The
+  staging folder was built before step 6.8 existed.
+- macOS and Linux were not tested.
+- I copied `plink2.exe` into `bin/` to run the notebooks. The folder is ignored by Git.
+
 # Guided-training session, 12 November 2026 (final report)
 
 This section reports the unattended session that followed the earlier main-path

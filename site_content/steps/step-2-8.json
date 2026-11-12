@@ -6,7 +6,7 @@
   "anchor": "step-2-8",
   "title": "Module 2 checkpoint",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330",
+  "source_sha256": "ca06de8647b20a54aec0b5a0c1de028d66c1c9d97362b5c860d6a9f9599d62e2",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the first complete set of native files that you can restart from. We record its checked size.",

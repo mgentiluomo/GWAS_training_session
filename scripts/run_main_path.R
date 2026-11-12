@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 0cf1cd4affb3be44375daae0dd2db7073e48c039224f08ce1ac468018a0c1693
+# SHA-256: 08b6acc7e92d38813750360f1678295759453cc77a2e64e0470e9eb382e2c121
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -47,7 +47,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: b1bad8d75756854a24b127c080b1ec93364af4ad91fdfe813c7e006aa5645150
+# SHA-256: 380478074dae95f75611738cf52346eb21381b46c7bd7b381b76cdba443e947b
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -100,7 +100,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: dd70115965aca3b140f0c5aba6b62aeef4b125214f0bbeb9c53aee8bdaf9f330
+# SHA-256: ca06de8647b20a54aec0b5a0c1de028d66c1c9d97362b5c860d6a9f9599d62e2
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -201,7 +201,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 008528f76047a117a73ef4a4407077c00eddf29c91a67abf6256237fab9878c6
+# SHA-256: 3f42b1b6337a1f5ea70d4176e50b16722b7dd67705a48c9113f47886057877e0
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -315,7 +315,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: a2bec2a3c47cdbca2238ae2cfdc405588b5554e9e3718d81b97c8e43821f7a60
+# SHA-256: 85cdb8a1bcf1c1687db5607a02fe65ab4bcf4e4e2d15990e69c90ef26bc6516b
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -395,7 +395,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: c914335a2834807036b4871a35fb40d9e3d649afcf640491f429095edb1bd882
+# SHA-256: d206c4ce203c96c1f3327ec3e9fc12e2ba7544b819bca15ee2f97a975f379587
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -513,7 +513,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 2841ba64c1a2230cf762018bd20b09bdd311aeb67ef21f898366f9c00b69aae0
+# SHA-256: f8fbb86db6034a0841406b3b955e760c8000fb1e191f69e75f2596d23fc02bd8
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -635,7 +635,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: d271edfaa1e989b6c938b79ff1fdf7ca70792b1b026ddd0ea3b215e75380a850
+# SHA-256: 6c8daaddedc892a9646dd98e09c0ca762a492c87ba70979dddf4ea132e2848b7
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
@@ -778,9 +778,9 @@ psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "standard_error", "p_value", "n")]
-lead$ci_low <- exp(log(lead$odds_ratio) - 1.96 * lead$standard_error)
-lead$ci_high <- exp(log(lead$odds_ratio) + 1.96 * lead$standard_error)
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
+lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
+lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),

@@ -3,7 +3,7 @@
   "module": 1,
   "title": "from DNA to array data",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "b1bad8d75756854a24b127c080b1ec93364af4ad91fdfe813c7e006aa5645150",
+  "source_sha256": "380478074dae95f75611738cf52346eb21381b46c7bd7b381b76cdba443e947b",
   "overview_markdown": "**What you will do.** You will look at the files that come out of a genotyping laboratory. You will read a table of array sites, a laboratory report and a sample sheet. You will then check the size of the genotype files that the rest of the course uses.\n\n**What you will learn.**\n\n- What a SNP, an allele and a genotype are, and how they differ.\n- How a genotyping array turns fluorescent light into a genotype call.\n- What the Global Screening Array measures, and what it cannot measure.\n- Why one row in a laboratory file is not always one person.\n- Which laboratory problems the quality-control steps of later modules will look for.\n\n**How long it takes.** About 45 minutes. The slowest step is 1.5, because you read a report table and a summary of the scores.",
   "recap_markdown": "- You separated a variant, an allele and a genotype.\n- You saw that the array measures light, and that a calling algorithm turns it into genotypes.\n- The annotation lists 299,523 array entries on chromosomes 1 to 22, X, Y and MT.\n- The laboratory ran 21 plates of 96 wells, which gives 2,016 measurements; 16 wells are technical replicates of the 2,000 simulated people.\n- You checked that the genotype files hold 2,016 samples and 299,523 variants, with no QC applied and no person removed.\n\n**Next:** module 2 converts these files to the PLINK 2 format and checks them."
 }
