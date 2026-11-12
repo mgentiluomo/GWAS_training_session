@@ -24,6 +24,7 @@ chunks. Later errors are often consequences of that first failure.
 | Course download failed its SHA-256 check | Download again. If it still fails, ask the instructor for the approved configuration. Do not bypass the check or replace the expected checksum with the downloaded file's hash. |
 | Classroom data release is not configured | The local stage 1 archive is a test package. Ask the instructor for the approved classroom release configuration. |
 | Destination already exists | Choose a new destination folder. The download helper keeps existing work unchanged. |
+| Windows startup warnings about `C.UTF-8`, or errors reading accented text | Run `source("scripts/preflight.R")`. Inherited locale variables can request a locale unavailable to Windows R. The preflight clears invalid requests for this R session and recovers the Windows user locale. Your system language and settings stay unchanged. |
 
 ## Linux package installation
 

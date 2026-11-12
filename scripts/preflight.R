@@ -1,4 +1,6 @@
 # Run from the project root before class: source("scripts/preflight.R")
+source("R/session_locale.R")
+normalise_course_locale()
 source("R/package_setup.R")
 install_course_packages()
 source("R/course.R")
