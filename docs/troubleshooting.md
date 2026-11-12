@@ -111,16 +111,24 @@ the external program and records its printed command.
 ## Rejoining the class
 
 For the guided 2026 course, `restore_checkpoint("3.2")` means restart step 3.2:
-it restores the last completed step, 3.1. Outputs go into
-`results/course/3.1/` with an `s3-1_` prefix. Existing folders are refused.
+it restores the preceding full checkpoint and applies stored removal lists and
+transformations through 3.1. Indexed outputs have prefixes such as
+`results/course/s3-1_state`. Existing files are refused; choose a new work folder.
 Use `check_step("3.1")` to compare supplied outputs and `where_am_i()` to list
 verified progress. All three helpers accept `data_dir` and `work_dir` for a
 local installation outside the project.
 
-The stage 1 package has complete genotype checkpoints only at 4.6 and 5.6.
+The unchanged stage 1 test ZIP has complete genotype checkpoints only at 4.6 and 5.6.
 Other checkpoint folders contain removal lists; the helpers report these as
 partial references and refuse to use them as restart filesets. Ask the
 instructor for a complete checkpoint when the requested restart is unavailable.
+
+The newly tested notebook outputs use a boundary layout, with complete filesets
+at 2.8, 3.8, 4.6 and 5.7. `checkpoints/index.tsv` records expected counts and
+parent states. Intermediate folders store replay operations rather than another
+full genotype copy. `check_step` verifies counts; at full boundaries it also
+compares SHA-256. Intermediate count agreement is not a byte-level genotype
+comparison. The author must stage this new checkpoint tree for the final release.
 
 1. Keep the failed run and record its first error.
 2. For demo data, regenerate checkpoints by running the preceding notebooks,

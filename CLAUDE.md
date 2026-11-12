@@ -77,7 +77,7 @@ Modules 0 to 7 form the main path; A and B are additional.
 
 - **Step numbers** take the form module.step (for example 3.2). They appear in the heading, the page anchor (`#step-3-2`), output file names (prefix `s3-2_`) and expected results.
 - **Every step uses the same blocks, in this order**: What we do; Why; You need (inputs and the step that made them); Command (R, then the terminal equivalent); Show the expected result (collapsed); If something goes wrong (collapsed); What this check can reveal (QC steps only); Quick check (answer collapsed); Files created.
-- **Restart points**: `checkpoints/<step>/` in the course package holds the correct outputs of every step. "Restart from step 3.2" means copying `checkpoints/3.1/` into the working folder.
+- **Restart points**: full filesets are supplied at 2.8, 3.8, 4.6 and 5.7, with key association and plotting outputs in modules 6 and 7. Intermediate checkpoints contain removal lists, replay operations and expected counts in `checkpoints/index.tsv`. "Restart from step 3.2" means restoring the preceding full checkpoint, applying the stored operations through 3.1 and verifying counts. Reference lists alone never count as a complete restart fileset.
 - **Helpers to add**: `where_am_i()` reports completed steps; `check_step("3.2")` compares the student's files with the expected ones and explains any mismatch in plain words; `download_course_data(password = "...")` downloads, verifies SHA-256, decrypts and extracts the data.
 
 ## Simulated dataset (draft, to be confirmed with the author)

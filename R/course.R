@@ -178,6 +178,9 @@ course_checkpoint_names <- function(files, step, data_dir) {
 }
 
 check_step <- function(step, data_dir = "data/course", work_dir = "results/course", quiet = FALSE) {
+  if (file.exists(file.path(data_dir, "checkpoints", "index.tsv"))) {
+    return(course_index_check(step, data_dir, work_dir, quiet))
+  }
   expected <- course_checkpoint_files(step, data_dir)
   names <- course_checkpoint_names(expected, step, data_dir)
   actual <- file.path(work_dir, step, names)
@@ -206,6 +209,9 @@ check_step <- function(step, data_dir = "data/course", work_dir = "results/cours
 }
 
 restore_checkpoint <- function(step, data_dir = "data/course", work_dir = "results/course") {
+  if (file.exists(file.path(data_dir, "checkpoints", "index.tsv"))) {
+    return(course_index_restore(step, data_dir, work_dir))
+  }
   order <- course_step_order()
   index <- match(step, order)
   if (length(index) != 1L || is.na(index) || index == 1L) stop("Choose the step you want to restart, such as '3.2'.", call. = FALSE)
@@ -235,6 +241,16 @@ restore_checkpoint <- function(step, data_dir = "data/course", work_dir = "resul
 }
 
 where_am_i <- function(data_dir = "data/course", work_dir = "results/course") {
+  if (file.exists(file.path(data_dir, "checkpoints", "index.tsv"))) {
+    index <- read.delim(file.path(data_dir, "checkpoints", "index.tsv"), colClasses = "character")
+    status <- vapply(index$step, function(step) {
+      x <- course_index_check(step, data_dir, work_dir, TRUE)
+      if (isTRUE(attr(x, "complete"))) "complete" else "not verified"
+    }, character(1))
+    result <- data.frame(step = index$step, status = status)
+    print(result, row.names = FALSE)
+    return(invisible(result))
+  }
   folders <- list.dirs(file.path(data_dir, "checkpoints"), recursive = FALSE, full.names = FALSE)
   steps <- intersect(course_step_order(), folders)
   if (!length(steps)) stop("No course checkpoints were found. Download the course data first.", call. = FALSE)
@@ -248,6 +264,96 @@ where_am_i <- function(data_dir = "data/course", work_dir = "results/course") {
   print(result, row.names = FALSE)
   message("Completion is based on supplied checkpoint files, not on saved R objects. Steps without a supplied checkpoint cannot be verified.")
   invisible(result)
+}
+
+course_pgen_counts <- function(prefix) {
+  require_files(paste0(prefix, c(".pgen", ".pvar", ".psam")))
+  psam <- read_ws(paste0(prefix, ".psam"))
+  pvar <- read_ws(paste0(prefix, ".pvar"))
+  c(samples = nrow(psam), variants = nrow(pvar))
+}
+
+course_index <- function(data_dir) {
+  index <- read.delim(file.path(data_dir, "checkpoints", "index.tsv"), colClasses = "character")
+  if (!all(c("step", "kind", "parent", "samples", "variants") %in% names(index)) ||
+      anyDuplicated(index$step) || any(!index$step %in% course_step_order())) stop("Invalid checkpoint index.")
+  index
+}
+
+course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
+  index <- course_index(data_dir)
+  row <- index[index$step == step, , drop = FALSE]
+  if (nrow(row) != 1L) stop("No indexed checkpoint is supplied for that step.")
+  prefix <- file.path(work_dir, paste0("s", sub(".", "-", step, fixed = TRUE), "_state"))
+  status <- "missing"
+  if (all(file.exists(paste0(prefix, c(".pgen", ".pvar", ".psam"))))) {
+    counts <- course_pgen_counts(prefix)
+    status <- if (all(counts == as.numeric(row[c("samples", "variants")]))) "matches counts" else "different counts"
+    if (row$kind == "full" && status == "matches counts") {
+      expected <- file.path(data_dir, "checkpoints", step, "state")
+      for (ext in c(".pgen", ".pvar", ".psam")) {
+        if (digest::digest(paste0(expected, ext), file = TRUE, algo = "sha256") !=
+            digest::digest(paste0(prefix, ext), file = TRUE, algo = "sha256")) status <- "different contents"
+      }
+    }
+  }
+  result <- data.frame(step = step, status = status)
+  attr(result, "complete") <- status == "matches counts"
+  if (!quiet) {
+    print(result, row.names = FALSE)
+    message(if (status == "matches counts") "The expected counts match. Full checkpoints also receive SHA-256 checks." else
+      "Check the inputs, removal lists and command options; keep the current files for diagnosis.")
+  }
+  invisible(result)
+}
+
+course_index_restore <- function(step, data_dir, work_dir) {
+  order <- course_step_order()
+  position <- match(step, order)
+  if (length(position) != 1L || is.na(position) || position <= match("2.2", order)) stop("Choose a restart step after 2.2.")
+  index <- course_index(data_dir)
+  candidates <- match(index$step, order)
+  previous <- index$step[which.max(ifelse(candidates < position, candidates, -Inf))]
+  if (!any(candidates < position)) stop("No earlier checkpoint is available.")
+  cfg <- course_config(".", output_dir = work_dir)
+  build <- function(target, visiting = character()) {
+    if (target %in% visiting) stop("The checkpoint index contains a cycle.")
+    row <- index[index$step == target, , drop = FALSE]
+    if (nrow(row) != 1L) stop("The checkpoint parent is unavailable.")
+    prefix <- file.path(work_dir, paste0("s", sub(".", "-", target, fixed = TRUE), "_state"))
+    if (any(file.exists(paste0(prefix, c(".pgen", ".pvar", ".psam"))))) stop("Checkpoint output already exists. Choose a new work_dir.")
+    if (row$kind == "full") {
+      source <- file.path(data_dir, "checkpoints", target, "state")
+      require_files(paste0(source, c(".pgen", ".pvar", ".psam")))
+      for (ext in c(".pgen", ".pvar", ".psam")) {
+        if (!file.copy(paste0(source, ext), paste0(prefix, ext))) stop("Checkpoint copy failed.")
+      }
+    } else {
+      if (!nzchar(row$parent)) stop("A replay checkpoint needs an earlier full checkpoint.")
+      input <- build(row$parent, c(visiting, target))
+      operations <- read.delim(file.path(data_dir, "checkpoints", target, "operations.tsv"),
+                               colClasses = "character", na.strings = NULL)
+      if (!identical(names(operations), c("option", "value"))) stop("Invalid replay operations.")
+      allowed <- c("--remove", "--exclude", "--flip", "--split-par", "--set-all-var-ids", "--rm-dup")
+      if (any(!operations$option %in% allowed)) stop("Unsupported checkpoint replay operation.")
+      arguments <- character()
+      for (i in seq_len(nrow(operations))) {
+        value <- operations$value[i]
+        if (operations$option[i] %in% c("--remove", "--exclude", "--flip")) {
+          if (grepl("(^|/)\\.\\.(/|$)|^[\\\\/]|:", value)) stop("Unsafe checkpoint list path.")
+          value <- file.path(data_dir, "checkpoints", target, value)
+          require_files(value)
+        }
+        arguments <- c(arguments, operations$option[i], value)
+      }
+      run_plink(cfg, c("--pfile", input, arguments, "--make-pgen", "--out", prefix), paste0(prefix, ".pgen"))
+    }
+    if (!all(course_pgen_counts(prefix) == as.numeric(row[c("samples", "variants")]))) stop("Restored checkpoint counts do not match. Keep the logs and ask the instructor.")
+    prefix
+  }
+  prefix <- build(previous)
+  message("Restored ", previous, " from its full checkpoint and stored operations. Restart at ", step, ".")
+  invisible(prefix)
 }
 
 course_config <- function(root = ".", data_dir = NULL, output_dir = NULL) {

@@ -33,3 +33,18 @@ throwaway value. It must not become the classroom release.
 The package includes the small GRCh37 exercise. Historical full-size `DB_A` and
 `DB_1000G` inputs are absent from the authorised student folder and are not added.
 The final array naming, data version and public distribution remain author decisions.
+
+## Main-path checkpoint layout
+
+The classroom package will use full genotype filesets at 2.8, 3.8, 4.6 and 5.7,
+and key analysis outputs at modules 6 and 7. Each full checkpoint has
+`state.pgen`, `state.pvar` and `state.psam`. Intermediate folders contain only
+their removal lists and `operations.tsv` (`option`, `value`). The central
+`checkpoints/index.tsv` records `step`, `kind`, `parent`, `samples`, `variants`.
+Replay supports sample/variant removal, strand flips, PAR splitting and ID changes.
+Diagnostic steps with no genotype change reuse the preceding state.
+
+The notebooks create this structure in the external working folder. The author
+must stage the verified checkpoint tree with the student inputs before building
+the final release. The old local stage 1 ZIP is unchanged and does not yet have
+this layout. Never derive a new release checksum from the old configuration.
