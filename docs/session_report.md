@@ -71,3 +71,11 @@ modules and unresolved checks will be recorded below before the final push.
   All main-scan FIRTH flags were N; a separate low-frequency retained autosomal
   site was deliberately analysed with forced Firth for teaching. A manifest
   protects the 6.7 analysis checkpoint.
+
+- Module 7: Windows execution produced Manhattan, QQ, common-scale QQ comparison
+  and L2 regional plots, three LD clumps, effect-allele lead tables and a final
+  Markdown summary. Final cohort: 900 cases and 911 controls. The no-PC and
+  no-sample/variant-QC contrasts reproduced 15 and 19 significant variants and
+  lambda approximately 1.546 and 1.655. All main plots were visually inspected;
+  the regional legend was changed to ASCII ranges for Windows font portability,
+  and the comparison plots now share a vertical scale.

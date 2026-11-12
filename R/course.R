@@ -691,11 +691,12 @@ lambda_gc <- function(p) {
   median(qchisq(p, df = 1, lower.tail = FALSE)) / qchisq(0.5, df = 1)
 }
 
-plot_qq <- function(p, title = "QQ plot") {
+plot_qq <- function(p, title = "QQ plot", xlim = NULL, ylim = NULL) {
   p <- sort(p[valid_p(p)])
   if (!length(p)) stop("No finite p-values in (0,1]. Inspect ERRCODE.")
   plot(-log10(ppoints(length(p))), -log10(p), pch = 16, cex = 0.5,
-       xlab = "Expected -log10(p)", ylab = "Observed -log10(p)", main = title)
+       xlab = "Expected -log10(p)", ylab = "Observed -log10(p)", main = title,
+       xlim = xlim, ylim = ylim)
   abline(0, 1, col = "#B45309", lty = 2)
   legend("topleft", legend = paste("lambda GC =", round(lambda_gc(p), 3)), bty = "n")
 }
@@ -713,7 +714,7 @@ plot_manhattan <- function(x, title = "Manhattan plot") {
        col = c("#174A67", "#A34B18")[1 + match(x$CHROM, chrs) %% 2],
        xlab = "Chromosome", ylab = "-log10(p)", main = title,
        ylim = c(0, max(8, -log10(x$P))))
-  axis(1, at = centers, labels = chrs)
+  axis(1, at = centers, labels = chrs, las = 2, cex.axis = 0.8, gap.axis = 0)
   abline(h = -log10(5e-8), col = "#B91C1C", lty = 2)
   legend("topright", "Conventional GWAS threshold: 5e-8", lty = 2, col = "#B91C1C", bty = "n", cex = 0.8)
 }
