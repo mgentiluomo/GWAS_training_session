@@ -17,7 +17,7 @@ The course is an independent teaching resource for students across University of
 ## Where everything lives
 
 - The course lives only on manuelgentiluomo.it and in this GitHub repository.
-- External links are allowed only to: literature (prefer DOIs), data repositories we use, official sites and manuals of software we use. Never link to other courses, tutorials or guides, including the tutorial sections of software sites.
+- External links may point to PubMed or DOI records; official vendor documentation (including Illumina, Thermo Fisher, Roche, Oxford Nanopore and PacBio); official format specifications (including GA4GH hts-specs, PLINK and BGEN); and data resources (including UK Biobank, All of Us, dbGaP and GWAS Catalog). Official software manuals are also allowed. Links to other courses and tutorials stay forbidden, including tutorial sections of official sites.
 - All theory needed (p-values, multiple testing, power, LD, population structure, mixed models, inflation) is written in the course or its glossary.
 
 ## Website destination
@@ -30,7 +30,7 @@ The course is an independent teaching resource for students across University of
 
 ## Repository state (November 2026)
 
-- The repository was recreated with a clean history. No data files exist in any commit. Keep it that way.
+- The repository was recreated without course data in Git. The only data-file exception is tiny invented teaching examples in `examples/formats/`, as defined below. Never commit real or simulated classroom datasets.
 - `main` still holds the original 2025 course. It is archived in the tag `2025-original`. Link to that tag, never to `main`, when referring to 2025 material.
 - The GitHub default branch is `course/2026-guided-training`. Both Code > Download ZIP from the repository home and a plain `git clone` give the guided 2026 course. No branch change is needed. Work happens on this branch. `01_Codes/` has been removed from it.
 - Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Classroom data are available as encrypted GitHub Release assets under `data-2026.1`. No data files are stored in Git.
@@ -115,9 +115,18 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 - One small change at a time. Never bundle unrelated changes.
 - Before editing, describe the change and show what will differ. Wait for approval, then edit.
 - Confirm each step before starting the next.
-- Never add data files (genotypes, phenotypes, covariates, `.RData`, `.Rhistory`, ZIP packages) to the repository.
+- Never add data files (genotypes, phenotypes, covariates, `.RData`, `.Rhistory`, ZIP packages) to the repository, except the invented format examples defined below.
 - Use only read-only git commands unless the author approves a specific command: no `git stash`, `checkout`, `reset`, `restore`, `clean`, history rewriting or force push.
 - After code changes, run the relevant checks (`scripts/check_course.R`, notebook execution) and report what ran, on which operating system, and the result. Results on Windows are especially valuable: earlier validation ran only on Linux.
+
+## Invented format examples
+
+- Tiny teaching examples are allowed only in `examples/formats/`. They describe no real individuals. Their combined size must stay below 100,000 bytes.
+- Generate them with `scripts/author/make_format_examples.py`. Generation is reproducible and uses no network access.
+- Every file is labelled "invented example". Use a format-native comment or description where supported. Binary formats and strict index tables cannot accept arbitrary comments. Their file names and accompanying JSON carry the label instead. Never corrupt a format to insert a label.
+- The exporter may copy these exact examples to `site_content/formats/examples/` for website delivery. This is a generated mirror, not a second data source. JSON descriptions live in `site_content/formats/`.
+- Do not invent vendor binary files. Describe IDAT, GTC, CEL, BAM, CRAM and POD5 without creating example binaries.
+- All other data files remain forbidden in Git. Passwords are always forbidden.
 
 ## Open decisions
 
