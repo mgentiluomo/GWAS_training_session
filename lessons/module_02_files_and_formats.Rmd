@@ -9,10 +9,9 @@ output:
     theme: readable
 ---
 
-Work from the project root. Read each step before running its R chunk. All data
-are simulated; these exercises cannot establish a finding about a real disease.
-See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
-loads its inputs from disk; a saved R workspace is not required.
+Work from the project root (the main course folder). Read each step before you run its R code. All data are simulated. These exercises cannot show a real finding about a real disease.
+
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module loads its inputs from disk, so you do not need a saved R workspace.
 
 ```{r module2_setup, include=FALSE}
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -22,19 +21,35 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+## Module 2 at a glance {#module-2-overview}
+
+**What you will do.** You will check the files that the laboratory sent. You will convert them to the format of [PLINK 2](../docs/glossary.md#plink-2), the free program used throughout this course. Then you will correct [strand](../docs/glossary.md#strand) differences, add disease and age information, and save a first [checkpoint](../docs/glossary.md#checkpoint).
+
+**What you will learn.**
+
+- What the [genotype](../docs/glossary.md#genotype) files contain and why they must stay together.
+- How to measure [missingness](../docs/glossary.md#missingness), the share of genotypes that could not be read.
+- Why some variants cannot be oriented to a strand.
+- What a [genome build](../docs/glossary.md#genome-build) is and why GRCh37 and GRCh38 must not be mixed.
+- How to join disease and age to the right person.
+
+**How long it takes.** About 60 minutes. Steps 2.5 and 2.6 take the longest, because they introduce new ideas.
+
 ## 2.1 The starting files {#step-2-1}
 
 ### What we do
 
-Identify the complete laboratory export and keep an immutable input copy.
+We identify the complete set of files exported by the laboratory. We keep these input files unchanged.
 
 ### Why
 
-A binary genotype matrix is interpreted using its variant and sample files. Matching counts alone cannot detect reordered identities. The simulated initial data include low-quality wells and variants deliberately retained for QC; they are starting inputs, not an already cleaned analysis cohort.
+A genotype file in [binary format](../docs/glossary.md#bed-bim-fam) is a compact table that people cannot read directly. Two other files explain it: one describes the [variants](../docs/glossary.md#variant) (the positions on the DNA that were tested) and one describes the samples. If these files do not match, the genotypes are assigned to the wrong people or positions. Equal counts are not enough, because the same rows could be in a different order.
+
+The simulated data contain some low-quality [wells](../docs/glossary.md#well) and some low-quality variants. A well is one spot on a laboratory plate, and it holds one DNA sample. We keep the poor ones on purpose, so that you can find them during [quality control](../docs/glossary.md#quality-control) (QC), the checking of data quality. These are starting files, not a cleaned cohort.
 
 ### You need
 
-Module 0 passed; the module 1 export inspection.
+You need module 0 completed and the export inspection from module 1.
 
 ### Command
 
@@ -45,13 +60,13 @@ head(read_fam(cfg$input))
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R code above is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-2,016 sample wells and 299,523 variant entries before QC. Each well has its own FID/IID pair.
+You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -60,17 +75,17 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Why must the FAM stay with the BED and BIM?
+Why must the FAM file stay together with the BED and BIM files?
 
 <details><summary>Show the answer</summary>
 
-It gives the sample identities and ordering used to decode the matrix.
+The FAM file gives the sample identities and their order. PLINK needs this information to decode the genotype matrix.
 
 </details>
 
@@ -82,15 +97,15 @@ None.
 
 ### What we do
 
-Convert the matched BED/BIM/FAM export to PGEN/PVAR/PSAM.
+We convert the matched BED, BIM and FAM files to PGEN, PVAR and PSAM files.
 
 ### Why
 
-PGEN stores genotypes, PVAR describes sites and PSAM describes samples. These are PLINK 2 native files. BED/BIM/FAM remain useful for older tools, but neither format determines the genome build. Binary conversion must preserve sample and variant identity and order.
+PGEN stores the genotypes. PVAR describes the variants (the sites). PSAM describes the samples. These three files are the [native format](../docs/glossary.md#pgen-pvar-psam) of PLINK 2. The BED, BIM and FAM files stay useful for older programs. Neither format records the genome build. The conversion must keep the same samples and variants in the same order.
 
 ### You need
 
-The original matched files checked at 2.1.
+You need the original matched files that you checked at 2.1.
 
 ### Command
 
@@ -107,11 +122,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048
 ```
 
-`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
+`--bfile` takes the shared file-name prefix of the BED, BIM and FAM files. `--make-pgen` writes a new set of native files. `--out` sets the prefix (the first part) of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB (about 2 GB). The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
-2,016 samples and 299,523 variants are preserved. An imported BED does not establish the genomic reference allele: PLINK can mark REF as provisional.
+The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](../docs/glossary.md#reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -120,7 +135,7 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
@@ -130,27 +145,29 @@ Does converting BED to PGEN automatically convert GRCh37 coordinates to GRCh38?
 
 <details><summary>Show the answer</summary>
 
-No. Storage format and genome assembly are separate properties.
+No. The storage format and the genome assembly are two separate properties.
 
 </details>
 
 ### Files created
 
-`s2-2_state.pgen/.pvar/.psam`, command and console logs under the output folder.
+`s2-2_state.pgen/.pvar/.psam`, and the command and console logs in the output folder.
 
 ## 2.3 Sample and variant tables {#step-2-3}
 
 ### What we do
 
-Read the sample and variant descriptions without altering them.
+We read the sample table and the variant table. We do not change them.
 
 ### Why
 
-FID and IID are text identifiers, not row numbers. Preserve leading zeros and join by identifiers. PVAR columns include chromosome, position, site ID and alleles. An rs identifier can be shared across resources while their coordinates use different assemblies; an Illumina name may identify an array assay rather than a unique genomic site.
+FID and IID are text identifiers, not row numbers. Keep any leading zeros, such as in 007. Always join tables by these identifiers.
+
+The variant table (PVAR) has columns for the chromosome, the position, the site ID and the alleles. An [rs identifier](../docs/glossary.md#rs-identifier) can be shared by several resources, even when each resource uses a different genome assembly (a full reference sequence of the genome) for the coordinates. An Illumina name may name an array assay (one test on the chip) and not a unique place in the genome.
 
 ### You need
 
-The native fileset from 2.2.
+You need the native files from 2.2.
 
 ### Command
 
@@ -164,13 +181,13 @@ check_ids(samples, "Laboratory samples")
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R code above is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-A PSAM with 2,016 rows and PVAR with 299,523 rows. Distinct assay IDs do not rule out duplicated genomic sites.
+The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -179,17 +196,17 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Should two tables be joined by their row number if their lengths match?
+Should you join two tables by row number when they have the same length?
 
 <details><summary>Show the answer</summary>
 
-No. Match the explicit FID/IID or site identifier and check that every required record matched.
+No. Match the FID/IID pair or the site identifier. Then check that every required record found its match.
 
 </details>
 
@@ -201,15 +218,17 @@ None.
 
 ### What we do
 
-Measure missingness before deciding which samples or sites to remove.
+We measure how much data is missing, before we decide which samples or sites to remove.
 
 ### Why
 
-Call rate is the fraction of eligible genotypes that are observed; missingness is one minus call rate. A sample report asks whether a well has many no-calls. A variant report asks whether a site fails across many wells. Examine both because these represent different possible failures.
+The [call rate](../docs/glossary.md#call-rate) is the fraction of genotypes that were observed. Missingness is one minus the call rate. A missing genotype is also called a no-call.
+
+A sample report asks whether a well has many no-calls. A variant report asks whether a site fails in many wells. We look at both, because they point to different problems.
 
 ### You need
 
-The fileset from 2.2.
+You need the native files from 2.2.
 
 ### Command
 
@@ -228,11 +247,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048
 ```
 
-`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
+`--pfile` reads a set of native files by their shared prefix. `--missing` writes one report for samples and one for variants, and it removes nothing. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
-A sample report and a variant report; some observations are much worse than the main distribution. No samples or variants are removed at this step.
+You get a sample report and a variant report. Some values are much worse than the main group. No samples and no variants are removed at this step.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -241,13 +260,13 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-A poorly performing well, failed probes or groups of affected samples. A threshold is a decision rule, not a diagnosis of the underlying cause.
+It can reveal a well that performed badly, probes (the DNA pieces on the chip that detect a variant) that failed, or groups of affected samples. A threshold is a rule for deciding. It does not tell you the cause of the problem.
 
 ### Quick check
 
@@ -261,21 +280,25 @@ If F_MISS is 0.03, what is the call rate?
 
 ### Files created
 
-`s2-4_missing.smiss`, `.vmiss` and logs.
+`s2-4_missing.smiss`, `.vmiss` and the logs.
 
 ## 2.5 Alleles and strand {#step-2-5}
 
 ### What we do
 
-Compare laboratory allele pairs with the supplied plus-strand annotation; flip complementary pairs and remove ambiguous or incompatible sites.
+We compare the allele pairs from the laboratory with the supplied plus-strand annotation. We flip the pairs that are complementary. We remove the sites that are ambiguous or incompatible.
 
 ### Why
 
-The complementary bases are A-T and C-G. An A/C site on one strand is T/G on the other. Palindromic A/T and C/G sites have the same pair after a strand flip, so the pair alone cannot establish orientation. This course excludes them rather than guessing from frequency. Allele order is not strand: A/G and G/A contain the same pair.
+An [allele](../docs/glossary.md#allele) is one of the versions of a variant, written as a base: A, C, G or T. DNA has two strands, and the bases pair up in a fixed way: A with T, and C with G. An A/C site on one strand reads T/G on the other strand.
+
+Some sites are [palindromic](../docs/glossary.md#palindromic-snp): A/T and C/G. After a strand flip, they show the same pair as before. So the pair alone cannot tell us the orientation. This course removes these sites instead of guessing from allele frequency.
+
+Allele order is not strand. A/G and G/A contain the same pair.
 
 ### You need
 
-The BIM from 2.1, annotation from 1.1 and PGEN from 2.2.
+You need the BIM file from 2.1, the annotation from 1.1 and the PGEN files from 2.2.
 
 ### Command
 
@@ -308,11 +331,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-2_state --flip results/guided/s2-5_flip.txt --exclude results/guided/s2-5_exclude.txt --make-pgen --out results/guided/s2-5_state --threads 2 --memory 2048
 ```
 
-`--flip` complements bases at listed IDs; it is not an effect-allele swap. `--exclude` removes listed IDs; `--make-pgen` saves the corrected copy. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
+`--flip` replaces each base by its complement at the listed IDs. It does not swap the effect allele. `--exclude` removes the listed IDs; `--make-pgen` saves the corrected copy. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
-400 sites flipped and 3,013 sites excluded; 2,016 samples and 296,510 variants remain. Planted categories overlap, so their nominal counts must not be blindly added.
+400 sites are flipped and 3,013 sites are excluded. 2,016 samples and 296,510 variants remain. The planted problem categories overlap, so do not simply add their nominal counts.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -321,13 +344,13 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Strand differences, palindromic sites and incompatible alleles. Agreement with this annotation does not independently validate the physical genome reference sequence.
+It can reveal strand differences, palindromic sites and incompatible alleles. Agreement with this annotation does not prove that the genome reference sequence itself is correct.
 
 ### Quick check
 
@@ -335,27 +358,31 @@ Can A/T versus T/A tell you whether the strand is correct?
 
 <details><summary>Show the answer</summary>
 
-No. It is palindromic; strand orientation cannot be resolved from that pair alone.
+No. The pair is palindromic, so the strand cannot be found from the pair alone.
 
 </details>
 
 ### Files created
 
-Flip/exclusion lists and `s2-5_state.pgen/.pvar/.psam`.
+The flip and exclusion lists, and `s2-5_state.pgen/.pvar/.psam`.
 
 ## 2.6 Genome builds and lift-over {#step-2-6}
 
 ### What we do
 
-Convert the separate GRCh37 exercise to GRCh38 with a direction-specific chain in R; keep it separate from the main analysis.
+We convert the separate GRCh37 exercise to GRCh38 in R. We use a chain file for this one direction. We keep the exercise apart from the main analysis.
 
 ### Why
 
-GRCh37 and GRCh38 are different reference assemblies. A coordinate means a chromosome and position in a specified assembly. Renaming the build label or changing an rsID does not transform coordinates. A chain records aligned genome intervals; lift-over can leave sites unmapped, change chromosome or reverse strand. UCSC intervals are zero-based half-open, whereas course positions are one-based. Review unmapped and reverse-strand sites instead of accepting an undocumented conversion.
+GRCh37 and GRCh38 are two different reference assemblies of the human genome. A coordinate is a chromosome and a position in one named assembly. Changing the build label or the rsID does not change the coordinates.
+
+A [lift-over](../docs/glossary.md#lift-over) converts coordinates from one assembly to the other. It uses a [chain file](../docs/glossary.md#chain-file), which records which intervals of the two genomes are aligned. After a lift-over, a site can be unmapped (it has no match), it can move to another chromosome, or it can map to the reverse strand.
+
+UCSC intervals are zero-based and half-open, which means they start counting at 0 and exclude the end point. The course positions are one-based, which means they start counting at 1. Review the unmapped sites and the reverse-strand sites. Do not accept a conversion that nobody documented.
 
 ### You need
 
-The small GRCh37 exercise supplied at 0.5 and the official hg19-to-hg38 chain. The final course package must include the chain under grch37_exercise/. Author validation may set COURSE_CHAIN_FILE to the existing local chain. The main array is already GRCh38 and is not lifted again.
+You need the small GRCh37 exercise supplied at 0.5. You also need the official hg19-to-hg38 chain file. The final course package must include the chain file under grch37_exercise/. Authors may set COURSE_CHAIN_FILE to a chain file that already exists on their computer. The main array is already GRCh38, so we do not lift it again.
 
 ### Command
 
@@ -386,11 +413,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-`--extract` retains the successfully mapped IDs; `--update-map` reads ID and new position from two columns. If the R calculation finds reverse-strand mappings, add `--flip` with the generated reverse list. The exercise retains same-chromosome mappings only and reports exclusions. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
+`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. If R finds reverse-strand mappings, add `--flip` with the reverse list that R generates. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
-10,000 exercise sites are inspected; 9,970 map to the same chromosome and eight of these reverse strand in this chain. The resulting exercise variants are not position-sorted; sort explicitly before an operation that requires sorted input. Mapped positions sharing an identifier with the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. General lift-over can lose sites, so record the reported mapping counts.
+The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -399,13 +426,13 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Build mismatches, gaps and reverse mappings. A chain is not an allele-validation or genotype-imputation tool.
+It can reveal build mismatches, gaps and reverse mappings. A chain file does not check alleles and does not impute genotypes.
 
 ### Quick check
 
@@ -413,27 +440,33 @@ Does a successful position lift-over guarantee that REF and ALT now match the de
 
 <details><summary>Show the answer</summary>
 
-No. Alleles and reverse-strand mappings still require checking.
+No. You must still check the alleles and the reverse-strand mappings.
 
 </details>
 
 ### Files created
 
-`s2-6_update_map.tsv`, mapped/reverse lists and the separate `s2-6_grch38` fileset.
+`s2-6_update_map.tsv`, the mapped and reverse lists, and the separate `s2-6_grch38` files.
 
 ## 2.7 Add phenotype and covariates {#step-2-7}
 
 ### What we do
 
-Join metadata by well identity, resolving labelled technical replicates to their original person.
+We join the extra information to each well by its identity. A well that holds a labelled technical replicate gets the information of the original person.
 
 ### Why
 
-The phenotype is the outcome being studied. Here Disease is 1 for controls and 2 for cases. Age is a covariate, a measured predictor used to account for other influences in the model. Recorded sex is supplied for the sex check, not inferred from row order. A technical replicate inherits its original person's metadata but remains a distinct measured well until duplicate review.
+The [phenotype](../docs/glossary.md#phenotype) is the outcome that we study. Here the variable Disease is 1 for controls and 2 for cases. A case is a person with the disease and a control is a person without it.
+
+Age is a [covariate](../docs/glossary.md#covariate). A covariate is a measured variable that the model uses to account for other influences.
+
+Recorded sex is supplied for the sex check. We never guess it from the row order.
+
+A [technical replicate](../docs/glossary.md#technical-replicate) is the same person measured in a second well. It inherits the information of the original person. It stays a separate well until the duplicate review.
 
 ### You need
 
-The corrected fileset from 2.5, sample sheet and phenotype table from 0.5.
+You need the corrected files from 2.5, and the sample sheet and phenotype table from 0.5.
 
 ### Command
 
@@ -456,11 +489,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048
 ```
 
-`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
+`--update-sex` loads the recorded sex of each sample by its ID; `--pheno` selects the phenotype table; `--pheno-name Disease` names the yes-or-no outcome to use. `--make-pgen` stores the joined phenotype in the PSAM file. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
-All 2,016 wells matched; 296,510 variants remain. There are 2,000 people before removal of low-quality wells, relatives and ancestry outliers.
+All 2,016 wells are matched, and 296,510 variants remain. There are 2,000 people before we remove low-quality wells, relatives and ancestry outliers.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -469,37 +502,37 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Why must labelled replicate wells be joined to their original person before phenotype assignment?
+Why must you join labelled replicate wells to their original person before you assign the phenotype?
 
 <details><summary>Show the answer</summary>
 
-The phenotype describes the person, while the export rows describe measured wells.
+The phenotype describes the person. The rows of the export describe measured wells.
 
 </details>
 
 ### Files created
 
-`s2-7_phenotypes.tsv` and native `s2-7_state` files.
+`s2-7_phenotypes.tsv` and the native `s2-7_state` files.
 
 ## 2.8 Module 2 checkpoint {#step-2-8}
 
 ### What we do
 
-Save the first complete native restart fileset and record its verified dimensions.
+We save the first complete set of native files that you can restart from. We record its checked size.
 
 ### Why
 
-A module boundary gives a stable recovery point. Subsequent intermediate filters can be replayed from this full copy without distributing every large matrix. Checkpoints are analysis states, not evidence of independent replication.
+The end of a module is a stable point to return to. A checkpoint is a saved copy of the analysis at one moment. Later filters can be replayed from this full copy, so we do not need to distribute every large file. A checkpoint is not evidence that anyone replicated the result.
 
 ### You need
 
-The joined fileset from 2.7.
+You need the joined files from 2.7.
 
 ### Command
 
@@ -510,13 +543,13 @@ check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+Not applicable: this step needs no PLINK command. The R code above is the complete command.
 
-R reads or calculates the displayed values without changing the genotype files.
+R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-A full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches its checkpoint counts and SHA-256 checks.
+You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches the counts and the [SHA-256](../docs/glossary.md#sha-256) checks of its checkpoint. A SHA-256 check compares a short fingerprint of a file, to prove that the file has not changed.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.
@@ -525,20 +558,31 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Which boundary should be used before replaying the early sample QC filters?
+Which boundary should you use before you replay the early sample QC filters?
 
 <details><summary>Show the answer</summary>
 
-The completed module 2 checkpoint at 2.8.
+Use the completed module 2 checkpoint at 2.8.
 
 </details>
 
 ### Files created
 
 `s2-8_state.*`, `checkpoints/2.8/state.*`, `checkpoints/index.tsv` and `step_counts.tsv`.
+
+## Module 2 recap {#module-2-recap}
+
+- You checked that the laboratory export has 2,016 sample wells and 299,523 variant entries.
+- You converted the BED, BIM and FAM files to PGEN, PVAR and PSAM without losing any sample or variant.
+- You measured missingness for samples and for variants, and removed nothing yet.
+- You flipped 400 sites and excluded 3,013 sites, leaving 296,510 variants.
+- You lifted a 10,000-site GRCh37 exercise to GRCh38: 9,970 sites stayed on the same chromosome, and eight mapped to the reverse strand.
+- You added Disease, age and recorded sex to the 2,016 wells and saved the 2.8 checkpoint.
+
+**Next:** module 3 cleans the samples: low call rate, sex check, heterozygosity, relatives, duplicates and batch effects.
