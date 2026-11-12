@@ -50,7 +50,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048
 ```
 
-`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -119,7 +119,7 @@ bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided
 bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048
 ```
 
-`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -182,7 +182,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048
 ```
 
-`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -257,7 +257,7 @@ bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls
 bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
 ```
 
-`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -341,7 +341,7 @@ bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclu
 bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048
 ```
 
-`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.
+`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 

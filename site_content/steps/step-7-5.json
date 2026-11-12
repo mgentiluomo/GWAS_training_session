@@ -6,13 +6,13 @@
   "anchor": "step-7-5",
   "title": "Clump correlated results",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "1049e15aee3ffe78bfd13b7489371278b381089bffd7f6d289e276d8f2c4b53a",
+  "source_sha256": "a494ef8489e2a7af36ef71d264e9382eb651f4d3e2075207a78e02ec1f6fd9bb",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Group correlated significant variants around index variants using study-cohort LD.",
     "why": "Clumping starts with the smallest p-value, assigns nearby correlated variants, and continues greedily. It describes approximately independent regions under chosen radius and LD settings. It is not fine-mapping, causal inference or proof of one causal effect per clump. Use LD from the analysed cohort rather than an unmatched external population.",
     "you_need": "The full 5.7 genotype set and unaltered PLINK association report from 6.4.",
-    "command": "```{r s7-5}\nreport <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper.",
+    "command": "```{r s7-5}\nreport <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` names the variant ID column. `--clump-p-field P` names the p-value column. `--clump-p1 5e-8` sets index eligibility. `--clump-p2 1e-5` sets the secondary-report threshold. `--clump-r2 0.1` sets the squared-correlation threshold. `--clump-kb 250` sets the distance limit in kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--pfile` reads the native genotype fileset. `--out` names the report. `--threads 2` limits worker threads. `--memory 2048` sets the main workspace budget in MiB.",
     "expected_result": "Three clumps describing the strong chromosome 3, 9 and 12 regions. Their index IDs and p-values are reported; this does not establish three causal variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "If the LD threshold or radius changes, can the clump membership change even though the association scan is identical?\n\n<details><summary>Show the answer</summary>\n\nYes. Clump membership is conditional on those settings and the LD sample.\n\n</details>",
@@ -35,51 +35,51 @@
     "options": [
       {
         "name": "--clump",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump` reads the association report."
       },
       {
         "name": "--clump-id-field",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-id-field ID` names the variant ID column."
       },
       {
         "name": "--clump-kb",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-kb 250` sets the distance limit in kilobases."
       },
       {
         "name": "--clump-p-field",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-p-field P` names the p-value column."
       },
       {
         "name": "--clump-p1",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-p1 5e-8` sets index eligibility."
       },
       {
         "name": "--clump-p2",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-p2 1e-5` sets the secondary-report threshold."
       },
       {
         "name": "--clump-r2",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-r2 0.1` sets the squared-correlation threshold."
       },
       {
         "name": "--clump-unphased",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--clump-unphased` uses squared dosage correlation, making its LD definition explicit."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--memory 2048` sets the main workspace budget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper."
+        "explanation_markdown": "`--out` names the report."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--pfile` reads the native genotype fileset."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

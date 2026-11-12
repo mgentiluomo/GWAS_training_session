@@ -6,7 +6,7 @@
   "anchor": "step-6-5",
   "title": "Read association output",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "a362bfeba80fbdf4acfabbc1919df3032efef1069d87c97512342cfe630ea528",
+  "source_sha256": "7be3c133dc4ea1057f40b34ba12225a659412388f057af5ed2a2f2622127a8ec",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Identify effect allele, sample count, uncertainty, test type and fitting status.",

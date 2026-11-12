@@ -43,6 +43,24 @@ class CourseExportsTests(unittest.TestCase):
             self.assertEqual(flags, {option["name"] for option in record["plink"]["options"]})
             self.assertTrue(all(option["explanation_markdown"] for option in record["plink"]["options"]))
 
+    def test_option_explanations_are_clauses_and_references_are_local(self):
+        text = "`--geno 0.02` filters sites; `--mind 0.02` filters samples. R plots counts."
+        self.assertEqual(exports.flag_explanation("--geno", text), "`--geno 0.02` filters sites")
+        self.assertEqual(exports.flag_explanation("--mind", text), "`--mind 0.02` filters samples.")
+        self.assertIsNone(exports.flag_explanation("--out", "`--out` has the meanings given at 3.1."))
+        by_id = {r["id"]: r for r in self.records}
+        references = []
+        for record in self.records:
+            for option in record["plink"]["options"]:
+                if "explained_at" in option:
+                    origin = by_id[option["explained_at"]]
+                    self.assertEqual(origin["module"], record["module"])
+                    self.assertLess(origin["step"], record["step"])
+                    self.assertEqual(exports.flag_explanation(option["name"], origin["blocks"]["command"]),
+                                     option["explanation_markdown"])
+                    references.append(option)
+        self.assertTrue(references)
+
     def test_required_blocks_and_figure_prompts(self):
         for record in self.records:
             self.assertTrue(record["r_commands"])

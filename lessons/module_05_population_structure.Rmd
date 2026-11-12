@@ -242,7 +242,7 @@ bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/g
 bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048
 ```
 
-`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1 to PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1 to PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -387,7 +387,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
 ```
 
-R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -461,7 +461,7 @@ bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed
 bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
 ```
 
-`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+`--maf 0.05` selects common sites for pruning. `--chr 1-22` selects autosomal sites; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 

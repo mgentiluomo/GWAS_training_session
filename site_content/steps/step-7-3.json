@@ -6,7 +6,7 @@
   "anchor": "step-7-3",
   "title": "Manhattan plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "1049e15aee3ffe78bfd13b7489371278b381089bffd7f6d289e276d8f2c4b53a",
+  "source_sha256": "a494ef8489e2a7af36ef71d264e9382eb651f4d3e2075207a78e02ec1f6fd9bb",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Plot association evidence along the autosomal genome.",

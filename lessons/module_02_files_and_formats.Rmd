@@ -107,7 +107,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048
 ```
 
-`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.
+`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
@@ -228,7 +228,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048
 ```
 
-`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.
+`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
@@ -308,7 +308,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-2_state --flip results/guided/s2-5_flip.txt --exclude results/guided/s2-5_exclude.txt --make-pgen --out results/guided/s2-5_state --threads 2 --memory 2048
 ```
 
-`--flip` complements bases at listed IDs; it is not an effect-allele swap. `--exclude` removes listed IDs; `--make-pgen` saves the corrected copy. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.
+`--flip` complements bases at listed IDs; it is not an effect-allele swap. `--exclude` removes listed IDs; `--make-pgen` saves the corrected copy. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
@@ -386,7 +386,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-`--extract` retains the successfully mapped IDs; `--update-map` reads ID and new position from two columns. If the R calculation finds reverse-strand mappings, add `--flip` with the generated reverse list. The exercise retains same-chromosome mappings only and reports exclusions. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.
+`--extract` retains the successfully mapped IDs; `--update-map` reads ID and new position from two columns. If the R calculation finds reverse-strand mappings, add `--flip` with the generated reverse list. The exercise retains same-chromosome mappings only and reports exclusions. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 
@@ -456,7 +456,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048
 ```
 
-`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.
+`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 

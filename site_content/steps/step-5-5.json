@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "6b9efdadd370f938728e9227191c5549fee91d7232f25f4980570cb0474b3758",
+  "source_sha256": "b6782a845ba573cd44ccbba19247b7028df855a220a4ef7ab626dc3734f26a19",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Visualise the first two reference axes, with labels and symbols for reference groups.",

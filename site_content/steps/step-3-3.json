@@ -6,13 +6,13 @@
   "anchor": "step-3-3",
   "title": "Recorded and genetic sex",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
+  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Move pseudo-autosomal regions out of non-PAR X, compare recorded sex with X/Y patterns and review discordant wells.",
     "why": "Pseudo-autosomal regions (PARs) occur on both X and Y and can recombine. Their diploid behaviour must not be treated as ordinary male non-PAR X. PLINK's X inbreeding coefficient and Y call counts can reveal discordance. A flagged result may reflect a swap, unusual karyotype, poor calls or incomplete metadata; it is not a clinical diagnosis. This simulation removes the flagged wells for the main teaching analysis.",
     "you_need": "State 3.2 and recorded sex joined at 2.7.",
-    "command": "```{r s3-3}\nsplit <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-2_state --split-par b38 --make-pgen --out results/guided/s3-3_par --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/guided/s3-3_sexcheck --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048\n```\n\n`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "command": "```{r s3-3}\nsplit <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-2_state --split-par b38 --make-pgen --out results/guided/s3-3_par --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/guided/s3-3_sexcheck --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048\n```\n\n`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
     "expected_result": "Eight flagged wells removed; 1,963 samples remain. 520 sites are labelled PAR1/PAR2; variant count is unchanged.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Sex discordance and unusual X/Y patterns, including an XXY-like simulated profile. Do not infer a real diagnosis from a course threshold.",
@@ -38,35 +38,35 @@
     "options": [
       {
         "name": "--check-sex",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--check-sex` compares recorded sex with genotype patterns"
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--make-pgen` saves a new state"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--out` sets its prefix."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--pfile` selects the input native fileset"
       },
       {
         "name": "--remove",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--remove` reads the reviewed sample list."
       },
       {
         "name": "--split-par",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

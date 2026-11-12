@@ -402,10 +402,10 @@ source("scripts/preflight.R")
 ```
 
 Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`
-starts without saved workspaces and startup files. Internally the R helper
-runs PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal
-sites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),
-`--freq` (allele frequencies) and `--out` (output prefix). The exact command,
+starts without saved workspaces and startup files. Internally the R helper runs PLINK with these options. `--bfile` selects the
+input BED/BIM/FAM prefix. `--autosome` selects autosomal sites.
+`--thin-count 20` selects a small subset. `--seed 20261111` makes sampling
+repeatable. `--freq` reports allele frequencies. `--out` sets the output prefix. The exact command,
 including your paths and resource settings, is printed and recorded.
 
 For the standard project layout, the plain PLINK command is:

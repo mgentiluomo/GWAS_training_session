@@ -39,9 +39,12 @@ clicks or masked GUI prompts. Step 0.5 is `manual_required`: its interactive
 download chunks are intentionally not run by the whole-path script. Local ZIP
 extraction and the URL branch have separate integration/mocked tests.
 
-PLINK option explanations come from the step's prose. Shared options may use
-their explanation elsewhere in the same canonical notebook set; the exporter
-rejects an option with no explanation. Laboratory and R-only steps explicitly
+PLINK option explanations come from the step's prose. Each `plink.options` entry has `name` and `explanation_markdown`, containing
+only the sentence or clause explaining that option. Shared options may reuse
+an explanation from an earlier step of the same module. These entries also
+have `explained_at`, the originating step ID (for example `3.1`). Locally
+explained options omit this field. Forward references and cross-module
+fallbacks are forbidden; the exporter rejects an option with no explanation. Laboratory and R-only steps explicitly
 have `plink.applicable = false`; do not invent a PLINK command for a laboratory
 measurement. Terminal commands use the standard project paths; the R helper
 prints exact safe paths at runtime. Rendering a command must preserve quotes,
@@ -61,7 +64,7 @@ JSON contains code and teaching text only, never the instructor key, phenotype
 records, passwords, archive bytes or generated analytical tables. The R script
 omits `eval=FALSE` chunks for interactive installation and data retrieval. It
 starts from already installed tools and verified data, and executes modules
-0–7 in order. Set `COURSE_DATA_DIR`, `COURSE_OUTPUT_DIR` and, if needed,
+0â€“7 in order. Set `COURSE_DATA_DIR`, `COURSE_OUTPUT_DIR` and, if needed,
 `COURSE_CHAIN_FILE` before running it from the project root.
 
 This export prepares source content only. It is not a website implementation;

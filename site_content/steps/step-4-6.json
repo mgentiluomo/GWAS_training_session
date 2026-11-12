@@ -6,7 +6,7 @@
   "anchor": "step-4-6",
   "title": "Variant QC summary and checkpoint",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "e2da6496768ffa4db380e2461b2f600aa9fe13c5419989da888b82f736c7b783",
+  "source_sha256": "fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Save the complete post-variant-QC boundary and review what the filters achieved.",

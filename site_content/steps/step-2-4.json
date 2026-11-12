@@ -6,13 +6,13 @@
   "anchor": "step-2-4",
   "title": "First overview",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "747ad2fecbc5fd22cfa03bbe74b4742af11c788a45acfbfeb6fc769e10c57088",
+  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Measure missingness before deciding which samples or sites to remove.",
     "why": "Call rate is the fraction of eligible genotypes that are observed; missingness is one minus call rate. A sample report asks whether a well has many no-calls. A variant report asks whether a site fails across many wells. Examine both because these represent different possible failures.",
     "you_need": "The fileset from 2.2.",
-    "command": "```{r s2-4}\nout <- guided_path(cfg, \"2.4\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048\n```\n\n`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.",
+    "command": "```{r s2-4}\nout <- guided_path(cfg, \"2.4\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048\n```\n\n`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB. The R helper prints the exact command with your own safe paths.",
     "expected_result": "A sample report and a variant report; some observations are much worse than the main distribution. No samples or variants are removed at this step.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "A poorly performing well, failed probes or groups of affected samples. A threshold is a decision rule, not a diagnosis of the underlying cause.",
@@ -36,23 +36,23 @@
     "options": [
       {
         "name": "--memory",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--missing",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--missing` writes separate sample and variant missingness reports without filtering."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--out` sets the output prefix"
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--pfile` reads a native genotype prefix."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

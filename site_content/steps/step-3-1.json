@@ -6,13 +6,13 @@
   "anchor": "step-3-1",
   "title": "Rough cleaning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
+  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Remove very poorly called wells first, then very poorly called sites.",
     "why": "Gross failures distort later missingness and heterozygosity summaries. We first remove samples with over 10% missing genotypes, recompute on the survivors, and remove variants with over 10% missingness. Order matters: removing poor wells can improve a site's apparent call rate. This is an initial screen, not the final 98% call-rate rule.",
     "you_need": "The full 2.8 checkpoint.",
-    "command": "```{r s3-1}\ninput <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out results/guided/s3-1_samples --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048\n```\n\n`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "command": "```{r s3-1}\ninput <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out results/guided/s3-1_samples --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048\n```\n\n`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
     "expected_result": "Three wells and 150 variants removed: 2,013 samples and 296,360 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Failed wells and gross probe failures. The procedure does not identify the biological or technical cause by itself.",
@@ -37,31 +37,31 @@
     "options": [
       {
         "name": "--geno",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--geno 0.10` removes sites above 10% missingness in the remaining wells."
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--make-pgen` saves a new state"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--mind",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--out` sets its prefix."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--pfile` selects the input native fileset"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

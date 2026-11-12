@@ -6,7 +6,7 @@
   "anchor": "step-2-1",
   "title": "The starting files",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "747ad2fecbc5fd22cfa03bbe74b4742af11c788a45acfbfeb6fc769e10c57088",
+  "source_sha256": "0271088f545082687b5b1e9570de0e0c5af8ad4c1f5d906a8d420bdd1bf23f22",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Identify the complete laboratory export and keep an immutable input copy.",

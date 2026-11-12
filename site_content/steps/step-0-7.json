@@ -6,13 +6,13 @@
   "anchor": "step-0-7",
   "title": "Run the setup check",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da",
+  "source_sha256": "03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Check packages, locale, genotype file integrity and a small PLINK read/write operation.",
     "why": "A program can print its version while still failing to read data or write\nresults in a path containing spaces and non-English characters. Testing a\nreal operation catches these failures before a long analysis.",
     "you_need": "The executable from 0.4 and verified data from 0.5. The standard guided folder\nis `data/course/`. For an existing external installation, `COURSE_DATA_DIR`\nmay identify the extracted data and `COURSE_OUTPUT_DIR` a separate output folder.\nThese optional environment variables contain paths, never passwords.",
-    "command": "```{r s0-7_preflight}\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely.",
+    "command": "```{r s0-7_preflight}\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper runs PLINK with these options. `--bfile` selects the\ninput BED/BIM/FAM prefix. `--autosome` selects autosomal sites.\n`--thin-count 20` selects a small subset. `--seed 20261111` makes sampling\nrepeatable. `--freq` reports allele frequencies. `--out` sets the output prefix. The exact command,\nincluding your paths and resource settings, is printed and recorded.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely.",
     "expected_result": "The guided starting data have 2,016 sample wells and 299,523 variants. Wells\ninclude replicates; there are 2,000 simulated people. PLINK completes the\n20-variant frequency probe and R prints `Preflight passed. Report:` followed\nby the report path. The package installation check may print additional messages.",
     "troubleshooting": "Stop at the first error. The setup check explains unavailable packages or a\nmissing PLINK binary. On Windows it clears inherited locale requests that R\ncannot use, for this session only; startup warnings can appear before the\nscript has a chance to run. Your Windows language stays unchanged. On Linux,\nthe package preparation selects matching Posit binaries where available and\nexplains development libraries if source installation is needed. Do not run\nlater analytical steps until the setup check succeeds.",
     "quick_check": "Why does the setup check write a frequency report rather than only print a version?\n\n<details><summary>Show the answer</summary>It tests actual data reading and file writing, including a path containing spaces and non-English characters.</details>",
@@ -35,35 +35,35 @@
     "options": [
       {
         "name": "--autosome",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--autosome` selects autosomal sites."
       },
       {
         "name": "--bfile",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--bfile` selects the\ninput BED/BIM/FAM prefix."
       },
       {
         "name": "--freq",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--freq` reports allele frequencies."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--memory 2048` sets the main workspace\nbudget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--out` sets the output prefix."
       },
       {
         "name": "--seed",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--seed 20261111` makes sampling\nrepeatable."
       },
       {
         "name": "--thin-count",
-        "explanation_markdown": "Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`\nstarts without saved workspaces and startup files. Internally the R helper\nruns PLINK with `--bfile` (input BED/BIM/FAM prefix), `--autosome` (autosomal\nsites), `--thin-count 20` (a small subset), `--seed 20261111` (repeatable sampling),\n`--freq` (allele frequencies) and `--out` (output prefix). The exact command,\nincluding your paths and resource settings, is printed and recorded."
+        "explanation_markdown": "`--thin-count 20` selects a small subset."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--threads 2` limits worker threads"
       }
     ]
   },

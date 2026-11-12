@@ -6,7 +6,7 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
+  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Select a less-correlated autosomal subset for heterozygosity, relatedness and later PCA.",
@@ -36,39 +36,43 @@
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes"
       },
       {
         "name": "--exclude",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--exclude bed1` reads one-based inclusive intervals."
       },
       {
         "name": "--geno",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--geno 0.02` requires 98% variant call rate for this subset."
       },
       {
         "name": "--indep-pairwise",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2."
       },
       {
         "name": "--maf",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--maf 0.05` keeps common variants"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB.",
+        "explained_at": "3.3"
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--out` sets its prefix.",
+        "explained_at": "3.3"
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+        "explanation_markdown": "`--pfile` selects the input native fileset",
+        "explained_at": "3.3"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits worker threads; `--memory 2048` sets the main workspace\nbudget in MiB. On Windows the executable is `bin\\plink2.exe`. The helper's\nregression probe intentionally uses a non-English path and translates it safely."
+        "explanation_markdown": "`--threads 2` limits worker threads.",
+        "explained_at": "3.3"
       }
     ]
   },

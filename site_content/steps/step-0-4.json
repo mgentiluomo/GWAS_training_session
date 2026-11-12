@@ -6,7 +6,7 @@
   "anchor": "step-0-4",
   "title": "Download PLINK 2",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da",
+  "source_sha256": "03f8d7d0ce0b2b285a575e27729824676b6b1d1b248b05d65317fbb3fb21f47f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/).\nExtract the executable into the project's `bin/` folder. The executable is\n`plink2.exe` on Windows and `plink2` on macOS or Linux. Extract it first;\nthe ZIP file is not the executable.",
@@ -35,7 +35,7 @@
     "options": [
       {
         "name": "--version",
-        "explanation_markdown": "Terminal equivalent for checking the executable: `bin/plink2 --version`\n(Windows: `bin\\plink2.exe --version`). `--version` requests the version string;\nit does not read data. The R setup check performs this call for you at 0.7."
+        "explanation_markdown": "`--version` requests the version string"
       }
     ]
   },

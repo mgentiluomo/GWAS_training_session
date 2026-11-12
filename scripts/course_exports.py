@@ -53,19 +53,34 @@ def prose(text: str) -> str:
 
 def flag_explanation(flag: str, text: str) -> str | None:
     pattern = re.compile(r"(?<![\w-])" + re.escape(flag) + r"(?![\w-])")
-    paragraphs = prose(text).split("\n\n")
-    for paragraph in paragraphs:
-        if pattern.search(paragraph) and not paragraph.startswith("Plain PLINK"):
-            return paragraph.strip()
+    # Split prose only outside inline code, preserving decimals and option arguments.
+    inline = []
+    def protect(match):
+        inline.append(match.group())
+        return f"CODETOKEN{len(inline) - 1}END"
+    protected = re.sub(r"`[^`]*`", protect, prose(text))
+    clauses = re.split(r";\s*|(?<=[.!?])\s+(?=[A-Z])|\n\s*\n", protected)
+    clauses = [re.sub(r"CODETOKEN(\d+)END", lambda m: inline[int(m.group(1))], clause)
+               for clause in clauses]
+    for clause in clauses:
+        clause = clause.strip()
+        if not pattern.search(clause) or clause.startswith("Plain PLINK"):
+            continue
+        if re.search(r"meanings given|meaning given|same .*settings|settings are used", clause):
+            continue
+        # An inline command is a usage example, not an explanation.
+        if re.search(r"`bin[/\\]", clause) or clause.startswith("Terminal equivalent"):
+            continue
+        return clause
     return None
 
 
 def export_steps(root: Path = ROOT) -> list[dict]:
     records = []
-    all_text = "\n\n".join(p.read_text(encoding="utf-8") for p in notebook_paths(root))
     for path in notebook_paths(root):
         text = path.read_text(encoding="utf-8")
         matches = list(STEP.finditer(text))
+        explained = {}
         setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])]
         for i, match in enumerate(matches):
             body = text[match.end():matches[i + 1].start() if i + 1 < len(matches) else len(text)]
@@ -79,10 +94,17 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             options = []
             flags = sorted({token for command in commands for token in shlex.split(command) if token.startswith("--")})
             for flag in flags:
-                explanation = flag_explanation(flag, blocks["command"]) or flag_explanation(flag, all_text)
+                explanation = flag_explanation(flag, blocks["command"])
+                previous = explained.get(flag)
+                if not explanation and previous:
+                    explanation = previous["explanation_markdown"]
                 if not explanation:
                     raise ValueError(f"No notebook explanation for {flag} in step {match.group(1)}.{match.group(2)}")
-                options.append({"name": flag, "explanation_markdown": explanation})
+                option = {"name": flag, "explanation_markdown": explanation}
+                if not flag_explanation(flag, blocks["command"]):
+                    option["explained_at"] = previous.get("explained_at", previous["step_id"])
+                options.append(option)
+                explained[flag] = {**option, "step_id": f"{match.group(1)}.{match.group(2)}"}
             r_commands = [{"label": m.group(1), "code": m.group(3).strip(),
                            "run_by_default": not bool(re.search(r"eval\s*=\s*FALSE", m.group(2)))}
                           for m in CHUNK.finditer(blocks["command"])]

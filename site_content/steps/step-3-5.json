@@ -6,13 +6,13 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
+  "source_sha256": "daa2ea1502507de0a51f9b8748d37d0725b1c6270e530cc546597dee39b766f7",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Estimate excess or deficit of heterozygous calls using the pruned subset.",
     "why": "A heterozygote carries two different alleles. PLINK's F statistic compares observed homozygosity with that expected from allele frequencies. Negative F can indicate excess heterozygosity, including contamination; high positive F can reflect related parents, population structure or technical effects. We remove F below mean minus three population standard deviations, and flag values above mean plus three deviations for review. High F is not an automatic exclusion rule here.",
     "you_need": "State 3.3 and the diagnostic subset from 3.4.",
-    "command": "```{r s3-5}\nreport <- guided_path(cfg, \"3.5\", \"het\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048\n```\n\n`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "command": "```{r s3-5}\nreport <- guided_path(cfg, \"3.5\", \"het\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048\n```\n\n`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
     "expected_result": "13 low-F wells removed; eight high-F wells flagged and retained. Mean F approximately 0.0078, population SD approximately 0.0298; 1,950 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Excess heterozygosity and homozygosity. These are hypotheses for review, not proof of contamination or consanguinity.",
@@ -37,35 +37,35 @@
     "options": [
       {
         "name": "--extract",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list."
       },
       {
         "name": "--het",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--het` reports heterozygosity statistics."
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--make-pgen` saves a new state"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--out` sets its prefix."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--pfile` selects the input native fileset"
       },
       {
         "name": "--remove",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--remove` applies the selected low-F exclusions to the complete matrix."
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

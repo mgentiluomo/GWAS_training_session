@@ -54,7 +54,7 @@ bin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out resul
 bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048
 ```
 
-`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--mind 0.10` removes wells above 10% missingness. `--geno 0.10` removes sites above 10% missingness in the remaining wells. These are deliberately separate calls. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -117,7 +117,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
 ```
 
-`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -190,7 +190,7 @@ bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-mal
 bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048
 ```
 
-`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -330,7 +330,7 @@ bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
 ```
 
-`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--extract` limits the diagnostic calculation to the pruning list. `--het` reports heterozygosity statistics. R calculates the explicit review thresholds; `--remove` applies the selected low-F exclusions to the complete matrix. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -415,7 +415,7 @@ bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
 
-`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -489,7 +489,7 @@ bin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results
 bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048
 ```
 
-`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.
+`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 

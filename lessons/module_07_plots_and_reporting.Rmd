@@ -307,7 +307,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
 ```
 
-`--clump` reads the association report. `--clump-id-field ID` and `--clump-p-field P` name its columns. `--clump-p1 5e-8` sets index eligibility and `--clump-p2 1e-5` the secondary-report threshold. `--clump-r2 0.1` uses this correlation threshold within `--clump-kb 250` kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--out` names the report; threads and memory are set by the helper.
+`--clump` reads the association report. `--clump-id-field ID` names the variant ID column. `--clump-p-field P` names the p-value column. `--clump-p1 5e-8` sets index eligibility. `--clump-p2 1e-5` sets the secondary-report threshold. `--clump-r2 0.1` sets the squared-correlation threshold. `--clump-kb 250` sets the distance limit in kilobases. `--clump-unphased` uses squared dosage correlation, making its LD definition explicit. `--pfile` reads the native genotype fileset. `--out` names the report. `--threads 2` limits worker threads. `--memory 2048` sets the main workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -386,7 +386,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
 ```
 
-`--chr 9`, `--from-bp` and `--to-bp` define a one-megabase GRCh38 interval. `--r2-unphased` reports squared dosage correlation. `--ld-snp` restricts the first member of pairs to the lead. `--ld-window-kb 500` limits distance from it and `--ld-window-r2 0` retains low as well as high correlations; otherwise low-LD points could disappear from the report. `--out`, threads and memory have the meanings given earlier.
+`--chr 9`, `--from-bp` and `--to-bp` define a one-megabase GRCh38 interval. `--r2-unphased` reports squared dosage correlation. `--ld-snp` restricts the first member of pairs to the lead. `--ld-window-kb 500` limits distance from the lead in kilobases. `--ld-window-r2 0` retains low as well as high correlations; otherwise low-LD points could disappear from the report. `--out`, threads and memory have the meanings given earlier.
 
 <details><summary>Show the expected result</summary>
 
@@ -478,7 +478,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s7-7_all_ages.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_qc_no_pcs --threads 2 --memory 2048
 ```
 
-The same `--glm sex hide-covar firth-fallback` settings are used throughout. `--covar-name Age` omits PCs explicitly. The first call retains the cleaned cohort; the second changes `--pfile` to the pre-QC boundary and uses ages for all wells. `--maf 0.01` remains an association eligibility rule even in the no-QC contrast. `--out` separates outputs; threads and memory are unchanged.
+`--glm sex hide-covar firth-fallback` fits the association model with recorded sex, reports genetic tests and uses Firth correction when needed. `--covar` loads the ID-keyed covariate table. `--covar-variance-standardize` rescales numerical covariates for stable fitting. `--covar-name Age` omits PCs explicitly. The first call retains the cleaned cohort; the second changes `--pfile` to the pre-QC boundary and uses ages for all wells. `--maf 0.01` remains an association eligibility rule even in the no-QC contrast. `--out` separates outputs; threads and memory are unchanged.
 
 <details><summary>Show the expected result</summary>
 

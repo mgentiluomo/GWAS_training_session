@@ -6,13 +6,13 @@
   "anchor": "step-4-4",
   "title": "Hardy-Weinberg and sample size",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "e2da6496768ffa4db380e2461b2f600aa9fe13c5419989da888b82f736c7b783",
+  "source_sha256": "fdec8eb274e50fe730521585f7840847aedc0811227e1838c2496506340881b0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate a control-only exact mid-p Hardy-Weinberg test and apply an explicit sample-size-aware screening rule.",
     "why": "Hardy-Weinberg equilibrium (HWE) predicts genotype proportions a^2, 2a(1-a) and (1-a)^2 under random mating and other idealised assumptions. Here a is the frequency of one allele; it is not the HWE test p-value. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(-6 - 0.001 * max(0, n_control - 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.",
     "you_need": "State 4.3 and its PSAM phenotype; no association results are used to choose the cutoff.",
-    "command": "```{r s4-4}\npsam <- guided_table(paste0(guided_path(cfg, \"4.3\"), \".psam\"))\ncontrols <- guided_list(psam$IID[psam$Disease == \"1\"], guided_path(cfg, \"4.4\", \"controls.txt\"), TRUE)\nreport <- guided_path(cfg, \"4.4\", \"hardy\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--keep\", controls, \"--chr\", \"1-22\", \"--hardy\", \"midp\", \"--out\", report))\nhwe <- guided_table(paste0(report, \".hardy\"))\nn_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)\ncutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))\np <- as.numeric(hwe$MIDP)\nexclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, \"4.4\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.4\")))\nretained <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))$ID\nstopifnot(!any(c(\"rs4988235\", \"rs12913832\", \"rs1426654\") %in% retained))\nops <- guided_replay_lists(cfg, \"4.4\", \"4.3\")\nguided_register(cfg, \"4.4\", \"4.3\", 1844, 238852, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048\n```\n\n`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.",
+    "command": "```{r s4-4}\npsam <- guided_table(paste0(guided_path(cfg, \"4.3\"), \".psam\"))\ncontrols <- guided_list(psam$IID[psam$Disease == \"1\"], guided_path(cfg, \"4.4\", \"controls.txt\"), TRUE)\nreport <- guided_path(cfg, \"4.4\", \"hardy\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--keep\", controls, \"--chr\", \"1-22\", \"--hardy\", \"midp\", \"--out\", report))\nhwe <- guided_table(paste0(report, \".hardy\"))\nn_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)\ncutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))\np <- as.numeric(hwe$MIDP)\nexclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, \"4.4\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.3\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.4\")))\nretained <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))$ID\nstopifnot(!any(c(\"rs4988235\", \"rs12913832\", \"rs1426654\") %in% retained))\nops <- guided_replay_lists(cfg, \"4.4\", \"4.3\")\nguided_register(cfg, \"4.4\", \"4.3\", 1844, 238852, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048\n```\n\n`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
     "expected_result": "167 variants excluded, leaving 238,852. Strong planted errors are not the only failures: eight unplanted sites and seven altered duplicate copies also fail, while some mild errors survive. rs4988235, rs12913832 and rs1426654 leave here and cannot be used as surviving module 5 markers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Calling errors and population mixture. The unplanted failures demonstrate why HWE failure is not proof of technical error, and why association loci cannot be rescued after seeing their p-values.",
@@ -37,39 +37,39 @@
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--chr 1-22` excludes sex chromosomes from this HWE calculation."
       },
       {
         "name": "--exclude",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix."
       },
       {
         "name": "--hardy",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--hardy midp` reports the exact mid-p statistic"
       },
       {
         "name": "--keep",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls"
       },
       {
         "name": "--make-pgen",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--make-pgen` writes a new copy"
       },
       {
         "name": "--memory",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--out` names its files."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--pfile` selects the native input"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },

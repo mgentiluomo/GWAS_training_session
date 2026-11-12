@@ -58,7 +58,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
 ```
 
-`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2-by-2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2-by-2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -249,7 +249,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
 ```
 
-`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table and `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -379,7 +379,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
 ```
 
-The R command uses `--snp` with the selected ID; the equivalent terminal command uses `--extract` with its one-ID file. `--glm firth` requests Firth for that variant rather than waiting for fallback. Other covariate and resource options match 6.4. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+The R command uses `--snp` with the selected ID; the equivalent terminal command uses `--extract` with its one-ID file. `--glm firth` requests Firth for that variant rather than waiting for fallback. Other covariate and resource options match 6.4. `--pfile` reads the final genotype state; `--out` sets the report prefix. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
 
 <details><summary>Show the expected result</summary>
 

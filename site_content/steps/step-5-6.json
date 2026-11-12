@@ -6,13 +6,13 @@
   "anchor": "step-5-6",
   "title": "Define an ancestry-matched cohort",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "6b9efdadd370f938728e9227191c5549fee91d7232f25f4980570cb0474b3758",
+  "source_sha256": "b6782a845ba573cd44ccbba19247b7028df855a220a4ef7ab626dc3734f26a19",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Apply the predefined six-standard-deviation rule on the first four projected PCs.",
     "why": "This teaching design focuses the main analysis on a broadly European-reference-matched cohort. For each of PC1 to PC4, standardise the study score using the European reference mean and population standard deviation. Flag a sample if its largest absolute standardised distance exceeds six. This is a study-specific inclusion policy, not a universal ancestry classification. Apply it before inspecting association results and report exclusions.",
     "you_need": "Reference and study projections from 5.4; reference labels from 5.5.",
-    "command": "```{r s5-6}\nref <- guided_table(paste0(guided_path(cfg, \"5.4\", \"ref_scores\"), \".sscore\"))\nstudy <- guided_table(paste0(guided_path(cfg, \"5.4\", \"study_scores\"), \".sscore\"))\nmetadata <- guided_table(file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38.psam\"))\neur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == \"EUR\"\ncolumns <- paste0(\"PC\", 1:4, \"_AVG\")\nr <- sapply(ref[eur, columns, drop = FALSE], as.numeric)\ns <- sapply(study[columns], as.numeric)\ncentre <- colMeans(r)\nspread <- sqrt(colMeans(sweep(r, 2, centre, \"-\")^2))\nz <- sweep(sweep(s, 2, centre, \"-\"), 2, spread, \"/\")\nbad <- study$IID[apply(abs(z), 1, max) > 6]\nremove <- guided_list(bad, guided_path(cfg, \"5.6\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.6\"), \"--remove\", remove, \"--make-pgen\", \"--out\", guided_path(cfg, \"5.6\")))\nops <- guided_replay_lists(cfg, \"5.6\", \"4.6\")\nguided_register(cfg, \"5.6\", \"5.4\", 1811, 238513, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048\n```\n\nR calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.",
+    "command": "```{r s5-6}\nref <- guided_table(paste0(guided_path(cfg, \"5.4\", \"ref_scores\"), \".sscore\"))\nstudy <- guided_table(paste0(guided_path(cfg, \"5.4\", \"study_scores\"), \".sscore\"))\nmetadata <- guided_table(file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38.psam\"))\neur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == \"EUR\"\ncolumns <- paste0(\"PC\", 1:4, \"_AVG\")\nr <- sapply(ref[eur, columns, drop = FALSE], as.numeric)\ns <- sapply(study[columns], as.numeric)\ncentre <- colMeans(r)\nspread <- sqrt(colMeans(sweep(r, 2, centre, \"-\")^2))\nz <- sweep(sweep(s, 2, centre, \"-\"), 2, spread, \"/\")\nbad <- study$IID[apply(abs(z), 1, max) > 6]\nremove <- guided_list(bad, guided_path(cfg, \"5.6\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.6\"), \"--remove\", remove, \"--make-pgen\", \"--out\", guided_path(cfg, \"5.6\")))\nops <- guided_replay_lists(cfg, \"5.6\", \"4.6\")\nguided_register(cfg, \"5.6\", \"5.4\", 1811, 238513, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048\n```\n\nR calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.",
     "expected_result": "33 remaining outlier records excluded; 1,811 samples and 238,513 variants remain. Some originally simulated outliers left during earlier QC, so this is not the initial total outlier count.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Large reference-relative ancestry differences and possible technical outliers. A mismatch demands review and a documented study design, not a claim that excluded people are biologically unsuitable in general.",
@@ -36,27 +36,27 @@
     "options": [
       {
         "name": "--make-pgen",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--make-pgen` saves the retained cohort."
       },
       {
         "name": "--memory",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--memory 2048` sets the workspace budget in MiB."
       },
       {
         "name": "--out",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--out` names reports."
       },
       {
         "name": "--pfile",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--pfile` reads the specified native genotype set"
       },
       {
         "name": "--remove",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--remove` applies that prespecified list to the complete study matrix"
       },
       {
         "name": "--threads",
-        "explanation_markdown": "R calculates the explicit reference-based rule and writes the selected IID list. `--remove` applies that prespecified list to the complete study matrix; `--make-pgen` saves the retained cohort. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+        "explanation_markdown": "`--threads 2` limits worker threads."
       }
     ]
   },
