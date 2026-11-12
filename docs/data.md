@@ -14,17 +14,25 @@ Inputs: `data/demo/`. Outputs: `results/demo/`.
 
 ## Original course mode
 
-1. Obtain the **matching `DB_A.bed`** through the institutional course channel.
-   See [the existing access information](../02_Database/Databases/DB_download).
-   Older SharePoint links may expire or require authentication. Do not save a
-   login webpage as a BED file.
-2. Put it alongside `DB_A.bim` and `DB_A.fam` in `02_Database/Databases/`.
+1. Obtain the matching `DB_A.bed/.bim/.fam` set and its metadata through the
+   authorised course channel. The stage 1 test package does not contain this
+   historical full-size dataset. Do not save a login webpage as a BED file.
+2. Put the genotype files and their matching metadata in `data/legacy/`.
 3. Set `mode = "course"` in `config.R` and start at lesson 1.
 
-There is no public automatic BED download. The old `linktoBEDfile.txt` is a
-pointer, not genotype data. Use a three-file set from the same release, preserving
+There is no public automatic BED download. Use a three-file set from the same release, preserving
 sample/variant order. Preflight checks the signature, byte count and identifier
 uniqueness; this does not prove biological annotation or provenance.
+
+## Guided 2026 course data
+
+The guided modules use the simulated 2026 dataset, separate from the older
+600-sample demo and the historical DB_A dataset. Use `download_course_data()`
+after configuring the approved release in `config.R`, or supply `zip_path` for
+the local stage 1 test. See [encrypted data setup](troubleshooting.md#downloading-the-encrypted-course-data).
+The extracted folder contains `lab_export/`, `array/`, `phenotypes/`,
+`pca_reference/`, `grch37_exercise/`, `imputation/` and `checkpoints/`.
+No data archive is hosted in the repository or under the browser tutorial.
 
 ## Input dictionary
 

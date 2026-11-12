@@ -20,8 +20,6 @@ import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "tutorial"
-DL = OUT / "downloads"
-DL.mkdir(parents=True, exist_ok=True)
 REPO = "https://github.com/mgentiluomo/GWAS_training_session"
 BRANCH = "course/2026-guided-training"
 RAW = "https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/" + BRANCH
@@ -104,63 +102,22 @@ def img(data, alt, caption):
     return f'<figure class="figure"><img src="data:image/png;base64,{data}" alt="{esc(alt)}" loading="lazy"><figcaption>{caption}</figcaption></figure>'
 
 
-# Only explicitly enumerated synthetic inputs/checkpoints enter public downloads.
-PACKAGES = []
+# Data are supplied through the encrypted release, never as repository ZIPs.
+PACKAGES = [
+    {"file": name, "title": title}
+    for name, title in [
+        ("demo_input", "Initial demo input"),
+        ("01_autosomes", "After autosomal preparation"),
+        ("02_geno", "After variant-missingness filtering"),
+        ("03_mind", "After sample-missingness filtering"),
+        ("04_maf", "After minor-allele-frequency filtering"),
+        ("qc_final", "Final QC checkpoint")
+    ]
+]
 
 
-def make_package(name, title, files, count_rows=None):
-    path = DL / name
-    members = {}
-    for src in files:
-        src = Path(src)
-        relative = src.relative_to(ROOT)
-        if not (str(relative).startswith('data/demo/') or str(relative).startswith('results/demo/')):
-            raise ValueError('Refusing to package a non-demo input')
-        if src.suffix == '.fam':
-            for line in src.read_text().splitlines():
-                assert line.split()[0].startswith('DEMO_') and line.split()[1].startswith('DEMO_')
-        members[str(relative)] = src.read_bytes()
-    if count_rows:
-        s = io.StringIO()
-        writer = csv.DictWriter(s, fieldnames=['stage', 'samples', 'variants'], delimiter='\t', lineterminator='\n')
-        writer.writeheader(); writer.writerows(count_rows)
-        members['results/demo/01_qc/sample_variant_counts.tsv'] = s.getvalue().encode()
-    manifest = {'description': title, 'data': 'SIMULATED ONLY', 'seed': 20261111,
-                'plink': '2.0 beta 1.4 (7 November 2026)',
-                'files': {p: hashlib.sha256(b).hexdigest() for p, b in members.items()}}
-    members['CHECKPOINT_MANIFEST.json'] = json.dumps(manifest, indent=2).encode()
-    members['CHECKPOINT_README.txt'] = (
-        title + '\nSIMULATED PRACTICE DATA ONLY. No real participant records.\n'
-        'Extract into the RStudio project root, preserving data/ and results/ paths.\n'
-        'Use mode="demo". Back up an existing run before replacing checkpoint files.\n'
-        'These files belong to the documented demo seed/build and default course settings.\n'
-        'They are not expected results for the original class dataset.\n').encode()
-    with zipfile.ZipFile(path, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as z:
-        for member, data in members.items():
-            info = zipfile.ZipInfo(member, date_time=(2026, 11, 11, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            z.writestr(info, data)
-    PACKAGES.append({'file': name, 'title': title, 'bytes': path.stat().st_size,
-                     'sha256': hashlib.sha256(path.read_bytes()).hexdigest(), 'members': sorted(members)})
-
-
-make_package('demo_input.zip', 'Initial demo input — 600 samples, 6000 variants',
-             [DEMO / n for n in ('DB_demo.bed', 'DB_demo.bim', 'DB_demo.fam', 'README.txt',
-                                 'Sex.txt', 'general_covar.txt', 'pheno.txt')])
-meta_files = [ROOT / 'results/demo' / n for n in ('metadata.tsv', 'phenotype.tsv', 'sex.tsv')]
-stages = [('01_autosomes', 'qc_01_autosomes.zip', 'After autosomal preparation', 1),
-          ('02_geno', 'qc_02_geno.zip', 'After variant-missingness filtering', 2),
-          ('03_mind', 'qc_03_mind.zip', 'After sample-missingness filtering', 3),
-          ('04_maf', 'qc_04_maf.zip', 'After minor-allele-frequency filtering', 4),
-          ('qc_final', 'qc_final.zip', 'Final QC checkpoint — ready for lesson 2', 5)]
-for prefix, filename, title, nstages in stages:
-    make_package(filename, title, [QCDIR / (prefix + ext) for ext in ('.bed', '.bim', '.fam')] + meta_files,
-                 count_rows=counts[:nstages])
-(DL / 'manifest.json').write_text(json.dumps({'data': 'SIMULATED ONLY', 'packages': PACKAGES}, indent=2))
-
-
-def download(name, text="Download checkpoint"):
-    return f'<a class="button secondary" href="{RAW}/tutorial/downloads/{name}" download>{esc(text)}</a>'
+def download(name, text="Prepare data in R"):
+    return '<a class="button secondary" href="#setup">Prepare data in R</a>'
 
 
 def end(previous, next_):
@@ -320,21 +277,21 @@ practice += checkpoint('I have written a QC interpretation, including a limitati
 practice += callout('This page does not submit answers or collect student records. Checklist ticks can remain in this browser; exercise responses are not saved or sent.')
 practice += end(('qc','Quality control'),('downloads','Files and checkpoints'))
 
-package_html = []
-for p in PACKAGES:
-    kb = p['bytes'] / 1024
-    package_html.append(f'<article class="package"><div><h3>{esc(p["title"])}</h3><p>{esc(p["file"])} · {kb:.0f} KB · simulated only</p></div>{download(p["file"],"Download ZIP")}</article>')
+package_html = [
+    f'<article class="package"><div><h3>{esc(p["title"])}</h3><p>Use matching data prepared in R; no public ZIP is supplied here.</p></div>{download(p["file"])}</article>'
+    for p in PACKAGES
+]
 
 downloads = f'''<span class="eyebrow">Files and checkpoints</span><h1>The right files<br>for the right step.</h1>
-<p class="lead">Every package below contains simulated data only. Extract it into the project root and preserve its internal folders.</p>
+<p class="lead">These are the older demo stages. Prepare demo data in R. Guided 2026 checkpoints come from the encrypted course release; it has not been published yet.</p>
 {callout('These packages match the default demo seed and tested build. They are not checkpoints for the original class dataset, or for a run whose sample selection or thresholds you changed. Back up an existing run before replacing outputs.','warning')}
 <div class="actions"><a class="button" href="{PROJECT}">Complete RStudio project</a><a class="button secondary" href="{REPO}/tree/{BRANCH}/lessons">All three notebooks</a></div>
 <div class="package-list">{''.join(package_html)}</div>
-<h2>Resume without restoring an old workspace</h2><ol><li>Keep the first error and the log from the run that stopped.</li><li>Back up the affected outputs. Restore the package for the last completed step into the project root.</li><li>Open the RStudio project and restart R. Run the setup below.</li><li>Use the individual command block for the next step on this web page, or select those lines in the notebook. An intermediate package does not contain every earlier diagnostic or genotype set.</li></ol>
+<h2>Resume without restoring an old workspace</h2><ol><li>Keep the first error and the log from the run that stopped.</li><li>Back up the affected outputs. Use the matching complete checkpoint for the last completed step. The setup instructions explain access.</li><li>Open the RStudio project and restart R. Run the setup below.</li><li>Use the individual command block for the next step on this web page, or select those lines in the notebook. An intermediate package does not contain every earlier diagnostic or genotype set.</li></ol>
 {block(recovery,'R · restore path variables only')}
 <p>For a full restart, restore the initial demo inputs and begin the QC walkthrough at step 1. To join lesson 2 directly, use the final QC checkpoint and open its notebook.</p>
 <h2>What is inside a checkpoint?</h2><p>The matching BED/BIM/FAM set for that stage, prepared metadata, phenotype and sex tables, a stage-appropriate count table and a manifest with SHA-256 checksums. It does not include a saved R workspace or the original study data.</p>
-<p><a href="{RAW}/tutorial/downloads/manifest.json">Inspect the package manifests and checksums</a></p>
+<p>Release URLs and expected checksums are configured in config.R. See the setup instructions above.</p>
 <h2>The original class data</h2><p>The original BED is distributed through the course’s institutional access arrangements. Older links may expire or require authentication. Use only its matching BIM/FAM files and authorised checkpoints.</p>
 <a href="{REPO}/blob/{BRANCH}/docs/data.md">Read original-data access and coding instructions →</a>
 {end(('practice','Practice'),('help','Troubleshooting'))}'''
@@ -390,4 +347,4 @@ document = f'''<!doctype html>
 <div id="toast" class="toast" role="status" hidden></div>
 <script type="application/json" id="sample-missingness-data">{json.dumps(sample_missing)}</script><script>{js}</script></body></html>'''
 (OUT/'index.html').write_text(document)
-print(f'Built {OUT.relative_to(ROOT)}/index.html ({len(document):,} characters), {len(PACKAGES)} demo downloads.')
+print(f'Built {OUT.relative_to(ROOT)}/index.html ({len(document):,} characters), {len(PACKAGES)} demo stage descriptions; no data archives written.')

@@ -261,9 +261,9 @@ course_config <- function(root = ".") {
   if (!cfg$mode %in% c("demo", "course")) stop("config.R: mode must be demo or course.")
   cfg$root <- root
   cfg$input <- if (cfg$mode == "demo") file.path(root, "data", "demo", "DB_demo") else
-    file.path(root, "02_Database", "Databases", "DB_A")
+    file.path(root, "data", "legacy", "DB_A")
   cfg$metadata <- if (cfg$mode == "demo") file.path(root, "data", "demo") else
-    file.path(root, "02_Database")
+    file.path(root, "data", "legacy")
   cfg$out <- file.path(root, "results", cfg$mode)
   cfg$qc <- file.path(cfg$out, "01_qc")
   cfg$pca <- file.path(cfg$out, "02_pca")
