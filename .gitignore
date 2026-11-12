@@ -1,8 +1,8 @@
 # Local inputs, binaries and generated results
 data/
 results/
-bin/plink2
-bin/plink2.exe
+bin/*
+!bin/README.md
 .Rproj.user/
 .RData
 .Rhistory
