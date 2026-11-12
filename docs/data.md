@@ -73,3 +73,27 @@ The default retains all post-QC samples for an exploratory teaching analysis.
 Before research interpretation, resolve structure, HWE filtering, heterozygosity
 flags, batch effects and study-specific exclusions. Genome build and array
 manifest provenance are not inferred from filenames.
+
+## Summary statistics file
+
+Step 6.8 writes `results/guided/s6-8_gwas_summary_statistics.tsv`, a tab-separated
+file with one row per tested variant and these ten columns, in this order. A second
+file, `s6-8_gwas_summary_statistics_columns.tsv`, explains each column in plain words.
+The Manhattan and QQ plots of module 7 are built from the first file. Step 6.8 of
+the lessons describes the columns in detail.
+
+| Column | Meaning |
+|---|---|
+| `chromosome` | Chromosome label (1 to 22, X, Y or MT). |
+| `base_pair_location` | Position in base pairs, genome build GRCh38. |
+| `variant_id` | Course variant identifier (chromosome:position:allele:allele). |
+| `effect_allele` | The allele whose copies are counted (PLINK A1). It is not always the minor or the ALT allele. |
+| `other_allele` | The other allele of the variant. |
+| `effect_allele_frequency` | Frequency of the effect allele in the analysed samples. |
+| `odds_ratio` | Odds ratio per copy of the effect allele. |
+| `standard_error` | Standard error of the natural log of the odds ratio, not of the odds ratio itself. |
+| `p_value` | P-value of the additive test. A failed test stays `NA`. |
+| `n` | Number of samples used for that variant. |
+
+The file holds results per variant only. It contains no genotypes, sample IDs or
+other individual-level data. Never add it, or any other result file, to the repository.
