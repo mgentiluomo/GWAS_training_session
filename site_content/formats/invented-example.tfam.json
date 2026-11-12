@@ -39,7 +39,7 @@
     "No header line is permitted in this example format."
   ],
   "magic_bytes": null,
-  "size_bytes": 64,
-  "sha256": "9c618742c40a808d19650bd2f30fbc9aca3c6eb70dddb8a385dcad2a0cb15535",
+  "size_bytes": 60,
+  "sha256": "60fe81913764625a7624f96e81da9760e19c6b665428880b46518a963eefb450",
   "asset": "examples/invented example.tfam"
 }

@@ -229,6 +229,11 @@ def generate(plink: Path) -> dict:
         for option in (["--make-bed"], ["--make-pgen"], ["--export", "ped"],
                        ["--export", "tped"], ["--export", "bgen-1.2", "bits=8"]):
             run(plink, folder, *common, *option, "--out", str(base))
+        # PLINK writes CRLF on Windows. Canonical LF keeps text bytes portable.
+        # Binary files are copied unchanged and are never decoded as text.
+        for suffix in (".ped", ".map", ".tped", ".tfam", ".bim", ".fam", ".pvar", ".psam", ".sample"):
+            path = Path(str(base) + suffix)
+            write(path, path.read_text(encoding="utf-8"))
         imports = {"vcf": ["--vcf", source, "--double-id"],
                    "bed": ["--bfile", base], "pgen": ["--pfile", base],
                    "ped": ["--pedmap", base], "tped": ["--tfile", base],

@@ -43,7 +43,7 @@
     "No header line is permitted in this example format."
   ],
   "magic_bytes": null,
-  "size_bytes": 144,
-  "sha256": "201e2ed4faee10b2e540f9438ade8ca1f066f129a0d672d2bf9ef067617b5d3c",
+  "size_bytes": 140,
+  "sha256": "75beaeb831c016eaee3efcdb8586096733986ac52c290e03d92cce8826c1a5ec",
   "asset": "examples/invented example.ped"
 }

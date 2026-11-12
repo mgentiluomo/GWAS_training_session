@@ -35,7 +35,7 @@
     "No header line is permitted."
   ],
   "magic_bytes": null,
-  "size_bytes": 177,
-  "sha256": "0043c2ca0ab1b98a6c1cd7e491064bbf75f01282666fb004177b7c864cf45023",
+  "size_bytes": 172,
+  "sha256": "4d2cbfa2ee7748278a40ad5a8673e1f6c4e2ada26bcfb405ce384dc287d58dbc",
   "asset": "examples/invented example.tped"
 }

@@ -31,7 +31,7 @@
     "The first row names fields; the second row declares field types."
   ],
   "magic_bytes": null,
-  "size_bytes": 80,
-  "sha256": "fe10ac5774428daf8810cf6fe254c8c00896e6bb72dbeb6345114206c0f9ff56",
+  "size_bytes": 74,
+  "sha256": "0f85d18af065d31d01d2fc2322d16f5cda3c3a7d9c5406dc9de2e9a8a9bf2191",
   "asset": "examples/invented example.sample"
 }

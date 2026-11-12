@@ -40,7 +40,7 @@
     "REF from the invented VCF is retained; this does not check GRCh38."
   ],
   "magic_bytes": null,
-  "size_bytes": 334,
-  "sha256": "f002121629b157ebda6e90810ff5b5f716f9e41435b47f328bcff62c6564d751",
+  "size_bytes": 324,
+  "sha256": "dca1b04f93cb428ccc9cdddebb0bc8448ad58490580d659639d0f2a50e7d7ec1",
   "asset": "examples/invented example.pvar"
 }

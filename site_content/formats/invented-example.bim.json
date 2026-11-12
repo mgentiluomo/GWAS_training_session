@@ -39,7 +39,7 @@
     "No header line is permitted."
   ],
   "magic_bytes": null,
-  "size_bytes": 117,
-  "sha256": "664a253bb0779e3cfea7d21863732555af58a4fe0716a024646750ca9aa4ff8d",
+  "size_bytes": 112,
+  "sha256": "f622211ef4680792297e7d0fb09c4c22453ae6f29d24a447520e4ab8aeaa4a6e",
   "asset": "examples/invented example.bim"
 }

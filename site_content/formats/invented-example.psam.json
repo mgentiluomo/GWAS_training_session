@@ -27,7 +27,7 @@
     "The hash-prefixed header names fields; sex 0 means unknown."
   ],
   "magic_bytes": null,
-  "size_bytes": 51,
-  "sha256": "5f8c384de81e2fc60af92874ec739df01cfaf6f270d65b225f82c102cd8810c9",
+  "size_bytes": 46,
+  "sha256": "bfc65833690610c30c4727e92b97b93ed031d7e93170968bab5ad0bd68129643",
   "asset": "examples/invented example.psam"
 }
