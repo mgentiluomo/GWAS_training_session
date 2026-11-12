@@ -48,6 +48,7 @@ tab <- table(case = case, carrier = dose > 0)
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
+guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -178,6 +179,7 @@ design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
 guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -241,6 +243,7 @@ results <- guided_association(out)
 valid <- valid_p(results$P)
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
 guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -305,6 +308,7 @@ valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
 top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
 print(head(top, 10))
 guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):

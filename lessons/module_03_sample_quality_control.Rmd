@@ -246,6 +246,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
+guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -318,7 +319,7 @@ remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
 print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
-guided_register(cfg, "3.5", "3.3", 1950, 296360, operations = ops)
+guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):

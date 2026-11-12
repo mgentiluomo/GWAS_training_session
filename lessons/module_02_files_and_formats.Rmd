@@ -99,6 +99,7 @@ The original matched files checked at 2.1.
 out <- guided_path(cfg, "2.2")
 run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))
 stopifnot(all(guided_counts(out) == c(2016, 299523)))
+guided_source_checkpoint(cfg)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -300,6 +301,8 @@ stopifnot(sum(flip) == 400L, sum(exclude) == 3013L)
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,
   "--make-pgen", "--out", guided_path(cfg, "2.5")))
 stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))
+ops <- data.frame(option = c("--flip", "--exclude"), value = c(flip_file, exclude_file))
+guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -446,6 +449,8 @@ guided_write(pheno, pheno_file)
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,
   "--pheno", pheno_file, "--pheno-name", "Disease", "--make-pgen", "--out", guided_path(cfg, "2.7")))
 stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))
+ops <- data.frame(option = c("--update-sex", "--pheno", "--pheno-name"), value = c(pheno_file, pheno_file, "Disease"))
+guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):

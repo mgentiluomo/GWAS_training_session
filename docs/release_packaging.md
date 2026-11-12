@@ -2,7 +2,8 @@
 
 Run `scripts/package_release.py` on the author machine. The hard rule protecting
 `scripts/author/` takes precedence over the requested location in that directory.
-The script reads only `sim2026/student/`. It creates a new `codex_work/release/`
+The script reads only `sim2026/student/` or the verified
+`codex_work/classroom-stage-2026.1/`. It creates a new `codex_work/release/`
 directory. An existing destination is refused. It never uploads anything.
 
 Supply the password through `COURSE_RELEASE_PASSWORD`. Never put a real password
@@ -44,7 +45,34 @@ their removal lists and `operations.tsv` (`option`, `value`). The central
 Replay supports sample/variant removal, strand flips, PAR splitting and ID changes.
 Diagnostic steps with no genotype change reuse the preceding state.
 
+Small diagnostic artifacts are also indexed where the next step needs them,
+including pruning lists, reference projection scores and covariates. Their
+manifests verify restoration. The initial BED/BIM/FAM is the source checkpoint
+for 2.2; it is converted on demand rather than duplicated as a full PGEN copy.
+Replay before 2.8 includes strand correction and phenotype/sex loading.
+
 The notebooks create this structure in the external working folder. The author
 must stage the verified checkpoint tree with the student inputs before building
 the final release. The old local stage 1 ZIP is unchanged and does not yet have
 this layout. Never derive a new release checksum from the old configuration.
+
+## Stage the completed main path
+
+After the notebook checks pass, run the author-only staging script with the
+external run folder and the official local chain:
+
+```sh
+python -B scripts/author/stage_main_path.py --run PATH_TO_VERIFIED_RUN --chain PATH_TO_HG19_TO_HG38_CHAIN
+```
+
+It creates a new `codex_work/classroom-stage-2026.1/` and a SHA-256 sidecar,
+copies only main-path student inputs and the verified checkpoint tree, and
+adds the chain under `grch37_exercise/`. It excludes instructor material,
+command/console logs and imputation inputs. It refuses an existing destination.
+Seven restart integration tests compare restored metadata and genotypes with
+the canonical run, including missing-call differences.
+
+This is staging only. No new encrypted archive or GitHub Release is created.
+When the author creates the classroom archive, select this approved source and
+a new output directory. Replace both configured URLs and both expected hashes
+in `config.R` after approval; the old local test ZIP remains a distinct artifact.

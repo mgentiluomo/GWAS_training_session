@@ -143,8 +143,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=WORK / "release")
     parser.add_argument("--sevenzip", type=Path, default=Path(r"C:\Program Files\7-Zip\7z.exe"))
     args = parser.parse_args()
-    if args.source.resolve() != SOURCE.resolve():
-        parser.error("Production input must be sim2026/student. Tests call build() on isolated copies.")
+    approved = (SOURCE.resolve(), (WORK / "classroom-stage-2026.1").resolve())
+    if args.source.resolve() not in approved:
+        parser.error("Production input must be sim2026/student or the verified classroom-stage-2026.1 folder. Tests call build() on isolated copies.")
     import json
     print(json.dumps(build(args.source, args.output, args.sevenzip), indent=2))
 

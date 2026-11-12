@@ -72,7 +72,7 @@ guided_register <- function(cfg, step, parent, samples, variants, full = FALSE, 
     }
   } else if (!is.null(operations)) {
     for (i in seq_len(nrow(operations))) {
-      if (operations$option[i] %in% c("--remove", "--exclude", "--flip")) {
+      if (operations$option[i] %in% c("--remove", "--exclude", "--flip", "--update-sex", "--pheno")) {
         original <- operations$value[i]
         name <- basename(original)
         if (!file.copy(original, file.path(folder, name), overwrite = TRUE)) stop("Replay list copy failed.")
@@ -152,9 +152,24 @@ guided_artifact_checkpoint <- function(cfg, step, files, parent = "5.7") {
   guided_write(manifest, file.path(folder, "MANIFEST.tsv"))
   index_path <- file.path(cfg$out, "checkpoints", "index.tsv")
   index <- read.delim(index_path, colClasses = "character", na.strings = NULL)
-  row <- data.frame(step = step, kind = "artifacts", parent = parent, samples = 1811, variants = 238513)
+  previous <- index[index$step == parent, , drop = FALSE]
+  if (nrow(previous) != 1L) stop("The artifact checkpoint parent is unavailable.")
+  row <- data.frame(step = step, kind = "artifacts", parent = parent,
+    samples = previous$samples, variants = previous$variants)
   guided_write(rbind(index[index$step != step, ], row), index_path)
   invisible(folder)
+}
+
+guided_source_checkpoint <- function(cfg) {
+  folder <- file.path(cfg$out, "checkpoints")
+  dir.create(folder, recursive = TRUE, showWarnings = FALSE)
+  path <- file.path(folder, "index.tsv")
+  row <- data.frame(step = "2.2", kind = "source", parent = "", samples = 2016, variants = 299523)
+  if (file.exists(path)) {
+    old <- read.delim(path, colClasses = "character", na.strings = NULL)
+    row <- rbind(old[old$step != "2.2", ], row)
+  }
+  guided_write(row, path)
 }
 
 guided_liftover <- function(chromosome, position, chain_file) {

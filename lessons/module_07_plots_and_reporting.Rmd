@@ -436,7 +436,9 @@ metadata <- guided_metadata(cfg)
 all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
 all_file <- guided_path(cfg, "7.7", "all_ages.tsv"); guided_write(all_covar, all_file)
 no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.8"), "--maf", "0.01", "--covar", all_file,
+baseline <- guided_path(cfg, "2.8")
+if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
+run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
 main <- guided_association(guided_path(cfg, "6.4", "association"))
 a <- guided_association(no_pc); b <- guided_association(no_qc)

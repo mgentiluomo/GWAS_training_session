@@ -79,3 +79,15 @@ modules and unresolved checks will be recorded below before the final push.
   lambda approximately 1.546 and 1.655. All main plots were visually inspected;
   the regional legend was changed to ASCII ranges for Windows font portability,
   and the comparison plots now share a vertical scale.
+
+- Full main-path rerun: all eight notebooks executed in order in a fresh external
+  folder and passed instructor key/reference comparisons, including sample
+  removal identities (except the intentionally interchangeable relative-pair
+  choice), leading association p-values and main-scan test counts.
+- Recovery: seven restart targets (2.6, 3.2, 3.5, 4.5, 5.6, 6.4, 7.7) passed
+  metadata identity, expected counts and zero PLINK genotype differences with
+  missing calls included. Early source conversion and required diagnostic files
+  are now replayed too; full genotype copies remain at the four boundaries only.
+- Local release staging: 105 files, 634,410,035 bytes, under codex_work/classroom-stage-2026.1,
+  with a separate SHA-256 manifest. It includes the official chain and excludes
+  imputation material and instructor keys. The old 55-file test ZIP is unchanged.

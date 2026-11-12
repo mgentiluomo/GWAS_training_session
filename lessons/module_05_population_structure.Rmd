@@ -103,6 +103,7 @@ reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
 stopifnot(length(common) == 48614L)
+guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -235,6 +236,7 @@ score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenv
   "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
 run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))
+guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".eigenval", ".eigenvec.allele")), paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"), paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore")), parent = "5.2")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -377,7 +379,7 @@ bad <- study$IID[apply(abs(z), 1, max) > 6]
 remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))
 ops <- guided_replay_lists(cfg, "5.6", "4.6")
-guided_register(cfg, "5.6", "4.6", 1811, 238513, operations = ops)
+guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):

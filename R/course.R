@@ -276,8 +276,9 @@ course_pgen_counts <- function(prefix) {
 course_index <- function(data_dir) {
   index <- read.delim(file.path(data_dir, "checkpoints", "index.tsv"), colClasses = "character")
   if (!all(c("step", "kind", "parent", "samples", "variants") %in% names(index)) ||
-      anyDuplicated(index$step) || any(!index$step %in% course_step_order())) stop("Invalid checkpoint index.")
-  index
+      anyDuplicated(index$step) || any(!index$step %in% course_step_order()) ||
+      any(!index$kind %in% c("source", "full", "replay", "artifacts"))) stop("Invalid checkpoint index.")
+  index[order(match(index$step, course_step_order())), ]
 }
 
 course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
@@ -327,7 +328,8 @@ course_index_restore <- function(step, data_dir, work_dir) {
   candidates <- match(index$step, order)
   previous <- index$step[which.max(ifelse(candidates < position, candidates, -Inf))]
   if (!any(candidates < position)) stop("No earlier checkpoint is available.")
-  cfg <- course_config(".", output_dir = work_dir)
+  cfg <- course_config(".", data_dir = if (dir.exists(file.path(data_dir, "lab_export"))) data_dir else NULL,
+                       output_dir = work_dir)
   build <- function(target, visiting = character()) {
     if (target %in% visiting) stop("The checkpoint index contains a cycle.")
     row <- index[index$step == target, , drop = FALSE]
@@ -345,11 +347,26 @@ course_index_restore <- function(step, data_dir, work_dir) {
     }
     prefix <- file.path(work_dir, paste0("s", sub(".", "-", target, fixed = TRUE), "_state"))
     if (any(file.exists(paste0(prefix, c(".pgen", ".pvar", ".psam"))))) stop("Checkpoint output already exists. Choose a new work_dir.")
-    if (row$kind == "full") {
+    if (row$kind == "source") {
+      if (target != "2.2") stop("Unknown source checkpoint.")
+      source <- file.path(data_dir, "lab_export", "sim2026_lab")
+      require_files(paste0(source, c(".bed", ".bim", ".fam")))
+      run_plink(cfg, c("--bfile", source, "--make-pgen", "--out", prefix))
+    } else if (row$kind == "full") {
       source <- file.path(data_dir, "checkpoints", target, "state")
       require_files(paste0(source, c(".pgen", ".pvar", ".psam")))
       for (ext in c(".pgen", ".pvar", ".psam")) {
         if (!file.copy(paste0(source, ext), paste0(prefix, ext))) stop("Checkpoint copy failed.")
+      }
+      extras <- list.files(dirname(source), full.names = TRUE)
+      extras <- extras[!basename(extras) %in% paste0("state", c(".pgen", ".pvar", ".psam")) & !dir.exists(extras)]
+      for (extra in extras) {
+        target_file <- file.path(work_dir, basename(extra))
+        if (file.exists(target_file)) stop("A diagnostic output already exists. Choose a new work_dir.")
+        if (!file.copy(extra, target_file) ||
+            digest::digest(extra, file = TRUE, algo = "sha256") != digest::digest(target_file, file = TRUE, algo = "sha256")) {
+          stop("A checkpoint diagnostic file failed verification.")
+        }
       }
     } else {
       if (!nzchar(row$parent)) stop("A replay checkpoint needs an earlier full checkpoint.")
@@ -357,12 +374,13 @@ course_index_restore <- function(step, data_dir, work_dir) {
       operations <- read.delim(file.path(data_dir, "checkpoints", target, "operations.tsv"),
                                colClasses = "character", na.strings = NULL)
       if (!identical(names(operations), c("option", "value"))) stop("Invalid replay operations.")
-      allowed <- c("--remove", "--exclude", "--flip", "--split-par", "--set-all-var-ids", "--rm-dup")
+      allowed <- c("--remove", "--exclude", "--flip", "--split-par", "--set-all-var-ids", "--rm-dup",
+        "--update-sex", "--pheno", "--pheno-name")
       if (any(!operations$option %in% allowed)) stop("Unsupported checkpoint replay operation.")
       arguments <- character()
       for (i in seq_len(nrow(operations))) {
         value <- operations$value[i]
-        if (operations$option[i] %in% c("--remove", "--exclude", "--flip")) {
+        if (operations$option[i] %in% c("--remove", "--exclude", "--flip", "--update-sex", "--pheno")) {
           if (grepl("(^|/)\\.\\.(/|$)|^[\\\\/]|:", value)) stop("Unsafe checkpoint list path.")
           value <- file.path(data_dir, "checkpoints", target, value)
           require_files(value)
