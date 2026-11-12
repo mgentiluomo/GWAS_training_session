@@ -507,3 +507,219 @@ A method that reads almost every base of a person's DNA. An array reads only a c
 ### Working directory and project root {#working-directory}
 
 The working directory is the folder where R looks first for files. In this course it is the project root, the main folder of the project.
+
+### Read {#read}
+
+A sequence measured from one DNA molecule. Its length depends on the instrument and preparation.
+
+### Sequencing {#sequencing}
+
+Measuring the order of DNA bases. The output contains reads and uncertainty about their bases.
+
+### Sequencing depth {#sequencing-depth}
+
+The number of reads covering a base. Mean depth 30x means an average of 30 reads, not 30 at every base.
+
+### Marker density {#marker-density}
+
+The number and spacing of measured variant sites across a genomic region. It is not sequencing depth.
+
+### Amplicon {#amplicon}
+
+A DNA segment copied by a laboratory amplification reaction before sequencing. Copying can favour one allele or introduce errors.
+
+### Exome {#exome}
+
+The protein-coding parts of genes. Whole-exome sequencing enriches these regions before reading them, with uneven coverage.
+
+### Targeted panel {#targeted-panel}
+
+A test designed to measure a chosen set of genes or regions. More reads inside these targets do not measure regions outside them.
+
+### File format {#file-format}
+
+Rules that specify how a file stores records, fields and metadata.
+
+### Text and binary files {#text-binary}
+
+A text file stores readable characters with a defined character encoding. A binary format stores structured bytes; a byte contains eight bits.
+
+### Pipeline {#pipeline}
+
+A sequence of processing steps. Each step takes defined inputs and produces outputs used by later steps.
+
+### IDAT {#idat}
+
+An Illumina binary array file containing fluorescence measurements and scanner information. Genotype calling is a later step.
+
+### Array manifest: BPM and CSV {#array-manifest}
+
+A description of array probes, sites, allele coding and related information. Illumina BPM is binary; CSV stores comma-separated text fields.
+
+### EGT {#egt}
+
+An Illumina cluster file that describes signal groups used for genotype calling. It contains a calling model, not a genotype row for every sample.
+
+### GTC {#gtc}
+
+An Illumina binary output containing genotype calls and related sample measurements. It is distinct from raw scanner IDAT intensities.
+
+### CEL {#cel}
+
+A Thermo Fisher/Affymetrix array intensity format. Common versions are binary; older text variants exist. Array-specific definitions are needed for calling.
+
+### BCL {#bcl}
+
+Illumina sequencing base-call data organised by instrument cycles. Conversion and sample separation produce downstream read files such as FASTQ.
+
+### FASTQ {#fastq}
+
+A text read format with identifier, sequence, separator and quality lines. Quality characters encode uncertainty at each read base.
+
+### POD5 and FAST5 {#pod5-fast5}
+
+Oxford Nanopore raw signal containers. POD5 uses an Arrow-based binary representation and replaces the legacy HDF5-based FAST5 format. Arrow and HDF5 are general structured-data storage systems.
+
+### Basecalling {#basecalling}
+
+Converting an instrument signal into sequence bases and base-quality estimates. It differs from assigning array genotypes.
+
+### SAM, BAM and CRAM {#sam-bam-cram}
+
+Formats for reads and alignments. SAM is text; BAM is a compressed binary representation. CRAM stores compressed reads, often using a matching reference sequence.
+
+### Alignment {#alignment}
+
+A proposed match between a read and a reference sequence. It can contain mismatches, insertions and deletions.
+
+### Index {#index}
+
+A companion structure that points to records or regions in a file. BAI and CSI can index BAM, CRAI indexes CRAM, and TBI or CSI can index compressed genomic text. Regenerate the index when the underlying file changes.
+
+### gVCF {#gvcf}
+
+A VCF convention containing variant evidence and reference blocks, often for one sample before joint calling. A reference block represents a stretch as non-variant under the caller model; it does not prove every base was measured perfectly.
+
+### VCF and BCF {#vcf-bcf}
+
+Variant Call Format is a text format for sites, alleles, annotations and sample fields. BCF stores the same logical information in binary form.
+
+### bgzip and tabix {#bgzip-tabix}
+
+bgzip uses independently compressed blocks so software can seek to a region. Tabix indexes sorted genomic text in this blocked gzip representation. Ordinary gzip compression alone does not provide the same random access.
+
+### Hail MatrixTable and VariantDataset {#hail-formats}
+
+Hail is software for large genetic datasets. MatrixTable stores variant rows, sample columns and entries. VariantDataset separates variant entries from reference blocks to represent sparse sequence data efficiently.
+
+### BGEN {#bgen}
+
+A binary format for genotypes and genotype probabilities. Layout 2, used by BGEN 1.2, supports multiple alleles, variable chromosome-copy counts and configurable probability precision.
+
+### GEN {#gen}
+
+An Oxford text format describing variants and genotype probabilities. A common two-allele version stores three probabilities per sample plus variant identifiers, position and alleles.
+
+### PED and MAP {#ped-map}
+
+A PLINK text fileset. PED has sample rows, six family/sample fields and allele pairs. MAP describes variants in the same order.
+
+### TPED and TFAM {#tped-tfam}
+
+A transposed PLINK text fileset. TPED has variant rows followed by sample allele pairs. TFAM lists samples in the corresponding order.
+
+### UCSC BED {#ucsc-bed}
+
+A text format for genomic intervals. Its start is zero-based and included; its end is excluded. It is unrelated to the binary PLINK BED genotype format.
+
+### GFA {#gfa}
+
+Graphical Fragment Assembly: a text format describing sequence segments and links. Alternative paths can represent different versions of a genomic region.
+
+### FASTA and FAI {#fasta-fai}
+
+FASTA stores a header beginning with > followed by sequence bases. Its FAI index gives the sequence name, length, first-base byte offset, bases per line and bytes per line including newline characters.
+
+### Contig {#contig}
+
+A continuous sequence represented as one named unit. It can be an assembled segment, a chromosome sequence or an invented teaching sequence.
+
+### GWAS-SSF {#gwas-ssf}
+
+The GWAS Summary Statistics Format used by the GWAS Catalog. It defines association-table columns and accompanying study metadata. Similar column names alone do not establish a valid submission.
+
+### Coordinate system {#coordinate-system}
+
+A rule for numbering bases and intervals. VCF positions are one-based. UCSC BED starts are zero-based and its interval ends are excluded.
+
+### Illumina TOP/BOT {#top-bot}
+
+Illumina probe-strand labels defined by sequence context. They do not automatically mean the genomic forward or reverse strand. Use the matching manifest and the checks at 2.5.
+
+### Compression {#compression}
+
+Encoding information using fewer bytes. Lossless compression preserves the original information. Some formats separately reduce numerical precision, which can lose information.
+
+### Header {#header}
+
+The opening records that define a file version, column names or metadata. Different formats allow different header syntax; some have no header.
+
+### Magic bytes and hexadecimal {#magic-bytes}
+
+A distinctive byte pattern used by some formats. Hexadecimal writes a byte with two base-16 digits, from 00 to ff. A signature may occur after other header fields rather than at byte zero.
+
+### Phred quality {#phred-quality}
+
+A score Q = -10 * log10(p), where p is an estimated error probability. Phred+33 adds 33 to the score to obtain the ASCII character code. ASCII is a standard mapping from characters to numbers. Base quality and mapping quality describe different errors.
+
+### CIGAR {#cigar}
+
+An alignment-operation string. M consumes a read and reference base; I consumes read bases only; D consumes reference bases only. S denotes clipped read bases retained in the sequence. The example 4M1I5M spans ten read bases and nine reference bases.
+
+### Bit flag {#bit-flag}
+
+An integer whose binary digits encode separate yes/no properties. SAM FLAG combines properties such as paired status, unmapped status and reverse orientation. Zero denotes an unpaired forward alignment with no flags set.
+
+### VCF GT {#vcf-genotype}
+
+A genotype expressed as allele indices. Zero names REF, one names the first ALT, and a dot means missing. A slash leaves allele order unphased; a vertical bar records phase.
+
+### Phasing {#phasing}
+
+Estimating which alleles lie together on the same inherited chromosome copy. An unphased genotype alone does not provide this arrangement.
+
+### Genotype probability: GP {#genotype-probability}
+
+A probability assigned to a possible genotype. For a two-allele diploid VCF site, GP values follow 0/0, 0/1 and 1/1. They sum to one when present. Dosage is their expected alternative-allele count. For a haploid two-allele call, GP lists probabilities for 0 and 1; dosage is GP(1).
+
+### Controlled access {#controlled-access}
+
+Access granted to approved researchers under specified permissions. A format description does not grant permission to download or use restricted data.
+
+### Distributed data {#distributed-data}
+
+Data stored or processed across multiple computing workers. This can make cohort-wide analysis practical without loading the whole dataset on one laptop.
+
+### Allele balance {#allele-balance}
+
+The fraction of measured evidence supporting each allele. Laboratory amplification, alignment and other biases can make a heterozygous site appear unequal.
+
+### Structural variant {#structural-variant}
+
+A larger change in DNA structure, such as a deletion, duplication, inversion or rearrangement. Definitions often use a size threshold around 50 bases.
+
+### Sequence capture {#sequence-capture}
+
+Enriching selected DNA regions before sequencing. Capture does not measure all targets equally well.
+
+### Low-pass sequencing {#low-pass}
+
+Whole-genome sequencing at sparse depth, often followed by imputation. Accuracy depends on measured evidence and the reference panel.
+
+### Short and long reads {#long-read}
+
+Read length is the number of measured bases in one read. Short reads usually span hundreds of bases or fewer. Long reads commonly span thousands or more; exact lengths depend on the platform and preparation.
+
+### Natural logarithm {#logarithm}
+
+The logarithm with base e. In this course beta = log(odds ratio), so exponentiating beta recovers the odds ratio.

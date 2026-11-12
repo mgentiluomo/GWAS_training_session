@@ -223,7 +223,7 @@ download_course_data <- function(password = NULL, destination = "data/course", r
 }
 
 course_step_order <- function() {
-  counts <- c(8L, 7L, 8L, 8L, 6L, 7L, 8L, 8L)
+  counts <- c(8L, 11L, 8L, 8L, 6L, 7L, 8L, 8L)
   unlist(lapply(seq_along(counts), function(i) paste0(i - 1L, ".", seq_len(counts[i]))), use.names = FALSE)
 }
 

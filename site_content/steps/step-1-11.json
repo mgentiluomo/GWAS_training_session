@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "id": "1.11",
+  "module": 1,
+  "step": 11,
+  "anchor": "step-1-11",
+  "title": "How large projects share genetic data",
+  "source": "lessons/module_01_from_dna_to_array_data.Rmd",
+  "source_sha256": "7fc7730beab59bd66db1b50f9113eecb59591a0767eb8ecad51a2323999732e9",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Compare three controlled-access resources. [Controlled access](../docs/glossary.md#controlled-access) means that approved researchers use data under specified permissions.",
+    "why": "[UK Biobank](https://community.ukbiobank.ac.uk/hc/en-gb/articles/15468170680605-Genome-wide-genotyping) combines array calls with imputation and sequencing. Its arrays were UK BiLEVE Axiom and UK Biobank Axiom, now associated with Thermo Fisher. Called array data can use PLINK sets. Imputed genotypes use BGEN probabilities with sample descriptions. Sequence resources also use read alignments and variant files. The exact available files depend on the release and approved access.\n\n[All of Us](https://www.researchallofus.org/data-tools/methods/) offers array and sequencing data in its research environment. Array exports include VCF, PLINK and Hail MatrixTable representations. Short-read whole-genome data include CRAM and Hail VariantDataset. Selected variant sets also have VCF, PLINK, MatrixTable or BGEN representations. An exome subset selected from whole-genome sequencing is not a separate whole-exome experiment. Long-read resources use additional alignment, variant and assembly formats. Availability depends on the release and access tier.\n\n[dbGaP](https://www.ncbi.nlm.nih.gov/gap/) is a controlled-access archive across studies, not one uniform genotype dataset. Deposited data can include PLINK sets or VCF. Sequence reads and alignments may be linked through the Sequence Read Archive, an archive for sequencing measurements. Read each study's file descriptions and access conditions rather than expecting one mandatory format.\n\nWhy offer more than one representation? A [distributed dataset](../docs/glossary.md#distributed-data) can spread work across many computers. Hail stores make repeated cohort-wide processing practical. BGEN keeps probability information compact. PLINK sets support efficient association tools. CRAM retains read-level evidence. Summary statistics are smaller but cannot answer every question about individual calls. Format choice is about scale, retained information and intended analysis, not which extension is newest.\n\n**References:** [UK Biobank, PMID 30305743](https://pubmed.ncbi.nlm.nih.gov/30305743/); [All of Us genomic data, PMID 38374255](https://pubmed.ncbi.nlm.nih.gov/38374255/); [dbGaP, PMID 24297256](https://pubmed.ncbi.nlm.nih.gov/24297256/).",
+    "you_need": "Steps 1.8 to 1.10. No access application is needed for this reading.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can explain why an archive may supply alignments, genotype probabilities and compact analysis files for different tasks.",
+    "troubleshooting": "Do not download restricted data for this course. Use the invented examples and the supplied simulated classroom dataset. Check the resource documentation for release-specific details.",
+    "quick_check": "Would summary statistics let you inspect whether one person's read alignment supports a variant?\n\n<details><summary>Show the answer</summary>\n\nNo. They summarise an association analysis. Read-level inspection needs authorised access to the relevant alignment data.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

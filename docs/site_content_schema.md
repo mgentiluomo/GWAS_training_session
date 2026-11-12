@@ -8,7 +8,7 @@ Regenerate both without reading genotype data or building the older demo site:
 python -B scripts/build_tutorial.py --export-steps site_content/steps --export-main-script scripts/run_main_path.R
 ```
 
-The command creates 60 JSON files, one per main-path step. It does not generate
+The command creates 64 JSON files, one per main-path step. It does not generate
 images, download data, publish a website or create an encrypted release.
 
 | Field | Type | Meaning |
@@ -158,3 +158,27 @@ edited by hand.
 A step ends at the next level-2 heading, so the recap never becomes part of the
 last step's "Files created" block.
 
+
+## Invented format examples
+
+The export also copies the authorised tiny files from `examples/formats/` to
+`site_content/formats/examples/`. These are invented reading aids, not classroom
+data. It generates one JSON description per example plus descriptions without
+assets for IDAT, GTC, CEL, BAM, CRAM and POD5. The descriptions come from
+`scripts/author/make_format_examples.py`. Exporting reads existing examples;
+it does not run PLINK or generate new genotypes.
+
+Each description has `file_name`, `format`, `encoding` (text or binary),
+`producer`, `pipeline_position`, `columns_or_fields` (a name and one sentence per
+field), `header_notes`, `magic_bytes` and `asset`. Concrete examples also record
+`label`, `size_bytes` and `sha256`. `asset` is relative to the formats folder.
+Description-only records have null `file_name`, `asset` and `magic_bytes`; they
+link to official documentation. No vendor binary is supplied. Binary examples
+have companion hex dumps. Strict indexes and binaries carry the invented-example
+label in their filename and JSON because arbitrary comments would corrupt them.
+The copied bytes are identical, including newlines and FASTA index offsets.
+When resolving notebook links under `../examples/formats/`, the website can use
+this catalogue to select the matching asset under `formats/examples/`.
+
+Steps 1.8 to 1.11 have no executable commands and no `setup_code`. Conversion
+syntax appears in their reading text only. It never enters the main-path script.

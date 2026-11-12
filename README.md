@@ -32,8 +32,8 @@ or cloned folder. Then read and run the numbered steps in order.
 | 7 | [Plots and final summary](lessons/module_07_plots_and_reporting.Rmd) |
 
 **The classroom data are available in [release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1).**
-The repository holds code and text,
-never genotype data. The verified simulated main path starts with 2,016 wells
+The repository holds code and text. Its only genotype-file exception is the
+tiny invented format examples described below. Classroom data stay outside Git. The verified simulated main path starts with 2,016 wells
 and 299,523 array entries; its final cohort has 1,811 samples, 238,513 post-QC
 variants and 236,815 association tests. Release download URLs and SHA-256 values
 are configured in `config.R`. After opening the project and preparing the packages,
@@ -52,7 +52,13 @@ QQ and regional plots, lead variants with effect alleles/intervals, comparisons
 and `s7-8_summary.md`. See [Windows validation](VALIDATION.md) and the
 [session report](docs/session_report.md) for results and limits.
 
-The [website JSON schema](docs/site_content_schema.md) documents the 60 exported
+Module 1 has 11 steps. Steps 1.8 to 1.11 are reading only. They compare data
+sources, explain file formats and introduce large data resources. The
+[invented format examples](examples/formats/) are tiny reading aids, separate
+from the classroom dataset. Regenerate them offline with
+`python -I -B scripts/author/make_format_examples.py`, using the configured PLINK 2.
+
+The [website JSON schema](docs/site_content_schema.md) documents the 64 exported
 steps. No new website is deployed; site design still requires a mockup.
 Modules A/B and post-GWAS analysis were not started.
 

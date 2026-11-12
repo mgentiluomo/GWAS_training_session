@@ -18,7 +18,7 @@ import tempfile
 
 # One sentence per field. These definitions also generate the website catalogue.
 FAM = {"FID": "Family identifier, set equal to the invented sample identifier.", "IID": "Individual identifier S1 to S4.", "PAT": "Father identifier, zero when not supplied.", "MAT": "Mother identifier, zero when not supplied.", "SEX": "Sex code: 1 male, 2 female, 0 unknown.", "PHENO": "Phenotype code, -9 when not supplied."}
-VCF_FIELDS = {"CHROM": "Chromosome name.", "POS": "One-based position of the first reference base.", "ID": "Invented variant identifier.", "REF": "Reference allele in this invented example.", "ALT": "Alternative allele, or a symbolic allele such as NON_REF.", "QUAL": "Variant quality score, a dot when not supplied.", "FILTER": "PASS denotes no failed example filter.", "INFO": "Site annotations, including END or R2 when declared in the header.", "FORMAT": "Names and order of the sample fields.", "S1-S4": "Sample values follow FORMAT; the gVCF contains only S1.", "GT": "Genotype allele indices, where 0 is REF, 1 is the first ALT, and a dot is missing.", "DS": "Expected ALT count, equal to GP(0/1) plus twice GP(1/1) for a diploid biallelic site.", "GP": "Probabilities for 0/0, 0/1 and 1/1, in that order.", "R2": "Invented imputation quality annotation, not calculated from these four samples.", "END": "One-based last included base of a reference block."}
+VCF_FIELDS = {"CHROM": "Chromosome name.", "POS": "One-based position of the first reference base.", "ID": "Invented variant identifier.", "REF": "Reference allele in this invented example.", "ALT": "Alternative allele, or a symbolic allele such as NON_REF.", "QUAL": "Variant quality score, a dot when not supplied.", "FILTER": "PASS denotes no failed example filter.", "INFO": "Site annotations, including END or R2 when declared in the header.", "FORMAT": "Names and order of the sample fields.", "S1-S4": "Sample values follow FORMAT; the gVCF contains only S1.", "GT": "Genotype allele indices, where 0 is REF, 1 is the first ALT, and a dot is missing.", "DS": "Expected ALT count, equal to GP(0/1) plus twice GP(1/1) for a diploid biallelic site, or GP(1) when haploid.", "GP": "Probabilities for 0/0, 0/1 and 1/1 in diploid calls, or 0 and 1 in haploid calls.", "R2": "Invented imputation quality annotation, not calculated from these four samples.", "END": "One-based last included base of a reference block."}
 
 
 def catalogue_entry(path: Path) -> dict:
@@ -59,10 +59,11 @@ def catalogue_entry(path: Path) -> dict:
         notes += ["Double-hash metadata lines may precede the column header.", "REF from the invented VCF is retained; this does not check GRCh38."]
     elif suffix == ".psam":
         fields = {k: FAM[k] for k in ("FID", "IID", "SEX")}
+        fields["SEX"] = "Sex code: 1 male, 2 female, NA unknown in this PSAM."
         producer, stage = "PLINK 2 --make-pgen", "Sample metadata paired with PGEN"
         notes += ["The hash-prefixed header names fields; sex 0 means unknown."]
     elif suffix == ".sample":
-        fields = {"ID_1": "First sample identifier, here the family identifier.", "ID_2": "Second sample identifier, here the individual identifier.", "missing": "Missingness placeholder in the sample description, not a recalculated QC statistic.", "sex": "Sex code, where NA is unknown, 1 male and 2 female."}
+        fields = {"ID_1": "First sample identifier, here the family identifier.", "ID_2": "Second sample identifier, here the individual identifier.", "missing": "Proportion of missing genotype calls across the five exported sites.", "sex": "Sex code, where NA is unknown, 1 male and 2 female."}
         producer, stage = "PLINK 2 BGEN export", "Sample order alongside BGEN probabilities"
         notes += ["The first row names fields; the second row declares field types."]
     elif suffix == ".fasta":
@@ -131,9 +132,9 @@ def export_formats(destination: Path) -> list[dict]:
         write(destination / slug, json.dumps(entry, ensure_ascii=False, indent=2) + "\n")
         entries.append(entry)
     descriptions = {
-        "IDAT": ("Illumina scanner", "Raw fluorescence before genotype calling", "Intensity records and scanner metadata", "https://support.illumina.com/array/array_software/genomestudio/documentation.html"),
-        "GTC": ("Illumina genotype calling software", "Called array genotypes before text export", "Sample identifiers, calls, confidence and intensity records", "https://support.illumina.com/array/array_software/illumina-array-analysis-platform/documentation.html"),
-        "CEL": ("Thermo Fisher array scanner software", "Probe intensities before Axiom calling", "Probe intensity and array metadata records", "https://www.thermofisher.com/us/en/home/life-science/microarray-analysis.html"),
+        "IDAT": ("Illumina scanner", "Raw fluorescence before genotype calling", "Intensity records and scanner metadata", "https://support-docs.illumina.com/ARR/iScan/Content/ARR/iScan/GeneratedFiles_fIS.htm"),
+        "GTC": ("Illumina genotype calling software", "Called array genotypes before text export", "Sample identifiers, calls, confidence and intensity records", "https://support-docs.illumina.com/ARR/iScan/Content/ARR/iScan/GeneratedFiles_fIS.htm"),
+        "CEL": ("Thermo Fisher array scanner software", "Probe intensities before Axiom calling", "Probe intensity and array metadata records", "https://assets.thermofisher.com/TFS-Assets/GSD/brochures/axiom-analysis-suite-user-guide.pdf"),
         "BAM": ("Alignment software and SAMtools", "Compressed aligned reads before variant calling", "Binary representation of SAM fields", "https://samtools.github.io/hts-specs/SAMv1.pdf"),
         "CRAM": ("Alignment software and SAMtools", "Compressed reads, often encoded against a reference", "Read and alignment containers plus reference identifiers", "https://samtools.github.io/hts-specs/CRAMv3.pdf"),
         "POD5": ("Oxford Nanopore MinKNOW", "Raw electrical signals before basecalling", "Signal and read metadata in an Arrow-based container", "https://software-docs.nanoporetech.com/pod5/latest/")}
@@ -179,11 +180,15 @@ def vcf(dosages=False):
     if dosages:
         header += ('##INFO=<ID=R2,Number=1,Type=Float,Description="Invented imputation quality; not estimated from these samples">\n'
                    '##FORMAT=<ID=DS,Number=1,Type=Float,Description="Expected ALT allele count">\n'
-                   '##FORMAT=<ID=GP,Number=G,Type=Float,Description="Probabilities for 0/0,0/1,1/1">\n')
+                   '##FORMAT=<ID=GP,Number=G,Type=Float,Description="Probabilities for 0/0,0/1,1/1 if diploid; 0,1 if haploid">\n')
     rows = [header + "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join(SAMPLES)]
     values = {"0/0": "0/0:0.1:0.91,0.08,0.01", "0/1": "0/1:1:0.1,0.8,0.1",
-              "1/1": "1/1:1.9:0.01,0.08,0.91", "./.": "./.:.:.,.,."}
+              "1/1": "1/1:1.9:0.01,0.08,0.91", "./.": "./.:.:.,.,.",
+              "0": "0:0.05:0.95,0.05", "1": "1:0.95:0.05,0.95"}
     for chrom, pos, vid, ref, alt, genotypes in VARIANTS:
+        # S1 is male. These chrX sites are outside the pseudoautosomal regions.
+        if chrom == "X":
+            genotypes = (genotypes[0][0], *genotypes[1:])
         rows.append("\t".join(map(str, (chrom, pos, vid, ref, alt, ".", "PASS",
                     "R2=0.92" if dosages else ".", "GT:DS:GP" if dosages else "GT",
                     *(values[g] if dosages else g for g in genotypes)))))
@@ -253,7 +258,10 @@ def generate(plink: Path) -> dict:
         stats = "# invented example; effects are illustrative, not estimates from four samples\nchromosome\tbase_pair_location\tvariant_id\teffect_allele\tother_allele\teffect_allele_frequency\todds_ratio\tbeta\tstandard_error\tp_value\tn\n"
         for i, (c, p, v, ref, alt, calls) in enumerate(VARIANTS):
             called = [g for g in calls if g != "./."]
-            freq = sum(g.count("1") for g in called) / (2 * len(called))
+            allele_calls = [g.replace("/", "") for g in called]
+            if c == "X":
+                allele_calls[0] = allele_calls[0][0]
+            freq = sum(g.count("1") for g in allele_calls) / sum(map(len, allele_calls))
             odds = 1.1 + i / 10
             stats += f"{c}\t{p}\t{v}\t{alt}\t{ref}\t{freq:.6g}\t{odds:.6g}\t{math.log(odds):.10g}\t0.2\t0.5\t{len(called)}\n"
         write(folder / f"{LABEL} summary.tsv", stats)

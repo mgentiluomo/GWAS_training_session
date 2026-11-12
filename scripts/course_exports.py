@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -167,7 +168,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                       "title": match.group(3), "source": path.relative_to(root).as_posix(),
                       "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
                       "verification": verification,
-                      "blocks": blocks, "setup_code": "\n\n".join(setup), "r_commands": r_commands,
+                      "blocks": blocks, "setup_code": "\n\n".join(setup) if r_commands else "", "r_commands": r_commands,
                       "notebook_only_expected_code": expected_render_code,
                       "plink": {"applicable": bool(commands), "commands": commands, "options": options},
                       "figures": figures}
@@ -175,8 +176,8 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             if interactive:
                 record["interactive_data"] = json.loads(interactive.group(1))
             records.append(record)
-    if len(records) != 60 or len({r["id"] for r in records}) != 60:
-        raise ValueError("The main path must have 60 unique steps.")
+    if len(records) != 64 or len({r["id"] for r in records}) != 64:
+        raise ValueError("The main path must have 64 unique steps.")
     return records
 
 
@@ -239,7 +240,11 @@ def main() -> None:
         for record in modules:
             (module_dir / f"module-{record['module']}.json").write_text(
                 json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        print(f"Exported {len(records)} steps and {len(modules)} module pages; no data files or website deployment created.")
+        spec = importlib.util.spec_from_file_location("format_examples", ROOT / "scripts/author/make_format_examples.py")
+        formats = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(formats)
+        entries = formats.export_formats(args.export_steps.parent / "formats")
+        print(f"Exported {len(records)} steps, {len(modules)} module pages and {len(entries)} format descriptions with tiny invented examples; no classroom data or website deployment created.")
     if args.export_main_script:
         args.export_main_script.write_text(main_script(), encoding="utf-8")
         print(f"Exported {args.export_main_script} from canonical notebook chunks.")

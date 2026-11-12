@@ -60,9 +60,9 @@ class FormatExamplesTests(unittest.TestCase):
                 if gt == "./.":
                     self.assertEqual(ds, ".")
                     continue
-                p0, p1, p2 = map(float, gp.split(","))
-                self.assertAlmostEqual(p0+p1+p2, 1)
-                self.assertAlmostEqual(float(ds), p1 + 2*p2)
+                probabilities = list(map(float, gp.split(",")))
+                self.assertAlmostEqual(sum(probabilities), 1)
+                self.assertAlmostEqual(float(ds), sum(i * p for i, p in enumerate(probabilities)))
 
     def test_catalogue_mirrors_every_example_and_describes_binaries_only(self):
         with tempfile.TemporaryDirectory(dir=ROOT / "examples") as folder:

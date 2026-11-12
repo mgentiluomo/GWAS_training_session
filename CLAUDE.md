@@ -33,7 +33,7 @@ The course is an independent teaching resource for students across University of
 - The repository was recreated without course data in Git. The only data-file exception is tiny invented teaching examples in `examples/formats/`, as defined below. Never commit real or simulated classroom datasets.
 - `main` still holds the original 2025 course. It is archived in the tag `2025-original`. Link to that tag, never to `main`, when referring to 2025 material.
 - The GitHub default branch is `course/2026-guided-training`. Both Code > Download ZIP from the repository home and a plain `git clone` give the guided 2026 course. No branch change is needed. Work happens on this branch. `01_Codes/` has been removed from it.
-- Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Classroom data are available as encrypted GitHub Release assets under `data-2026.1`. No data files are stored in Git.
+- Historical DB_A inputs now use `data/legacy/`. Guided 2026 inputs use `data/course/`. Classroom data are available as encrypted GitHub Release assets under `data-2026.1`. No classroom data files are stored in Git. Only the tiny invented examples defined below are permitted.
 - Keep and extend: `R/course.R` (PLINK execution from R, decimal, encoding and identifier safeguards), `scripts/preflight.R`, `scripts/check_course.R`, `VALIDATION.md`, the single-source principle of `scripts/build_tutorial.py` (site pages are generated from tested notebooks, never maintained as a second copy of the code), SHA-256 manifests for packages.
 
 ## Current status
@@ -51,7 +51,7 @@ The course is an independent teaching resource for students across University of
 - Modules 0 to 7 are implemented in `lessons/module_00_*.Rmd` through `module_07_*.Rmd` and executed on Windows against the external instructor key/reference run. Final cohort: 1,811 samples (900 cases, 911 controls), 238,513 post-QC variants, 236,815 association tests, eight significant variants in three clumps; autosomal lambda 1.016465.
 - `download_course_data`, `restore_checkpoint`, `check_step` and `where_am_i` exist. Unicode PLINK paths and seven intermediate restart states passed Windows integration checks. Full genotype boundaries are 2.8, 3.8, 4.6 and 5.7; other states use replay lists and diagnostic artifacts.
 - A new main-path staging folder exists at `C:\WEB_site\data_sources\codex_work\classroom-stage-2026.1-final\` (108 files, 656,298,229 bytes), with a SHA-256 sidecar. It includes the official lift-over chain and excludes instructor keys and imputation inputs. The original 55-file local test ZIP is unchanged.
-- `scripts/run_main_path.R` is generated from the notebooks and has been executed on the new staging folder. `scripts/build_tutorial.py` can export 60 JSON steps (step 6.8 writes the GWAS summary statistics file) without accessing data; their schema is in `docs/site_content_schema.md`. Do not edit generated code/content as a second source.
+- `scripts/run_main_path.R` is generated from the notebooks and has been executed on the new staging folder. `scripts/build_tutorial.py` can export 64 JSON steps (step 6.8 writes the GWAS summary statistics file) without accessing data; their schema is in `docs/site_content_schema.md`. Do not edit generated code/content as a second source.
 - Beginner text pass, step 6.8 (summary statistics file), a four-pass student rehearsal and release preparation are done. See `docs/session_report.md`, `docs/student_rehearsal.md` and `docs/release_checklist.md`. Next steps: check the published release from a clean installation (checklist), complete macOS/Linux and masked-prompt checks, then the website (mockup first). Do not start modules A/B or post-GWAS work without a new request.
 
 ## Technical decisions
@@ -69,7 +69,7 @@ Modules 0 to 7 form the main path; A and B are additional.
 | Module | Topic |
 | --- | --- |
 | 0 | Preparing the computer: what you need (0.1), install R (0.2), install RStudio (0.3), download PLINK 2 (0.4), download the course package (0.5), open the project (0.6), run the setup check (0.7), how to use this guide (0.8) |
-| 1 | From DNA to array data: SNPs and genotypes (1.1), how a genotyping array works (1.2), the Global Screening Array (1.3), from sample to scanned chip (1.4), calling genotypes (1.5), problems born in the lab (1.6), the export (1.7) |
+| 1 | From DNA to array data: SNPs and genotypes (1.1), how a genotyping array works (1.2), the Global Screening Array (1.3), from sample to scanned chip (1.4), calling genotypes (1.5), problems born in the lab (1.6), the export (1.7), data sources (1.8), format map (1.9), format fields and invented examples (1.10), large data resources (1.11) |
 | 2 | Files and formats: the starting files (2.1), convert to binary format (2.2), samples and variants files (2.3), first overview (2.4), alleles and strand (2.5), genome builds GRCh37 and GRCh38 (2.6), add phenotype and covariates (2.7), checkpoint (2.8) |
 | 3 | Sample QC: rough clean (3.1), call rate (3.2), sex check (3.3), LD pruning (3.4), heterozygosity (3.5), relatedness and duplicates (3.6), batch effects (3.7), summary (3.8) |
 | 4 | Variant QC: call rate (4.1), differential missingness (4.2), allele frequency (4.3), Hardy-Weinberg with a sample-size-aware threshold (4.4), sex chromosomes, MT and duplicated variants (4.5), summary (4.6) |

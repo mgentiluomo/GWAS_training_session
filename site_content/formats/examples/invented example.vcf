@@ -9,5 +9,5 @@
 1	100001	toy_v1	A	G	.	PASS	.	GT	0/0	0/1	1/1	0/1
 1	100101	toy_v2	C	T	.	PASS	.	GT	0/1	0/0	0/1	1/1
 2	200001	toy_v3	G	A	.	PASS	.	GT	1/1	0/1	./.	0/0
-X	5000001	toy_v4	T	C	.	PASS	.	GT	0/0	0/1	1/1	0/0
-X	5000101	toy_v5	A	C	.	PASS	.	GT	1/1	0/0	0/1	1/1
+X	5000001	toy_v4	T	C	.	PASS	.	GT	0	0/1	1/1	0/0
+X	5000101	toy_v5	A	C	.	PASS	.	GT	1	0/0	0/1	1/1

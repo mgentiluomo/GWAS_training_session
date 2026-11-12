@@ -7,10 +7,10 @@
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Called genotype">
 ##INFO=<ID=R2,Number=1,Type=Float,Description="Invented imputation quality; not estimated from these samples">
 ##FORMAT=<ID=DS,Number=1,Type=Float,Description="Expected ALT allele count">
-##FORMAT=<ID=GP,Number=G,Type=Float,Description="Probabilities for 0/0,0/1,1/1">
+##FORMAT=<ID=GP,Number=G,Type=Float,Description="Probabilities for 0/0,0/1,1/1 if diploid; 0,1 if haploid">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S1	S2	S3	S4
 1	100001	toy_v1	A	G	.	PASS	R2=0.92	GT:DS:GP	0/0:0.1:0.91,0.08,0.01	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91	0/1:1:0.1,0.8,0.1
 1	100101	toy_v2	C	T	.	PASS	R2=0.92	GT:DS:GP	0/1:1:0.1,0.8,0.1	0/0:0.1:0.91,0.08,0.01	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91
 2	200001	toy_v3	G	A	.	PASS	R2=0.92	GT:DS:GP	1/1:1.9:0.01,0.08,0.91	0/1:1:0.1,0.8,0.1	./.:.:.,.,.	0/0:0.1:0.91,0.08,0.01
-X	5000001	toy_v4	T	C	.	PASS	R2=0.92	GT:DS:GP	0/0:0.1:0.91,0.08,0.01	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91	0/0:0.1:0.91,0.08,0.01
-X	5000101	toy_v5	A	C	.	PASS	R2=0.92	GT:DS:GP	1/1:1.9:0.01,0.08,0.91	0/0:0.1:0.91,0.08,0.01	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91
+X	5000001	toy_v4	T	C	.	PASS	R2=0.92	GT:DS:GP	0:0.05:0.95,0.05	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91	0/0:0.1:0.91,0.08,0.01
+X	5000101	toy_v5	A	C	.	PASS	R2=0.92	GT:DS:GP	1:0.95:0.05,0.95	0/0:0.1:0.91,0.08,0.01	0/1:1:0.1,0.8,0.1	1/1:1.9:0.01,0.08,0.91

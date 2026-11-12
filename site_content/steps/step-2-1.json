@@ -6,11 +6,11 @@
   "anchor": "step-2-1",
   "title": "The starting files",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27",
+  "source_sha256": "a06b8ad326befd58800f104948e5b9ed9a665e546e67b89a993934a87817d5a6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We identify the complete set of files exported by the laboratory. We keep these input files unchanged.",
-    "why": "A genotype file in [binary format](../docs/glossary.md#bed-bim-fam) is a compact table that people cannot read directly. Two other files explain it: one describes the [variants](../docs/glossary.md#variant) (the positions on the DNA that were tested) and one describes the samples. If these files do not match, the genotypes are assigned to the wrong people or positions. Equal counts are not enough, because the same rows could be in a different order.\n\nThe simulated data contain some low-quality [wells](../docs/glossary.md#well) and some low-quality variants. A well is one spot on a laboratory plate, and it holds one DNA sample. We keep the poor ones on purpose, so that you can find them during [quality control](../docs/glossary.md#quality-control) (QC), the checking of data quality. These are starting files, not a cleaned cohort.",
+    "why": "The laboratory supplied a matched [BED/BIM/FAM](../docs/glossary.md#bed-bim-fam) trio. BED holds the calls, BIM the variants and FAM the samples. Review [the format map at 1.9](module_01_from_dna_to_array_data.Rmd#step-1-9) and [the fields at 1.10](module_01_from_dna_to_array_data.Rmd#step-1-10) if needed. Keep the companions in their original order. Equal counts alone do not prove that identities match.\n\nThese are starting files with deliberate quality problems, not a cleaned cohort. Later steps find the poor samples and variants.",
     "you_need": "You need module 0 completed and the export inspection from module 1.",
     "command": "```{r s2-1}\nprint(check_bed(cfg$input))\nhead(read_fam(cfg$input))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R code above is the complete command.\n\nR reads the files and shows the values. It does not change the genotype files.",
     "expected_result": "You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",

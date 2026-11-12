@@ -60,7 +60,7 @@
     "PASS and dot values here do not establish biological validity."
   ],
   "magic_bytes": null,
-  "size_bytes": 583,
-  "sha256": "b65077c9a503dd4d85918ae6ed58efcab9b055ad679af952d9e555edd9e78b48",
+  "size_bytes": 579,
+  "sha256": "2214a9460321639e693af073c13698249a825b8ba9dc3b6dcd0d57689380389f",
   "asset": "examples/invented example.vcf"
 }

@@ -74,7 +74,8 @@ local({
 
   # Checkpoint: the 6.8 artifact needs parent 6.7 and passes check_step.
   stopifnot("6.8" %in% course_step_order(), which(course_step_order() == "6.8") == which(course_step_order() == "6.7") + 1L,
-    length(course_step_order()) == 60L)
+    length(course_step_order()) == 64L,
+    identical(course_step_order()[16:20], c("1.8", "1.9", "1.10", "1.11", "2.1")))
   dir.create(file.path(root, "checkpoints"))
   guided_write(data.frame(step = c("5.7", "6.7"), kind = c("full", "artifacts"), parent = c("", "5.7"),
     samples = 1811, variants = 238513), file.path(root, "checkpoints", "index.tsv"))

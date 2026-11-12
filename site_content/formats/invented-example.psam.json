@@ -17,7 +17,7 @@
     },
     {
       "name": "SEX",
-      "meaning": "Sex code: 1 male, 2 female, 0 unknown."
+      "meaning": "Sex code: 1 male, 2 female, NA unknown in this PSAM."
     }
   ],
   "header_notes": [

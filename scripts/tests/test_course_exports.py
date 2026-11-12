@@ -20,10 +20,36 @@ class CourseExportsTests(unittest.TestCase):
         cls.records = exports.export_steps()
 
     def test_complete_main_path(self):
-        self.assertEqual(len(self.records), 60)
-        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 7, 8, 8, 6, 7, 8, 8])
+        self.assertEqual(len(self.records), 64)
+        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 11, 8, 8, 6, 7, 8, 8])
         self.assertEqual(self.records[0]["id"], "0.1")
         self.assertEqual(self.records[-1]["id"], "7.8")
+
+    def test_new_format_readings_have_no_executable_commands_or_setup(self):
+        readings = [r for r in self.records if r["module"] == 1 and r["step"] >= 8]
+        self.assertEqual([r["id"] for r in readings], ["1.8", "1.9", "1.10", "1.11"])
+        for record in readings:
+            self.assertEqual(record["r_commands"], [])
+            self.assertEqual(record["setup_code"], "")
+            self.assertEqual(record["verification"], "manual_required")
+            self.assertEqual(record["plink"]["commands"], [])
+            self.assertIn("No code to run", record["blocks"]["command"])
+            self.assertIn("pubmed.ncbi.nlm.nih.gov", record["blocks"]["why"])
+        journey = next(r for r in readings if r["id"] == "1.9")
+        self.assertEqual(len(journey["figures"]), 1)
+        self.assertIn("Three data journeys", journey["figures"][0]["alt_text"])
+        self.assertNotIn("samtools view", exports.main_script())
+        self.assertNotIn("--bgen", exports.main_script())
+
+    def test_format_examples_links_and_exported_assets_resolve(self):
+        from urllib.parse import unquote
+        for record in self.records:
+            for target in re.findall(r"\]\((\.\./examples/formats/[^)]+)\)", "\n".join(record["blocks"].values())):
+                path = ROOT / "lessons" / unquote(target)
+                self.assertTrue(path.exists(), target)
+                if path.is_file():
+                    copied = ROOT / "site_content/formats/examples" / path.name
+                    self.assertEqual(copied.read_bytes(), path.read_bytes())
 
     def test_mathematical_text_has_no_lossy_question_mark_substitutions(self):
         for path in exports.notebook_paths():
@@ -33,7 +59,7 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_committed_json_matches_canonical_sources(self):
         paths = list((ROOT / "site_content" / "steps").glob("*.json"))
-        self.assertEqual(len(paths), 60)
+        self.assertEqual(len(paths), 64)
         for record in self.records:
             with self.subTest(step=record["id"]):
                 saved = json.loads((ROOT / "site_content" / "steps" / (record["anchor"] + ".json")).read_text(encoding="utf-8"))
@@ -96,9 +122,9 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_required_blocks_and_figure_prompts(self):
         for record in self.records:
-            if record["module"] != 0 or record["step"] >= 5:
+            if (record["module"] != 0 or record["step"] >= 5) and not (record["module"] == 1 and record["step"] >= 8):
                 self.assertTrue(record["r_commands"])
-            self.assertTrue(record["setup_code"] or record["module"] == 0)
+            self.assertTrue(record["setup_code"] or record["module"] == 0 or not record["r_commands"])
             for name, _ in exports.BLOCKS:
                 if name != "what_this_check_can_reveal":
                     self.assertTrue(record["blocks"][name])
@@ -185,7 +211,7 @@ class CourseExportsTests(unittest.TestCase):
                 self.assertNotIn("setwd", setup)
                 self.assertNotIn("knitr", setup)
                 self.assertNotIn("start_dir", setup)
-                if record["module"] == 0:
+                if record["module"] == 0 or not record["r_commands"]:
                     self.assertEqual(setup, "")
                 else:
                     self.assertIn('source("R/guided.R")', setup)

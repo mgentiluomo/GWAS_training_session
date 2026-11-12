@@ -35,8 +35,10 @@ cfg <- guided_init()
 - What the Global Screening Array measures, and what it cannot measure.
 - Why one row in a laboratory file is not always one person.
 - Which laboratory problems the quality-control steps of later modules will look for.
+- How data sources differ, and what the common file formats contain.
+- Why large projects share different formats for different tasks.
 
-**How long it takes.** About 45 minutes. The slowest step is 1.5, because you read a report table and a summary of the scores.
+**How long it takes.** About 90 minutes. Steps 1.8 to 1.11 are reading only. You can pause after 1.7 and return to the format examples later.
 
 ## 1.1 SNPs and genotypes {#step-1-1}
 
@@ -462,6 +464,342 @@ No. Equal counts do not prove that the sample identity, the order or the genotyp
 
 None.
 
+## 1.8 Where genetic data come from {#step-1-8}
+
+### What we do
+
+Compare ways to measure genetic variation. This course uses simulated array data.
+
+### Why
+
+A [read](../docs/glossary.md#read) is a sequence measured from one DNA molecule. [Sequencing](../docs/glossary.md#sequencing) reads bases. An [array](../docs/glossary.md#genotyping-array) measures signals at selected sites instead. [Depth](../docs/glossary.md#sequencing-depth) counts reads covering a base. [Density](../docs/glossary.md#marker-density) counts tested sites across a region. These are different quantities.
+
+A [targeted panel](../docs/glossary.md#targeted-panel) tests selected genes or regions. An [amplicon](../docs/glossary.md#amplicon) is a DNA segment copied before sequencing. The [exome](../docs/glossary.md#exome) is the protein-coding part of the genome. [Imputation](../docs/glossary.md#imputation) predicts unmeasured alleles using a reference group. [Summary statistics](../docs/glossary.md#summary-statistics) report group-level results instead of individual genotypes.
+
+Costs below are relative for large research studies. They depend on sample numbers, preparation and analysis. They are not price quotes. A typical depth is a study design choice, not a guarantee for every base.
+
+| Source | What is measured | Density or depth | Strength | Blind spot | Relative cost and typical use |
+| --- | --- | --- | --- | --- | --- |
+| Illumina Infinium Global Screening Array (GSA) and Global Diversity Array (GDA) | Fluorescence at selected SNPs | Hundreds of thousands to a few million sites, depending on design | Many samples at low cost | Most unselected and rare sites are not directly measured | Low; common-variant association |
+| Thermo Fisher Axiom arrays | Probe signals at selected sites | Hundreds of thousands of sites or more, depending on design | Large studies and custom content; UK Biobank used Axiom | Content and calling quality depend on design | Low; population studies |
+| Targeted panels and amplicons | Reads from chosen regions | Often hundreds of reads per target base | Detailed measurements in selected genes | Regions outside the panel are absent; copying can bias [allele balance](../docs/glossary.md#allele-balance) | Low to medium; focused research or clinical testing |
+| Whole-exome sequencing | Reads from [captured](../docs/glossary.md#sequence-capture) coding regions | Often tens to over 100 reads per target base | Many rare coding variants | Most non-coding regions and some difficult exons are missed | Medium; coding-variant studies |
+| [Short-read](../docs/glossary.md#long-read) [whole-genome sequencing](../docs/glossary.md#whole-genome-sequencing) | Reads across the genome | About 30x is a common research design | Broad measurement of common and rare variation | Repeats and [large rearrangements](../docs/glossary.md#structural-variant) can remain difficult | High; discovery across the genome |
+| [Low-pass](../docs/glossary.md#low-pass) whole-genome sequencing plus imputation | Sparse reads followed by predicted genotypes | Often below a few reads per base | Broad coverage at lower sequencing cost | Rare alleles and poorly represented ancestries can be harder to predict | Low to medium; large cohorts with a suitable reference |
+| Newer short-read platforms, such as Roche sequencing by expansion (SBX) | Reads derived from a sequencing instrument | Depends on the experiment | Another way to produce sequence data | Platform-specific preparation and analysis still need checking | Study-dependent; genome sequencing |
+| Oxford Nanopore (ONT) long reads | Electrical signals converted to long sequences | Depth varies; reads can span many thousands of bases | Repeats, large rearrangements and long-range context | DNA quality, errors and analysis choices matter | Medium to high; complex variation |
+| PacBio high-fidelity (HiFi) long reads | Repeated observations combined into accurate long sequences | Depth varies; reads often span many thousands of bases | Accurate long reads and complex variation | Preparation, DNA quality and cost constrain designs | Medium to high; genome discovery |
+| Imputed genotypes | Probabilities inferred from measured data and a reference | Often millions of predicted variants | Wider coverage without measuring every site | Predictions are uncertain and reference-dependent | Low added analysis cost; association at untyped sites |
+| Summary statistics | Effects and uncertainty from an association analysis | One row per tested variant | Share results without sharing individual calls | Cannot recover each person's genotype or redo every model | Low storage cost; combining studies |
+
+Roche SBX produces ordinary downstream read files, including [FASTQ](../docs/glossary.md#fastq), which stores reads and qualities, and [BAM](../docs/glossary.md#sam-bam-cram), which stores reads and alignments. Alignment means matching reads to a reference. Variant calling means assigning alleles from the evidence. These operations can then lead to [CRAM](../docs/glossary.md#sam-bam-cram), a compressed read format, and [VCF](../docs/glossary.md#vcf-bcf), a variant format. These names describe formats, not a promise that every instrument emits every format. Step 1.9 explains them.
+
+**Official documentation:** [Illumina GSA](https://www.illumina.com/products/by-type/microarray-kits/infinium-global-screening.html), [GDA](https://www.illumina.com/products/by-type/microarray-kits/infinium-global-diversity.html), [Thermo Fisher arrays](https://www.thermofisher.com/us/en/home/life-science/microarray-analysis.html), [Roche SBX outputs](https://diagnostics.roche.com/gb/en/diagnostics-insights/sbx-data-analysis-resources.html), [ONT output specifications](https://nanoporetech.github.io/ont-output-specifications/26.01/read_formats/pod5/) and [PacBio HiFi](https://www.pacb.com/technology/hifi-sequencing/).
+
+**References:** [Infinium, PMID 15838508](https://pubmed.ncbi.nlm.nih.gov/15838508/); [Axiom, PMID 21565264](https://pubmed.ncbi.nlm.nih.gov/21565264/); [HiFi, PMID 31406327](https://pubmed.ncbi.nlm.nih.gov/31406327/); [UK Biobank, PMID 30305743](https://pubmed.ncbi.nlm.nih.gov/30305743/).
+
+### You need
+
+The array explanation at 1.2. No extra dataset is needed.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can distinguish a measured array call, a sequence read and an imputed prediction. This course starts from array calls.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Do not compare array density with sequencing depth. They measure different things. Follow the glossary links before reading the table again.
+
+</details>
+
+### Quick check
+
+Would deeper sequencing of a small panel reveal variants everywhere in the genome?
+
+<details><summary>Show the answer</summary>
+
+No. More depth improves measurements inside the targets. It does not add regions outside them.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.9 A map of genetic file formats {#step-1-9}
+
+### What we do
+
+Follow the files from an instrument to an association result.
+
+### Why
+
+A [file format](../docs/glossary.md#file-format) defines how information is stored. A [text file](../docs/glossary.md#text-binary) contains readable characters. A binary file encodes records as bytes. A [pipeline](../docs/glossary.md#pipeline) is a sequence of processing steps. Different instruments can reach the same analysis format.
+
+**[IDAT](../docs/glossary.md#idat)** stores Illumina array fluorescence and scanner information. It precedes genotype calling.
+
+**[BPM/CSV manifest](../docs/glossary.md#array-manifest)** describes array probes and sites. BPM is binary; CSV is text with values separated by commas.
+
+**[EGT cluster file](../docs/glossary.md#egt)** stores Illumina calling [clusters](../docs/glossary.md#intensity-cluster), the signal groups used to assign genotypes. It is not a sample genotype matrix.
+
+**[GTC](../docs/glossary.md#gtc)** stores a sample's Illumina genotype calls and related measurements. It is a binary output of calling software.
+
+**[Final Report](../docs/glossary.md#final-report)** is a configurable Illumina text export. Rows usually describe sample-marker measurements; the selected columns must be checked.
+
+**[CEL](../docs/glossary.md#cel)** stores probe intensities from Thermo Fisher/Affymetrix arrays. It needs the matching array definitions and calling software.
+
+**[BCL](../docs/glossary.md#bcl)** stores Illumina sequencing base calls and quality information by instrument cycle. Sample separation produces read files for downstream analysis.
+
+**[FASTQ](../docs/glossary.md#fastq)** stores each read's identifier, sequence and base-quality characters. It does not normally say where the read belongs in the genome.
+
+**[POD5 and FAST5](../docs/glossary.md#pod5-fast5)** store Oxford Nanopore raw signals and [metadata](../docs/glossary.md#metadata), the information describing a measurement. POD5 replaces legacy FAST5. [Basecalling](../docs/glossary.md#basecalling) translates signals into sequence reads.
+
+**[SAM/BAM/CRAM](../docs/glossary.md#sam-bam-cram)** store reads and their [alignments](../docs/glossary.md#alignment), the proposed matches to a reference. Sequence Alignment/Map (SAM) is text. Binary Alignment/Map (BAM) is compressed binary. CRAM compresses read information, often using a matching reference. BAI/CSI and CRAI are [indexes](../docs/glossary.md#index), small companion files that help retrieve a region.
+
+**[gVCF](../docs/glossary.md#gvcf)** means genomic Variant Call Format. It is a VCF convention for one sample's variant evidence and reference blocks. A reference block describes a stretch represented as non-variant. It is not simply a list of variant sites.
+
+**[VCF/BCF](../docs/glossary.md#vcf-bcf)** store variants, alleles and sample fields. Variant Call Format (VCF) is text. Its binary counterpart is BCF. [bgzip](../docs/glossary.md#bgzip-tabix) compresses data in independently readable blocks. Tabix indexes sorted genomic text, including compressed VCF; TBI or CSI is the companion index.
+
+**[Hail MatrixTable and VariantDataset](../docs/glossary.md#hail-formats)** are directory-based stores for large analyses. MatrixTable separates variant rows, sample columns and entry values. VariantDataset keeps variant data and reference blocks separately to avoid expanding every reference call.
+
+**[BGEN](../docs/glossary.md#bgen)** stores genotypes or [genotype probabilities](../docs/glossary.md#genotype-probability), the probabilities of possible calls, in a compact binary format. A separate `.sample` file can describe samples; some BGEN files also embed identifiers.
+
+**[GEN](../docs/glossary.md#gen)** is a text probability format. It usually gives three probabilities per sample for each two-allele site, plus variant and allele fields.
+
+**[PED/MAP](../docs/glossary.md#ped-map)** is an older PLINK text pair. PED has one row per sample with allele pairs; MAP lists variants in the same order.
+
+**[TPED/TFAM](../docs/glossary.md#tped-tfam)** is the transposed PLINK text pair. TPED has one row per variant; TFAM gives the sample order.
+
+**[BED/BIM/FAM](../docs/glossary.md#bed-bim-fam)** is the older PLINK binary genotype set. BED stores calls, BIM variants and FAM samples. It is unrelated to UCSC BED.
+
+**[PGEN/PVAR/PSAM](../docs/glossary.md#pgen-pvar-psam)** is the PLINK 2 native set. PGEN stores calls and can also store dosages; PVAR describes variants and PSAM describes samples.
+
+**[UCSC BED](../docs/glossary.md#ucsc-bed)** is a text format for genomic intervals. Its start is zero-based and its end is excluded.
+
+**[GFA](../docs/glossary.md#gfa)** describes sequence graphs. Segments and links can represent alternative paths through a genome.
+
+**[FASTA/FAI](../docs/glossary.md#fasta-fai)** stores named sequences and their byte index. A [contig](../docs/glossary.md#contig) is a continuous sequence, such as our invented `toy1`.
+
+**[GWAS-SSF](../docs/glossary.md#gwas-ssf)** standardises association summary statistics for sharing. It requires defined columns and study metadata, not just a renamed table.
+
+| Format group | Typical producer | Text or binary | Content | Pipeline position |
+| --- | --- | --- | --- | --- |
+| IDAT; BPM/CSV; EGT; GTC; Final Report | Illumina scanner and array software | Binary, except CSV and Final Report | Signals; probe definitions; clusters; calls; exported table | Array measurement to called genotypes |
+| CEL | Thermo Fisher array software | Binary in common current uses; older text variants exist | Probe intensities | Before array calling |
+| BCL | Illumina sequencer software | Binary | Cycle-level calls and qualities | Before read export |
+| FASTQ | Basecaller or sample separation software | Text, often compressed | Reads and qualities | Before alignment |
+| POD5; FAST5 | ONT instrument software | Binary | Raw signals and read metadata | Before basecalling |
+| SAM; BAM; CRAM; BAI/CSI/CRAI | Alignment software and SAMtools | SAM text; others binary | Reads, alignments and region indexes | Before variant calling |
+| gVCF; VCF; BCF; TBI/CSI | Variant callers, BCFtools and imputation tools | VCF/gVCF text; BCF and indexes binary | Reference blocks, variants, calls or probabilities | Calling to analysis |
+| MatrixTable; VariantDataset | Hail | Binary directory stores | Distributed variant, sample and entry data | Large-scale processing |
+| BGEN; GEN; sample | Imputation and conversion software | BGEN binary; GEN/sample text | Probabilities and sample descriptions | Imputation to association |
+| PED/MAP; TPED/TFAM | PLINK | Text | Calls and identities | Older analysis exchange |
+| BED/BIM/FAM | PLINK | BED binary; BIM/FAM text | Calls and identities | Compact called-genotype analysis |
+| PGEN/PVAR/PSAM | PLINK 2 | PGEN binary; PVAR/PSAM text, optionally compressed | Calls, dosages and identities | Current PLINK analysis |
+| UCSC BED | Annotation software | Text | Half-open intervals | Region annotation |
+| GFA | Genome assembly software | Text | Sequence graph segments and links | Assembly and complex variation |
+| FASTA/FAI | Reference providers and SAMtools | Text | Sequences and byte offsets | Reference input |
+| GWAS-SSF | Association tools plus a formatter | Text, usually compressed | Effects, uncertainty and study metadata | Result sharing |
+
+**Four checks apply across formats.** A [genome build](../docs/glossary.md#genome-build) names the reference version. A file extension does not prove its build. [Coordinates](../docs/glossary.md#coordinate-system) may count from zero or one. VCF position 100001 corresponds to UCSC BED interval `[100000,100001)`. Illumina [TOP/BOT](../docs/glossary.md#top-bot) is a [probe](../docs/glossary.md#probe) convention, not automatically the reference forward strand; see [2.5](module_02_files_and_formats.Rmd#step-2-5). [Compression](../docs/glossary.md#compression) reduces file size. An index accelerates access but must match the exact sorted file. Renaming `.gz` does not turn ordinary gzip into bgzip.
+
+<!-- Figure placeholder. Gemini prompt: Create an accessible format journey with three independent branches. Arrays: IDAT or CEL to calling to Final Report or PLINK. Sequencing: BCL or POD5 to FASTQ to SAM/BAM/CRAM to gVCF/VCF. Imputation: called genotypes to BGEN or dosage VCF. All three can lead to association summary statistics. Show FASTA as a reference input to alignment and calling. Use labelled arrows, shapes and text, high contrast, no invented people or numeric research findings. -->
+<!-- fig.alt="Three data journeys connect array signals, sequencing reads and imputed probabilities to analysis files and association summary statistics; reference sequences support alignment and calling." -->
+
+**Vendor format documentation:** [Illumina array inputs](https://help.dragenarray.illumina.com/dragen-array-v1.2/product-guides/input-files), [scanner outputs](https://support-docs.illumina.com/ARR/iScan/Content/ARR/iScan/GeneratedFiles_fIS.htm), [TOP/BOT definition](https://www.illumina.com/documents/products/technotes/technote_topbot.pdf), [Thermo Fisher CEL descriptions](https://assets.thermofisher.com/TFS-Assets/GSD/brochures/axiom-analysis-suite-user-guide.pdf) and [ONT POD5](https://software-docs.nanoporetech.com/pod5/latest/).
+
+**Specifications:** [GA4GH file specifications](https://samtools.github.io/hts-specs/), [PLINK formats](https://www.cog-genomics.org/plink/2.0/formats), [BGEN 1.2](https://www.chg.ox.ac.uk/~gav/bgen_format/spec/v1.2.html), [Hail MatrixTable](https://hail.is/docs/0.2/hail.MatrixTable.html), [Hail VariantDataset](https://hail.is/docs/0.2/vds/hail.vds.VariantDataset.html), [GWAS Catalog GWAS-SSF](https://www.ebi.ac.uk/gwas/docs/summary-statistics-format/).
+
+**References:** [FASTQ, PMID 20015970](https://pubmed.ncbi.nlm.nih.gov/20015970/); [SAM/BAM, PMID 19505943](https://pubmed.ncbi.nlm.nih.gov/19505943/); [VCF, PMID 21653522](https://pubmed.ncbi.nlm.nih.gov/21653522/); [tabix, PMID 21208982](https://pubmed.ncbi.nlm.nih.gov/21208982/); [BGEN, DOI 10.1101/308296](https://doi.org/10.1101/308296).
+
+### You need
+
+Step 1.8. The invented examples are optional reading aids, separate from the classroom dataset.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can place a file before or after calling. You can name its companion metadata files and check its coordinate convention.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Check the producer and file header. Do not identify a format from its extension alone. Do not open a binary file as if it were a spreadsheet.
+
+</details>
+
+### Quick check
+
+Are a PLINK BED file and a UCSC BED file interchangeable?
+
+<details><summary>Show the answer</summary>
+
+No. One stores binary genotype calls. The other is a text list of genomic intervals.
+
+</details>
+
+### Files created
+
+None. The journey figure is planned; no image is supplied yet.
+
+## 1.10 The formats you will meet most often {#step-1-10}
+
+### What we do
+
+Read fields in tiny invented examples. Conversion commands below are examples to read, not instructions to run.
+
+### Why
+
+All files in [examples/formats](../examples/formats/) are labelled **invented example**. S1 to S4 are invented identifiers. S1 is male, S2 and S4 are female, and S3 has unknown sex. Five two-allele SNPs use invented GRCh38-style positions on chromosomes 1, 2 and X. One genotype is missing. S1 has a [haploid](../docs/glossary.md#haploid) X call, with one allele copy, outside the [pseudoautosomal regions](../docs/glossary.md#pseudoautosomal-region), the X/Y regions that pair. Two reads belong to a separate invented 60-base contig, `toy1`. These files cannot support a biological conclusion.
+
+A [header](../docs/glossary.md#header) describes a file before its data records. [Magic bytes](../docs/glossary.md#magic-bytes) are byte patterns that identify some binary encodings. The binary examples have companion `.hex.txt` files showing their first bytes. Their filenames and JSON descriptions carry the invented-example label because binary headers cannot accept arbitrary comments.
+
+**FASTQ.** Open [the read example](../examples/formats/invented%20example.fastq). Each record has four lines: `@` plus identifier, sequence, `+`, and qualities. [Phred quality](../docs/glossary.md#phred-quality) expresses base-error probability. Here each `I` means 40 under Phred+33 encoding. Quality length must equal sequence length. A common mistake is to confuse these base qualities with alignment confidence. Alignment software converts reads into SAM or BAM using a reference.
+
+**SAM/BAM/CRAM.** Read [the SAM example](../examples/formats/invented%20example.sam) beside [FASTA](../examples/formats/invented%20example.fasta) and [FAI](../examples/formats/invented%20example.fasta.fai). `@HD` declares version and sorting; `@SQ` declares reference name and length; `@CO` is a comment. The eleven required fields are `QNAME` (read name), `FLAG` (encoded alignment properties), `RNAME` (reference name), `POS` (one-based start), `MAPQ` (mapping confidence), `CIGAR` (alignment operations), `RNEXT` and `PNEXT` (mate reference and position), `TLEN` (template length), `SEQ` (read bases) and `QUAL` (base qualities). Optional `TAG:TYPE:VALUE` fields add annotations. A [CIGAR](../docs/glossary.md#cigar) such as `4M1I5M` means four aligned bases, one inserted read base, then five aligned bases. `M` does not distinguish matches from mismatches. The example reads are unpaired, so mate fields are absent or zero. [Bit flags](../docs/glossary.md#bit-flag) combine properties in one integer; zero here means an unpaired forward alignment. BAM stores the same logical fields in binary. CRAM may require the exact reference used to encode it. Mixing references or reusing an old index gives incorrect retrieval or errors.
+
+Read-only shell example:
+
+```sh
+samtools view -b -o reads.bam reads.sam
+samtools sort -o sorted.bam reads.bam
+samtools index sorted.bam
+```
+
+`view -b` writes BAM; `-o` names the output. `sort` orders alignments by coordinate. `index` creates the companion region index. The filenames here are explanatory names, not supplied exercise inputs. Calling variants from BAM/CRAM needs a suitable caller and study design; format conversion alone does not call variants.
+
+**VCF/gVCF.** Read [the multi-sample VCF](../examples/formats/invented%20example.vcf), [gVCF](../examples/formats/invented%20example.g.vcf) and [dosage VCF](../examples/formats/invented%20example%20imputed.vcf). `##` lines declare metadata. The columns are `CHROM` (chromosome), `POS` (one-based position), `ID` (variant identifier), `REF` (reference allele), `ALT` (alternative alleles), `QUAL` (variant quality), `FILTER` (filter status), `INFO` (site annotations), `FORMAT` (sample-field order), then one column per sample. A dot is missing. `PASS` says no listed filter failed; it does not prove a correct call. [GT](../docs/glossary.md#vcf-genotype) uses allele indices: `0/1` means REF/first ALT, while `./.` is missing. A slash leaves the parental order unknown; a vertical bar records [phase](../docs/glossary.md#phasing), which alleles belong together on a chromosome copy. The gVCF uses `<NON_REF>` and `END` to describe a reference block. It is an illustrative convention, not a complete caller output for joint calling. [DS](../docs/glossary.md#dosage) is the expected ALT count. [GP](../docs/glossary.md#genotype-probability) gives genotype probabilities; for diploid calls, their order is `0/0,0/1,1/1`. Thus `DS = GP(0/1) + 2 * GP(1/1)`. For S1 on X, GP instead lists `0,1` and DS equals GP(1). `R2` is a declared imputation-quality annotation. Its exact definition depends on the producer; the example value is invented. Do not replace uncertain dosages with rounded calls without a reason.
+
+Read-only shell example:
+
+```sh
+plink2 --vcf "invented example.vcf" --double-id --update-sex "invented example.psam" --make-pgen --out converted
+```
+
+`--vcf` selects the input. `--double-id` sets both PLINK identifiers from each sample name. `--update-sex` reads the named sex column. `--make-pgen` creates the native trio; `--out` names its shared prefix. This example retains calls. Importing dosage values additionally requires the documented `dosage=DS` modifier to `--vcf`. A conversion preserves supplied alleles; it does not validate their reference build.
+
+**Illumina Final Report, IDAT and GTC.** Open [the Final Report example](../examples/formats/invented%20example%20Final%20Report.txt). `[Header]` gives file information; `[Data]` begins the selected columns. `SNP Name` identifies a marker; `Sample ID` identifies a sample; `Allele1 - Forward` and `Allele2 - Forward` are called alleles on the declared strand. `GC Score` is calling confidence, not a disease probability. `X` and `Y` are illustrative normalised intensities. Missing calls use `-` here. Actual exports offer other columns and conventions. IDAT contains earlier scanner intensities. GTC contains binary calls and related measurements. No vendor binary is fabricated. The next conversion needs the exact export columns and the matching manifest. A universal text-import command would hide those choices. See [2.5](module_02_files_and_formats.Rmd#step-2-5) before interpreting strand labels.
+
+**PLINK 1 and PLINK 2.** Read [PED](../examples/formats/invented%20example.ped), [MAP](../examples/formats/invented%20example.map), [TPED](../examples/formats/invented%20example.tped), [TFAM](../examples/formats/invented%20example.tfam), [BIM](../examples/formats/invented%20example.bim), [FAM](../examples/formats/invented%20example.fam), [PVAR](../examples/formats/invented%20example.pvar) and [PSAM](../examples/formats/invented%20example.psam). FAM/TFAM and the first six PED fields are family ID, individual ID, father ID, mother ID, sex and phenotype. Zero parent IDs mean unknown; sex is 1 male, 2 female and 0 unknown in FAM. Phenotype `-9` is missing. PED then gives two alleles per variant; `0 0` is a missing call. MAP columns are chromosome, variant ID, genetic distance and one-based position. TPED starts with these four variant fields, then allele pairs per sample. BIM adds allele 1 and allele 2 to MAP's four fields. The binary [BED](../examples/formats/invented%20example.bed) starts `6c 1b 01` in this variant-major encoding. Sample and variant order come from its companions. PLINK 1.9 often treats A1/A2 as minor/major in analysis; those are sample-frequency labels, not genomic REF/ALT. PVAR instead names `CHROM, POS, ID, REF, ALT`; this example also has `FILTER`. PSAM names `FID, IID, SEX` in its header; `NA` means unknown sex. [PGEN](../examples/formats/invented%20example.pgen) starts `6c 1b`, followed by its storage-mode information. A reference allele imported from an old BIM may remain provisional. Do not silently assume it matches GRCh38.
+
+Read-only shell example:
+
+```sh
+plink2 --bfile "invented example" --make-pgen --out converted
+```
+
+`--bfile` reads the BED/BIM/FAM trio with that prefix. `--make-pgen` creates PGEN/PVAR/PSAM; `--out` sets the new prefix. Keep every trio together. Do not mix companion files from separate runs.
+
+**BGEN.** Inspect [the BGEN bytes](../examples/formats/invented%20example.bgen.hex.txt) and [sample table](../examples/formats/invented%20example.sample). The binary header records variant/sample counts and encoding flags. The `bgen` signature occurs at byte offset 16. Variant records identify the chromosome, position, alleles and encoded probabilities. Layout 2 supports different allele counts and numbers of chromosome copies. Our BGEN 1.2 uses eight bits per probability and represents called genotypes as certainty, not genuine imputation. Its sample table has `ID_1`, `ID_2`, `missing` and `sex`. The second row declares column types. A missingness value is descriptive; it is not a reason to replace formal QC. Read [the specification](https://www.chg.ox.ac.uk/~gav/bgen_format/spec/v1.2.html) before decoding binary records.
+
+Read-only shell example:
+
+```sh
+plink2 --bgen "invented example.bgen" ref-first --sample "invented example.sample" --make-pgen --out converted
+```
+
+`--bgen` selects the file. `ref-first` declares that this example's first allele is the reference. `--sample` supplies the companion sample table. Do not assume the same allele order for an unfamiliar BGEN file.
+
+**Summary statistics.** Open [the example table](../examples/formats/invented%20example%20summary.tsv). `chromosome`, `base_pair_location` and `variant_id` locate and name the variant. `effect_allele` is the allele whose effect is reported; `other_allele` is its partner. `effect_allele_frequency` is its fraction among called alleles. `odds_ratio` describes the effect on disease [odds](../docs/glossary.md#odds), the probability of disease divided by the probability of no disease. `beta` is its [natural logarithm](../docs/glossary.md#logarithm). `standard_error` measures [uncertainty in beta](../docs/glossary.md#standard-error). `p_value` measures evidence against the tested [null model](../docs/glossary.md#null-hypothesis), which assumes no association. `n` is the number of samples with a called genotype in this example. Effects and uncertainties are invented, not fitted to four samples. Step 6.8 creates the classroom table. [GWAS-SSF requirements](https://www.ebi.ac.uk/gwas/docs/summary-statistics-format/) additionally specify fields and study metadata for submission. Never interpret beta without its effect allele, scale and build.
+
+**References:** [FASTQ, PMID 20015970](https://pubmed.ncbi.nlm.nih.gov/20015970/); [SAM/BAM, PMID 19505943](https://pubmed.ncbi.nlm.nih.gov/19505943/); [CRAM, PMID 21245279](https://pubmed.ncbi.nlm.nih.gov/21245279/); [CRAM 3.1, PMID 34999766](https://pubmed.ncbi.nlm.nih.gov/34999766/); [VCF, PMID 21653522](https://pubmed.ncbi.nlm.nih.gov/21653522/); [GATK, PMID 20644199](https://pubmed.ncbi.nlm.nih.gov/20644199/); [PLINK, PMID 17701901](https://pubmed.ncbi.nlm.nih.gov/17701901/); [second-generation PLINK, PMID 25722852](https://pubmed.ncbi.nlm.nih.gov/25722852/); [SAMtools/BCFtools, PMID 33590861](https://pubmed.ncbi.nlm.nih.gov/33590861/); [BGEN, DOI 10.1101/308296](https://doi.org/10.1101/308296).
+
+### You need
+
+Step 1.9 and the linked invented examples. Their JSON descriptions in `site_content/formats/` explain every example field. No classroom data or password is needed.
+
+### Command
+
+No code to run. This is a reading-only step. The shell examples in Why show conversion syntax only.
+
+<details><summary>Show the expected result</summary>
+
+You can explain the header and fields of each example. The offline generator verifies that PLINK imports preserve the five variants, four samples and one missing genotype across the supplied genotype formats.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+A binary file will not look like a readable table. Use its JSON description and hex dump. The illustrative conversion outputs are not needed for any later step.
+
+</details>
+
+### Quick check
+
+An imputed sample has probabilities `0.1, 0.8, 0.1`. What is its ALT dosage, and is that a certain heterozygous call?
+
+<details><summary>Show the answer</summary>
+
+The dosage is `0.8 + 2 * 0.1 = 1`. It is not certainty: the two homozygous possibilities still have probability 0.1 each.
+
+</details>
+
+### Files created
+
+None. The supplied examples are separate reading aids.
+
+## 1.11 How large projects share genetic data {#step-1-11}
+
+### What we do
+
+Compare three controlled-access resources. [Controlled access](../docs/glossary.md#controlled-access) means that approved researchers use data under specified permissions.
+
+### Why
+
+[UK Biobank](https://community.ukbiobank.ac.uk/hc/en-gb/articles/15468170680605-Genome-wide-genotyping) combines array calls with imputation and sequencing. Its arrays were UK BiLEVE Axiom and UK Biobank Axiom, now associated with Thermo Fisher. Called array data can use PLINK sets. Imputed genotypes use BGEN probabilities with sample descriptions. Sequence resources also use read alignments and variant files. The exact available files depend on the release and approved access.
+
+[All of Us](https://www.researchallofus.org/data-tools/methods/) offers array and sequencing data in its research environment. Array exports include VCF, PLINK and Hail MatrixTable representations. Short-read whole-genome data include CRAM and Hail VariantDataset. Selected variant sets also have VCF, PLINK, MatrixTable or BGEN representations. An exome subset selected from whole-genome sequencing is not a separate whole-exome experiment. Long-read resources use additional alignment, variant and assembly formats. Availability depends on the release and access tier.
+
+[dbGaP](https://www.ncbi.nlm.nih.gov/gap/) is a controlled-access archive across studies, not one uniform genotype dataset. Deposited data can include PLINK sets or VCF. Sequence reads and alignments may be linked through the Sequence Read Archive, an archive for sequencing measurements. Read each study's file descriptions and access conditions rather than expecting one mandatory format.
+
+Why offer more than one representation? A [distributed dataset](../docs/glossary.md#distributed-data) can spread work across many computers. Hail stores make repeated cohort-wide processing practical. BGEN keeps probability information compact. PLINK sets support efficient association tools. CRAM retains read-level evidence. Summary statistics are smaller but cannot answer every question about individual calls. Format choice is about scale, retained information and intended analysis, not which extension is newest.
+
+**References:** [UK Biobank, PMID 30305743](https://pubmed.ncbi.nlm.nih.gov/30305743/); [All of Us genomic data, PMID 38374255](https://pubmed.ncbi.nlm.nih.gov/38374255/); [dbGaP, PMID 24297256](https://pubmed.ncbi.nlm.nih.gov/24297256/).
+
+### You need
+
+Steps 1.8 to 1.10. No access application is needed for this reading.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can explain why an archive may supply alignments, genotype probabilities and compact analysis files for different tasks.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Do not download restricted data for this course. Use the invented examples and the supplied simulated classroom dataset. Check the resource documentation for release-specific details.
+
+</details>
+
+### Quick check
+
+Would summary statistics let you inspect whether one person's read alignment supports a variant?
+
+<details><summary>Show the answer</summary>
+
+No. They summarise an association analysis. Read-level inspection needs authorised access to the relevant alignment data.
+
+</details>
+
+### Files created
+
+None.
+
 ## Module 1 recap {#module-1-recap}
 
 - You separated a variant, an allele and a genotype.
@@ -469,5 +807,8 @@ None.
 - The annotation lists 299,523 array entries on chromosomes 1 to 22, X, Y and MT.
 - The laboratory ran 21 plates of 96 wells, which gives 2,016 measurements; 16 wells are technical replicates of the 2,000 simulated people.
 - You checked that the genotype files hold 2,016 samples and 299,523 variants, with no QC applied and no person removed.
+
+- You compared arrays, sequencing and imputation, then read invented format examples.
+- You saw why large resources share several representations of the same study.
 
 **Next:** module 2 converts these files to the PLINK 2 format and checks them.

@@ -53,11 +53,11 @@
     },
     {
       "name": "DS",
-      "meaning": "Expected ALT count, equal to GP(0/1) plus twice GP(1/1) for a diploid biallelic site."
+      "meaning": "Expected ALT count, equal to GP(0/1) plus twice GP(1/1) for a diploid biallelic site, or GP(1) when haploid."
     },
     {
       "name": "GP",
-      "meaning": "Probabilities for 0/0, 0/1 and 1/1, in that order."
+      "meaning": "Probabilities for 0/0, 0/1 and 1/1 in diploid calls, or 0 and 1 in haploid calls."
     },
     {
       "name": "R2",
@@ -72,7 +72,7 @@
     "PASS and dot values here do not establish biological validity."
   ],
   "magic_bytes": null,
-  "size_bytes": 1246,
-  "sha256": "a7de32baa67299eeb3db296e537d7784ed570d5cfaa51fc0209c0cdd64c8b440",
+  "size_bytes": 1261,
+  "sha256": "c5cdc80aaa69e08f806d0a4a807884910302792c6a0535410c4f5e51c391562d",
   "asset": "examples/invented example imputed.vcf"
 }

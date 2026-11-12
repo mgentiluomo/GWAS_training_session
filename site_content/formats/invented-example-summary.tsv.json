@@ -60,7 +60,7 @@
     "Uses the course standard columns; this is not a complete GWAS-SSF submission with required study metadata."
   ],
   "magic_bytes": null,
-  "size_bytes": 472,
-  "sha256": "562a05d0ccec9a682c5acda2c283e75d17eb87a30ed60263bfc932c6ca377a1a",
+  "size_bytes": 478,
+  "sha256": "b4bda74ce5927b48d45bcc86ef925bc29549dbe7050713bb115e6dec7294f0cf",
   "asset": "examples/invented example summary.tsv"
 }

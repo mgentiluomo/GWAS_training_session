@@ -17,7 +17,7 @@
     },
     {
       "name": "missing",
-      "meaning": "Missingness placeholder in the sample description, not a recalculated QC statistic."
+      "meaning": "Proportion of missing genotype calls across the five exported sites."
     },
     {
       "name": "sex",
