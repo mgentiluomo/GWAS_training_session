@@ -6,7 +6,7 @@
   "anchor": "step-2-5",
   "title": "Alleles and strand",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d",
+  "source_sha256": "e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the allele pairs from the laboratory with the supplied plus-strand annotation. We flip the pairs that are complementary. We remove the sites that are ambiguous or incompatible.",
@@ -19,7 +19,7 @@
     "quick_check": "Can A/T versus T/A tell you whether the strand is correct?\n\n<details><summary>Show the answer</summary>\n\nNo. The pair is palindromic, so the strand cannot be found from the pair alone.\n\n</details>",
     "files_created": "The flip and exclusion lists, and `s2-5_state.pgen/.pvar/.psam`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s2-5",

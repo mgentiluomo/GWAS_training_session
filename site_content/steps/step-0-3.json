@@ -6,26 +6,20 @@
   "anchor": "step-0-3",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd",
-  "verification": "unverified",
+  "source_sha256": "3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0",
+  "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
     "why": "The console runs one command at a time. The editor keeps commands in a notebook, so you can read and rerun them later. R holds values, such as loaded data, in memory. These values disappear when R restarts. Files saved on disk remain.",
     "you_need": "A working R installation from step 0.2 and the RStudio installer.",
-    "command": "In the RStudio console, type this small calculation and press Enter:\n\n```{r s0-3_console}\n2 + 3\n```\n\nTerminal equivalent: `Rscript -e \"print(2 + 3)\"`. The console and the terminal use the same R calculation. You open RStudio itself from your applications menu.",
-    "expected_result": "`[1] 5`. The `[1]` marks the first value printed. It is not part of the answer.",
-    "troubleshooting": "If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, R is waiting for the rest of a command. Press Escape and type the complete command again.",
+    "command": "No code to run. Open RStudio from your applications menu. Find the Console pane and check that it shows a `>` prompt. You will run your first course commands at step 0.5.",
+    "expected_result": "RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet.",
+    "troubleshooting": "If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, press Escape to return to an empty prompt.",
     "quick_check": "After restarting R, should you expect an unsaved object to remain in memory?\n\n<details><summary>Show the answer</summary>No. Reload it from a saved file or rerun the command that creates it.</details>",
-    "files_created": "RStudio software files. The calculation creates no course data."
+    "files_created": "RStudio software files. No course data are created."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
-  "r_commands": [
-    {
-      "label": "s0-3_console",
-      "code": "2 + 3",
-      "run_by_default": true
-    }
-  ],
+  "setup_code": "",
+  "r_commands": [],
   "notebook_only_expected_code": [],
   "plink": {
     "applicable": false,

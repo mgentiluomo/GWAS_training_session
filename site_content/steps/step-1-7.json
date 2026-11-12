@@ -6,7 +6,7 @@
   "anchor": "step-1-7",
   "title": "The export",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "5e5711b85c81d25a373fe8b197e2b87cadc27d8d9b838792339aab39dd4d28f0",
+  "source_sha256": "11fdbc3421834afeadf3535292bd5f6c27ea852eb5fa84f62ccc44c3366b5794",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Understand how the reports relate to the genotype files used for the analysis.",
@@ -18,7 +18,7 @@
     "quick_check": "Can you combine a BED from one release with a FAM from another if their sample counts match?\n\n<details><summary>Show the answer</summary>\n\nNo. Equal counts do not prove that the sample identity, the order or the genotypes match.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s1-7",

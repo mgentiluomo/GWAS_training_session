@@ -6,7 +6,7 @@
   "anchor": "step-4-3",
   "title": "Allele frequency",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "ad09fd3f0d7467d62f2ac42c26a2eda0f7f705b5a4d1493ea9eead11d51de1ed",
+  "source_sha256": "774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep variants with a minor allele frequency of at least 1%. We use this rule for the main array scan.",
@@ -19,7 +19,7 @@
     "quick_check": "Can the minor and major label of an allele change between populations?\n\n<details><summary>Show the answer</summary>\n\nYes. The label describes how common the allele is in the sample. It is not a fixed property of the allele.\n\n</details>",
     "files_created": "`s4-3_state.*` and the list of excluded variants that lets the course repeat this step."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s4-3",

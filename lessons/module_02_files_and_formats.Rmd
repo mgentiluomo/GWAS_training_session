@@ -13,12 +13,15 @@ Work from the project root, the main folder of the course. Read each step before
 
 The [glossary](../docs/glossary.md) explains the course words. Each module reads its input files from disk. You do not need a saved R workspace.
 
-```{r setup, include=FALSE}
+```{r knit_setup, include=FALSE}
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
 if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
+setwd(start_dir)
+```
+
+```{r setup, include=FALSE}
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 ```
 
 ## Module 2 at a glance {#module-2-overview}

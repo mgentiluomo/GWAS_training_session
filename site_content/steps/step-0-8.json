@@ -6,7 +6,7 @@
   "anchor": "step-0-8",
   "title": "How to use this guide",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd",
+  "source_sha256": "3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Use the same routine at every step: read, run, compare. Follow these actions:\n\n1. Read \"What we do\", \"Why\" and \"You need\".\n2. Run the command in the console.\n3. Open \"Show the expected result\" and compare it with your result.\n4. If your result differs, open \"If something goes wrong\".\n5. Answer the quick check.",
@@ -18,7 +18,7 @@
     "quick_check": "To restart step 4.2, which completed step's files do you need?\n\n<details><summary>Show the answer</summary>Step 4.1, from the same course data version.</details>",
     "files_created": "`where_am_i` creates no files. Continue to module 1, which explains how the array data arise."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
+  "setup_code": "",
   "r_commands": [
     {
       "label": "s0-8_progress",

@@ -6,7 +6,7 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
+  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",
@@ -19,7 +19,7 @@
     "quick_check": "A well has 1% missing calls. What is its call rate? Does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\nThe call rate is 99%. The well passes the 98% call-rate rule.\n\n</details>",
     "files_created": "`s3-2_state.*`, the list of removed samples and the replay metadata."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s3-2",

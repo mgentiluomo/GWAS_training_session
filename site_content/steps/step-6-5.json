@@ -6,7 +6,7 @@
   "anchor": "step-6-5",
   "title": "Read association output",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0",
+  "source_sha256": "78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.",
@@ -18,7 +18,7 @@
     "quick_check": "What should you do with a row that has an ERRCODE for a failure and a missing p-value?\n\n<details><summary>Show the answer</summary>\n\nRead the reason for the failure. Keep the p-value as missing. Do not replace it with a number, whether significant or not.\n\n</details>",
     "files_created": "`s6-5_top20.tsv`, with the effect estimates and their intervals."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-5",

@@ -84,7 +84,9 @@ def export_steps(root: Path = ROOT) -> list[dict]:
         text = path.read_text(encoding="utf-8")
         matches = list(STEP.finditer(text))
         explained = {}
-        setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])]
+        # The explicit knit_setup chunk configures notebook rendering only.
+        setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])
+                 if m.group(1) != "knit_setup"]
         for i, match in enumerate(matches):
             # A step ends at the next level-2 heading, which may be a module recap.
             following = [h.start() for h in HEADING.finditer(text) if h.start() > match.start()]
@@ -129,7 +131,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             verified = "passed on Windows" in body or "executable preparation chunks passed on Windows" in text
             blocks = {name: re.sub(r"<!--.*?-->", "", content, flags=re.S).strip()
                       for name, content in blocks.items()}
-            manual = bool(r_commands) and not any(command["run_by_default"] for command in r_commands)
+            manual = not any(command["run_by_default"] for command in r_commands)
             verification = "manual_required" if manual else (
                 "windows_executed" if verified and "UNVERIFIED" not in body and
                 "pending executable Windows verification" not in body else "unverified")
@@ -187,7 +189,7 @@ def main_script(root: Path = ROOT) -> str:
         lines.extend([f"# Source: {path.relative_to(root).as_posix()}",
                       f"# SHA-256: {hashlib.sha256(text.encode()).hexdigest()}"])
         for match in CHUNK.finditer(text):
-            if re.search(r"eval\s*=\s*FALSE", match.group(2)):
+            if match.group(1) == "knit_setup" or re.search(r"eval\s*=\s*FALSE", match.group(2)):
                 continue
             lines.extend([f"\n# Chunk: {match.group(1)}", match.group(3).strip(), ""])
     return "\n".join(lines).rstrip() + "\n"

@@ -6,7 +6,7 @@
   "anchor": "step-4-5",
   "title": "Sex chromosomes, MT and duplicated sites",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "ad09fd3f0d7467d62f2ac42c26a2eda0f7f705b5a4d1493ea9eead11d51de1ed",
+  "source_sha256": "774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We review calls that are impossible for the [sex chromosomes](../docs/glossary.md#sex-chromosomes) X and Y and for mitochondrial DNA (MT). We also merge duplicated entries that describe the same variant.",
@@ -19,7 +19,7 @@
     "quick_check": "Why do we remove both copies of a duplicate with different genotypes? Why do we not keep the copy with the better association p-value?\n\n<details><summary>Show the answer</summary>\n\nThe difference between the genotypes is not resolved. Association results must not decide which technical record to trust.\n\n</details>",
     "files_created": "The chromosome export, the exclusion list, the duplicate reports and `s4-5_state.*`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s4-5",

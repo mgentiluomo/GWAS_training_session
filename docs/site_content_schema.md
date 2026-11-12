@@ -21,7 +21,7 @@ images, download data, publish a website or create an encrypted release.
 | `source_sha256` | string | SHA-256 of UTF-8 notebook text with normalised line endings. |
 | `verification` | string | `windows_executed`, `manual_required` or `unverified`; read alongside the session report's limits. |
 | `blocks` | object | The fixed teaching blocks, in their source order, as Markdown/HTML. |
-| `setup_code` | string | Module setup chunks required before the step. |
+| `setup_code` | string | Student setup required before the step. Excludes the `knit_setup` chunk. Empty when no setup is needed. |
 | `r_commands` | array | Source chunk `label`, literal R `code`, and boolean `run_by_default`. |
 | `notebook_only_expected_code` | array | Render-only R helpers extracted from expected-result blocks; never display these as student instructions on the website. |
 | `plink` | object | Boolean `applicable`, literal `commands`, and one explanation per unique option name. |
@@ -34,6 +34,17 @@ The block keys are `what_we_do`, `why`, `you_need`, `command`,
 troubleshooting are collapsed by default; quick-check answers retain their
 native `<details>` markup. Keep step numbers visible and provide previous/next
 navigation when the approved website design is implemented.
+
+Chunks labelled `knit_setup` contain only notebook rendering configuration.
+They run when knitting a notebook. The website setup and combined R script omit
+them. Keep student setup, such as loading `R/guided.R` and initialising `cfg`,
+in a separate chunk. Do not mix it into `knit_setup`.
+
+Steps 0.1 to 0.4 have no R command blocks and no `setup_code`.
+Their `r_commands` arrays are empty and their verification is `manual_required`.
+They use operating system settings and installer windows. R checks start later.
+Render an empty command array without a code panel. Hide the module setup panel
+when `setup_code` is empty. The operating system and version checks run at 0.7.
 
 `windows_executed` refers to the executable R chunks, not to untested installer
 clicks or masked GUI prompts. Step 0.5 is `manual_required`: its interactive

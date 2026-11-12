@@ -6,7 +6,7 @@
   "anchor": "step-2-8",
   "title": "Module 2 checkpoint",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d",
+  "source_sha256": "e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the first complete set of native files that you can restart from. We record its checked size.",
@@ -18,7 +18,7 @@
     "quick_check": "Which boundary should you use before you replay the early sample QC filters?\n\n<details><summary>Show the answer</summary>\n\nUse the completed module 2 checkpoint at 2.8.\n\n</details>",
     "files_created": "`s2-8_state.*`, `checkpoints/2.8/state.*`, `checkpoints/index.tsv` and `step_counts.tsv`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s2-8",

@@ -6,7 +6,7 @@
   "anchor": "step-7-2",
   "title": "Genomic inflation factor",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa",
+  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate lambda for the autosomal variants. Then read it together with the QQ plot.",
@@ -18,7 +18,7 @@
     "quick_check": "Can a lambda near one prove that a particular top variant is causal?\n\n<details><summary>Show the answer</summary>\n\nNo. Lambda summarises the middle of all the tests. It does not show that one single association is valid or causal.\n\n</details>",
     "files_created": "`s7-2_lambda.tsv`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-2",

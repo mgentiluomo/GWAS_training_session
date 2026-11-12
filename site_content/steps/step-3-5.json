@@ -6,7 +6,7 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
+  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
@@ -19,7 +19,7 @@
     "quick_check": "Why does this course keep wells with high F for review, and not remove both ends automatically?\n\n<details><summary>Show the answer</summary>\n\nA high value can have a biological cause or an ancestry cause. A symmetric numerical threshold does not prove an error.\n\n</details>",
     "files_created": "The `.het` report, the low-F removal list, the high-F review list and `s3-5_state.*`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s3-5",

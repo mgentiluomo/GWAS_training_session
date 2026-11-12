@@ -6,7 +6,7 @@
   "anchor": "step-6-8",
   "title": "Create the summary statistics file",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0",
+  "source_sha256": "78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.",
@@ -18,7 +18,7 @@
     "quick_check": "A colleague wants the 95% confidence interval for an odds ratio. Which column do they use with `beta`, and on which scale?\n\n<details><summary>Show the answer</summary>\n\nThey use `standard_error`. It is the standard error of `beta`, the natural logarithm of the odds ratio. They calculate the interval on the log scale and then convert it back with `exp()`.\n\n</details>",
     "files_created": "In the folder `results/guided/`: `s6-8_gwas_summary_statistics.tsv` (the summary statistics file), `s6-8_gwas_summary_statistics_columns.tsv` (the column dictionary) and `checkpoints/6.8/MANIFEST.tsv`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-8",

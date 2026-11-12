@@ -6,7 +6,7 @@
   "anchor": "step-7-7",
   "title": "Compare without PCs and without QC",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa",
+  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.",
@@ -18,7 +18,7 @@
     "quick_check": "Can we interpret the comparison of the main analysis with the no-PC analysis more narrowly than the comparison with the no-QC analysis?\n\n<details><summary>Show the answer</summary>\n\nYes. The first comparison keeps the same samples and the same number of samples for each variant. The second comparison also changes the samples and the tested sites.\n\n</details>",
     "files_created": "Two comparison association outputs, the age table, `s7-7_comparison.tsv` and `s7-7_qq_comparison.png`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-7",

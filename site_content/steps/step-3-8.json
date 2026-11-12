@@ -6,7 +6,7 @@
   "anchor": "step-3-8",
   "title": "Sample QC summary and checkpoint",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
+  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the complete fileset that remains after all sample QC. This saved fileset is a [checkpoint](../docs/glossary.md#checkpoint). Then we review how many samples each step removed.",
@@ -18,7 +18,7 @@
     "quick_check": "Does a finished sample QC checkpoint prove that every kept variant is suitable for association?\n\n<details><summary>Show the answer</summary>\n\nNo. Variant QC follows in module 4.\n\n</details>",
     "files_created": "The full checkpoint `checkpoints/3.8/state.*`, the working files `s3-8_state.*` and the updated index and count table."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s3-8",

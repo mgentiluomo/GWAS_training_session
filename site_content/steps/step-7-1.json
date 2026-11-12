@@ -6,7 +6,7 @@
   "anchor": "step-7-1",
   "title": "QQ plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa",
+  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.\n\nThe plot reads the [summary statistics file](../docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.",
@@ -18,7 +18,7 @@
     "quick_check": "Does a strong departure only at the highest points always mean confounding across the whole genome?\n\n<details><summary>Show the answer</summary>\n\nNo. A few true signals can lift the highest points while most other tests stay close to the line.\n\n</details>",
     "files_created": "`s7-1_qq.png`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-1",

@@ -6,7 +6,7 @@
   "anchor": "step-3-1",
   "title": "Rough cleaning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
+  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "First we remove [wells](../docs/glossary.md#well) that were read very badly. A well is a small hole in a plate that holds the DNA of one sample. Then we remove [variants](../docs/glossary.md#variant) (also called sites) that were read very badly. A variant is a place in the DNA where people differ.",
@@ -19,7 +19,7 @@
     "quick_check": "Why do we recalculate variant missingness after we remove the very poor wells?\n\n<details><summary>Show the answer</summary>\n\nPoor wells can make good sites look bad.\n\n</details>",
     "files_created": "`s3-1_samples.*`, `s3-1_state.*`, the lists of removed samples and variants, and the replay metadata (notes that let the course repeat this step)."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s3-1",

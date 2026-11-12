@@ -6,31 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd
-
-# Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
-setwd(start_dir)
-
-
-# Chunk: s0-1_system
-Sys.info()[c("sysname", "release", "machine")]
-
-
-# Chunk: s0-2_r_version
-R.version.string
-
-
-# Chunk: s0-3_console
-2 + 3
-
-
-# Chunk: s0-4_plink_setting
-settings <- new.env(parent = baseenv())
-sys.source("config.R", settings)
-settings$course_settings$tested_plink_version
-
+# SHA-256: 3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0
 
 # Chunk: s0-6_project
 getwd()
@@ -38,6 +14,12 @@ stopifnot(file.exists("config.R"), file.exists("R/course.R"))
 
 
 # Chunk: s0-7_preflight
+Sys.info()[c("sysname", "release", "machine")]
+R.version.string
+2 + 3
+settings <- new.env(parent = baseenv())
+sys.source("config.R", settings)
+settings$course_settings$tested_plink_version
 source("scripts/preflight.R")
 
 
@@ -47,14 +29,11 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 5e5711b85c81d25a373fe8b197e2b87cadc27d8d9b838792339aab39dd4d28f0
+# SHA-256: 11fdbc3421834afeadf3535292bd5f6c27ea852eb5fa84f62ccc44c3366b5794
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s1-1
@@ -100,14 +79,11 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d
+# SHA-256: e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s2-1
@@ -201,14 +177,11 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6
+# SHA-256: c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s3-1
@@ -315,14 +288,11 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: ad09fd3f0d7467d62f2ac42c26a2eda0f7f705b5a4d1493ea9eead11d51de1ed
+# SHA-256: 774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s4-1
@@ -395,14 +365,11 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 8f5a26ab6607f700fd78a71db41d04750b76b51500e15831c07728cea3d62dc8
+# SHA-256: bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s5-1
@@ -513,14 +480,11 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0
+# SHA-256: 78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s6-1
@@ -635,14 +599,11 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa
+# SHA-256: 341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e
 
 # Chunk: setup
-start_dir <- setwd(if (file.exists("config.R")) "." else "..")
-if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
-setwd(start_dir)
 
 
 # Chunk: s7-1

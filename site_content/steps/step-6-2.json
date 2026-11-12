@@ -6,7 +6,7 @@
   "anchor": "step-6-2",
   "title": "The additive logistic model",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0",
+  "source_sha256": "78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.",
@@ -18,7 +18,7 @@
     "quick_check": "What does beta = 0 imply for the per-allele odds ratio?\n\n<details><summary>Show the answer</summary>\n\nexp(0) = 1. The estimate shows no change in the odds for each extra copy of the allele.\n\n</details>",
     "files_created": "The example model exists only in R memory. The genotype export from 6.1 stays on disk."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-2",

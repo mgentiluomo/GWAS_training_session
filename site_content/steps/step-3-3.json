@@ -6,7 +6,7 @@
   "anchor": "step-3-3",
   "title": "Recorded and genetic sex",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "9c43bc9544cc3560b7b882954ee968d96ad5a9c162ffbc7d7699dcb07da53ca6",
+  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We move the [pseudo-autosomal regions](../docs/glossary.md#pseudoautosomal-region) (PARs) out of the rest of the X chromosome. We then compare the recorded sex of each person with the X and Y patterns in the DNA. Finally, we review the wells where the two do not agree.",
@@ -19,7 +19,7 @@
     "quick_check": "Should we correct a sex mismatch automatically by changing the recorded sex?\n\n<details><summary>Show the answer</summary>\n\nNo. First review the identity of the sample, the genotype quality and the source records.\n\n</details>",
     "files_created": "The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_state.*`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s3-3",

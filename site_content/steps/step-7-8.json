@@ -6,7 +6,7 @@
   "anchor": "step-7-8",
   "title": "Final summary and reporting",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa",
+  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Write a clear summary of the whole simulated main path. Save the final results and figures so that others can check them.",
@@ -18,7 +18,7 @@
     "quick_check": "What more evidence would we need before we call a simulated association a biological discovery?\n\n<details><summary>Show the answer</summary>\n\nWe would need real data that are handled under proper rules, [replication](../docs/glossary.md#replication) in independent data and suitable biological evidence. This simulation gives none of these.\n\n</details>",
     "files_created": "`s7-8_summary.md`, `s7-8_leads.tsv`, and the complete `checkpoints/7.8/` artifact checkpoint."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-8",

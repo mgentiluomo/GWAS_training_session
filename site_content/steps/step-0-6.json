@@ -6,7 +6,7 @@
   "anchor": "step-0-6",
   "title": "Open the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "0214e0002a29e364774d3abf6508348fe7f15574df5181537a3544c264be6cbd",
+  "source_sha256": "3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the extracted folder, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.",
@@ -18,7 +18,7 @@
     "quick_check": "Does a relative path starting `R/` refer to a folder on every computer's C drive?\n\n<details><summary>Show the answer</summary>No. It refers to the R folder under the current project root.</details>",
     "files_created": "RStudio may create local project settings in `.Rproj.user/`. Git ignores them."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsetwd(start_dir)",
+  "setup_code": "",
   "r_commands": [
     {
       "label": "s0-6_project",

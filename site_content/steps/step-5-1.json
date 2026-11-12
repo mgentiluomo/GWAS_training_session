@@ -6,7 +6,7 @@
   "anchor": "step-5-1",
   "title": "Why ancestry matters",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "8f5a26ab6607f700fd78a71db41d04750b76b51500e15831c07728cea3d62dc8",
+  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn how [population structure](../docs/glossary.md#population-stratification) can mislead an association study. Then look at the reference samples we will use.",
@@ -18,7 +18,7 @@
     "quick_check": "Can an allele-frequency difference between cases and controls appear because their ancestry differs, even when the site has no effect on the disease?\n\n<details><summary>Show the answer</summary>\n\nYes. Ancestry can influence both which group a person is in and which alleles that person carries.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s5-1",

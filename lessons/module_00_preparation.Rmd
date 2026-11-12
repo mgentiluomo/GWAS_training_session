@@ -13,7 +13,7 @@ This course follows a simulated study. The study starts with [genotypes](../docs
 
 All data come from a computer program. They describe no real person. You do not need any programming experience.
 
-Work in the same way at every step. Read the step. Run its command in the [console](../docs/glossary.md#console) of [RStudio](../docs/glossary.md#rstudio). Compare your result with the expected result. Then go to the next step.
+Work in the same way at every step. Read the step. Follow the installation instructions in steps 0.1 to 0.4. From step 0.5, run each R command in the [console](../docs/glossary.md#console) of [RStudio](../docs/glossary.md#rstudio). Compare your result with the expected result. Then go to the next step.
 
 Keep your computer's language and decimal settings as they are.
 
@@ -23,7 +23,7 @@ This [notebook](../docs/glossary.md#notebook) is the source of the guided prepar
 
 Lesson text, figures and simulated data: [CC BY-NC-SA 4.0](../LICENSE-CONTENT.md). Code: [MIT](../LICENSE).
 
-```{r setup, include=FALSE}
+```{r knit_setup, include=FALSE}
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
 if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 setwd(start_dir)
@@ -49,7 +49,7 @@ setwd(start_dir)
 
 Prepare a computer, a project folder and the tools used in the whole course. In this step you only find out which system and processor you have.
 
-You can see this without R. On Windows, open Settings, then System, then About, and read "System type". On a Mac, click the Apple menu, then About This Mac. A line "Chip" with a name such as Apple M1 means Apple Silicon. A line "Processor" means an Intel Mac.
+You can see this without R. On Windows, open Settings, then System, then About, and read "System type". On a Mac, click the Apple menu, then About This Mac. A line "Chip" with a name such as Apple M1 means Apple Silicon. A line "Processor" means an Intel Mac. On Linux, open Settings and look for About or System information. Menu names depend on your distribution.
 
 ### Why
 
@@ -61,23 +61,17 @@ A Windows, macOS or Linux computer. You need an internet connection to download 
 
 ### Command
 
-Once R is installed, this safe command shows your operating system:
-
-```{r s0-1_system}
-Sys.info()[c("sysname", "release", "machine")]
-```
-
-Terminal equivalent: `Rscript -e "print(Sys.info())"`. A [terminal](../docs/glossary.md#terminal) is a window where you type commands for the computer, outside R. The option `-e` tells Rscript to run the R expression in quotes. Do not paste terminal commands into the R console.
+No code to run. Use the system settings described above. Write down your operating system and processor type. You will use them to choose the correct installers.
 
 <details><summary>Show the expected result</summary>
 
-R prints three named values. The value `sysname` is Windows, Darwin (macOS) or Linux. The value `release` is the version of your system. The value `machine` is your processor type. These values depend on your computer. They are not genotype counts.
+You have written down your operating system and processor type. For example, Windows may report a 64-bit system with an x64 processor. A Mac may show Apple Silicon or an Intel processor. The details depend on your computer.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If R says that `Sys.info()` is not recognised, check where you are typing. You must type in the R console, which normally shows `>` at the start of the line. If R is not installed yet, continue with step 0.2.
+If you cannot find the system information, ask the instructor or your institution's support team. You do not need R for this step.
 
 </details>
 
@@ -115,17 +109,11 @@ The system and processor you found at step 0.1. On a Mac with Apple Silicon, use
 
 ### Command
 
-Open R from the Start menu or the Applications folder. A window with a `>` prompt appears. Type this command and press Enter:
-
-```{r s0-2_r_version}
-R.version.string
-```
-
-Terminal equivalent: `Rscript --version`. The option `--version` prints the installed version without running an analysis. If the terminal cannot find `Rscript` but RStudio can run R, use the R console. You do not need to set up the terminal's PATH (the list of folders where it looks for programs) here.
+No code to run. Open R from the Start menu or the Applications folder. Check that its window opens. Step 0.7 checks the installed version after you have opened the course project.
 
 <details><summary>Show the expected result</summary>
 
-R prints one line that begins `R version`. Your version may differ from the Windows validation environment, which used R 4.5.2. The author also tested Ubuntu extraction with R 4.6.1.
+The R application opens. Its window shows version information and a `>` prompt. Your version may differ from the Windows validation environment, which used R 4.5.2. The author also tested Ubuntu extraction with R 4.6.1.
 
 </details>
 
@@ -137,9 +125,9 @@ If your computer blocks the installation, ask the instructor or your institution
 
 ### Quick check
 
-What does the version command measure: the version of R or the version of PLINK?
+Does the R installer also install RStudio?
 
-<details><summary>Show the answer</summary>The version of R.</details>
+<details><summary>Show the answer</summary>No. Install RStudio separately at step 0.3.</details>
 
 ### Files created
 
@@ -167,23 +155,17 @@ A working R installation from step 0.2 and the RStudio installer.
 
 ### Command
 
-In the RStudio console, type this small calculation and press Enter:
-
-```{r s0-3_console}
-2 + 3
-```
-
-Terminal equivalent: `Rscript -e "print(2 + 3)"`. The console and the terminal use the same R calculation. You open RStudio itself from your applications menu.
+No code to run. Open RStudio from your applications menu. Find the Console pane and check that it shows a `>` prompt. You will run your first course commands at step 0.5.
 
 <details><summary>Show the expected result</summary>
 
-`[1] 5`. The `[1]` marks the first value printed. It is not part of the answer.
+RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, R is waiting for the rest of a command. Press Escape and type the complete command again.
+If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, press Escape to return to an empty prompt.
 
 </details>
 
@@ -195,7 +177,7 @@ After restarting R, should you expect an unsaved object to remain in memory?
 
 ### Files created
 
-RStudio software files. The calculation creates no course data.
+RStudio software files. No course data are created.
 
 ## 0.4 Download PLINK 2 {#step-0-4}
 
@@ -221,19 +203,11 @@ Your system and processor from step 0.1, and the extracted project from step 0.5
 
 ### Command
 
-You can run this command after you open the project at step 0.6. If the project is not open yet, skip it now and come back later. It reads the tested PLINK 2 version from the settings file:
-
-```{r s0-4_plink_setting}
-settings <- new.env(parent = baseenv())
-sys.source("config.R", settings)
-settings$course_settings$tested_plink_version
-```
-
-Terminal equivalent for checking the executable: `bin/plink2 --version` (Windows: `bin\plink2.exe --version`). The option `--version` asks PLINK 2 to print its version. It does not read data. The R setup check at step 0.7 makes this call for you.
+No R code to run. Check that you extracted the ZIP and found `plink2.exe` on Windows, or `plink2` on macOS or Linux. Copy it into the project's `bin` folder after step 0.5. The setup check at step 0.7 reports the tested and installed versions.
 
 <details><summary>Show the expected result</summary>
 
-R prints the PLINK 2 version used to test the course. At step 0.7 your own executable must identify itself as PLINK v2. A newer version gives a warning. A different version number alone does not make the check fail.
+The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux. At step 0.7 your executable must identify itself as PLINK v2. A different build gives a warning. A different version number alone does not make the check fail.
 
 </details>
 
@@ -389,6 +363,12 @@ The executable from step 0.4 and the verified data from step 0.5. The standard g
 ### Command
 
 ```{r s0-7_preflight}
+Sys.info()[c("sysname", "release", "machine")]
+R.version.string
+2 + 3
+settings <- new.env(parent = baseenv())
+sys.source("config.R", settings)
+settings$course_settings$tested_plink_version
 source("scripts/preflight.R")
 ```
 
@@ -416,7 +396,7 @@ bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20
 
 <details><summary>Show the expected result</summary>
 
-The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.
+R first prints your system information, its version and the result `[1] 5` from the small calculation. It also prints the tested PLINK version from `config.R`. The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.
 
 </details>
 

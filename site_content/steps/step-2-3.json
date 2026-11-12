@@ -6,7 +6,7 @@
   "anchor": "step-2-3",
   "title": "Sample and variant tables",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d",
+  "source_sha256": "e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We read the sample table and the variant table. We do not change them.",
@@ -18,7 +18,7 @@
     "quick_check": "Should you join two tables by row number when they have the same length?\n\n<details><summary>Show the answer</summary>\n\nNo. Match the FID/IID pair or the site identifier. Then check that every required record found its match.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s2-3",

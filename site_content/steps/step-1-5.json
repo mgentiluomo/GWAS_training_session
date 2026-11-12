@@ -6,7 +6,7 @@
   "anchor": "step-1-5",
   "title": "Calling genotypes",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "5e5711b85c81d25a373fe8b197e2b87cadc27d8d9b838792339aab39dd4d28f0",
+  "source_sha256": "11fdbc3421834afeadf3535292bd5f6c27ea852eb5fa84f62ccc44c3366b5794",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Read the call and score columns, and do not treat the score as certainty.",
@@ -18,7 +18,7 @@
     "quick_check": "Does GC Score = 0.9 mean a variant has a 90% chance of causing disease?\n\n<details><summary>Show the answer</summary>\n\nNo. The score describes the quality of the genotype call. It says nothing about disease or association.\n\n</details>",
     "files_created": "None."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s1-5",

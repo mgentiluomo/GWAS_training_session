@@ -95,7 +95,8 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_required_blocks_and_figure_prompts(self):
         for record in self.records:
-            self.assertTrue(record["r_commands"])
+            if record["module"] != 0 or record["step"] >= 5:
+                self.assertTrue(record["r_commands"])
             self.assertTrue(record["setup_code"] or record["module"] == 0)
             for name, _ in exports.BLOCKS:
                 if name != "what_this_check_can_reveal":
@@ -105,6 +106,40 @@ class CourseExportsTests(unittest.TestCase):
                 self.assertTrue(figure["gemini_prompt"])
                 self.assertFalse(figure["reviewed"])
             self.assertNotIn("Gemini prompt:", record["blocks"]["files_created"])
+
+    def test_installation_steps_need_no_r_commands_or_setup(self):
+        for record in self.records[:4]:
+            with self.subTest(step=record["id"]):
+                self.assertEqual(record["r_commands"], [])
+                self.assertEqual(record["setup_code"], "")
+                self.assertEqual(record["verification"], "manual_required")
+                self.assertNotIn("```", record["blocks"]["command"])
+                self.assertNotIn("Rscript", record["blocks"]["command"])
+        system_step = self.records[0]
+        self.assertIn("System type", system_step["blocks"]["what_we_do"])
+        self.assertIn("Settings", system_step["blocks"]["what_we_do"])
+        check = next(r for r in self.records if r["id"] == "0.7")
+        code = "\n".join(c["code"] for c in check["r_commands"])
+        self.assertIn("Sys.info()", code)
+        self.assertIn("R.version.string", code)
+        self.assertIn('source("scripts/preflight.R")', code)
+
+    def test_site_setup_keeps_helpers_and_excludes_notebook_rendering(self):
+        for record in self.records:
+            with self.subTest(step=record["id"]):
+                setup = record["setup_code"]
+                self.assertNotIn("setwd", setup)
+                self.assertNotIn("knitr", setup)
+                self.assertNotIn("start_dir", setup)
+                if record["module"] == 0:
+                    self.assertEqual(setup, "")
+                else:
+                    self.assertIn('source("R/guided.R")', setup)
+                    self.assertIn("cfg <- guided_init()", setup)
+        script = exports.main_script()
+        self.assertNotIn("knit_setup", script)
+        self.assertNotIn("opts_knit", script)
+        self.assertIn('source("R/guided.R")', script)
 
     def test_combined_script_matches_chunks_and_omits_interactive_downloads(self):
         script = exports.main_script()

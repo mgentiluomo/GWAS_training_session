@@ -6,7 +6,7 @@
   "anchor": "step-5-3",
   "title": "Match build, position and alleles",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "8f5a26ab6607f700fd78a71db41d04750b76b51500e15831c07728cea3d62dc8",
+  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Check that the shared variants are really the same variants in both files, before the projection.",
@@ -18,7 +18,7 @@
     "quick_check": "Is it safe to match variants only by row position if both `.pvar` files contain 48,614 rows?\n\n<details><summary>Show the answer</summary>\n\nNo. Match the variant IDs, and check the position and the alleles.\n\n</details>",
     "files_created": "None. If a variant does not match, the code stops before the projection."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s5-3",

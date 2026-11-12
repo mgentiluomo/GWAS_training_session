@@ -6,7 +6,7 @@
   "anchor": "step-5-2",
   "title": "Prepare variants for reference PCA",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "8f5a26ab6607f700fd78a71db41d04750b76b51500e15831c07728cea3d62dc8",
+  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Find the sites that are present in both the reference subset and the cleaned study. Only common sites on the [autosomes](../docs/glossary.md#autosome) (chromosomes 1 to 22) are used.",
@@ -18,7 +18,7 @@
     "quick_check": "Should we add back sites that failed variant QC just because they exist in the reference?\n\n<details><summary>Show the answer</summary>\n\nNo. The comparison with the reference uses only the study sites that passed QC.\n\n</details>",
     "files_created": "`s5-2_common.txt`."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s5-2",

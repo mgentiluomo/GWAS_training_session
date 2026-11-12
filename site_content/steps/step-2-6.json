@@ -6,7 +6,7 @@
   "anchor": "step-2-6",
   "title": "Genome builds and lift-over",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "45d1e66a8b1a4c110c083c5c9877852a5cc3684e647e6a99c36fa0ceddafa05d",
+  "source_sha256": "e0ed7f9765a2c82c3d33f5392b57f4c67a5140ce22bebc0d178db0d443e7da27",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We convert the separate GRCh37 exercise to GRCh38 in R. We use a chain file for this one direction. We keep the exercise apart from the main analysis.",
@@ -19,7 +19,7 @@
     "quick_check": "Does a successful position lift-over guarantee that REF and ALT now match the destination reference?\n\n<details><summary>Show the answer</summary>\n\nNo. You must still check the alleles and the reverse-strand mappings.\n\n</details>",
     "files_created": "`s2-6_update_map.tsv`, the mapped and reverse lists, and the separate `s2-6_grch38` files."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s2-6",

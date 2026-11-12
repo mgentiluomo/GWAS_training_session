@@ -6,7 +6,7 @@
   "anchor": "step-7-6",
   "title": "Regional plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "acb782f935f6480407d74a79539efcfd30821d8a5c086cc376089d99a1963afa",
+  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.",
@@ -18,7 +18,7 @@
     "quick_check": "Does the highest point always identify the causal variant?\n\n<details><summary>Show the answer</summary>\n\nNo. The lead variant is the strongest association among the sites that we tested. It may only mark a cause that we did not measure.\n\n</details>",
     "files_created": "`s7-6_ld.vcor`, `s7-6_regional.png` and the regional analysis checkpoint."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-6",

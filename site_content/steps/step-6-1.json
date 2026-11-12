@@ -6,7 +6,7 @@
   "anchor": "step-6-1",
   "title": "One variant by hand",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0",
+  "source_sha256": "78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.",
@@ -18,7 +18,7 @@
     "quick_check": "An OR of 2 means that the probability of disease doubled. Is this statement generally correct?\n\n<details><summary>Show the answer</summary>\n\nNo. Odds and probability are different things. An odds ratio is usually not the same as a risk ratio.\n\n</details>",
     "files_created": "`s6-1_example.raw` and the log files."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-1",

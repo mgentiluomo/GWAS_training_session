@@ -6,7 +6,7 @@
   "anchor": "step-6-4",
   "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "2d5d8ff5b8ad1cc5ae4401fcff8b1b236700d8bba7fcfcb5eb582ed1d5c8a3a0",
+  "source_sha256": "78b02570d225371b05ff863afe7649102e5c4ce04d183ae8b9e8de721922ced6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",
@@ -18,7 +18,7 @@
     "quick_check": "Does a tiny p-value imply a large odds ratio?\n\n<details><summary>Show the answer</summary>\n\nNo. The p-value depends on the effect, the uncertainty and the sample size. Also report the effect estimate and its interval.\n\n</details>",
     "files_created": "`s6-4_association.Disease.glm.logistic.hybrid`, the log files and `s6-4_results.tsv`, a cleaned copy of the results."
   },
-  "setup_code": "start_dir <- setwd(if (file.exists(\"config.R\")) \".\" else \"..\")\nif (requireNamespace(\"knitr\", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())\nsource(\"R/guided.R\")\ncfg <- guided_init()\nsetwd(start_dir)",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-4",
