@@ -1,0 +1,21 @@
+source("R/session_locale.R")
+normalise_course_locale()
+source("R/course.R")
+local({
+  data <- Sys.getenv("COURSE_DATA_DIR")
+  stopifnot(nzchar(data))
+  out <- tempfile("unicode-plink-test-")
+  dir.create(out)
+  on.exit(unlink(out, recursive = TRUE))
+  cfg <- course_config(".", data_dir = data, output_dir = out)
+  folder <- file.path(out, "caf\u00e9_\u03b1_\u4e2d\u6587")
+  dir.create(folder)
+  prefix <- file.path(folder, "s0-7_probe")
+  original <- getwd()
+  run_plink(cfg, c("--bfile", cfg$input, "--autosome", "--thin-count", "20", "--seed", "20261111",
+    "--freq", "--out", prefix), paste0(prefix, ".afreq"))
+  command <- readLines(paste0(prefix, ".command.txt"))
+  stopifnot(file.exists(paste0(prefix, ".afreq")), identical(getwd(), original),
+            !any(grepl("[^ -~]", tail(command, 1))))
+  cat("Unicode PLINK path regression passed.\n")
+})

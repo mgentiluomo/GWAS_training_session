@@ -250,7 +250,7 @@ where_am_i <- function(data_dir = "data/course", work_dir = "results/course") {
   invisible(result)
 }
 
-course_config <- function(root = ".") {
+course_config <- function(root = ".", data_dir = NULL, output_dir = NULL) {
   root <- normalizePath(root, mustWork = TRUE)
   # Session display only: do not change OS language, input methods or LC_CTYPE.
   original_outdec <- getOption("OutDec")
@@ -264,7 +264,13 @@ course_config <- function(root = ".") {
     file.path(root, "data", "legacy", "DB_A")
   cfg$metadata <- if (cfg$mode == "demo") file.path(root, "data", "demo") else
     file.path(root, "data", "legacy")
-  cfg$out <- file.path(root, "results", cfg$mode)
+  if (!is.null(data_dir)) {
+    cfg$mode <- "guided"
+    cfg$data_dir <- normalizePath(data_dir, mustWork = TRUE)
+    cfg$input <- file.path(cfg$data_dir, "lab_export", "sim2026_lab")
+    cfg$metadata <- file.path(cfg$data_dir, "phenotypes")
+  }
+  cfg$out <- if (is.null(output_dir)) file.path(root, "results", cfg$mode) else output_dir
   cfg$qc <- file.path(cfg$out, "01_qc")
   cfg$pca <- file.path(cfg$out, "02_pca")
   cfg$assoc <- file.path(cfg$out, "03_association")
@@ -278,6 +284,11 @@ course_config <- function(root = ".") {
   if (!is.null(attr(version, "status")) || !any(grepl("PLINK v2", version, fixed = TRUE)))
     stop("The selected executable is not a working PLINK 2 binary. See docs/troubleshooting.md.")
   cfg$version <- version
+  expected_version <- strsplit(cfg$tested_plink_version, " ", fixed = TRUE)[[1]][2L]
+  if (!any(grepl(expected_version, version, fixed = TRUE))) {
+    warning("Your PLINK 2 version differs from the tested version: ", cfg$tested_plink_version,
+            ". You can continue, but check any changed options or results.", call. = FALSE)
+  }
   writeLines(c(version, paste("Mode:", cfg$mode), paste("Original R OutDec:", original_outdec),
                paste("Course R OutDec:", getOption("OutDec")),
                paste("Numeric locale:", Sys.getlocale("LC_NUMERIC")),
@@ -371,18 +382,59 @@ check_bed <- function(prefix) {
   data.frame(samples = nrow(fam), variants = nrow(bim))
 }
 
+course_relative_path <- function(path, root) {
+  path <- strsplit(gsub("\\\\", "/", path), "/", fixed = TRUE)[[1]]
+  root <- strsplit(gsub("\\\\", "/", root), "/", fixed = TRUE)[[1]]
+  if (tolower(path[1]) != tolower(root[1])) return(paste(path, collapse = "/"))
+  common <- 0L
+  for (i in seq_len(min(length(path), length(root)))) {
+    if (tolower(path[i]) != tolower(root[i])) break
+    common <- i
+  }
+  parts <- c(rep("..", length(root) - common), path[seq_along(path) > common])
+  if (length(parts)) paste(parts, collapse = "/") else "."
+}
+
+course_plink_path <- function(path, root) {
+  absolute <- if (file.exists(path)) normalizePath(path, winslash = "/", mustWork = TRUE) else {
+    paste0(normalizePath(dirname(path), winslash = "/", mustWork = TRUE), "/", basename(path))
+  }
+  relative <- course_relative_path(absolute, root)
+  if (.Platform$OS.type == "windows" && grepl("[^ -~]", relative)) {
+    if (file.exists(absolute)) {
+      absolute <- utils::shortPathName(absolute)
+    } else {
+      absolute <- file.path(utils::shortPathName(dirname(absolute)), basename(absolute))
+    }
+    relative <- course_relative_path(absolute, root)
+    if (grepl("[^ -~]", relative)) {
+      stop("Windows could not provide an ASCII path for PLINK. Use a simple project and output folder, such as C:/GWAS_course.", call. = FALSE)
+    }
+  }
+  relative
+}
+
 run_plink <- function(cfg, args, expected = character()) {
   args <- as.character(args)
   oi <- match("--out", args)
   if (is.na(oi) || oi == length(args)) stop("Every command needs --out for a separate log.")
   prefix <- args[oi + 1L]
   dir.create(dirname(prefix), recursive = TRUE, showWarnings = FALSE)
+  previous_directory <- getwd()
+  root <- normalizePath(cfg$root, winslash = "/", mustWork = TRUE)
+  # Resolve paths before changing directory, then invoke PLINK from the project root.
+  is_path <- grepl("^([A-Za-z]:[/\\\\]|/)|[/\\\\]", args) & !startsWith(args, "--")
+  args[is_path] <- vapply(args[is_path], course_plink_path, character(1), root = root)
+  executable <- course_plink_path(cfg$plink2, root)
+  prefix <- paste0(normalizePath(dirname(prefix), winslash = "/", mustWork = TRUE), "/", basename(prefix))
+  setwd(root)
+  on.exit(setwd(previous_directory), add = TRUE)
   args <- c(args, "--threads", cfg$threads, "--memory", cfg$memory_mb)
-  command <- paste(shQuote(cfg$plink2), paste(shQuote(args), collapse = " "))
+  command <- paste(shQuote(executable), paste(shQuote(args), collapse = " "))
   cat(command, "\n")
   writeLines(c(paste("Started:", Sys.time()), cfg$version, command), paste0(prefix, ".command.txt"))
   # system2 quotes the executable. Quote each argument so paths with spaces work.
-  output <- suppressWarnings(system2(cfg$plink2, args = shQuote(args), stdout = TRUE, stderr = TRUE))
+  output <- suppressWarnings(system2(executable, args = shQuote(args), stdout = TRUE, stderr = TRUE))
   writeLines(output, paste0(prefix, ".console.txt"))
   cat(paste(tail(output, 10), collapse = "\n"), "\n")
   status <- attr(output, "status")

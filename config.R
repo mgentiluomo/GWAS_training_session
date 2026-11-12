@@ -12,6 +12,7 @@ course_settings <- list(
     manifest_sha256 = "5a3943e793b9a37b8873833c259325d078d261ba4b82b108a812a266e6fe8fd0"
   ),
   plink2 = Sys.getenv("PLINK2_BIN", unset = ""),
+  tested_plink_version = "PLINK v2.0.0-b.1.4 (7 Nov 2026)",
   threads = 2L,
   memory_mb = 2048L,
   maf = 0.01,
