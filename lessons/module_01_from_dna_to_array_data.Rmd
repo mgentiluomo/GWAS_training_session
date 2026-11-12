@@ -15,10 +15,11 @@ See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
 loads its inputs from disk; a saved R workspace is not required.
 
 ```{r setup, include=FALSE}
-if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
 if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
+setwd(start_dir)
 ```
 
 ## Module 1 at a glance {#module-1-overview}
