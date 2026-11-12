@@ -8,6 +8,26 @@ was rejected. Extraction and verification took 5.0 seconds. `digest` 0.6.39
 provided hashing. All investigation packages were installed under `codex_work/`.
 No system library or repository data directory was populated.
 
+On 12 November 2026, the author tested the same stage 1 archive on Ubuntu
+24.04.4 LTS with R 4.6.1. Extraction passed all 55 payload SHA-256 checks and
+rejected a wrong password in 7.78 seconds. This result was reported by the
+author, rather than reproduced on the Windows development machine.
+
+CRAN source installation failed without `libarchive-dev` for `archive` and
+`libuv1-dev` for `fs`, a dependency needed by `rmarkdown`. Only the runtime
+library `libarchive.so.13` was present. All packages then installed as binaries
+from `https://packagemanager.posit.co/cran/__linux__/noble/latest`, without a
+compiler or administrator rights. The following R option was essential;
+without it the server returned source packages:
+
+```r
+options(HTTPUserAgent = sprintf("R/%s R (%s)", getRversion(),
+  paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"])))
+```
+
+The [Posit Package Manager documentation](https://docs.posit.co/rspm/admin/serving-binaries.html)
+explains how distribution-specific URLs and the R user agent select binaries.
+
 Reproduce with `scripts/author/probe_archive.R`. Set `COURSE_WORK_DIR` to the
 existing authorised work folder containing `release/`. Set `TMP` and `TEMP`
 beneath that folder before starting R. Supply the test password through
@@ -27,7 +47,7 @@ route with native dependencies. It is not a pure R implementation.
 | --- | --- |
 | Windows x64 | Full local encrypted archive and wrong-password test passed. |
 | macOS ARM64 and Intel | Binary availability verified. Actual extraction not tested. |
-| Linux | Source installation may need libarchive development files and a compiler. Actual extraction not tested. |
+| Ubuntu 24.04.4 LTS, R 4.6.1 | Author-reported binary installation and extraction passed: 55 SHA-256 checks, wrong password rejected, 7.78 seconds. Other Linux distributions remain untested. |
 
 The probe covers a non-interactive supplied password. The masked classroom
 prompt needs an interactive RStudio check on each platform.
@@ -36,8 +56,10 @@ prompt needs an interactive RStudio check on each platform.
 
 Keep AES-256 ZIP with `archive` for extraction. Do not
 silently fall back to another format or weaken encryption. Before classroom use,
-test the same archive on macOS and Linux and decide how Linux dependencies are
-provided. Do not require 7-Zip on student machines. The author-side packager
+test the same archive on macOS and the masked RStudio prompt on each platform.
+Use matching Posit Package Manager binaries on supported Linux distributions;
+source installation needs development packages and a compiler. Do not require
+7-Zip on student machines. The author-side packager
 uses 7-Zip to create the ZIP; student extraction uses `archive`.
 
 | Option if the package route fails | Benefit | Cost |

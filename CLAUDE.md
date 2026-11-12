@@ -45,9 +45,10 @@ The course is an independent teaching resource for students across University of
 - L1 has one genome-wide variant only: use L2 or L3 for the regional plot at 7.6.
 - The release uses GSA-style Illumina names and real GRCh38 positions. The array manifest stays local only and is not included in the repository or release.
 - AES-256 release packaging exists in `scripts/package_release.py`, with manifest checks and a local test package. The classroom release has not been published.
-- Windows extraction with `archive` 1.1.14 passed all 55 payload SHA-256 checks and rejected a wrong password. Linux and macOS extraction still need testing.
+- Windows extraction with `archive` 1.1.14 passed all 55 payload SHA-256 checks and rejected a wrong password.
+- The author reports the same extraction checks passed on Ubuntu 24.04.4 LTS with R 4.6.1 in 7.78 seconds. Posit Package Manager binaries from the Noble repository installed without a compiler or administrator rights after setting R's `HTTPUserAgent`. CRAN source builds failed without `libarchive-dev` and `libuv1-dev`. Other Linux distributions, macOS extraction and the masked RStudio prompt remain untested.
 - Decision: keep AES-256 ZIP with `archive` for extraction. No 7-Zip installation or fallback for students; the author-side packager uses 7-Zip only to create the archive.
-- Next steps: test extraction on Linux and macOS, prepare the classroom release and the R helpers (`download_course_data`, `restore_checkpoint`, `check_step`), then the notebooks module by module, then the website (mockup first).
+- Next steps: test macOS extraction and the masked RStudio prompt, prepare the classroom release and the R helpers (`download_course_data`, `restore_checkpoint`, `check_step`), then the notebooks module by module, then the website (mockup first).
 
 ## Technical decisions
 
