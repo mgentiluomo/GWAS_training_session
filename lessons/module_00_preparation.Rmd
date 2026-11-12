@@ -274,7 +274,9 @@ The source project contains code and text. The encrypted package contains the da
 
 ### You need
 
-The complete project folder, R and the approved archive. Save the archive (`course-data-2026.1.zip`) and its small file `MANIFEST.tsv` together in one folder, for example your Downloads folder. The instructor gives you the password separately.
+The complete project folder, R and the approved archive. Save the archive (`course-data-2026.1.zip`) and its small file `MANIFEST.tsv` together in one folder, for example your Downloads folder. 
+
+Request the password with your university email through the [data access form](https://manuelgentiluomo.it/teaching/gwas/data-access). This is a placeholder address until the form is published. In class, you can scan the QR code to open the same form. The form sends the password automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
 
 ### Command
 
