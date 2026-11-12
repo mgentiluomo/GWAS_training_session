@@ -106,3 +106,46 @@ guided_high_ld <- function(cfg) {
   write.table(intervals, path, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
   path
 }
+
+guided_liftover <- function(chromosome, position, chain_file) {
+  # UCSC chain coordinates are zero-based half-open; course coordinates are one-based.
+  lines <- readLines(gzfile(chain_file), warn = FALSE)
+  fields <- strsplit(lines[nzchar(lines)], "[[:space:]]+")
+  blocks <- vector("list", length(fields))
+  n <- 0L
+  chain <- 0L
+  for (f in fields) {
+    if (f[1] == "chain") {
+      chain <- chain + 1L
+      score <- as.numeric(f[2]); source <- f[3]; t <- as.numeric(f[6])
+      target <- f[8]; size_q <- as.numeric(f[9]); strand <- f[10]; q <- as.numeric(f[11])
+    } else {
+      size <- as.numeric(f[1]); n <- n + 1L
+      blocks[[n]] <- c(source, t, t + size, target, if (strand == "+") q else size_q - 1 - q,
+        if (strand == "+") 1 else -1, score, chain)
+      if (length(f) == 3L) { t <- t + size + as.numeric(f[2]); q <- q + size + as.numeric(f[3]) }
+    }
+  }
+  blocks <- as.data.frame(do.call(rbind, blocks[seq_len(n)]), stringsAsFactors = FALSE)
+  names(blocks) <- c("source", "start", "end", "target", "target_start", "sign", "score", "chain")
+  for (column in c("start", "end", "target_start", "sign", "score", "chain")) blocks[[column]] <- as.numeric(blocks[[column]])
+  result <- data.frame(chromosome = NA_character_, position = NA_real_, strand = NA_character_)
+  result <- result[rep(1L, length(position)), ]
+  best <- rep(-Inf, length(position))
+  p0 <- as.numeric(position) - 1
+  for (b in split(blocks, blocks$chain)) {
+    b <- b[order(b$start), ]
+    todo <- which(chromosome == b$source[1] & b$score[1] > best)
+    if (!length(todo)) next
+    k <- findInterval(p0[todo], b$start)
+    hit <- k > 0L & p0[todo] < b$end[pmax(k, 1L)]
+    selected <- todo[hit]; k <- k[hit]
+    if (length(selected)) {
+      result$chromosome[selected] <- b$target[k]
+      result$position[selected] <- b$target_start[k] + b$sign[k] * (p0[selected] - b$start[k]) + 1
+      result$strand[selected] <- ifelse(b$sign[k] == 1, "+", "-")
+      best[selected] <- b$score[k]
+    }
+  }
+  result
+}

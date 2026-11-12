@@ -35,3 +35,11 @@ modules and unresolved checks will be recorded below before the final push.
   2,016 wells and the three supplied report excerpts were checked. No genotype
   changes are made in this module. Laboratory steps have no PLINK equivalent;
   they are explicitly labelled rather than given a misleading command.
+
+- Module 2: executed on Windows and compared with the instructor reference.
+  Strand correction flipped 400 sites and excluded 3,013; boundary 2.8 has
+  2,016 wells and 296,510 variants. R lift-over mapped 9,970/10,000 exercise sites
+  on the same chromosome, including eight reverse-strand mappings. All 9,965
+  shared annotation IDs were checked where mapped. The author-only chain path
+  was supplied through COURSE_CHAIN_FILE; stage the official chain in the
+  classroom package before publication. The isolated exercise is not position-sorted.
