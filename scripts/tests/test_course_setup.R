@@ -131,6 +131,11 @@ local({
     from <- if (identical(url, release$archive_url)) zip else manifest_file
     stopifnot(file.copy(from, destination))
   }
+  test("unpublished release refuses URL access before any download", {
+    before <- downloads
+    msg <- error_message(course$download_course_data(secret))
+    stopifnot(grepl("not configured", msg, fixed = TRUE), downloads == before)
+  })
   test("insecure URLs and missing checksum pins stop before downloading", {
     before <- downloads
     bad <- release
@@ -146,6 +151,51 @@ local({
     course$download_course_data(secret, destination = dest, release = release)
     stopifnot(downloads == 2L, identical(hash(file.path(dest, "example.txt")), original_manifest$sha256),
               !length(list.files(root, pattern = "^course-download-")))
+  })
+  test("local ZIP with a separate manifest never uses the downloader", {
+    before <- downloads
+    dest <- file.path(root, "local-verified")
+    local_release <- release
+    local_release$archive_url <- ""
+    local_release$manifest_url <- ""
+    course$download_course_data(secret, dest, local_release, zip_path = zip)
+    stopifnot(downloads == before, identical(hash(file.path(dest, "example.txt")), original_manifest$sha256))
+    manifest_copy <- file.path(root, "separate-manifest.tsv")
+    stopifnot(file.copy(manifest_file, manifest_copy))
+    course$download_course_data(secret, file.path(root, "explicit-manifest"), local_release,
+                                zip_path = zip, manifest_path = manifest_copy)
+    stopifnot(downloads == before)
+  })
+  test("missing local files and local checksum mismatches do not download", {
+    before <- downloads
+    msg <- error_message(course$download_course_data(secret, release = release,
+      zip_path = file.path(root, "absent.zip")))
+    stopifnot(grepl("local ZIP", msg, fixed = TRUE))
+    msg <- error_message(course$download_course_data(secret, release = release,
+      zip_path = zip, manifest_path = file.path(root, "absent.tsv")))
+    stopifnot(grepl("local manifest", msg, fixed = TRUE))
+    for (key in c("archive_sha256", "manifest_sha256")) {
+      bad <- release
+      bad[[key]] <- paste(rep("0", 64), collapse = "")
+      dest <- file.path(root, paste0("local-", key))
+      msg <- error_message(course$download_course_data(secret, dest, bad, zip_path = zip))
+      stopifnot(grepl("SHA-256", msg, fixed = TRUE), !dir.exists(dest))
+    }
+    stopifnot(downloads == before)
+  })
+  test("omitted password requests the prompt; supplied password bypasses it", {
+    original_prompt <- course$course_password_prompt
+    prompted <- 0L
+    course$course_password_prompt <- function() {
+      prompted <<- prompted + 1L
+      secret
+    }
+    tryCatch({
+      course$download_course_data(destination = file.path(root, "prompted"), release = release, zip_path = zip)
+      stopifnot(prompted == 1L)
+      course$download_course_data(secret, file.path(root, "not-prompted"), release, zip_path = zip)
+      stopifnot(prompted == 1L)
+    }, finally = { course$course_password_prompt <- original_prompt })
   })
   test("existing destination is retained without downloading", {
     before <- downloads
@@ -202,14 +252,15 @@ local({
     test("local stage 1 AES-256 archive, correct and wrong password", {
       zip <- file.path(test_archive_dir, "course-data-2026.1.zip")
       manifest_file <- file.path(test_archive_dir, "MANIFEST.tsv")
-      release$archive_sha256 <- hash(zip)
-      release$manifest_sha256 <- hash(manifest_file)
       supplied <- Sys.getenv("COURSE_RELEASE_PASSWORD")
       stopifnot(nzchar(supplied))
-      course$download_course_data(supplied, file.path(root, "stage1"), release)
-      msg <- error_message(course$download_course_data(secret, file.path(root, "wrong-passphrase"), release))
+      before <- downloads
+      # Use the checksum pins from config.R, not hashes calculated from these inputs.
+      course$download_course_data(supplied, file.path(root, "stage1"), zip_path = zip)
+      msg <- error_message(course$download_course_data(secret, file.path(root, "wrong-passphrase"), zip_path = zip))
       stopifnot(grepl("The password is wrong", msg, fixed = TRUE),
-                !grepl(supplied, msg, fixed = TRUE), !dir.exists(file.path(root, "wrong-passphrase")))
+                !grepl(supplied, msg, fixed = TRUE), !dir.exists(file.path(root, "wrong-passphrase")),
+                downloads == before)
     })
   }
   cat(count, "course setup tests passed.\n")

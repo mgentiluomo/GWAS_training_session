@@ -35,7 +35,16 @@ course_manifest <- function(path) {
   manifest
 }
 
-download_course_data <- function(password = NULL, destination = "data/course", release = NULL) {
+course_password_prompt <- function() {
+  if (!interactive()) stop("Supply the course password through the password argument in a non-interactive session.", call. = FALSE)
+  if (!requireNamespace("getPass", quietly = TRUE)) {
+    stop("The getPass package is missing. Run source('scripts/preflight.R') first.", call. = FALSE)
+  }
+  getPass::getPass("Course data password: ")
+}
+
+download_course_data <- function(password = NULL, destination = "data/course", release = NULL,
+                                 zip_path = NULL, manifest_path = NULL) {
   if (is.null(release)) {
     settings <- new.env(parent = baseenv())
     sys.source("config.R", envir = settings)
@@ -47,8 +56,25 @@ download_course_data <- function(password = NULL, destination = "data/course", r
     stop("The classroom data release is not configured. Ask the instructor for the approved course configuration.",
          call. = FALSE)
   }
-  if (!all(grepl("^https://", unlist(release[c("archive_url", "manifest_url")])))) {
-    stop("Course downloads must use HTTPS URLs.", call. = FALSE)
+  local_archive <- !is.null(zip_path)
+  local_manifest <- manifest_path
+  if (local_archive) {
+    if (!is.character(zip_path) || length(zip_path) != 1L || is.na(zip_path) ||
+        !nzchar(zip_path) || !file.exists(zip_path) || dir.exists(zip_path)) {
+      stop("The local ZIP file was not found. Check zip_path.", call. = FALSE)
+    }
+    if (is.null(local_manifest)) local_manifest <- file.path(dirname(zip_path), "MANIFEST.tsv")
+    if (!is.character(local_manifest) || length(local_manifest) != 1L || is.na(local_manifest) ||
+        !nzchar(local_manifest) || !file.exists(local_manifest) || dir.exists(local_manifest)) {
+      stop("The local manifest was not found. Put MANIFEST.tsv beside the ZIP or supply manifest_path.", call. = FALSE)
+    }
+  } else {
+    if (!is.null(local_manifest)) stop("Supply zip_path when using a local manifest.", call. = FALSE)
+    urls <- unlist(release[c("archive_url", "manifest_url")])
+    if (any(!nzchar(urls))) {
+      stop("The classroom data release is not configured. Supply a local zip_path to test the stage 1 archive.", call. = FALSE)
+    }
+    if (!all(grepl("^https://", urls))) stop("Course downloads must use HTTPS URLs.", call. = FALSE)
   }
   if (!all(grepl("^[a-fA-F0-9]{64}$", unlist(release[c("archive_sha256", "manifest_sha256")])))) {
     stop("The course configuration needs approved SHA-256 checksums for both downloads.", call. = FALSE)
@@ -75,8 +101,14 @@ download_course_data <- function(password = NULL, destination = "data/course", r
   on.exit(unlink(work, recursive = TRUE), add = TRUE)
   zip <- file.path(work, "course-data.zip")
   manifest_path <- file.path(work, "MANIFEST.tsv")
-  course_download_file(release$archive_url, zip)
-  course_download_file(release$manifest_url, manifest_path)
+  if (local_archive) {
+    if (!file.copy(zip_path, zip) || !file.copy(local_manifest, manifest_path)) {
+      stop("The local ZIP or manifest could not be copied. Check file permissions.", call. = FALSE)
+    }
+  } else {
+    course_download_file(release$archive_url, zip)
+    course_download_file(release$manifest_url, manifest_path)
+  }
   hash <- function(path) digest::digest(path, algo = "sha256", file = TRUE)
   if (hash(zip) != tolower(release$archive_sha256) ||
       hash(manifest_path) != tolower(release$manifest_sha256)) {
@@ -85,11 +117,7 @@ download_course_data <- function(password = NULL, destination = "data/course", r
   }
   manifest <- course_manifest(manifest_path)
   if (is.null(password)) {
-    if (!interactive()) stop("Supply the course password through the password argument in a non-interactive session.", call. = FALSE)
-    if (!requireNamespace("getPass", quietly = TRUE)) {
-      stop("The getPass package is missing. Run source('scripts/preflight.R') first.", call. = FALSE)
-    }
-    password <- getPass::getPass("Course data password: ")
+    password <- course_password_prompt()
   }
   if (!is.character(password) || length(password) != 1L || is.na(password) || !nzchar(password)) {
     stop("Enter the course password supplied by the instructor.", call. = FALSE)

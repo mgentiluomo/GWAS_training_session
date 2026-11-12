@@ -63,10 +63,12 @@ install.packages(c("archive", "digest", "getPass", "knitr", "rmarkdown"),
 
 ## Downloading the encrypted course data
 
-The instructor supplies an approved `course_settings$data_release` list in
-`config.R`. Its fields are `archive_url`, `manifest_url`, `archive_sha256` and
-`manifest_sha256`. Both URLs must use HTTPS. The two SHA-256 values must come
-from the approved release configuration. No password belongs in this file.
+`course_settings$data_release` in `config.R` is the single place for release
+URLs and expected checksums. Its fields are `archive_url`, `manifest_url`,
+`archive_sha256` and `manifest_sha256`. The current checksums identify the stage 1
+test package; both URLs are empty because the GitHub Release does not exist yet.
+Replace all four fields with the approved classroom release settings before
+publication. Remote URLs must use HTTPS. No password belongs in this file.
 
 After package preparation, run these commands in the R console:
 
@@ -74,6 +76,22 @@ After package preparation, run these commands in the R console:
 source("R/course.R")
 download_course_data()
 ```
+
+Until the release exists, supply a local ZIP instead. The following R command
+opens the password prompt and looks for `MANIFEST.tsv` beside the ZIP. It makes
+no network request:
+
+```r
+download_course_data(
+  zip_path = file.path(Sys.getenv("COURSE_WORK_DIR"), "release", "course-data-2026.1.zip"),
+  destination = file.path(Sys.getenv("COURSE_WORK_DIR"), "local-data-check")
+)
+```
+
+Set `COURSE_WORK_DIR` to the existing authorised work folder first. Choose a new
+destination on each run. If the manifest is elsewhere, supply `manifest_path`
+too. Local inputs receive the same configured SHA-256 and payload checks as
+remote downloads; expected hashes are never inferred from the input files.
 
 The helper downloads and verifies the ZIP and its separate manifest, requests
 the password through a masked prompt, extracts into a temporary folder and
