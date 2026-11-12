@@ -1,0 +1,438 @@
+---
+title: "Module 1: from DNA to array data"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root. Read each step before running its R chunk. All data
+are simulated; these exercises cannot establish a finding about a real disease.
+See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
+loads its inputs from disk; a saved R workspace is not required.
+
+```{r module1_setup, include=FALSE}
+if (requireNamespace("knitr", quietly = TRUE)) {
+  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
+}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## 1.1 SNPs and genotypes {#step-1-1}
+
+### What we do
+
+Distinguish a DNA site, an allele and a genotype.
+
+### Why
+
+A variant is a position where DNA differs between people. An allele is one of its possible sequences. A single nucleotide polymorphism (SNP) has single-base alternatives. At an ordinary autosomal site a person carries two copies: an A/G site can have A/A, A/G or G/G genotypes. Missing is not a fourth allele. X, Y and mitochondrial DNA need different copy-number assumptions, discussed at 4.5.
+
+### You need
+
+The verified array annotation from 0.5.
+
+### Command
+
+```{r s1-1}
+ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+A table of site identifiers, chromosome, GRCh38 coordinate and plus-strand alleles. The annotation contains 299,523 rows. Array site names are not guaranteed to be rs identifiers.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+At a C/T autosomal site, does C/T represent two variants or one genotype?
+
+<details><summary>Show the answer</summary>
+
+One genotype at one variant: one C allele and one T allele.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.2 How an array measures DNA {#step-1-2}
+
+### What we do
+
+Separate a fluorescence measurement from a genotype call.
+
+### Why
+
+An array measures fluorescent signals from DNA hybridising to probes. Probes are short DNA sequences designed to recognise selected sites. Intensities from two channels tend to form clusters representing the two homozygotes and the heterozygote. A calling algorithm assigns a genotype or leaves the call missing. Signal strength is a measurement, not an allele count. Poor separation, background signal and unusual DNA mixtures can produce uncertain calls.
+
+### You need
+
+The array annotation from 1.1; the final report examples supplied at 0.5.
+
+### Command
+
+```{r s1-2}
+reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)
+stopifnot(length(reports) == 3L)
+readLines(reports[1], n = 12L)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+A simulated Final Report header and the start of its data section. The supplied reports have genotype calls and GC scores; they do not contain raw intensity data, so this exercise cannot redraw cluster plots.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Can a low-quality fluorescence measurement be treated as a confidently observed missing allele?
+
+<details><summary>Show the answer</summary>
+
+No. Missing means no accepted genotype call; it is not a biological allele.
+
+</details>
+
+### Files created
+
+None.
+
+Figure placeholder. Gemini prompt: Draw three separated two-channel intensity clusters for AA, AB and BB, with ambiguous observations left uncalled. Label the drawing schematic, not course data. Use labels and point shapes as well as colour.
+
+## 1.3 The Global Screening Array {#step-1-3}
+
+### What we do
+
+Recognise what an array includes and what it leaves unmeasured.
+
+### Why
+
+The Illumina Global Screening Array (GSA) targets a selected set of sites. It is not whole-genome sequencing: an unmeasured site cannot be called absent. The simulated course subset uses GSA-style Illumina names and real GRCh38 positions. The local manufacturer manifest is not redistributed. The student annotation supplies only the fields needed for this course; it does not reproduce the full proprietary design.
+
+### You need
+
+The annotation inspected at 1.1.
+
+### Command
+
+```{r s1-3}
+table(ann$Chr)
+stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+Autosomes 1?22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+If a site is absent from the array, can you conclude that every participant has the reference allele there?
+
+<details><summary>Show the answer</summary>
+
+No. Absence from the array means the site was not directly measured.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.4 From sample to scanned chip {#step-1-4}
+
+### What we do
+
+Trace sample identity through a plate and laboratory well.
+
+### Why
+
+DNA extraction, concentration checks, amplification, fragmentation, hybridisation, staining and scanning precede the export. A plate groups laboratory wells processed together. A well can contain a technical replicate of a person. Consequently a row in a laboratory export is not always a unique person. Batch effects are systematic differences associated with processing, such as a faulty plate, rather than the phenotype of interest.
+
+### You need
+
+The sample sheet from 0.5.
+
+### Command
+
+```{r s1-4}
+sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")
+table(sheet$Plate)
+sum(nzchar(sheet$Replicate_of))
+stopifnot(nrow(sheet) == 2016L)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+Twenty-one plates, each with 96 wells, for 2,016 measurements. Sixteen wells are labelled technical replicates; 2,000 original people were simulated.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+A plate has 96 wells and two are replicates of other wells. Must it contain 96 different people?
+
+<details><summary>Show the answer</summary>
+
+No. Wells count measurements; people count biological individuals.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.5 Calling genotypes {#step-1-5}
+
+### What we do
+
+Read the call and score columns without treating the score as certainty.
+
+### Why
+
+The calling algorithm compares intensities with expected clusters. A GC score is a calling-quality measure; it is not a probability that an association is true, nor a p-value. A no-call can reflect low signal or ambiguous clusters. The examples use semicolons and decimal points intentionally: check the delimiter instead of changing the computer language.
+
+### You need
+
+The example Final Reports from 1.2.
+
+### Command
+
+```{r s1-5}
+lines <- readLines(reports[1], warn = FALSE)
+start <- match("[Data]", lines)
+example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")
+head(example)
+summary(as.numeric(example[["GC Score"]]))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+Columns SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are selected report excerpts, not the full 299,523-site matrix for every person.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Does GC Score = 0.9 mean a variant has a 90% chance of causing disease?
+
+<details><summary>Show the answer</summary>
+
+No. The score concerns genotype calling, not causal or association evidence.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.6 Problems born in the laboratory {#step-1-6}
+
+### What we do
+
+Connect laboratory problems to the later QC checks.
+
+### Why
+
+Low DNA yield can cause many no-calls. Contamination can increase heterozygous calls. Sample swaps can create disagreement between recorded and genetic sex or duplicates with conflicting metadata. A processing batch can affect many samples together. None of these patterns alone proves its cause: retain logs and seek laboratory confirmation before changing identities. QC means quality control, a set of checks that reduce avoidable errors before statistical testing.
+
+### You need
+
+The sample sheet and score examples from 1.4?1.5.
+
+### Command
+
+```{r s1-6}
+stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))
+head(sheet)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+The information needed to investigate batch membership and labelled replicates. No person is removed in module 1.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+If many samples from one plate have low call rates, what shared cause should you investigate before attributing the pattern to disease?
+
+<details><summary>Show the answer</summary>
+
+A processing or batch problem; the plate pattern suggests a shared laboratory cause but does not establish it.
+
+</details>
+
+### Files created
+
+None.
+
+## 1.7 The export {#step-1-7}
+
+### What we do
+
+Identify the relationship between reports and the genotype matrix used for analysis.
+
+### Why
+
+The report excerpts show how calls are labelled. The matching BED/BIM/FAM set holds the complete course genotype matrix. BED stores genotypes in binary; BIM describes variants; FAM describes sample order. These three files are a matched set. In module 2 we convert to the PLINK 2 native PGEN/PVAR/PSAM format while checking identity and order.
+
+### You need
+
+The matched laboratory export from 0.5; concepts from 1.1?1.6.
+
+### Command
+
+```{r s1-7}
+initial <- check_bed(cfg$input)
+print(initial)
+stopifnot(initial$samples == 2016L, initial$variants == 299523L)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+```
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+2,016 sample wells and 299,523 variants. No QC has yet been applied and no case/control phenotype is present in the initial FAM.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Can you combine a BED from one release with a FAM from another if their sample counts match?
+
+<details><summary>Show the answer</summary>
+
+No. Equal counts do not establish matching sample identity, ordering or genotypes.
+
+</details>
+
+### Files created
+
+None.
+

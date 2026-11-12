@@ -30,3 +30,8 @@ working area is `C:/WEB_site/data_sources/codex_work/`.
 
 Module authoring and boundary checkpoint validation are continuing. Completed
 modules and unresolved checks will be recorded below before the final push.
+
+- Module 1: seven steps executed on Windows; annotation rows, 21 plates,
+  2,016 wells and the three supplied report excerpts were checked. No genotype
+  changes are made in this module. Laboratory steps have no PLINK equivalent;
+  they are explicitly labelled rather than given a misleading command.
