@@ -6,7 +6,7 @@
   "anchor": "step-3-1",
   "title": "Rough cleaning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "17e24e3c21300c2b0eb162876f6458303f8fb8a49c9f70ec79f8f76257c2ed26",
+  "source_sha256": "845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Remove very poorly called wells first, then very poorly called sites.",

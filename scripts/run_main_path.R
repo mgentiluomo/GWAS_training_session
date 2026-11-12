@@ -198,7 +198,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 17e24e3c21300c2b0eb162876f6458303f8fb8a49c9f70ec79f8f76257c2ed26
+# SHA-256: 845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3
 
 # Chunk: module3_setup
 if (requireNamespace("knitr", quietly = TRUE)) {

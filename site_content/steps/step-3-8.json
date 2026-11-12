@@ -6,14 +6,14 @@
   "anchor": "step-3-8",
   "title": "Sample QC summary and checkpoint",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "17e24e3c21300c2b0eb162876f6458303f8fb8a49c9f70ec79f8f76257c2ed26",
+  "source_sha256": "845f83d99b3de0df7c8b68dcea6924b1f46720038a054aa2ed7f7298327182a3",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Save the complete post-sample-QC fileset and review the sample flow.",
     "why": "A count table should distinguish sequential exclusions from overlapping flags. At this boundary, 1,844 wells remain from the initial 2,016. This does not mean variant QC or population structure checks are complete. Keep the reason for every exclusion and the threshold used.",
     "you_need": "State 3.7 and the recorded intermediate replay metadata.",
     "command": "```{r s3-8}\nguided_snapshot(cfg, \"3.8\", guided_path(cfg, \"3.7\"), 1844, 296360, parent = \"3.7\")\nprint(read.delim(file.path(cfg$out, \"step_counts.tsv\")))\ncheck_step(\"3.8\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored; only 2.8 and 3.8 hold full genotype copies in the release checkpoint tree so far.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "expected_result": "Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored. The complete main-path package supplies full genotype copies at 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are later module boundaries; intermediate states are rebuilt from a preceding full checkpoint and stored replay operations.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "Does a completed sample-QC checkpoint prove that every retained variant is suitable for association?\n\n<details><summary>Show the answer</summary>\n\nNo. Variant QC follows in module 4.\n\n</details>",
     "files_created": "Full checkpoint `checkpoints/3.8/state.*`, working `s3-8_state.*` and updated index/count table."

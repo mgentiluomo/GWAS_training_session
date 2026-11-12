@@ -645,7 +645,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored; only 2.8 and 3.8 hold full genotype copies in the release checkpoint tree so far.
+Module 3 boundary: 1,844 samples and 296,360 variants. Intermediate restart operations are stored. The complete main-path package supplies full genotype copies at 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are later module boundaries; intermediate states are rebuilt from a preceding full checkpoint and stored replay operations.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
