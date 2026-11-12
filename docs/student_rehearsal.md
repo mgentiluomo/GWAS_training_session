@@ -93,9 +93,9 @@ later count, are the same.
 
 End products, checked in the clean run:
 
-- `results/guided/s6-8_gwas_summary_statistics.tsv` has 236,815 rows and the ten columns
-  in the documented order. It is about 17 MB.
-- `results/guided/s6-8_gwas_summary_statistics_columns.tsv` has one row for each of the ten columns.
+- `results/guided/s6-8_gwas_summary_statistics.tsv` has 236,815 rows and the eleven columns
+  in the documented order. It is about 22 MB.
+- `results/guided/s6-8_gwas_summary_statistics_columns.tsv` has one row for each of the eleven columns.
 - `s7-3_manhattan.png`: three peaks above the dashed 5e-8 line, on chromosomes 3 (one variant),
   9 (four) and 12 (three). The vertical axis reaches about 16 and the colours alternate by chromosome.
 - `s7-1_qq.png`: points follow the diagonal, a tail lifts at the right end, and the label

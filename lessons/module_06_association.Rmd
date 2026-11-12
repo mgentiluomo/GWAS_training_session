@@ -497,7 +497,7 @@ Save the results of the association scan in one clearly named file with standard
 
 ### Why
 
-The raw PLINK output is long and uses PLINK column names. A summary statistics file is the standard way to share GWAS results. It has one row for each tested variant and no data about individual people. Colleagues use it to plot results, to combine several studies into one analysis (a meta-analysis) and to look up a variant. This file keeps only the ten columns that others expect, with the same names in the same order. From now on we build the [Manhattan plot](../docs/glossary.md#manhattan-plot) and the [QQ plot](../docs/glossary.md#qq-plot) from this file, not from the raw scan output.
+The raw PLINK output is long and uses PLINK column names. A summary statistics file is the standard way to share GWAS results. It has one row for each tested variant and no data about individual people. Colleagues use it to plot results, to combine several studies into one analysis (a meta-analysis) and to look up a variant. This file keeps only the eleven columns that others expect, with the same names in the same order. From now on we build the [Manhattan plot](../docs/glossary.md#manhattan-plot) and the [QQ plot](../docs/glossary.md#qq-plot) from this file, not from the raw scan output.
 
 Each column has one clear meaning. Read the table before you use the file.
 
@@ -510,11 +510,12 @@ Each column has one clear meaning. Read the table before you use the file.
 | `other_allele` | The other allele of the variant. | One letter, such as `G`. | Swapping the two alleles. The odds ratio then points the other way. |
 | `effect_allele_frequency` | How common the effect allele is in the analysed samples. | A number from 0 to 1, such as `0.2`. | Reading it as the minor allele frequency ([MAF](../docs/glossary.md#maf)). It can be above 0.5. |
 | `odds_ratio` | The odds ratio per copy of the effect allele. | A positive number. Above 1 means higher odds of disease with each copy. | Reading it as a risk ratio. |
-| `standard_error` | The standard error of the natural logarithm of the odds ratio. | A small positive number, such as `0.09`. | Using it as the standard error of the odds ratio itself. It belongs to the log odds ratio. |
+| `beta` | The natural logarithm of the odds ratio. It is the effect size on the log odds scale. | A number that can be negative, zero or positive, such as `0.18`. Above 0 means higher odds of disease. It is `NA` when the odds ratio is `NA`. | Mixing it up with the odds ratio. `beta` is `log(odds_ratio)`. An odds ratio of 1 gives a `beta` of 0. |
+| `standard_error` | The standard error of `beta`, the natural logarithm of the odds ratio. | A small positive number, such as `0.09`. | Using it as the standard error of the odds ratio itself. It belongs to `beta`. |
 | `p_value` | The p-value of the additive test. | A number above 0 and at most 1. A test that failed is `NA`. | Replacing `NA` with 1 or 0. A missing result stays missing. |
 | `n` | The number of samples used for this variant. | A whole number up to 1,811. | Assuming every variant uses all samples. Missing genotypes lower it. |
 
-To get the 95% confidence interval of an odds ratio, use `exp(log(odds_ratio) +/- 1.96 * standard_error)`. The standard error is on the log scale, so the formula takes the logarithm of the odds ratio first.
+To get the 95% confidence interval of an odds ratio, use `exp(beta +/- 1.96 * standard_error)`. The standard error is on the log scale, so the formula starts from `beta`, the logarithm of the odds ratio.
 
 The file is plain text with a header row. Tabs separate the columns. It uses UTF-8 encoding (a standard way to store text characters) and decimal points. It holds only results for each variant. It has no genotypes and no sample IDs. Even so, it stays in your `results` folder. Do not share it outside the course unless your instructor says so.
 
@@ -554,7 +555,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 <details><summary>Show the expected result</summary>
 
-The summary statistics file has 236,815 rows, one for each tested variant. It has the ten columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G` and n = 1807. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.7. The file is about 17 MB. The column file has one row for each of the ten columns. The last table shows `matches` for both files in the 6.8 checkpoint.
+The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.7. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.8 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
@@ -571,11 +572,11 @@ Stop at the first error. Check the input file named in the message and the previ
 
 ### Quick check
 
-A colleague wants the 95% confidence interval for an odds ratio. Which column do they use with `odds_ratio`, and on which scale?
+A colleague wants the 95% confidence interval for an odds ratio. Which column do they use with `beta`, and on which scale?
 
 <details><summary>Show the answer</summary>
 
-They use `standard_error`. It is the standard error of the natural logarithm of the odds ratio. They calculate the interval on the log scale and then convert it back with `exp()`.
+They use `standard_error`. It is the standard error of `beta`, the natural logarithm of the odds ratio. They calculate the interval on the log scale and then convert it back with `exp()`.
 
 </details>
 
@@ -590,6 +591,6 @@ In the folder `results/guided/`: `s6-8_gwas_summary_statistics.tsv` (the summary
 - You ran the association scan. The frequency check removed another 1,698 variants, which left 236,815 tests with finite p-values.
 - Eight variants had a p-value below 0.00000005. The leading regions are on chromosomes 9, 3 and 12.
 - The autosomal lambda is about 1.016.
-- You saved the results in a summary statistics file with ten columns and a file that explains each column.
+- You saved the results in a summary statistics file with eleven columns and a file that explains each column.
 
 **Next:** Module 7 draws the QQ plot and the Manhattan plot, sets the thresholds, groups the correlated signals and reports the results.

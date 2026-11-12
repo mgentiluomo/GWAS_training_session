@@ -22,7 +22,10 @@ local({
   stats <- guided_standardise_scan(scan)
   stopifnot(identical(names(stats), guided_summary_columns()), nrow(stats) == 4L,
     identical(stats$effect_allele, scan$A1), identical(stats$other_allele, scan$OMITTED),
-    stats$base_pair_location[1] == 100000L, is.integer(stats$n), is.na(stats$p_value[3]), is.na(stats$odds_ratio[3]))
+    stats$base_pair_location[1] == 100000L, is.integer(stats$n), is.na(stats$p_value[3]), is.na(stats$odds_ratio[3]),
+    is.na(stats$beta[3]), !is.nan(stats$beta[3]), identical(stats$beta[-3], log(stats$odds_ratio[-3])),
+    match("beta", names(stats)) == match("standard_error", names(stats)) - 1L,
+    match("odds_ratio", names(stats)) == match("beta", names(stats)) - 1L)
   guided_check_summary(stats, rows = 4L)
   # Without OMITTED the other allele is derived from REF and ALT.
   derived <- guided_standardise_scan(scan[setdiff(names(scan), "OMITTED")])
@@ -45,7 +48,7 @@ local({
   guided_write(dictionary, guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv"))
 
   # Validation failures.
-  expect_error(guided_check_summary(stats[rev(names(stats))]), "ten standard columns")
+  expect_error(guided_check_summary(stats[rev(names(stats))]), "eleven standard columns")
   expect_error(guided_check_summary(stats, rows = 5L), "number of rows")
   bad <- stats; bad$p_value[1] <- 0
   expect_error(guided_check_summary(bad), "p_value")
@@ -53,6 +56,10 @@ local({
   expect_error(guided_check_summary(bad), "p_value")
   bad <- stats; bad$odds_ratio[1] <- -1
   expect_error(guided_check_summary(bad), "odds_ratio")
+  bad <- stats; bad$beta[1] <- 5
+  expect_error(guided_check_summary(bad), "beta")
+  bad <- stats; bad$beta[3] <- 0
+  expect_error(guided_check_summary(bad), "beta")
   bad <- stats; bad$base_pair_location[1] <- 0L
   expect_error(guided_check_summary(bad), "base_pair_location")
   bad <- stats; bad$effect_allele[2] <- ""

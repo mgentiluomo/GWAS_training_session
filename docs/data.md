@@ -77,7 +77,7 @@ manifest provenance are not inferred from filenames.
 ## Summary statistics file
 
 Step 6.8 writes `results/guided/s6-8_gwas_summary_statistics.tsv`, a tab-separated
-file with one row per tested variant and these ten columns, in this order. A second
+file with one row per tested variant and these eleven columns, in this order. A second
 file, `s6-8_gwas_summary_statistics_columns.tsv`, explains each column in plain words.
 The Manhattan and QQ plots of module 7 are built from the first file. Step 6.8 of
 the lessons describes the columns in detail.
@@ -91,7 +91,8 @@ the lessons describes the columns in detail.
 | `other_allele` | The other allele of the variant. |
 | `effect_allele_frequency` | Frequency of the effect allele in the analysed samples. |
 | `odds_ratio` | Odds ratio per copy of the effect allele. |
-| `standard_error` | Standard error of the natural log of the odds ratio, not of the odds ratio itself. |
+| `beta` | Natural log of `odds_ratio`: the effect size on the log odds scale. `NA` when the odds ratio is `NA`. |
+| `standard_error` | Standard error of `beta` (the natural log of the odds ratio), not of the odds ratio itself. |
 | `p_value` | P-value of the additive test. A failed test stays `NA`. |
 | `n` | Number of samples used for that variant. |
 

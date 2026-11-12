@@ -573,9 +573,9 @@ psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "standard_error", "p_value", "n")]
-lead$ci_low <- exp(log(lead$odds_ratio) - 1.96 * lead$standard_error)
-lead$ci_high <- exp(log(lead$odds_ratio) + 1.96 * lead$standard_error)
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
+lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
+lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),
