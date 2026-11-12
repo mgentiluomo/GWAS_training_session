@@ -129,23 +129,39 @@ def build(source: Path, output: Path, sevenzip: Path) -> dict:
         raise RuntimeError("7-Zip could not build the encrypted package. Exit code: " + str(result.returncode))
     if sorted(aes256_members(archive)) != sorted(name for _, name in members):
         raise ValueError("Archive members differ from the approved inventory.")
+    # Prove that the password opens the archive before any checksum is recorded.
+    check = subprocess.run([str(sevenzip), "t", str(archive)], input=password + "\n",
+                           text=True, capture_output=True, env=environment)
+    if check.returncode:
+        raise RuntimeError("The finished archive failed its own 7-Zip test. Exit code: " + str(check.returncode))
     checksum = sha256(archive)
-    (output / "SHA256SUMS.txt").write_text(checksum + "  " + archive.name + "\n", encoding="ascii")
+    manifest_checksum = sha256(output / "MANIFEST.tsv")
+    # Both lines are in GNU format, so `sha256sum -c SHA256SUMS.txt` works beside the files.
+    (output / "SHA256SUMS.txt").write_text(
+        f"{checksum}  {archive.name}\n{manifest_checksum}  MANIFEST.tsv\n", encoding="ascii")
     return {"archive": str(archive), "files": len(rows), "input_bytes": sum(r[1] for r in rows),
-            "zip_bytes": archive.stat().st_size, "sha256": checksum,
-            "manifest_sha256": sha256(output / "MANIFEST.tsv"),
+            "zip_bytes": archive.stat().st_size, "archive_sha256": checksum,
+            "manifest_sha256": manifest_checksum, "sha256": checksum,
             "seconds": round(time.perf_counter() - started, 3)}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=SOURCE)
-    parser.add_argument("--output", type=Path, default=WORK / "release")
+    parser.add_argument("--source", type=Path, default=WORK / "classroom-stage-2026.1",
+                        help="the verified main-path staging folder (default) or the older sim2026/student folder")
+    parser.add_argument("--output", type=Path, default=WORK / "release-data-2026.1",
+                        help="a NEW folder under codex_work; an existing folder is refused")
+    parser.add_argument("--min-password-length", type=int, default=12)
     parser.add_argument("--sevenzip", type=Path, default=Path(r"C:\Program Files\7-Zip\7z.exe"))
     args = parser.parse_args()
-    approved = (SOURCE.resolve(), (WORK / "classroom-stage-2026.1").resolve())
-    if args.source.resolve() not in approved:
-        parser.error("Production input must be sim2026/student or the verified classroom-stage-2026.1 folder. Tests call build() on isolated copies.")
+    source = args.source.resolve()
+    staged = source.parent == WORK.resolve() and source.name.startswith("classroom-stage-")
+    if source != SOURCE.resolve() and not staged:
+        parser.error("Production input must be sim2026/student or a verified classroom-stage-* folder "
+                     "directly under codex_work. Tests call build() on isolated copies.")
+    password = os.environ.get("COURSE_RELEASE_PASSWORD", "")
+    if len(password) < args.min_password_length:
+        parser.error(f"COURSE_RELEASE_PASSWORD must have at least {args.min_password_length} characters.")
     import json
     print(json.dumps(build(args.source, args.output, args.sevenzip), indent=2))
 

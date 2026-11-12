@@ -56,6 +56,9 @@ class PackagingTests(unittest.TestCase):
         with (output / "MANIFEST.tsv").open(encoding="utf-8") as stream:
             rows = list(csv.DictReader(stream, delimiter="\t"))
         self.assertEqual(rows[0]["sha256"], release.sha256(self.source / rows[0]["path"]))
+        sums = (output / "SHA256SUMS.txt").read_text(encoding="ascii").splitlines()
+        self.assertEqual(sums, [f"{result['archive_sha256']}  {archive.name}",
+                                f"{result['manifest_sha256']}  MANIFEST.tsv"])
         self.assertEqual(release.aes256_members(archive), [rows[0]["path"]])
         good = subprocess.run([str(sevenzip), "t", str(archive)], input=password + "\n",
                               text=True, capture_output=True)
