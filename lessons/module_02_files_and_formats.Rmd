@@ -13,10 +13,9 @@ Work from the project root (the main course folder). Read each step before you r
 
 See the [glossary](../docs/glossary.md) for the course vocabulary. Each module loads its inputs from disk, so you do not need a saved R workspace.
 
-```{r module2_setup, include=FALSE}
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+```{r setup, include=FALSE}
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
 ```

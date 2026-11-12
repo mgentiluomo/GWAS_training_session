@@ -11,10 +11,9 @@ output:
 
 Work from the project root. This is the main folder of the course project, the one that contains `config.R`. Read each step before you run its R chunk. All data are simulated, so these exercises cannot show a finding about a real disease. See the [glossary](../docs/glossary.md) for the course vocabulary. Each module loads its input files from disk, so you do not need a saved R workspace.
 
-```{r module4_setup, include=FALSE}
-if (requireNamespace("knitr", quietly = TRUE)) {
-  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists("config.R")) "." else ".."))
-}
+```{r setup, include=FALSE}
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
 source("R/guided.R")
 cfg <- guided_init()
 ```
