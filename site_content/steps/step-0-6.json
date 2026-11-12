@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "0.6",
+  "module": 0,
+  "step": 6,
+  "anchor": "step-0-6",
+  "title": "Open the project",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Open `GWAS_training_session.Rproj` from the extracted folder. In RStudio,\nopen this notebook from `lessons/`. Run commands in the console at the project root.",
+    "why": "Relative paths are interpreted from the working directory. Keeping one project\nroot avoids copying your personal absolute paths into every command.",
+    "you_need": "The complete extracted project from 0.5, not an individual downloaded notebook.",
+    "command": "```{r s0-6_project}\ngetwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\n```\n\nTerminal equivalent: from the project directory, run\n`Rscript -e \"stopifnot(file.exists('config.R'))\"`. `stopifnot` stops when a\nrequired condition is false. No output means this check passed.",
+    "expected_result": "Your project folder is printed. The file checks finish without an error.\nYour personal folder path will differ from the author's path.",
+    "troubleshooting": "If `config.R` is absent, reopen the project from the extracted source folder.\nDo not create a blank replacement or rename a downloaded HTML page to `.R`.",
+    "quick_check": "Does a relative path starting `R/` refer to a folder on every computer's C drive?\n\n<details><summary>Show the answer</summary>No. It refers to the R folder under the current project root.</details>",
+    "files_created": "RStudio may create local project settings under `.Rproj.user/`; they are ignored by Git."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-6_project",
+      "code": "getwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

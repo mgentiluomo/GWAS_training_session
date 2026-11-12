@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "id": "3.7",
+  "module": 3,
+  "step": 7,
+  "anchor": "step-3-7",
+  "title": "Batch effects",
+  "source": "lessons/module_03_sample_quality_control.Rmd",
+  "source_sha256": "f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Compare call rate by plate and remove the demonstrably faulty simulated plate.",
+    "why": "Samples processed together can share artefacts. Compare laboratory grouping with genotype completeness and heterozygosity. A case-heavy plate must not be removed merely because it contains cases; the rationale here is the poor technical measurements. Reassess the case/control distribution after any batch exclusion.",
+    "you_need": "State 3.6 and the sample sheet from 1.4; heterozygosity report from 3.5.",
+    "command": "```{r s3-7}\nreport <- guided_path(cfg, \"3.7\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results/guided/s3-7_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048\n```\n\n`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "expected_result": "Plate P14 has median call rate approximately 98.56%, against 99.84% for the other plates. Its 76 remaining wells are removed, leaving 1,844 samples and 296,360 variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "A shared laboratory effect. The same pattern can confound association if processing groups and phenotype groups overlap.",
+    "quick_check": "Why are 76 wells removed from a plate that originally had 96?\n\n<details><summary>Show the answer</summary>\n\nSome wells on that plate were already removed by earlier QC steps.\n\n</details>",
+    "files_created": "Sample missingness report, plate-based removal list and `s3-7_state.*`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s3-7",
+      "code": "report <- guided_path(cfg, \"3.7\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results/guided/s3-7_missing --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--missing",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--remove",
+        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--missing sample-only` writes the per-well report without a variant report. R joins it to plates by IID, compares medians, and writes the reviewed removal list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

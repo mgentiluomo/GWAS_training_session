@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "id": "4.3",
+  "module": 4,
+  "step": 3,
+  "anchor": "step-4-3",
+  "title": "Allele frequency",
+  "source": "lessons/module_04_variant_quality_control.Rmd",
+  "source_sha256": "006b3a4f0381921f35e054ff366909a4c8339f1ed5ce32f61a15d35949bab024",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Keep variants with minor allele frequency of at least 1% for the main array scan.",
+    "why": "Minor allele frequency (MAF) is the frequency of the less common allele in the analysed sample. Rare alleles give sparse genotype cells and unstable ordinary logistic estimates. A 1% filter is a course analysis choice, not a definition of biological relevance. Frequencies depend on ancestry, sample selection and how chromosome copy number is handled.",
+    "you_need": "State 4.2.",
+    "command": "```{r s4-3}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.2\"), \"--maf\", \"0.01\", \"--make-pgen\", \"--out\", guided_path(cfg, \"4.3\")))\nops <- guided_replay_lists(cfg, \"4.3\", \"4.2\")\nguided_register(cfg, \"4.3\", \"4.2\", 1844, 239019, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048\n```\n\n`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.",
+    "expected_result": "56,420 variants excluded from the observed frequency distribution; 239,019 remain. No dedicated list of rare artefacts was planted.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Sparse variants with limited information in this sample. It does not establish whether a rare allele is genuine or whether it would be analysable in a larger study.",
+    "quick_check": "Can an allele's minor/major label change between populations?\n\n<details><summary>Show the answer</summary>\n\nYes. The label describes frequency in the sample, not a fixed property of the allele.\n\n</details>",
+    "files_created": "`s4-3_state.*` and replay exclusion list."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s4-3",
+      "code": "run_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.2\"), \"--maf\", \"0.01\", \"--make-pgen\", \"--out\", guided_path(cfg, \"4.3\")))\nops <- guided_replay_lists(cfg, \"4.3\", \"4.2\")\nguided_register(cfg, \"4.3\", \"4.2\", 1844, 239019, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--maf",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

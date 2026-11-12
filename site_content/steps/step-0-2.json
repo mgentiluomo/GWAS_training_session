@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "0.2",
+  "module": 0,
+  "step": 2,
+  "anchor": "step-0-2",
+  "title": "Install R",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Install R from [CRAN](https://cran.r-project.org/). Select your operating\nsystem and its installation package. On Linux, follow CRAN's instructions for\nyour distribution; package installation may require an administrator.",
+    "why": "The R interpreter reads the commands in the notebooks. A package adds\nfunctions to R; packages do not replace R itself.",
+    "you_need": "The system and processor identified at 0.1. On Apple Silicon use the ARM64\nbuild; Intel Macs use the Intel build. Do not mix processor builds.",
+    "command": "Open R after installation and run:\n\n```{r s0-2_r_version}\nR.version.string\n```\n\nTerminal equivalent: `Rscript --version`. `--version` prints the installed\nversion without running an analysis. If the terminal cannot find Rscript but\nRStudio can run R, use the R console; terminal PATH setup is not required here.",
+    "expected_result": "A line beginning `R version`. The version on your computer may differ from\nthe Windows validation environment, R 4.5.2. Ubuntu extraction was also tested\nby the author using R 4.6.1.",
+    "troubleshooting": "If installation is blocked, ask the instructor or your institution's support\nteam for an approved installation. Do not change your system language.",
+    "quick_check": "What does the version command measure: the version of R or the version of PLINK?\n\n<details><summary>Show the answer</summary>The version of R.</details>",
+    "files_created": "The R installer creates software files outside this course project."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-2_r_version",
+      "code": "R.version.string",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

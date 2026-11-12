@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "7.2",
+  "module": 7,
+  "step": 2,
+  "anchor": "step-7-2",
+  "title": "Genomic inflation factor",
+  "source": "lessons/module_07_plots_and_reporting.Rmd",
+  "source_sha256": "a9e3a9af248e5e7b0f1d19acbbba759ee0dfecad4737eb886eecb7f595c058ab",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Calculate autosomal lambda and interpret it alongside the QQ plot.",
+    "why": "Genomic inflation factor lambda is the median one-degree-of-freedom chi-square statistic divided by its null median, approximately 0.4549. We convert each valid p-value using the chi-square upper-tail quantile. A value near one is consistent with median calibration, not proof of no confounding. Lambda depends on sample size, polygenicity, phenotype model and tested variant set. Do not automatically divide every test by lambda or treat one threshold as a pass/fail diagnosis.",
+    "you_need": "The same autosomal p-values used at 7.1.",
+    "command": "```{r s7-2}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\np <- results$P[results$CHROM %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "Lambda approximately 1.016, computed from valid autosomal tests. The test uses the same definition as the reference run.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Can lambda near one prove that a particular lead is causal?\n\n<details><summary>Show the answer</summary>\n\nNo. Lambda summarises the median test distribution, not the validity or causal interpretation of an individual association.\n\n</details>",
+    "files_created": "`s7-2_lambda.tsv`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s7-2",
+      "code": "results <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\np <- results$P[results$CHROM %in% as.character(1:22)]\nlambda <- lambda_gc(p)\nprint(lambda)\nstopifnot(abs(lambda - 1.016) < 0.001)\nguided_write(data.frame(model = \"QC plus ten PCs\", lambda = lambda), guided_path(cfg, \"7.2\", \"lambda.tsv\"))",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

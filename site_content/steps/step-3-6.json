@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0",
+  "id": "3.6",
+  "module": 3,
+  "step": 6,
+  "anchor": "step-3-6",
+  "title": "Relatedness and duplicates",
+  "source": "lessons/module_03_sample_quality_control.Rmd",
+  "source_sha256": "f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Estimate pairwise kinship, review duplicates and retain an unrelated main-analysis set.",
+    "why": "Kinship measures genetic sharing beyond the population baseline. Repeated measurements and close relatives violate the independence assumption of a simple unrelated-sample logistic model. Approximate KING boundaries classify duplicates above 0.354 and first-degree pairs above 0.177; these are screening thresholds. Labelled technical repeats lose the repeat well. Unlabelled duplicates with conflicting metadata lose both records in this teaching analysis. For a first-degree pair we retain one by a reproducible ID rule, not by disease status.",
+    "you_need": "State 3.5, pruning list from 3.4 and source metadata from 2.7.",
+    "command": "```{r s3-6}\nreport <- guided_path(cfg, \"3.6\", \"king\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.5\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"),\n  \"--make-king-table\", \"--king-table-filter\", \"0.0442\", \"--out\", report))\nkin <- guided_table(paste0(report, \".kin0\"))\nkin <- kin[order(-as.numeric(kin$KINSHIP)), ]\nmetadata <- guided_metadata(cfg)\nremove <- character()\nfor (i in seq_len(nrow(kin))) {\n  a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])\n  if (value > 0.354) {\n    if (endsWith(a, \"_R2\") || endsWith(b, \"_R2\")) {\n      remove <- union(remove, if (endsWith(a, \"_R2\")) a else b)\n    } else {\n      ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)\n      same <- identical(unname(unlist(metadata[ai, c(\"SEX\", \"Age\", \"Disease\")])),\n                        unname(unlist(metadata[bi, c(\"SEX\", \"Age\", \"Disease\")])))\n      remove <- union(remove, if (same) max(a, b) else c(a, b))\n    }\n  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))\n}\nremove_file <- guided_list(remove, guided_path(cfg, \"3.6\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.5\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.6\")))\nops <- guided_replay_lists(cfg, \"3.6\", \"3.5\")\nguided_register(cfg, \"3.6\", \"3.5\", 1920, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048\n```\n\n`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "expected_result": "19 duplicate-class pairs and ten first-degree pairs; 30 records removed in total, leaving 1,920. Pairs can overlap; pair counts are not counts of unique people.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Technical repeats, unlabelled duplicates, metadata conflict and close relatives. For research, the retention policy should consider consent, phenotype completeness and design before association results are inspected.",
+    "quick_check": "Does removing one record for every related pair always yield the correct number of removals?\n\n<details><summary>Show the answer</summary>\n\nNo. Related pairs can share a person; review the graph of relationships and already removed records.\n\n</details>",
+    "files_created": "`.kin0`, reviewed removal list and `s3-6_state.*`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s3-6",
+      "code": "report <- guided_path(cfg, \"3.6\", \"king\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.5\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"),\n  \"--make-king-table\", \"--king-table-filter\", \"0.0442\", \"--out\", report))\nkin <- guided_table(paste0(report, \".kin0\"))\nkin <- kin[order(-as.numeric(kin$KINSHIP)), ]\nmetadata <- guided_metadata(cfg)\nremove <- character()\nfor (i in seq_len(nrow(kin))) {\n  a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])\n  if (value > 0.354) {\n    if (endsWith(a, \"_R2\") || endsWith(b, \"_R2\")) {\n      remove <- union(remove, if (endsWith(a, \"_R2\")) a else b)\n    } else {\n      ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)\n      same <- identical(unname(unlist(metadata[ai, c(\"SEX\", \"Age\", \"Disease\")])),\n                        unname(unlist(metadata[bi, c(\"SEX\", \"Age\", \"Disease\")])))\n      remove <- union(remove, if (same) max(a, b) else c(a, b))\n    }\n  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))\n}\nremove_file <- guided_list(remove, guided_path(cfg, \"3.6\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.5\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.6\")))\nops <- guided_replay_lists(cfg, \"3.6\", \"3.5\")\nguided_register(cfg, \"3.6\", \"3.5\", 1920, 296360, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--extract",
+        "explanation_markdown": "`--extract` retains the successfully mapped IDs; `--update-map` reads ID and new position from two columns. If the R calculation finds reverse-strand mappings, add `--flip` with the generated reverse list. The exercise retains same-chromosome mappings only and reports exclusions. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--king-table-filter",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--make-king-table",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--remove",
+        "explanation_markdown": "`--split-par b38` uses GRCh38 PAR boundaries. `--check-sex` compares recorded sex with genotype patterns; `max-female-xf` and `min-male-xf` set X-coefficient limits, while the two `ycount` limits bound observed Y calls. `--remove` reads the reviewed sample list. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--make-king-table` estimates pairwise kinship. `--king-table-filter 0.0442` reports pairs above the approximate third-degree boundary. R reviews the duplicate and first-degree cases; reporting a pair is not itself an exclusion. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

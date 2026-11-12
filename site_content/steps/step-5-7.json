@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "id": "5.7",
+  "module": 5,
+  "step": 7,
+  "anchor": "step-5-7",
+  "title": "Cohort PCs and how many to include",
+  "source": "lessons/module_05_population_structure.Rmd",
+  "source_sha256": "9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Recompute PCs in the retained study cohort, inspect eigenvalues and save the full boundary.",
+    "why": "Reference axes describe broad structure; within-cohort PCs can capture finer differences relevant to association. Re-prune after changing the cohort. An eigenvalue measures variation along a PC; a scree plot displays the ordered eigenvalues. The course prespecifies ten PCs for the main model, rather than choosing their number to obtain attractive p-values. Too few can leave confounding; too many can cost precision. Compare sensitivity in module 7 without retrospectively optimising significance.",
+    "you_need": "Retained cohort from 5.6 and the explicit GRCh38 long-range LD exclusions.",
+    "command": "```{r s5-7}\nregions <- guided_high_ld(cfg)\nprune <- guided_path(cfg, \"5.7\", \"prune\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.6\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--exclude\", \"bed1\", regions,\n  \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", prune))\nreport <- guided_path(cfg, \"5.7\", \"pca\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.6\"), \"--extract\", paste0(prune, \".prune.in\"), \"--pca\", \"10\", \"--out\", report))\neigenvalues <- scan(paste0(report, \".eigenval\"), quiet = TRUE)\npng(guided_path(cfg, \"5.7\", \"scree.png\"), width = 1000, height = 700, res = 130)\nplot(seq_along(eigenvalues), eigenvalues, type = \"b\", pch = 16, xlab = \"PC number\", ylab = \"Eigenvalue\", main = \"Retained cohort: first ten PCs\")\ndev.off()\nguided_snapshot(cfg, \"5.7\", guided_path(cfg, \"5.6\"), 1811, 238513, parent = \"5.6\")\nfile.copy(paste0(report, c(\".eigenvec\", \".eigenval\")), file.path(cfg$out, \"checkpoints\", \"5.7\"), overwrite = TRUE)\ncheck_step(\"5.7\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048\n```\n\n`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.",
+    "expected_result": "Ten cohort PCs, a scree plot and a complete 5.7 boundary with 1,811 samples and 238,513 variants. The first cohort eigenvalue is approximately 14; eigenvector signs can differ without changing association adjustment.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Should the number of PCs be chosen by trying many models and retaining the one with the most genome-wide hits?\n\n<details><summary>Show the answer</summary>\n\nNo. Specify the main model independently of association significance and report sensitivity analyses transparently.\n\n</details>",
+    "files_created": "Pruning lists, eigenvectors/eigenvalues, scree PNG, working state and full 5.7 checkpoint."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s5-7",
+      "code": "regions <- guided_high_ld(cfg)\nprune <- guided_path(cfg, \"5.7\", \"prune\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.6\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--exclude\", \"bed1\", regions,\n  \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", prune))\nreport <- guided_path(cfg, \"5.7\", \"pca\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.6\"), \"--extract\", paste0(prune, \".prune.in\"), \"--pca\", \"10\", \"--out\", report))\neigenvalues <- scan(paste0(report, \".eigenval\"), quiet = TRUE)\npng(guided_path(cfg, \"5.7\", \"scree.png\"), width = 1000, height = 700, res = 130)\nplot(seq_along(eigenvalues), eigenvalues, type = \"b\", pch = 16, xlab = \"PC number\", ylab = \"Eigenvalue\", main = \"Retained cohort: first ten PCs\")\ndev.off()\nguided_snapshot(cfg, \"5.7\", guided_path(cfg, \"5.6\"), 1811, 238513, parent = \"5.6\")\nfile.copy(paste0(report, c(\".eigenvec\", \".eigenval\")), file.path(cfg$out, \"checkpoints\", \"5.7\"), overwrite = TRUE)\ncheck_step(\"5.7\", data_dir = cfg$out, work_dir = cfg$out)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [
+    "if (requireNamespace(\"knitr\", quietly = TRUE) && knitr::is_html_output()) {\n  knitr::include_graphics(guided_path(cfg, \"5.7\", \"scree.png\"), rel_path = FALSE)\n}"
+  ],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--chr",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--exclude",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--extract",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--indep-pairwise",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--maf",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--pca",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--maf 0.05` and `--chr 1-22` select common autosomal sites for pruning; `--exclude bed1` reads one-based LD intervals. `--indep-pairwise 200kb 0.2` writes the diagnostic subset. `--extract` applies it only to PCA; `--pca 10` computes the ten cohort eigenvectors. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": [
+    {
+      "kind": "placeholder",
+      "asset": null,
+      "gemini_prompt": "Create a labelled teaching schematic for Cohort PCs and how many to include. Use shapes and text as well as colour. Do not invent numeric course results, gene annotations or individual identities. This complements the tested R plot; it does not replace it.",
+      "alt_text": "The first cohort eigenvalue is much larger than the subsequent nine; ten PCs are prespecified for association.",
+      "reviewed": false
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "id": "4.2",
+  "module": 4,
+  "step": 2,
+  "anchor": "step-4-2",
+  "title": "Differential missingness",
+  "source": "lessons/module_04_variant_quality_control.Rmd",
+  "source_sha256": "006b3a4f0381921f35e054ff366909a4c8339f1ed5ce32f61a15d35949bab024",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Test whether missing calls differ between cases and controls.",
+    "why": "An overall high call rate can hide unequal missingness between outcome groups. Such a pattern can create spurious association if call failures correlate with genotype. A p-value measures how incompatible the observed group difference is with the equal-missingness model; it is not the probability that a site is an error. With many sites, some small p-values occur by chance. The course uses a prespecified screening cutoff of 0.00001.",
+    "you_need": "State 4.1 and Disease phenotype joined at 2.7.",
+    "command": "```{r s4-2}\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048\n```\n\n`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.",
+    "expected_result": "120 variants excluded; 295,439 variants and 1,844 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Case/control-dependent calling, processing differences and some genotype-dependent missingness. A significant test does not itself identify the laboratory mechanism.",
+    "quick_check": "Can a variant pass the overall 98% call-rate rule and still fail this check?\n\n<details><summary>Show the answer</summary>\n\nYes. Its few missing calls can be concentrated in one phenotype group.\n\n</details>",
+    "files_created": "`.missing`, the reviewed exclusion list and `s4-2_state.*`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s4-2",
+      "code": "report <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--exclude",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--test-missing",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

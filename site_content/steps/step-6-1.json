@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "id": "6.1",
+  "module": 6,
+  "step": 1,
+  "anchor": "step-6-1",
+  "title": "One variant by hand",
+  "source": "lessons/module_06_association.Rmd",
+  "source_sha256": "783b75de1cc2c0d3e29d0f87641dbd8ee2b87de17a8eb9abc55d8600aacc7b7d",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Calculate a simple carrier odds ratio at a retained autosomal site.",
+    "why": "Odds are the number with an outcome divided by the number without it. An odds ratio (OR) compares odds between two groups; OR = 1 means equal odds. Here we compare carriers of the allele explicitly named in the exported column with non-carriers. This dominant carrier contrast is a teaching calculation, not the additive adjusted GWAS model. Allele coding matters: reversing the counted allele changes the contrast.",
+    "you_need": "Full 5.7 cohort; the retained site 9:96426973:A:G.",
+    "command": "```{r s6-1}\nreport <- guided_path(cfg, \"6.1\", \"example\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", \"9:96426973:A:G\", \"--export\", \"A\", \"--out\", report))\nx <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE)\ndose <- as.numeric(x[[7]])\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\ncase <- psam$Disease[match(x$IID, psam$IID)] == \"2\"\ntab <- table(case = case, carrier = dose > 0)\nprint(tab)\ncarrier_or <- tab[\"TRUE\", \"TRUE\"] * tab[\"FALSE\", \"FALSE\"] / (tab[\"FALSE\", \"TRUE\"] * tab[\"TRUE\", \"FALSE\"])\nprint(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))\nguided_artifact_checkpoint(cfg, \"6.1\", paste0(report, \".raw\"), parent = \"5.7\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048\n```\n\n`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.",
+    "expected_result": "A carrier/non-carrier table in the retained cohort and a finite odds ratio. Interpret its direction using the allele in the exported column; this need not be the allele that increases risk.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "An OR of 2 means that disease probability doubled. Is this statement generally correct?\n\n<details><summary>Show the answer</summary>\n\nNo. Odds and probability differ; an odds ratio is not generally a risk ratio.\n\n</details>",
+    "files_created": "`s6-1_example.raw` and logs."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s6-1",
+      "code": "report <- guided_path(cfg, \"6.1\", \"example\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", \"9:96426973:A:G\", \"--export\", \"A\", \"--out\", report))\nx <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE)\ndose <- as.numeric(x[[7]])\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\ncase <- psam$Disease[match(x$IID, psam$IID)] == \"2\"\ntab <- table(case = case, carrier = dose > 0)\nprint(tab)\ncarrier_or <- tab[\"TRUE\", \"TRUE\"] * tab[\"FALSE\", \"FALSE\"] / (tab[\"FALSE\", \"TRUE\"] * tab[\"TRUE\", \"FALSE\"])\nprint(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))\nguided_artifact_checkpoint(cfg, \"6.1\", paste0(report, \".raw\"), parent = \"5.7\")",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--export",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      },
+      {
+        "name": "--snp",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

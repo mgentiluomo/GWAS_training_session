@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "id": "3.2",
+  "module": 3,
+  "step": 2,
+  "anchor": "step-3-2",
+  "title": "Sample call rate",
+  "source": "lessons/module_03_sample_quality_control.Rmd",
+  "source_sha256": "f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Apply a 98% sample call-rate requirement after rough cleaning.",
+    "why": "Call rate estimates completeness across the retained sites. A threshold of 98% corresponds to at most 2% missingness, not 98% missingness. Low completeness can reduce effective sample size and can be associated with laboratory or recruitment groups. Compare the distribution before adopting the threshold in another study.",
+    "you_need": "State 3.1; call-rate definition from 2.4.",
+    "command": "```{r s3-2}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048\n```\n\n`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB.",
+    "expected_result": "42 additional wells removed; 1,971 samples and 296,360 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Moderate sample failures that survived the rough screen. Missingness may be related to case/control status or batch, so exclusions must be documented.",
+    "quick_check": "A well with 1% missing calls has what call rate, and does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\n99%; it passes the 98% call-rate requirement.\n\n</details>",
+    "files_created": "`s3-2_state.*`, sample removal list and replay metadata."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s3-2",
+      "code": "run_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--mind",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--mind 0.02` filters samples with more than 2% missing calls, equivalent to call rate below 98%. `--pfile` selects the input native fileset; `--make-pgen` saves a new state; `--out` sets its prefix. The helper adds `--threads 2` and `--memory 2048`, limiting threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

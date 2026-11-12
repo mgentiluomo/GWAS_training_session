@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "1.5",
+  "module": 1,
+  "step": 5,
+  "anchor": "step-1-5",
+  "title": "Calling genotypes",
+  "source": "lessons/module_01_from_dna_to_array_data.Rmd",
+  "source_sha256": "22c747c88f6b80cb0ff8d1c1acceebdd8cab10df17ea37e745cf178a7c1290ac",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Read the call and score columns without treating the score as certainty.",
+    "why": "The calling algorithm compares intensities with expected clusters. A GC score is a calling-quality measure; it is not a probability that an association is true, nor a p-value. A no-call can reflect low signal or ambiguous clusters. The examples use semicolons and decimal points intentionally: check the delimiter instead of changing the computer language.",
+    "you_need": "The example Final Reports from 1.2.",
+    "command": "```{r s1-5}\nlines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "Columns SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are selected report excerpts, not the full 299,523-site matrix for every person.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Does GC Score = 0.9 mean a variant has a 90% chance of causing disease?\n\n<details><summary>Show the answer</summary>\n\nNo. The score concerns genotype calling, not causal or association evidence.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s1-5",
+      "code": "lines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

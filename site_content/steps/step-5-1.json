@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "5.1",
+  "module": 5,
+  "step": 1,
+  "anchor": "step-5-1",
+  "title": "Why ancestry matters",
+  "source": "lessons/module_05_population_structure.Rmd",
+  "source_sha256": "9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Explain how population structure can confound an association study.",
+    "why": "If case recruitment and control recruitment sample different ancestry proportions, allele frequencies can differ even at sites unrelated to disease. A principal component (PC) summarises a direction of genetic variation across many sites. Principal component analysis (PCA) describes patterns; its axes are not diagnoses, nationality or ethnicity. Reference labels are contextual metadata, not a biological ranking. We define an ancestry-matched teaching cohort before examining association p-values.",
+    "you_need": "The module 4 boundary, plus the supplied GRCh38 reference subset.",
+    "command": "```{r s5-1}\nreference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\nreference_samples <- guided_table(paste0(reference, \".psam\"))\ntable(reference_samples$SuperPop)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS. The labels describe reference sampling metadata; the table shows the groups actually present, not every possible 1000 Genomes group.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Can a disease-associated allele-frequency difference arise from unequal ancestry proportions even when a site has no disease effect?\n\n<details><summary>Show the answer</summary>\n\nYes. Ancestry can be a common cause of group membership and allele-frequency differences.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s5-1",
+      "code": "reference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\nreference_samples <- guided_table(paste0(reference, \".psam\"))\ntable(reference_samples$SuperPop)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

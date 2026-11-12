@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "id": "4.1",
+  "module": 4,
+  "step": 1,
+  "anchor": "step-4-1",
+  "title": "Variant call rate",
+  "source": "lessons/module_04_variant_quality_control.Rmd",
+  "source_sha256": "006b3a4f0381921f35e054ff366909a4c8339f1ed5ce32f61a15d35949bab024",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Remove variants with call rate below 98% after sample QC.",
+    "why": "Site missingness is recalculated in the retained cohort. A probe can perform poorly across many wells even when each well passes sample QC. The observed number of failing variants can exceed the number of deliberately planted failures because natural genotype patterns and earlier exclusions change the denominator.",
+    "you_need": "Full sample-QC boundary 3.8.",
+    "command": "```{r s4-1}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.8\"), \"--geno\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"4.1\")))\nops <- guided_replay_lists(cfg, \"4.1\", \"3.8\")\nguided_register(cfg, \"4.1\", \"3.8\", 1844, 295559, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048\n```\n\n`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.",
+    "expected_result": "801 variants removed, rather than exactly the 800 planted low-call sites. 1,844 samples and 295,559 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Poor probes, cluster-calling problems and sample-dependent failures. Inspect which samples are affected rather than assuming every rejected site has the same cause.",
+    "quick_check": "Why can a simulation with 800 planted failures yield 801 observed exclusions?\n\n<details><summary>Show the answer</summary>\n\nThe rule acts on observed data, including other sites, and its result is not constrained to the planted list.\n\n</details>",
+    "files_created": "`s4-1_state.*`, excluded IDs and replay metadata."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s4-1",
+      "code": "run_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.8\"), \"--geno\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"4.1\")))\nops <- guided_replay_lists(cfg, \"4.1\", \"3.8\")\nguided_register(cfg, \"4.1\", \"3.8\", 1844, 295559, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--geno",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "0.1",
+  "module": 0,
+  "step": 1,
+  "anchor": "step-0-1",
+  "title": "What you need",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Prepare a computer, a project folder and the tools used throughout the course.",
+    "why": "R is the language that runs our commands. RStudio provides a console, file\nbrowser and editor around R. PLINK 2 is a separate program that processes\ngenotypes. A genotype records the alleles observed at a DNA site. R starts\nPLINK for you, but installing R does not install PLINK.",
+    "you_need": "A Windows, macOS or Linux computer; an internet connection for software and\nthe approved data download; and a writable folder. The local data test does\nnot require a network download. Keep space for the encrypted archive, an\nextracted copy and intermediate results. Required space grows as you work.",
+    "command": "Once R is installed, this safe command identifies your operating system:\n\n```{r s0-1_system}\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\n```\n\nTerminal equivalent: `Rscript -e \"print(Sys.info())\"`. `-e` evaluates the R\nexpression in quotes. Do not paste terminal commands into the R console.",
+    "expected_result": "A named list of system information: Windows, Darwin (macOS), or Linux, with\nyour own system release and processor. These values depend on your computer.\nThey are not genotype counts.",
+    "troubleshooting": "If `Sys.info()` is not recognised, check that you are typing in the R console,\nwhich normally displays `>`. Continue with step 0.2 if R is not installed yet.",
+    "quick_check": "Does installing R also install the program that analyses the genotype files?\n\n<details><summary>Show the answer</summary>No. PLINK 2 is installed separately at step 0.4.</details>",
+    "files_created": "None."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-1_system",
+      "code": "Sys.info()[c(\"sysname\", \"release\", \"machine\")]",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

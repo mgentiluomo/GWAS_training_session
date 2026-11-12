@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0",
+  "id": "2.7",
+  "module": 2,
+  "step": 7,
+  "anchor": "step-2-7",
+  "title": "Add phenotype and covariates",
+  "source": "lessons/module_02_files_and_formats.Rmd",
+  "source_sha256": "350d8a81bd381e68893269fc845f9924991b4d741df0bae4df1a0686e5cdd73d",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Join metadata by well identity, resolving labelled technical replicates to their original person.",
+    "why": "The phenotype is the outcome being studied. Here Disease is 1 for controls and 2 for cases. Age is a covariate, a measured predictor used to account for other influences in the model. Recorded sex is supplied for the sex check, not inferred from row order. A technical replicate inherits its original person's metadata but remains a distinct measured well until duplicate review.",
+    "you_need": "The corrected fileset from 2.5, sample sheet and phenotype table from 0.5.",
+    "command": "```{r s2-7}\nmetadata <- guided_metadata(cfg)\npheno <- metadata[c(\"FID\", \"IID\", \"SEX\", \"Age\", \"Disease\")]\nnames(pheno)[1] <- \"#FID\"\npheno_file <- guided_path(cfg, \"2.7\", \"phenotypes.tsv\")\nguided_write(pheno, pheno_file)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.5\"), \"--update-sex\", pheno_file,\n  \"--pheno\", pheno_file, \"--pheno-name\", \"Disease\", \"--make-pgen\", \"--out\", guided_path(cfg, \"2.7\")))\nstopifnot(all(guided_counts(guided_path(cfg, \"2.7\")) == c(2016, 296510)))\nops <- data.frame(option = c(\"--update-sex\", \"--pheno\", \"--pheno-name\"), value = c(pheno_file, pheno_file, \"Disease\"))\nguided_register(cfg, \"2.7\", \"2.5\", 2016, 296510, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048\n```\n\n`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.",
+    "expected_result": "All 2,016 wells matched; 296,510 variants remain. There are 2,000 people before removal of low-quality wells, relatives and ancestry outliers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Why must labelled replicate wells be joined to their original person before phenotype assignment?\n\n<details><summary>Show the answer</summary>\n\nThe phenotype describes the person, while the export rows describe measured wells.\n\n</details>",
+    "files_created": "`s2-7_phenotypes.tsv` and native `s2-7_state` files."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s2-7",
+      "code": "metadata <- guided_metadata(cfg)\npheno <- metadata[c(\"FID\", \"IID\", \"SEX\", \"Age\", \"Disease\")]\nnames(pheno)[1] <- \"#FID\"\npheno_file <- guided_path(cfg, \"2.7\", \"phenotypes.tsv\")\nguided_write(pheno, pheno_file)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.5\"), \"--update-sex\", pheno_file,\n  \"--pheno\", pheno_file, \"--pheno-name\", \"Disease\", \"--make-pgen\", \"--out\", guided_path(cfg, \"2.7\")))\nstopifnot(all(guided_counts(guided_path(cfg, \"2.7\")) == c(2016, 296510)))\nops <- data.frame(option = c(\"--update-sex\", \"--pheno\", \"--pheno-name\"), value = c(pheno_file, pheno_file, \"Disease\"))\nguided_register(cfg, \"2.7\", \"2.5\", 2016, 296510, operations = ops)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--pfile` reads a native genotype prefix. `--missing` writes separate sample and variant missingness reports without filtering. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--pheno",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--pheno-name",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--update-sex",
+        "explanation_markdown": "`--update-sex` loads recorded sex by ID; `--pheno` selects the phenotype table; `--pheno-name Disease` identifies the binary outcome. `--make-pgen` preserves the joined phenotype in PSAM. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      }
+    ]
+  },
+  "figures": []
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "6.2",
+  "module": 6,
+  "step": 2,
+  "anchor": "step-6-2",
+  "title": "The additive logistic model",
+  "source": "lessons/module_06_association.Rmd",
+  "source_sha256": "783b75de1cc2c0d3e29d0f87641dbd8ee2b87de17a8eb9abc55d8600aacc7b7d",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Fit a one-variant logistic regression in R and connect dosage to the odds ratio.",
+    "why": "For binary outcome Y, logistic regression models log(p/(1?p)) = intercept + beta ? dosage, where p is the probability of being a case. An additive model assumes the same change in log odds for each additional counted allele. exp(beta) is the per-allele OR; it differs from the carrier contrast at 6.1. The standard error measures uncertainty in the estimated log OR. This unadjusted one-site example is not the final association result.",
+    "you_need": "The one-variant export from 6.1 and the final PSAM.",
+    "command": "```{r s6-2}\nx <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "An intercept and dosage coefficient, with a standard error and p-value. The unadjusted per-allele OR and carrier OR need not be equal.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "What does beta = 0 imply for the per-allele odds ratio?\n\n<details><summary>Show the answer</summary>\n\nexp(0) = 1: no estimated per-allele change in odds.\n\n</details>",
+    "files_created": "The example model exists in R memory only; the genotype export remains on disk."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s6-2",
+      "code": "x <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

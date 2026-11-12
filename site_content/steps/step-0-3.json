@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "0.3",
+  "module": 0,
+  "step": 3,
+  "anchor": "step-0-3",
+  "title": "Install RStudio",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it.\nChoose the build for your operating system. R must already be installed.",
+    "why": "The console runs commands now. The editor keeps commands in a notebook so you\ncan read and rerun them later. R objects in memory disappear when R restarts;\nsaved output files remain on disk.",
+    "you_need": "A working R installation from 0.2 and the RStudio installer.",
+    "command": "In the RStudio console, run this small calculation:\n\n```{r s0-3_console}\n2 + 3\n```\n\nTerminal equivalent: `Rscript -e \"print(2 + 3)\"`. The console and terminal\nuse the same R calculation. RStudio itself is opened through your applications menu.",
+    "expected_result": "`[1] 5`. The `[1]` labels the first value printed; it is not part of the answer.",
+    "troubleshooting": "If RStudio cannot find R, check that R was installed for the correct processor.\nRestart RStudio after installing R. A `+` prompt usually means an unfinished\ncommand; press Escape and enter the complete command again.",
+    "quick_check": "After restarting R, should you expect an unsaved object to remain in memory?\n\n<details><summary>Show the answer</summary>No. Reload it from a saved file or rerun the command that creates it.</details>",
+    "files_created": "RStudio software files. No course data are created by the calculation."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-3_console",
+      "code": "2 + 3",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "5.2",
+  "module": 5,
+  "step": 2,
+  "anchor": "step-5-2",
+  "title": "Prepare variants for reference PCA",
+  "source": "lessons/module_05_population_structure.Rmd",
+  "source_sha256": "9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Identify common autosomal sites in the supplied reference subset and the cleaned study.",
+    "why": "PCA should not be dominated by long stretches of correlated probes. The supplied reference was constructed from common, LD-pruned autosomal array sites, with an r? threshold of 0.15 in 200-kb windows and a 50,000-site cap. We intersect it with the study after QC rather than reintroduce sites that failed earlier checks. Study-specific PCs will be pruned again after defining the final cohort.",
+    "you_need": "State 4.6; the reference subset supplied at 0.5.",
+    "command": "```{r s5-2}\nreference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\nstudy_sites <- guided_table(paste0(guided_path(cfg, \"4.6\"), \".pvar\"))\nreference_sites <- guided_table(paste0(reference, \".pvar\"))\ncommon <- sort(intersect(study_sites$ID, reference_sites$ID))\nguided_list(common, guided_path(cfg, \"5.2\", \"common.txt\"))\nstopifnot(length(common) == 48614L)\nguided_artifact_checkpoint(cfg, \"5.2\", guided_path(cfg, \"5.2\", \"common.txt\"), parent = \"4.6\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "48,614 shared sites retained for reference PCA and projection.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Should sites excluded for variant QC be added back merely because they exist in the reference?\n\n<details><summary>Show the answer</summary>\n\nNo. The reference comparison uses the retained study sites.\n\n</details>",
+    "files_created": "`s5-2_common.txt`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s5-2",
+      "code": "reference <- file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38\")\nstudy_sites <- guided_table(paste0(guided_path(cfg, \"4.6\"), \".pvar\"))\nreference_sites <- guided_table(paste0(reference, \".pvar\"))\ncommon <- sort(intersect(study_sites$ID, reference_sites$ID))\nguided_list(common, guided_path(cfg, \"5.2\", \"common.txt\"))\nstopifnot(length(common) == 48614L)\nguided_artifact_checkpoint(cfg, \"5.2\", guided_path(cfg, \"5.2\", \"common.txt\"), parent = \"4.6\")",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

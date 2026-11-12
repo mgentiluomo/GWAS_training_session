@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "id": "0.5",
+  "module": 0,
+  "step": 5,
+  "anchor": "step-0-5",
+  "title": "Download the course package",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Download and extract the whole source project from its GitHub branch. Then\nobtain the matching encrypted data archive through the approved course channel.\nThe GitHub Release does not exist yet: the current archive is a local author\ntest. Its checksums are marked as test values in `config.R`.",
+    "why": "The source project contains code and text. The encrypted package contains\ndata. Checksums detect changed downloads; the password decrypts the archive.\nA correct password does not replace checksum verification.",
+    "you_need": "The complete project folder, R and the approved archive. For the author test,\nset `COURSE_WORK_DIR` to the existing external work folder before using the\nlocal command below. The instructor supplies the password separately.",
+    "command": "Run the following interactively after opening the project. It is not run\nautomatically when rendering this notebook:\n\n```{r s0-5_data, eval=FALSE}\nsource(\"R/package_setup.R\")\ninstall_course_packages()\nsource(\"R/course.R\")\n# For the published release, after its approved URLs and checksums are configured:\ndownload_course_data()\n```\n\nFor the local test, use this instead; it makes no network download:\n\n```{r s0-5_local, eval=FALSE}\ndownload_course_data(\n  zip_path = file.path(Sys.getenv(\"COURSE_WORK_DIR\"), \"release\", \"course-data-2026.1.zip\")\n)\n```\n\n`download_course_data` uses `getPass` to ask for a masked password. Do not\nwrite the password in this notebook, a shared script or your command history.\nThere is no separate terminal decryption command for students. Both routes\nuse the same R helper and `archive`; no 7-Zip installation is required.",
+    "expected_result": "For the local stage 1 archive: `Course data are ready: 55 files verified.`\nThe destination is `data/course/`. The archive and sidecar manifest must both\nmatch their configured SHA-256 values; all extracted payload files are checked.",
+    "troubleshooting": "An empty release URL means the public release has not been configured. Use\nthe authorised local test or ask the instructor. A wrong password produces a\nmessage asking you to check typing and contact the instructor if needed.\nNever bypass a checksum failure. An existing destination is refused to protect\nyour work. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "If the checksum differs but the password is accepted, should you use that download?\n\n<details><summary>Show the answer</summary>No. Obtain the approved matching package before continuing.</details>",
+    "files_created": "Verified data under `data/course/`. Temporary download and extraction files\nare removed. Data and passwords are never added to Git."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-5_data",
+      "code": "source(\"R/package_setup.R\")\ninstall_course_packages()\nsource(\"R/course.R\")\n# For the published release, after its approved URLs and checksums are configured:\ndownload_course_data()",
+      "run_by_default": false
+    },
+    {
+      "label": "s0-5_local",
+      "code": "download_course_data(\n  zip_path = file.path(Sys.getenv(\"COURSE_WORK_DIR\"), \"release\", \"course-data-2026.1.zip\")\n)",
+      "run_by_default": false
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

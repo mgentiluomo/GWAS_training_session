@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "id": "0.4",
+  "module": 0,
+  "step": 4,
+  "anchor": "step-0-4",
+  "title": "Download PLINK 2",
+  "source": "lessons/module_00_preparation.Rmd",
+  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/).\nExtract the executable into the project's `bin/` folder. The executable is\n`plink2.exe` on Windows and `plink2` on macOS or Linux. Extract it first;\nthe ZIP file is not the executable.",
+    "why": "PLINK 2 reads the genotype formats and computes QC and association statistics.\nPLINK 1.9 is a different program. Tested version information is held once in\n`config.R`; the setup check reports your version and warns if it differs.",
+    "you_need": "Your system and processor from 0.1 and the extracted project from 0.5.\nYou may download the executable first and copy it after extracting the project.",
+    "command": "After opening the project at 0.6, read the configured tested version:\n\n```{r s0-4_plink_setting}\nsettings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version\n```\n\nTerminal equivalent for checking the executable: `bin/plink2 --version`\n(Windows: `bin\\plink2.exe --version`). `--version` requests the version string;\nit does not read data. The R setup check performs this call for you at 0.7.",
+    "expected_result": "The configured tested PLINK 2 version is printed. At 0.7 the installed binary\nmust identify itself as PLINK v2. A newer version produces a warning rather\nthan an automatic failure solely because its version differs.",
+    "troubleshooting": "On macOS or Linux an extracted executable may need execute permission. In a\nterminal at the project root, `chmod u+x bin/plink2` grants your user execute\npermission for that file. If institutional security blocks it, ask support.\nDo not disable computer security controls.",
+    "quick_check": "Can a file named `plink2.zip` be used as the executable?\n\n<details><summary>Show the answer</summary>No. Extract the matching executable from it.</details>",
+    "files_created": "`bin/plink2.exe` or `bin/plink2`, outside version control."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}",
+  "r_commands": [
+    {
+      "label": "s0-4_plink_setting",
+      "code": "settings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --version"
+    ],
+    "options": [
+      {
+        "name": "--version",
+        "explanation_markdown": "Terminal equivalent for checking the executable: `bin/plink2 --version`\n(Windows: `bin\\plink2.exe --version`). `--version` requests the version string;\nit does not read data. The R setup check performs this call for you at 0.7."
+      }
+    ]
+  },
+  "figures": []
+}

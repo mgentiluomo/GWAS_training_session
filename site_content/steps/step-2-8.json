@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "2.8",
+  "module": 2,
+  "step": 8,
+  "anchor": "step-2-8",
+  "title": "Module 2 checkpoint",
+  "source": "lessons/module_02_files_and_formats.Rmd",
+  "source_sha256": "350d8a81bd381e68893269fc845f9924991b4d741df0bae4df1a0686e5cdd73d",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Save the first complete native restart fileset and record its verified dimensions.",
+    "why": "A module boundary gives a stable recovery point. Subsequent intermediate filters can be replayed from this full copy without distributing every large matrix. Checkpoints are analysis states, not evidence of independent replication.",
+    "you_need": "The joined fileset from 2.7.",
+    "command": "```{r s2-8}\nguided_snapshot(cfg, \"2.8\", guided_path(cfg, \"2.7\"), 2016, 296510)\ncheck_step(\"2.8\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "A full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches its checkpoint counts and SHA-256 checks.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Which boundary should be used before replaying the early sample QC filters?\n\n<details><summary>Show the answer</summary>\n\nThe completed module 2 checkpoint at 2.8.\n\n</details>",
+    "files_created": "`s2-8_state.*`, `checkpoints/2.8/state.*`, `checkpoints/index.tsv` and `step_counts.tsv`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s2-8",
+      "code": "guided_snapshot(cfg, \"2.8\", guided_path(cfg, \"2.7\"), 2016, 296510)\ncheck_step(\"2.8\", data_dir = cfg$out, work_dir = cfg$out)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "id": "2.2",
+  "module": 2,
+  "step": 2,
+  "anchor": "step-2-2",
+  "title": "Convert to PLINK 2 native format",
+  "source": "lessons/module_02_files_and_formats.Rmd",
+  "source_sha256": "350d8a81bd381e68893269fc845f9924991b4d741df0bae4df1a0686e5cdd73d",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Convert the matched BED/BIM/FAM export to PGEN/PVAR/PSAM.",
+    "why": "PGEN stores genotypes, PVAR describes sites and PSAM describes samples. These are PLINK 2 native files. BED/BIM/FAM remain useful for older tools, but neither format determines the genome build. Binary conversion must preserve sample and variant identity and order.",
+    "you_need": "The original matched files checked at 2.1.",
+    "command": "```{r s2-2}\nout <- guided_path(cfg, \"2.2\")\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\nguided_source_checkpoint(cfg)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048\n```\n\n`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths.",
+    "expected_result": "2,016 samples and 299,523 variants are preserved. An imported BED does not establish the genomic reference allele: PLINK can mark REF as provisional.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and available instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "Does converting BED to PGEN automatically convert GRCh37 coordinates to GRCh38?\n\n<details><summary>Show the answer</summary>\n\nNo. Storage format and genome assembly are separate properties.\n\n</details>",
+    "files_created": "`s2-2_state.pgen/.pvar/.psam`, command and console logs under the output folder."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s2-2",
+      "code": "out <- guided_path(cfg, \"2.2\")\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\nguided_source_checkpoint(cfg)",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--bfile",
+        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--bfile` takes the common prefix of the BED/BIM/FAM set. `--make-pgen` writes a new native fileset. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      }
+    ]
+  },
+  "figures": []
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "id": "4.5",
+  "module": 4,
+  "step": 5,
+  "anchor": "step-4-5",
+  "title": "Sex chromosomes, MT and duplicated sites",
+  "source": "lessons/module_04_variant_quality_control.Rmd",
+  "source_sha256": "006b3a4f0381921f35e054ff366909a4c8339f1ed5ce32f61a15d35949bab024",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Review implausible chromosome-specific calls and collapse consistent duplicate genomic entries.",
+    "why": "Non-PAR X in males, Y and mitochondrial DNA have different copy-number expectations from autosomes. The exercise screens excess heterozygous male X/MT calls and Y calls in recorded females, using a 1% site-level rule. Real interpretation requires deeper laboratory and karyotype review. Distinct array IDs can refer to the same chromosome, coordinate and allele pair. We replace IDs with chromosome:position:REF:ALT, keep one consistent copy and remove both when genotype copies conflict. The imported REF remains provisional unless independently validated against a reference genome.",
+    "you_need": "State 4.4 with PAR splitting already performed at 3.3.",
+    "command": "```{r s4-5}\nreport <- guided_path(cfg, \"4.5\", \"sexchr\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.4\"), \"--chr\", \"X,Y,MT\", \"--export\", \"A\", \"--out\", report))\nheader <- strsplit(readLines(paste0(report, \".raw\"), n = 1L), \"[[:space:]]+\")[[1]]\nraw <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE, quote = \"\", comment.char = \"\",\n  colClasses = c(rep(\"character\", 6), rep(\"integer\", length(header) - 6L)), na.strings = \"NA\")\ngenotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L\nids <- sub(\"_[^_]+$\", \"\", names(raw)[-(1:6)])\npvar <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))\nchromosome <- pvar$CHROM[match(ids, pvar$ID)]\nwrong <- numeric(length(ids))\nwrong[chromosome == \"X\"] <- colMeans(genotypes[raw$SEX == \"1\", chromosome == \"X\", drop = FALSE] == 1L)\nwrong[chromosome == \"Y\"] <- colMeans(genotypes[raw$SEX == \"2\", chromosome == \"Y\", drop = FALSE] >= 0L)\nwrong[chromosome == \"MT\"] <- colMeans(genotypes[, chromosome == \"MT\", drop = FALSE] == 1L)\nexclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, \"4.5\", \"exclude.txt\"))\nsex_state <- guided_path(cfg, \"4.5\", \"sex_state\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.4\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", sex_state))\nstopifnot(all(guided_counts(sex_state) == c(1844, 238819)))\nrun_plink(cfg, c(\"--pfile\", sex_state, \"--set-all-var-ids\", \"@:#:$r:$a\", \"--rm-dup\", \"exclude-mismatch\", \"list\",\n  \"--make-pgen\", \"--out\", guided_path(cfg, \"4.5\")))\nops <- data.frame(option = c(\"--exclude\", \"--set-all-var-ids\", \"--rm-dup\"), value = c(exclude, \"@:#:$r:$a\", \"exclude-mismatch\"))\nguided_register(cfg, \"4.5\", \"4.4\", 1844, 238513, operations = ops)\nrm(raw, genotypes); invisible(gc())\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-4_state --chr X,Y,MT --export A --out results/guided/s4-5_sexchr --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclude.txt --make-pgen --out results/guided/s4-5_sex_state --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048\n```\n\n`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB.",
+    "expected_result": "33 chromosome-specific failures removed. Duplicate review removes 306 entries: one of each of 280 concordant pairs and both members of 13 discordant pairs. Final variant count is 238,513.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Implausible haploid calls, annotation duplication and discordant duplicate genotyping. An ID change does not validate reference alleles or confer a new biological interpretation.",
+    "quick_check": "Why are both copies of a discordant duplicate removed rather than keeping the copy with the nicer association p-value?\n\n<details><summary>Show the answer</summary>\n\nThe genotype discrepancy is unresolved; association evidence must not choose which technical record is trusted.\n\n</details>",
+    "files_created": "Chromosome export, exclusion list, duplicate reports and `s4-5_state.*`."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s4-5",
+      "code": "report <- guided_path(cfg, \"4.5\", \"sexchr\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.4\"), \"--chr\", \"X,Y,MT\", \"--export\", \"A\", \"--out\", report))\nheader <- strsplit(readLines(paste0(report, \".raw\"), n = 1L), \"[[:space:]]+\")[[1]]\nraw <- read.table(paste0(report, \".raw\"), header = TRUE, check.names = FALSE, quote = \"\", comment.char = \"\",\n  colClasses = c(rep(\"character\", 6), rep(\"integer\", length(header) - 6L)), na.strings = \"NA\")\ngenotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L\nids <- sub(\"_[^_]+$\", \"\", names(raw)[-(1:6)])\npvar <- guided_table(paste0(guided_path(cfg, \"4.4\"), \".pvar\"))\nchromosome <- pvar$CHROM[match(ids, pvar$ID)]\nwrong <- numeric(length(ids))\nwrong[chromosome == \"X\"] <- colMeans(genotypes[raw$SEX == \"1\", chromosome == \"X\", drop = FALSE] == 1L)\nwrong[chromosome == \"Y\"] <- colMeans(genotypes[raw$SEX == \"2\", chromosome == \"Y\", drop = FALSE] >= 0L)\nwrong[chromosome == \"MT\"] <- colMeans(genotypes[, chromosome == \"MT\", drop = FALSE] == 1L)\nexclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, \"4.5\", \"exclude.txt\"))\nsex_state <- guided_path(cfg, \"4.5\", \"sex_state\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.4\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", sex_state))\nstopifnot(all(guided_counts(sex_state) == c(1844, 238819)))\nrun_plink(cfg, c(\"--pfile\", sex_state, \"--set-all-var-ids\", \"@:#:$r:$a\", \"--rm-dup\", \"exclude-mismatch\", \"list\",\n  \"--make-pgen\", \"--out\", guided_path(cfg, \"4.5\")))\nops <- data.frame(option = c(\"--exclude\", \"--set-all-var-ids\", \"--rm-dup\"), value = c(exclude, \"@:#:$r:$a\", \"exclude-mismatch\"))\nguided_register(cfg, \"4.5\", \"4.4\", 1844, 238513, operations = ops)\nrm(raw, genotypes); invisible(gc())",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s4-4_state --chr X,Y,MT --export A --out results/guided/s4-5_sexchr --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclude.txt --make-pgen --out results/guided/s4-5_sex_state --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--chr",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--exclude",
+        "explanation_markdown": "`--flip` complements bases at listed IDs; it is not an effect-allele swap. `--exclude` removes listed IDs; `--make-pgen` saves the corrected copy. `--out` sets the output prefix; `--threads 2` and `--memory 2048` bound resources. The R helper prints the exact command with your own safe paths."
+      },
+      {
+        "name": "--export",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--make-pgen",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--rm-dup",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--set-all-var-ids",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. The helper appends `--threads 2` and `--memory 2048` for threads and workspace MiB."
+      }
+    ]
+  },
+  "figures": []
+}

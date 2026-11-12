@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "id": "1.1",
+  "module": 1,
+  "step": 1,
+  "anchor": "step-1-1",
+  "title": "SNPs and genotypes",
+  "source": "lessons/module_01_from_dna_to_array_data.Rmd",
+  "source_sha256": "22c747c88f6b80cb0ff8d1c1acceebdd8cab10df17ea37e745cf178a7c1290ac",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Distinguish a DNA site, an allele and a genotype.",
+    "why": "A variant is a position where DNA differs between people. An allele is one of its possible sequences. A single nucleotide polymorphism (SNP) has single-base alternatives. At an ordinary autosomal site a person carries two copies: an A/G site can have A/A, A/G or G/G genotypes. Missing is not a fourth allele. X, Y and mitochondrial DNA need different copy-number assumptions, discussed at 4.5.",
+    "you_need": "The verified array annotation from 0.5.",
+    "command": "```{r s1-1}\nann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nhead(ann[c(\"Name\", \"Chr\", \"Position_GRCh38\", \"Ref_Plus\", \"Alt_Plus\")])\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "expected_result": "A table of site identifiers, chromosome, GRCh38 coordinate and plus-strand alleles. The annotation contains 299,523 rows. Array site names are not guaranteed to be rs identifiers.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
+    "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "quick_check": "At a C/T autosomal site, does C/T represent two variants or one genotype?\n\n<details><summary>Show the answer</summary>\n\nOne genotype at one variant: one C allele and one T allele.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "s1-1",
+      "code": "ann <- guided_table(file.path(cfg$data_dir, \"array\", \"sim2026_array_annotation.tsv\"))\nhead(ann[c(\"Name\", \"Chr\", \"Position_GRCh38\", \"Ref_Plus\", \"Alt_Plus\")])",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": []
+}
