@@ -9,7 +9,13 @@ output:
     theme: readable
 ---
 
-This course follows a simulated study of [genotypes](../docs/glossary.md#genotype) (the DNA letters a person carries at chosen positions). It goes from laboratory files to [association](../docs/glossary.md#association) results. An association is a statistical link between a DNA difference and a trait. All data are simulated by a computer program, so they describe no real person. You do not need any programming experience. Read one step, run its command in the [console](../docs/glossary.md#console) of [RStudio](../docs/glossary.md#rstudio), and compare your result with the expected result. Then continue with the next step. Keep your computer's language and decimal settings as they are.
+This course follows a simulated study. The study starts with [genotypes](../docs/glossary.md#genotype). A genotype is the pair of DNA letters a person carries at one chosen position. The course ends with [association](../docs/glossary.md#association) results. An association is a statistical link between a DNA difference and a trait.
+
+All data come from a computer program. They describe no real person. You do not need any programming experience.
+
+Work in the same way at every step. Read the step. Run its command in the [console](../docs/glossary.md#console) of [RStudio](../docs/glossary.md#rstudio). Compare your result with the expected result. Then go to the next step.
+
+Keep your computer's language and decimal settings as they are.
 
 Validation: the R commands in this module ran without errors on Windows. The software installers and the password prompt in RStudio are checked by hand.
 

@@ -9,10 +9,9 @@ output:
     theme: readable
 ---
 
-Work from the project root. Read each step before you run its R chunk. All data
-are simulated, so these exercises cannot show a finding about a real disease.
-See the [glossary](../docs/glossary.md) for the course words. Each module
-loads its inputs from disk. You do not need a saved R workspace.
+Work from the project root, the main folder of the course. Read each step before you run its R chunk. All data are simulated. These exercises cannot show a finding about a real disease.
+
+The [glossary](../docs/glossary.md) explains the course words. Each module reads its input files from disk. You do not need a saved R workspace.
 
 ```{r setup, include=FALSE}
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")
