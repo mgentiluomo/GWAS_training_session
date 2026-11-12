@@ -473,3 +473,97 @@ No. Nearby variants can share a signal through LD; clumping at 7.5 groups correl
 ### Files created
 
 `s6-7_summary.tsv`, association checkpoint files and `checkpoints/6.7/MANIFEST.tsv`.
+
+## 6.8 Create the summary statistics file {#step-6-8}
+
+### What we do
+
+Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.
+
+### Why
+
+The raw PLINK output is long and uses PLINK column names. A summary statistics file is the standard way to share GWAS results. It holds one row per tested variant and no individual-level data. Colleagues use it to plot results, to combine studies in a meta-analysis and to look up a variant. This file keeps only the ten columns that others expect, with the same names in the same order. From now on the Manhattan and QQ plots are built from this file, not from the raw scan output.
+
+Each column has one clear meaning. Read the table before you use the file.
+
+| Column | What it is | What values look like | A common mistake |
+| --- | --- | --- | --- |
+| `chromosome` | Chromosome of the variant. | `1` to `22`, then `X`, `Y` or `MT`. | Treating it as a number. `X` is text. |
+| `base_pair_location` | Position on the chromosome, in base pairs, on genome build GRCh38. | A whole number such as `96426973`. | Comparing it with positions from another genome build. |
+| `variant_id` | The name of the variant in this course. | `9:96426973:A:G`: chromosome, position and the two alleles. | Expecting an rs number. This course does not use rs numbers as identifiers. |
+| `effect_allele` | The allele whose copies were counted in the model. PLINK calls it A1. | One letter, such as `A`. | Assuming it is the minor allele or the ALT allele. It is neither by definition. |
+| `other_allele` | The other allele of the variant. | One letter, such as `G`. | Swapping the two alleles. The odds ratio then points the other way. |
+| `effect_allele_frequency` | How common the effect allele is in the analysed samples. | A number from 0 to 1, such as `0.2`. | Reading it as the minor allele frequency. It can be above 0.5. |
+| `odds_ratio` | The odds ratio per copy of the effect allele. | A positive number. Above 1 means higher odds of disease with each copy. | Reading it as a risk ratio. |
+| `standard_error` | The standard error of the natural logarithm of the odds ratio. | A small positive number, such as `0.09`. | Using it as the standard error of the odds ratio itself. It belongs to the log odds ratio. |
+| `p_value` | The p-value of the additive test. | A number above 0 and at most 1. A test that failed is `NA`. | Replacing `NA` with 1 or 0. A missing result stays missing. |
+| `n` | The number of samples used for this variant. | A whole number up to 1,811. | Assuming every variant uses all samples. Missing genotypes lower it. |
+
+To get the 95% confidence interval of an odds ratio, use `exp(log(odds_ratio) +/- 1.96 * standard_error)`. This is why the standard error is on the log scale.
+
+The file is tab-separated text with a header row, UTF-8 encoding and decimal points. It holds only results per variant. It has no genotypes and no sample IDs. Even so, keep it out of the repository, like every other result file.
+
+### You need
+
+The association scan from 6.4 and the summary from 6.7.
+
+### Command
+
+```{r s6-8}
+results <- guided_association(guided_path(cfg, "6.4", "association"))
+stats <- guided_standardise_scan(results)
+guided_check_summary(stats, rows = nrow(results))
+stats_file <- guided_summary_path(cfg)
+guided_write_summary(stats, stats_file)
+dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
+guided_write(guided_summary_dictionary(), dictionary_file)
+# Read the file back, as the plots will, and check that nothing was lost.
+saved <- guided_summary_stats(cfg)
+guided_check_summary(saved, rows = nrow(results))
+stopifnot(isTRUE(all.equal(saved, stats)))
+first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
+finite <- valid_p(saved$p_value)
+stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
+print(head(saved, 5))
+print(c(rows = nrow(saved), finite_tests = sum(finite), missing_p_values = sum(is.na(saved$p_value)),
+  genome_wide = sum(saved$p_value[finite] < 5e-8)))
+guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = "6.7")
+check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
+
+R reads or calculates the displayed values without changing the genotype files.
+
+<details><summary>Show the expected result</summary>
+
+The summary statistics file has 236,815 rows, one for each tested variant, and the ten columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A` with effect allele `A`, other allele `G` and n = 1807. No p-value is missing in this dataset, and eight are below 0.00000005, as at 6.7. The file is about 17 MB. The column file has one row for each of the ten columns. The last table shows `matches` for both files in the 6.8 checkpoint.
+
+A p-value that PLINK could not calculate would stay `NA` in the file. It would never become 0 or 1.
+
+The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Stop at the first error. Check the named input and the previous step. If R says that the scan output is missing, run step 6.4 first. If a check names a column or a value, do not edit the file by hand. Run the step again. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+
+</details>
+
+### Quick check
+
+Your colleague wants the 95% confidence interval for an odds ratio. Which column do they use together with `odds_ratio`, and on which scale?
+
+<details><summary>Show the answer</summary>
+
+They use `standard_error`. It is the standard error of the natural logarithm of the odds ratio. The interval is calculated on the log scale and then converted back with `exp()`.
+
+</details>
+
+### Files created
+
+`s6-8_gwas_summary_statistics.tsv`, `s6-8_gwas_summary_statistics_columns.tsv` and `checkpoints/6.8/MANIFEST.tsv`.
