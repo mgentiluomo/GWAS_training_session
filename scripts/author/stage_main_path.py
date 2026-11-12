@@ -55,7 +55,7 @@ def stage(student: Path, run: Path, chain: Path, destination: Path) -> dict:
     full = {row["step"] for row in index if row["kind"] == "full"}
     if full != {"2.8", "3.8", "4.6", "5.7"}:
         raise ValueError("Expected exactly the four full genotype boundaries.")
-    if not {"6.7", "7.8"}.issubset({row["step"] for row in index}):
+    if not {"6.7", "6.8", "7.8"}.issubset({row["step"] for row in index}):
         raise ValueError("Final analysis checkpoints are missing.")
     destination.mkdir(parents=True)
     for name in ALLOWED:

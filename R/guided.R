@@ -141,6 +141,92 @@ guided_association <- function(prefix) {
   x
 }
 
+guided_summary_columns <- function() {
+  c("chromosome", "base_pair_location", "variant_id", "effect_allele", "other_allele",
+    "effect_allele_frequency", "odds_ratio", "standard_error", "p_value", "n")
+}
+
+guided_summary_path <- function(cfg) guided_path(cfg, "6.8", "gwas_summary_statistics.tsv")
+
+# Convert a parsed PLINK scan (from guided_association) into the standard summary statistics columns.
+guided_standardise_scan <- function(results) {
+  needed <- c("CHROM", "POS", "ID", "A1", "A1_FREQ", "OR", "LOG(OR)_SE", "P", "OBS_CT")
+  if (!all(needed %in% names(results))) stop("The scan table lacks columns: ", paste(setdiff(needed, names(results)), collapse = ", "))
+  other <- if ("OMITTED" %in% names(results)) results$OMITTED else
+    ifelse(results$A1 == results$ALT, results$REF, results$ALT)
+  data.frame(chromosome = as.character(results$CHROM),
+    base_pair_location = as.integer(results$POS),
+    variant_id = as.character(results$ID),
+    effect_allele = as.character(results$A1),
+    other_allele = as.character(other),
+    effect_allele_frequency = as.numeric(results$A1_FREQ),
+    odds_ratio = as.numeric(results$OR),
+    standard_error = as.numeric(results[["LOG(OR)_SE"]]),
+    p_value = as.numeric(results$P),
+    n = as.integer(results$OBS_CT),
+    stringsAsFactors = FALSE)
+}
+
+guided_summary_dictionary <- function() {
+  data.frame(
+    column = guided_summary_columns(),
+    meaning = c(
+      "Chromosome of the variant, as a label.",
+      "Position of the variant on the chromosome, in base pairs, on genome build GRCh38.",
+      "Name of the variant in this course: chromosome, position and the two alleles.",
+      "The allele whose copies were counted in the model (PLINK A1). It is not always the minor or the ALT allele.",
+      "The other allele of the variant, the one that was not counted.",
+      "Fraction of allele copies in the analysed samples that are the effect allele.",
+      "Odds ratio per copy of the effect allele. Above 1 means higher odds of disease with each copy.",
+      "Standard error of the natural logarithm of the odds ratio, not of the odds ratio itself.",
+      "P-value of the additive test. A test that failed is left as NA.",
+      "Number of samples used for this variant. It can be lower than the cohort size when genotypes are missing."),
+    type = c("text", "integer", "text", "text", "text", "number", "number", "number", "number", "integer"),
+    unit_or_range = c("1 to 22, X, Y or MT", "1 or more; base pairs", "text", "A, C, G, T or an indel allele",
+      "A, C, G, T or an indel allele", "0 to 1", "above 0", "0 or more; log odds scale",
+      "above 0 and at most 1; NA if the test failed", "whole number, at most the cohort size"),
+    stringsAsFactors = FALSE)
+}
+
+# Stop with a clear message when a summary statistics table breaks the file rules.
+guided_check_summary <- function(x, rows = NULL) {
+  stopifnot("The summary statistics need exactly the ten standard columns in the standard order." =
+      identical(names(x), guided_summary_columns()),
+    "base_pair_location must be whole numbers of 1 or more." =
+      !anyNA(x$base_pair_location) && all(x$base_pair_location >= 1L),
+    "p_value must be above 0 and at most 1, or NA." = all(is.na(x$p_value) | (x$p_value > 0 & x$p_value <= 1)),
+    "odds_ratio must be above 0, or NA." = all(is.na(x$odds_ratio) | x$odds_ratio > 0),
+    "standard_error must be 0 or more, or NA." = all(is.na(x$standard_error) | x$standard_error >= 0),
+    "effect_allele_frequency must be between 0 and 1, or NA." =
+      all(is.na(x$effect_allele_frequency) | (x$effect_allele_frequency >= 0 & x$effect_allele_frequency <= 1)),
+    "n must be whole numbers of 1 or more." = !anyNA(x$n) && all(x$n >= 1L),
+    "The allele and identifier columns must not be empty." =
+      all(!is.na(c(x$chromosome, x$variant_id, x$effect_allele, x$other_allele))) &&
+      all(nzchar(c(x$chromosome, x$variant_id, x$effect_allele, x$other_allele))))
+  if (!is.null(rows)) stopifnot("The number of rows differs from the number of tests in the scan." = nrow(x) == rows)
+  invisible(TRUE)
+}
+
+guided_write_summary <- function(x, path) {
+  guided_check_summary(x)
+  guided_write(x, path)
+  invisible(path)
+}
+
+# Read the summary statistics file made at step 6.8.
+guided_summary_stats <- function(cfg) {
+  path <- guided_summary_path(cfg)
+  if (!file.exists(path)) stop("The summary statistics file is missing. Run step 6.8 first: ", path, call. = FALSE)
+  classes <- c(chromosome = "character", base_pair_location = "integer", variant_id = "character",
+    effect_allele = "character", other_allele = "character", effect_allele_frequency = "numeric",
+    odds_ratio = "numeric", standard_error = "numeric", p_value = "numeric", n = "integer")
+  x <- read.delim(path, colClasses = classes, na.strings = "NA", quote = "", comment.char = "", check.names = FALSE)
+  if (!identical(names(x), guided_summary_columns())) {
+    stop("The summary statistics file has unexpected columns. Run step 6.8 again.", call. = FALSE)
+  }
+  x
+}
+
 guided_artifact_checkpoint <- function(cfg, step, files, parent = "5.7") {
   require_files(files)
   folder <- file.path(cfg$out, "checkpoints", step)

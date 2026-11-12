@@ -39,6 +39,9 @@ local({
     if (targets[i] == "6.4") stopifnot(file.exists(file.path(output, "s6-3_covariates.tsv")),
                                       file.exists(file.path(output, "s5-7_pca.eigenvec")))
     if (targets[i] == "7.7") stopifnot(file.exists(file.path(output, "s6-4_association.Disease.glm.logistic.hybrid")))
+    if (targets[i] == "7.7" && file.exists(file.path(data, "checkpoints", "6.8", "MANIFEST.tsv"))) {
+      stopifnot(file.exists(file.path(output, "s6-8_gwas_summary_statistics.tsv")))
+    }
     cat("PASS: restart", targets[i], "with matching metadata and no genotype differences.\n")
   }
   cat("Seven main-path restart integrations passed.\n")
