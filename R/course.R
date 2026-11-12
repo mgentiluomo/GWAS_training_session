@@ -1,5 +1,120 @@
 # Shared course utilities. Analytical choices remain visible in the notebooks.
 
+course_download_file <- function(url, destination) {
+  status <- utils::download.file(url, destination, mode = "wb", quiet = TRUE, method = "libcurl")
+  if (!identical(status, 0L)) stop("The course download failed. Check your connection and try again.", call. = FALSE)
+}
+
+course_archive_call <- function(expr) {
+  tryCatch(force(expr), error = function(e) {
+    if (grepl("Incorrect passphrase", conditionMessage(e), ignore.case = TRUE, fixed = FALSE)) {
+      stop("The password is wrong. Check it for typing errors. If it still fails, ask the instructor.",
+           call. = FALSE)
+    }
+    # Do not include the password or the archive library's raw error in the message.
+    stop("The archive could not be read or extracted. Check the download and ask the instructor for help.",
+         call. = FALSE)
+  })
+}
+
+course_manifest <- function(path) {
+  manifest <- read.delim(path, colClasses = "character", check.names = FALSE,
+                         quote = "", comment.char = "", na.strings = NULL)
+  if (!identical(names(manifest), c("path", "bytes", "sha256")) || !nrow(manifest) ||
+      anyNA(manifest)) stop("The course manifest is invalid. Ask the instructor for a replacement.", call. = FALSE)
+  safe <- vapply(strsplit(manifest$path, "/", fixed = TRUE), function(parts) {
+    length(parts) > 0L && all(nzchar(parts)) && !any(parts %in% c(".", ".."))
+  }, logical(1))
+  if (any(!safe) || any(!nzchar(manifest$path)) ||
+      any(grepl("^/|[\\\\:\r\n\t]", manifest$path)) ||
+      anyDuplicated(tolower(manifest$path)) ||
+      any(!grepl("^[0-9]+$", manifest$bytes)) ||
+      any(!grepl("^[a-fA-F0-9]{64}$", manifest$sha256))) {
+    stop("The course manifest contains invalid paths, sizes or checksums.", call. = FALSE)
+  }
+  manifest
+}
+
+download_course_data <- function(password = NULL, destination = "data/course", release = NULL) {
+  if (is.null(release)) {
+    settings <- new.env(parent = baseenv())
+    sys.source("config.R", envir = settings)
+    release <- settings$course_settings$data_release
+  }
+  keys <- c("archive_url", "manifest_url", "archive_sha256", "manifest_sha256")
+  if (!is.list(release) || !all(keys %in% names(release)) ||
+      !all(vapply(release[keys], function(x) is.character(x) && length(x) == 1L && !is.na(x), logical(1)))) {
+    stop("The classroom data release is not configured. Ask the instructor for the approved course configuration.",
+         call. = FALSE)
+  }
+  if (!all(grepl("^https://", unlist(release[c("archive_url", "manifest_url")])))) {
+    stop("Course downloads must use HTTPS URLs.", call. = FALSE)
+  }
+  if (!all(grepl("^[a-fA-F0-9]{64}$", unlist(release[c("archive_sha256", "manifest_sha256")])))) {
+    stop("The course configuration needs approved SHA-256 checksums for both downloads.", call. = FALSE)
+  }
+  for (package in c("archive", "digest")) {
+    if (!requireNamespace(package, quietly = TRUE)) {
+      stop("Required course packages are missing. Run source('scripts/preflight.R') first.", call. = FALSE)
+    }
+  }
+  if (!is.character(destination) || length(destination) != 1L || is.na(destination) || !nzchar(destination)) {
+    stop("Choose a new folder for the course data.", call. = FALSE)
+  }
+  if (file.exists(destination) || dir.exists(destination)) {
+    stop("The destination already exists. Choose a new folder to keep your existing work.", call. = FALSE)
+  }
+  parent <- dirname(destination)
+  if (!dir.exists(parent) && !dir.create(parent, recursive = TRUE)) {
+    stop("The destination's parent folder could not be created.", call. = FALSE)
+  }
+  parent <- normalizePath(parent, winslash = "/", mustWork = TRUE)
+  destination <- file.path(parent, basename(destination))
+  work <- tempfile("course-download-", tmpdir = parent)
+  if (!dir.create(work)) stop("A temporary download folder could not be created.", call. = FALSE)
+  on.exit(unlink(work, recursive = TRUE), add = TRUE)
+  zip <- file.path(work, "course-data.zip")
+  manifest_path <- file.path(work, "MANIFEST.tsv")
+  course_download_file(release$archive_url, zip)
+  course_download_file(release$manifest_url, manifest_path)
+  hash <- function(path) digest::digest(path, algo = "sha256", file = TRUE)
+  if (hash(zip) != tolower(release$archive_sha256) ||
+      hash(manifest_path) != tolower(release$manifest_sha256)) {
+    stop("A course download failed its SHA-256 check. Download again; ask the instructor if it still fails.",
+         call. = FALSE)
+  }
+  manifest <- course_manifest(manifest_path)
+  if (is.null(password)) {
+    if (!interactive()) stop("Supply the course password through the password argument in a non-interactive session.", call. = FALSE)
+    if (!requireNamespace("getPass", quietly = TRUE)) {
+      stop("The getPass package is missing. Run source('scripts/preflight.R') first.", call. = FALSE)
+    }
+    password <- getPass::getPass("Course data password: ")
+  }
+  if (!is.character(password) || length(password) != 1L || is.na(password) || !nzchar(password)) {
+    stop("Enter the course password supplied by the instructor.", call. = FALSE)
+  }
+  members <- course_archive_call(archive::archive(zip, password = password))
+  if (anyDuplicated(members$path) || !setequal(members$path, manifest$path) ||
+      !all(members$size[match(manifest$path, members$path)] == as.numeric(manifest$bytes))) {
+    stop("The archive contents do not match the approved manifest.", call. = FALSE)
+  }
+  payload <- file.path(work, "payload")
+  dir.create(payload)
+  course_archive_call(archive::archive_extract(zip, dir = payload, password = password))
+  paths <- file.path(payload, manifest$path)
+  if (!all(file.exists(paths)) || any(dir.exists(paths)) ||
+      !all(file.info(paths)$size == as.numeric(manifest$bytes)) ||
+      !all(vapply(paths, hash, character(1)) == tolower(manifest$sha256))) {
+    stop("Extracted course files failed verification. Ask the instructor for help.", call. = FALSE)
+  }
+  if (file.exists(destination) || !file.rename(payload, destination)) {
+    stop("Verified data could not be moved to the destination. Check folder permissions and try again.", call. = FALSE)
+  }
+  message("Course data are ready: ", nrow(manifest), " files verified.")
+  invisible(destination)
+}
+
 course_config <- function(root = ".") {
   root <- normalizePath(root, mustWork = TRUE)
   # Session display only: do not change OS language, input methods or LC_CTYPE.

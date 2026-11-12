@@ -2,6 +2,9 @@
 course_settings <- list(
   # "demo" = reproducible, simulated practice data; "course" = original class data.
   mode = "demo",
+  # Set only after approval of the classroom release. Never store its password here.
+  # Named list: archive_url, manifest_url, archive_sha256, manifest_sha256.
+  data_release = NULL,
   plink2 = Sys.getenv("PLINK2_BIN", unset = ""),
   threads = 2L,
   memory_mb = 2048L,
