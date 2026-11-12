@@ -64,7 +64,7 @@ install.packages(c("archive", "digest", "getPass", "knitr", "rmarkdown"),
 
 ## Downloading the encrypted course data
 
-Request the password with your university email through the [data access form](https://manuelgentiluomo.it/teaching/gwas/data-access). This is a placeholder address until the form is published. In class, you can scan the QR code to open the same form. The form sends the password automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
+Request the password with your university email through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access). In class, you can scan the QR code to open the same form. The form sends the password automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
 
 `course_settings$data_release` in `config.R` is the single place for release
 URLs and expected checksums. Its fields are `archive_url`, `manifest_url`,

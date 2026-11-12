@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: b0a47c92dba83a8ea3b7a92ff55a797c141a46026d2213e8518d26f9e41ae23a
+# SHA-256: 2fed82eb3a37d8546fe067370eb3d57de30c4d4b08cc02190be96697cca8aaca
 
 # Chunk: setup
 start_dir <- setwd(if (file.exists("config.R")) "." else "..")

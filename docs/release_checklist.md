@@ -41,8 +41,7 @@ Update `COURSE_DATA_PASSWORD` every academic year together with the new data
 release. Then test the form once with your own university address. Check that
 the automatic email arrives and that its password opens the matching archive.
 
-The form uses the placeholder path `/teaching/gwas/data-access` on
-manuelgentiluomo.it. It sends the password automatically only to addresses ending
+The form is at [the data access page](https://www.manuelgentiluomo.it/teaching/gwas/data-access). It sends the password automatically only to addresses ending
 in `@unipi.it` or `@studenti.unipi.it`. The classroom QR code opens that same
 form. Other users write to `manuel.gentiluomo@unipi.it`.
 

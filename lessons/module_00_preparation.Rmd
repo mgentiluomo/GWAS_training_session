@@ -276,7 +276,7 @@ The source project contains code and text. The encrypted package contains the da
 
 The complete project folder, R and an internet connection. The command below downloads `course-data-2026.1.zip` and its small manifest file, `MANIFEST.tsv`, for you.
 
-Request the password with your university email through the [data access form](https://manuelgentiluomo.it/teaching/gwas/data-access). This is a placeholder address until the form is published. In class, you can scan the QR code to open the same form. The form sends the password automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
+Request the password with your university email through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access). In class, you can scan the QR code to open the same form. The form sends the password automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.
 
 ### Command
 

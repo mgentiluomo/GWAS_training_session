@@ -90,7 +90,7 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 
 ## Data distribution
 
-- Data are not public. They are distributed as AES-256 encrypted archives attached to a GitHub Release (for example `data-2026.1`), each with a SHA-256 checksum. Students request the password through the form at `https://manuelgentiluomo.it/teaching/gwas/data-access` (placeholder path). The form sends it automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. In class, a QR code opens the same form. Other users write to `manuel.gentiluomo@unipi.it`. The password changes every academic year. It must not be shared and never appears in the repository or on the site.
+- Data are not public. They are distributed as AES-256 encrypted archives attached to a GitHub Release (for example `data-2026.1`), each with a SHA-256 checksum. Students request the password through the form at `https://www.manuelgentiluomo.it/teaching/gwas/data-access`. The form sends it automatically only to addresses ending in `@unipi.it` or `@studenti.unipi.it`. In class, a QR code opens the same form. Other users write to `manuel.gentiluomo@unipi.it`. The password changes every academic year. It must not be shared and never appears in the repository or on the site.
 - One new release with a new password each academic year; the previous one is deleted.
 - Contents: the new simulated GRCh38 dataset and the PCA reference (main path); DB_A with DB_1000G in GRCh37 (optional full-size dataset and conversion exercise).
 
