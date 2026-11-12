@@ -4,6 +4,7 @@ author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
     toc: true
+    toc_depth: 2
     number_sections: false
     theme: readable
 ---
@@ -547,9 +548,7 @@ check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 

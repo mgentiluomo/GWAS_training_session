@@ -4,6 +4,7 @@ author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
     toc: true
+    toc_depth: 2
     number_sections: false
     theme: readable
 ---
@@ -45,9 +46,7 @@ table(reference_samples$SuperPop)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -108,9 +107,7 @@ guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), pa
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -172,9 +169,7 @@ stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -311,9 +306,7 @@ dev.off()
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -323,6 +316,12 @@ A labelled reference/projection plot. Most study samples overlap European refere
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+```{r s5-5_expected_figure, echo=FALSE, fig.alt="Reference samples form labelled genetic-variation clusters; most simulated study samples overlap the European reference pattern."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "5.5", "reference_projection.png"), rel_path = FALSE)
+}
+```
 
 </details>
 
@@ -470,6 +469,12 @@ Ten cohort PCs, a scree plot and a complete 5.7 boundary with 1,811 samples and 
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+
+```{r s5-7_expected_figure, echo=FALSE, fig.alt="The first cohort eigenvalue is much larger than the subsequent nine; ten PCs are prespecified for association."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "5.7", "scree.png"), rel_path = FALSE)
+}
+```
 
 </details>
 

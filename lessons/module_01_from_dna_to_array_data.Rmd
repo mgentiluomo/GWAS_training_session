@@ -4,6 +4,7 @@ author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
     toc: true
+    toc_depth: 2
     number_sections: false
     theme: readable
 ---
@@ -44,9 +45,7 @@ head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -103,9 +102,7 @@ readLines(reports[1], n = 12L)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -163,9 +160,7 @@ stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -223,9 +218,7 @@ stopifnot(nrow(sheet) == 2016L)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -284,9 +277,7 @@ summary(as.numeric(example[["GC Score"]]))
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -342,9 +333,7 @@ head(sheet)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -401,9 +390,7 @@ stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 

@@ -4,6 +4,7 @@ author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
     toc: true
+    toc_depth: 2
     number_sections: false
     theme: readable
 ---
@@ -12,6 +13,8 @@ This course follows a simulated genotyping study from laboratory exports to
 association results. You do not need previous programming experience. Read one
 step, run its R command in the RStudio console, and compare the result before
 continuing. Keep your computer's language and decimal settings as they are.
+
+Validation: executable preparation chunks passed on Windows. Installer actions and the masked RStudio prompt remain manual checks.
 
 This notebook is the source for the guided preparation module. The older
 `01_quality_control.Rmd` belongs to a separate, smaller demonstration.

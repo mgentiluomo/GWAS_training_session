@@ -5,6 +5,14 @@ Authoring dependency: matplotlib. Students need only a browser to read the resul
 Run the demo validation first, then: python3 scripts/build_tutorial.py
 """
 from pathlib import Path
+import sys
+
+# Content export does not import plotting libraries, read data or build the old demo site.
+if "--export-steps" in sys.argv or "--export-main-script" in sys.argv:
+    from course_exports import main
+    main()
+    raise SystemExit(0)
+
 import base64
 import csv
 import hashlib

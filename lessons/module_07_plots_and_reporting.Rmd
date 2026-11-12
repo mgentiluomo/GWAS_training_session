@@ -4,6 +4,7 @@ author: "Manuel Gentiluomo, University of Pisa"
 output:
   html_document:
     toc: true
+    toc_depth: 2
     number_sections: false
     theme: readable
 ---
@@ -45,9 +46,7 @@ save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(results$P[autoso
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -57,6 +56,12 @@ Most points are close to the null diagonal, with a strong upper-tail departure. 
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
+
+```{r s7-1_expected_figure, echo=FALSE, fig.alt="Most adjusted autosomal tests follow the null diagonal, with an upper-tail departure from a few association signals."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "7.1", "qq.png"), rel_path = FALSE)
+}
+```
 
 </details>
 
@@ -109,9 +114,7 @@ guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -170,9 +173,7 @@ stopifnot(sum(results$P[valid_p(results$P)] < 5e-8) == 8L)
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -182,6 +183,12 @@ Three strong regions on chromosomes 3, 9 and 12, comprising eight variants below
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
+
+```{r s7-3_expected_figure, echo=FALSE, fig.alt="Autosomal association peaks exceed the conventional threshold on chromosomes 3, 9 and 12."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "7.3", "manhattan.png"), rel_path = FALSE)
+}
+```
 
 </details>
 
@@ -235,9 +242,7 @@ guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
@@ -390,6 +395,12 @@ Four genome-wide significant variants in L2. The plot encodes LD by symbol and c
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
 
+```{r s7-6_expected_figure, echo=FALSE, fig.alt="Four L2 variants pass the genome-wide threshold; symbol and colour indicate LD with the chromosome 9 lead."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "7.6", "regional.png"), rel_path = FALSE)
+}
+```
+
 </details>
 
 <details><summary>If something goes wrong</summary>
@@ -476,6 +487,12 @@ Main: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,8
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
 
+```{r s7-7_expected_figure, echo=FALSE, fig.alt="QQ plots share a vertical scale; removing PCs and then sample and variant QC increases median inflation."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(guided_path(cfg, "7.7", "qq_comparison.png"), rel_path = FALSE)
+}
+```
+
 </details>
 
 <details><summary>If something goes wrong</summary>
@@ -550,9 +567,7 @@ cat(paste(summary, collapse = "\n"), "\n")
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
-```sh
-No PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
-```
+Not applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.
 
 R reads or calculates the displayed values without changing the genotype files.
 
