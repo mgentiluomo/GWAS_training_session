@@ -70,14 +70,14 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results.
+Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 ```{r s7-1_expected_figure, echo=FALSE, fig.alt="Most adjusted autosomal tests follow the null diagonal, with an upper-tail departure from a few association signals."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.1", "qq.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.1", "qq.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -140,10 +140,10 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Lambda is approximately 1.016. R calculates it from the valid autosomal tests. The check uses the same definition as the reference run.
+Lambda is approximately 1.016. R calculates it from the valid autosomal tests.
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 </details>
 
@@ -201,14 +201,14 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes.
+There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 ```{r s7-3_expected_figure, echo=FALSE, fig.alt="Autosomal association peaks exceed the conventional threshold on chromosomes 3, 9 and 12."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.3", "manhattan.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.3", "manhattan.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -277,7 +277,7 @@ R reads or calculates the displayed values without changing the genotype files.
 There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 </details>
 
@@ -342,7 +342,7 @@ bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_associa
 There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 </details>
 
@@ -405,7 +405,8 @@ plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na
 abline(h = -log10(5e-8), lty = 2)
 legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
-dev.off()
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
 stopifnot(sum(region$p_value < 5e-8) == 4L)
 guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 ```
@@ -420,14 +421,14 @@ bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 
 
 <details><summary>Show the expected result</summary>
 
-L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero.
+L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 ```{r s7-6_expected_figure, echo=FALSE, fig.alt="Four L2 variants pass the genome-wide threshold; symbol and colour indicate LD with the chromosome 9 lead."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.6", "regional.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -519,11 +520,11 @@ bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s
 Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 ```{r s7-7_expected_figure, echo=FALSE, fig.alt="QQ plots share a vertical scale; removing PCs and then sample and variant QC increases median inflation."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "7.7", "qq_comparison.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "qq_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -612,7 +613,7 @@ R reads or calculates the displayed values without changing the genotype files.
 A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures. The 7.8 checkpoint manifest protects these files. The main path ends here. Imputation, mixed models and the analysis after a GWAS are not part of it.
 
 The tested PLINK version is set in `config.R` and recorded in
-`software_versions.txt`. Validation: the executable chunks, the comparisons with the instructor results and the final plot checks passed on Windows.
+`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.
 
 </details>
 

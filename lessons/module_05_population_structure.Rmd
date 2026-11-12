@@ -73,7 +73,7 @@ The chunk reads the sample table of the reference (a [.psam file](../docs/glossa
 This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS. The labels describe where the reference samples were collected. The table shows only the groups present in this subset, not every possible 1000 Genomes group.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -122,6 +122,7 @@ reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
 stopifnot(length(common) == 48614L)
+cat(length(common), "shared autosomal sites kept\n")
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 ```
 
@@ -136,7 +137,7 @@ R reads or calculates the displayed values without changing the genotype files.
 48,614 shared sites are kept for the reference PCA and the projection.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -187,6 +188,7 @@ a <- match(common, study$ID); b <- match(common, ref$ID)
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
 stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
   all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
+cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -200,7 +202,7 @@ R reads or calculates the displayed values without changing the genotype files.
 All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -275,7 +277,7 @@ bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_commo
 Reference eigenvectors and eigenvalues, allele weights, and two `.sscore` files (score tables) with the columns PC1_AVG to PC10_AVG. The study projection contains 1,844 samples.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -327,7 +329,8 @@ plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch 
   xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
 points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
 legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-dev.off()
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -338,14 +341,14 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning.
+A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 ```{r s5-5_expected_figure, echo=FALSE, fig.alt="Reference samples form labelled genetic-variation clusters; most simulated study samples overlap the European reference pattern."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "5.5", "reference_projection.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -422,7 +425,7 @@ R applies the rule and writes the list of flagged sample IDs (IIDs). `--remove` 
 33 remaining outlier records are excluded. 1,811 samples and 238,513 variants remain. Some of the simulated outliers were already removed in earlier QC steps. So 33 is not the total number of outliers in the original data.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -480,7 +483,8 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, 
 eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
 png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
 plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
-dev.off()
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
 guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
 file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
 check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
@@ -497,14 +501,14 @@ bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune
 
 <details><summary>Show the expected result</summary>
 
-Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants. The first cohort eigenvalue is about 14. The signs of the eigenvectors can differ on your computer. This does not change how the PCs adjust the association.
+Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants. The first cohort eigenvalue is about 14. The signs of the eigenvectors can differ on your computer. This does not change how the PCs adjust the association. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 ```{r s5-7_expected_figure, echo=FALSE, fig.alt="The first cohort eigenvalue is much larger than the subsequent nine; ten PCs are prespecified for association."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
-  knitr::include_graphics(guided_path(cfg, "5.7", "scree.png"), rel_path = FALSE)
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.7", "scree.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 

@@ -83,7 +83,7 @@ There are two separate commands on purpose. The second command works on the samp
 Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -241,7 +241,7 @@ bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out resul
 } -->
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -320,7 +320,7 @@ bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.t
 Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -374,6 +374,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
+cat(length(pruned), "variants kept by LD pruning\n")
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
@@ -390,7 +391,7 @@ bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 -
 The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -470,7 +471,7 @@ bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove
 13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -564,7 +565,7 @@ bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove
 There are 19 duplicate-class pairs and ten first-degree pairs. In total, 30 records are removed. 1,920 samples remain. Pairs can overlap, because one person can be in more than one pair. For this reason, the pair counts are not counts of unique people.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -642,7 +643,7 @@ bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove
 Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 
@@ -705,7 +706,7 @@ R reads or calculates the displayed values without changing the genotype files.
 Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows. Your numbers should be the same.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
 
 </details>
 

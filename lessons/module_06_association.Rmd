@@ -79,7 +79,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --o
 A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -139,7 +139,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 An intercept and a dosage coefficient, each with a standard error and a [p-value](../docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -192,6 +192,7 @@ design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
 guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+cat(nrow(covar), "complete covariate rows written\n")
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 ```
 
@@ -206,7 +207,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -270,7 +271,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -333,7 +334,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 The leading regions are on chromosomes 9, 3 and 12. The table keeps the effect allele and the OBS_CT of each variant. Every p-value and odds ratio refers to the tested A1 allele, whatever the variant ID looks like.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -400,7 +401,7 @@ The R command uses `--snp` with the chosen ID. The terminal command uses `--extr
 One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -464,7 +465,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 
@@ -558,7 +559,7 @@ The summary statistics file has 236,815 rows, one for each tested variant. It ha
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
+`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
 
 </details>
 

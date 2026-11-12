@@ -56,6 +56,7 @@ The checked array annotation file from step 0.5. An [annotation](../docs/glossar
 
 ```{r s1-1}
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+cat(nrow(ann), "rows in the annotation\n")
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 ```
 

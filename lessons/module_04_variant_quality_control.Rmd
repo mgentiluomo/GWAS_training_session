@@ -88,7 +88,7 @@ This is the same command written for a terminal, a window where you type command
 801 variants are removed. This is not exactly the 800 planted low-call variants. 1,844 samples and 295,559 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -175,7 +175,7 @@ The first command runs the test. R then makes a list of the variant IDs with p b
 120 variants are excluded. 295,439 variants and 1,844 samples remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -252,7 +252,7 @@ bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out result
 56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -357,7 +357,7 @@ R then applies the sample-size rule to the mid-p values and makes the list of fa
 167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -469,7 +469,7 @@ Put the template in quotes in a terminal, so that the dollar signs stay unchange
 33 variants with impossible calls on the sex chromosomes or MT are removed. The duplicate review removes 306 entries. It keeps one of each of the 280 matching pairs, and it removes both members of the 13 pairs that disagree. The final number of variants is 238,513.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 
@@ -531,7 +531,7 @@ R reads or calculates the displayed values without changing the genotype files.
 The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.
 
 The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.
 
 </details>
 

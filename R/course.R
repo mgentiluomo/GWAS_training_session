@@ -741,5 +741,6 @@ save_plot <- function(path, draw, width = 1800, height = 1200) {
   png(path, width = width, height = height, res = 180)
   on.exit(dev.off())
   draw()
+  cat("The plot was saved to ", path, "\n", sep = "")
   invisible(path)
 }
