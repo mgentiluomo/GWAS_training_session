@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented example.map",
+  "format": ".map",
+  "encoding": "text",
+  "producer": "PLINK 2 VCF export",
+  "pipeline_position": "Called genotypes for association tools",
+  "columns_or_fields": [
+    {
+      "name": "CHR",
+      "meaning": "Chromosome code."
+    },
+    {
+      "name": "ID",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "CM",
+      "meaning": "Genetic map distance, zero because none is supplied."
+    },
+    {
+      "name": "BP",
+      "meaning": "One-based base-pair position."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The label is in the filename and this description when the format has no comment field.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "No header line is permitted."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 97,
+  "sha256": "393de4f90e81f0c8c6c0841354690aa9283131628e70da7fc524e80affa2aeb3",
+  "asset": "examples/invented example.map"
+}

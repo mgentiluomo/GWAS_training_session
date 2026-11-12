@@ -1,0 +1,5 @@
+1	toy_v1	0	100001	A	A	G	A	G	G	G	A
+1	toy_v2	0	100101	T	C	C	C	T	C	T	T
+2	toy_v3	0	200001	A	A	A	G	0	0	G	G
+X	toy_v4	0	5000001	T	T	C	T	C	C	T	T
+X	toy_v5	0	5000101	C	C	A	A	C	A	C	C

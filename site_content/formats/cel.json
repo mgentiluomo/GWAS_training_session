@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "file_name": null,
+  "format": "CEL",
+  "encoding": "binary",
+  "producer": "Thermo Fisher array scanner software",
+  "pipeline_position": "Probe intensities before Axiom calling",
+  "columns_or_fields": [
+    {
+      "name": "records",
+      "meaning": "Probe intensity and array metadata records."
+    }
+  ],
+  "header_notes": [
+    "Description only. No vendor or read binary is fabricated.",
+    "Consult the linked documentation for version-specific headers and fields."
+  ],
+  "magic_bytes": null,
+  "specification": "https://www.thermofisher.com/us/en/home/life-science/microarray-analysis.html",
+  "asset": null
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "file_name": null,
+  "format": "IDAT",
+  "encoding": "binary",
+  "producer": "Illumina scanner",
+  "pipeline_position": "Raw fluorescence before genotype calling",
+  "columns_or_fields": [
+    {
+      "name": "records",
+      "meaning": "Intensity records and scanner metadata."
+    }
+  ],
+  "header_notes": [
+    "Description only. No vendor or read binary is fabricated.",
+    "Consult the linked documentation for version-specific headers and fields."
+  ],
+  "magic_bytes": null,
+  "specification": "https://support.illumina.com/array/array_software/genomestudio/documentation.html",
+  "asset": null
+}

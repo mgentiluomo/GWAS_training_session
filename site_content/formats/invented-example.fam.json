@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented example.fam",
+  "format": ".fam",
+  "encoding": "text",
+  "producer": "PLINK 2 VCF export",
+  "pipeline_position": "Called genotypes for association tools",
+  "columns_or_fields": [
+    {
+      "name": "FID",
+      "meaning": "Family identifier, set equal to the invented sample identifier."
+    },
+    {
+      "name": "IID",
+      "meaning": "Individual identifier S1 to S4."
+    },
+    {
+      "name": "PAT",
+      "meaning": "Father identifier, zero when not supplied."
+    },
+    {
+      "name": "MAT",
+      "meaning": "Mother identifier, zero when not supplied."
+    },
+    {
+      "name": "SEX",
+      "meaning": "Sex code: 1 male, 2 female, 0 unknown."
+    },
+    {
+      "name": "PHENO",
+      "meaning": "Phenotype code, -9 when not supplied."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The label is in the filename and this description when the format has no comment field.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "No header line is permitted in this example format."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 64,
+  "sha256": "9c618742c40a808d19650bd2f30fbc9aca3c6eb70dddb8a385dcad2a0cb15535",
+  "asset": "examples/invented example.fam"
+}

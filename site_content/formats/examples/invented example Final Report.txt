@@ -1,0 +1,24 @@
+[Header]
+Content	invented example; not a vendor export
+[Data]
+SNP Name	Sample ID	Allele1 - Forward	Allele2 - Forward	GC Score	X	Y
+toy_v1	S1	A	A	0.95	100	120
+toy_v1	S2	A	G	0.95	100	120
+toy_v1	S3	G	G	0.95	100	120
+toy_v1	S4	A	G	0.95	100	120
+toy_v2	S1	C	T	0.95	100	120
+toy_v2	S2	C	C	0.95	100	120
+toy_v2	S3	C	T	0.95	100	120
+toy_v2	S4	T	T	0.95	100	120
+toy_v3	S1	A	A	0.95	100	120
+toy_v3	S2	G	A	0.95	100	120
+toy_v3	S3	-	-	0	100	120
+toy_v3	S4	G	G	0.95	100	120
+toy_v4	S1	T	T	0.95	100	120
+toy_v4	S2	T	C	0.95	100	120
+toy_v4	S3	C	C	0.95	100	120
+toy_v4	S4	T	T	0.95	100	120
+toy_v5	S1	C	C	0.95	100	120
+toy_v5	S2	A	A	0.95	100	120
+toy_v5	S3	A	C	0.95	100	120
+toy_v5	S4	C	C	0.95	100	120

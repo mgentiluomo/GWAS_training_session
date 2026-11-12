@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented example.bed.hex.txt",
+  "format": "Hex dump",
+  "encoding": "text",
+  "producer": "Offline teaching generator",
+  "pipeline_position": "Human-readable view of binary bytes",
+  "columns_or_fields": [
+    {
+      "name": "line 1",
+      "meaning": "The label names the corresponding invented binary file."
+    },
+    {
+      "name": "line 2",
+      "meaning": "The first 32 bytes, or the whole file if shorter, are written as hexadecimal pairs."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The label is in the filename and this description when the format has no comment field.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 81,
+  "sha256": "dd1ef1e0cf8cef3d00448760853644b6947a22b45bb4ed9856536a51417a0afc",
+  "asset": "examples/invented example.bed.hex.txt"
+}

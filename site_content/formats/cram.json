@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "file_name": null,
+  "format": "CRAM",
+  "encoding": "binary",
+  "producer": "Alignment software and SAMtools",
+  "pipeline_position": "Compressed reads, often encoded against a reference",
+  "columns_or_fields": [
+    {
+      "name": "records",
+      "meaning": "Read and alignment containers plus reference identifiers."
+    }
+  ],
+  "header_notes": [
+    "Description only. No vendor or read binary is fabricated.",
+    "Consult the linked documentation for version-specific headers and fields."
+  ],
+  "magic_bytes": null,
+  "specification": "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+  "asset": null
+}

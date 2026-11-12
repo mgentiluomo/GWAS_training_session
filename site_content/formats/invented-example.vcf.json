@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented example.vcf",
+  "format": "VCF",
+  "encoding": "text",
+  "producer": "Offline teaching generator",
+  "pipeline_position": "Variant calling or imputation, before analysis",
+  "columns_or_fields": [
+    {
+      "name": "CHROM",
+      "meaning": "Chromosome name."
+    },
+    {
+      "name": "POS",
+      "meaning": "One-based position of the first reference base."
+    },
+    {
+      "name": "ID",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "REF",
+      "meaning": "Reference allele in this invented example."
+    },
+    {
+      "name": "ALT",
+      "meaning": "Alternative allele, or a symbolic allele such as NON_REF."
+    },
+    {
+      "name": "QUAL",
+      "meaning": "Variant quality score, a dot when not supplied."
+    },
+    {
+      "name": "FILTER",
+      "meaning": "PASS denotes no failed example filter."
+    },
+    {
+      "name": "INFO",
+      "meaning": "Site annotations, including END or R2 when declared in the header."
+    },
+    {
+      "name": "FORMAT",
+      "meaning": "Names and order of the sample fields."
+    },
+    {
+      "name": "S1-S4",
+      "meaning": "Sample values follow FORMAT; the gVCF contains only S1."
+    },
+    {
+      "name": "GT",
+      "meaning": "Genotype allele indices, where 0 is REF, 1 is the first ALT, and a dot is missing."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The label is in the filename and this description when the format has no comment field.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Double-hash lines declare metadata; the single-hash CHROM line names columns.",
+    "PASS and dot values here do not establish biological validity."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 583,
+  "sha256": "b65077c9a503dd4d85918ae6ed58efcab9b055ad679af952d9e555edd9e78b48",
+  "asset": "examples/invented example.vcf"
+}

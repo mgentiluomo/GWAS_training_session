@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "file_name": null,
+  "format": "BAM",
+  "encoding": "binary",
+  "producer": "Alignment software and SAMtools",
+  "pipeline_position": "Compressed aligned reads before variant calling",
+  "columns_or_fields": [
+    {
+      "name": "records",
+      "meaning": "Binary representation of SAM fields."
+    }
+  ],
+  "header_notes": [
+    "Description only. No vendor or read binary is fabricated.",
+    "Consult the linked documentation for version-specific headers and fields."
+  ],
+  "magic_bytes": null,
+  "specification": "https://samtools.github.io/hts-specs/SAMv1.pdf",
+  "asset": null
+}

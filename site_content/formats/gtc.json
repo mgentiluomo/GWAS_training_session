@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "file_name": null,
+  "format": "GTC",
+  "encoding": "binary",
+  "producer": "Illumina genotype calling software",
+  "pipeline_position": "Called array genotypes before text export",
+  "columns_or_fields": [
+    {
+      "name": "records",
+      "meaning": "Sample identifiers, calls, confidence and intensity records."
+    }
+  ],
+  "header_notes": [
+    "Description only. No vendor or read binary is fabricated.",
+    "Consult the linked documentation for version-specific headers and fields."
+  ],
+  "magic_bytes": null,
+  "specification": "https://support.illumina.com/array/array_software/illumina-array-analysis-platform/documentation.html",
+  "asset": null
+}
