@@ -6,7 +6,7 @@
   "anchor": "step-0-3",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0",
+  "source_sha256": "7bacb415a96195af5b4bf6fe0d005fd871b85e17bbf5abc194df52c002cb35f2",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",

@@ -6,7 +6,7 @@
   "anchor": "step-0-6",
   "title": "Open the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "3b54f241336ca6fba3db0fc0ffe25334b230d286e16aed9b71d93db511fba5e0",
+  "source_sha256": "7bacb415a96195af5b4bf6fe0d005fd871b85e17bbf5abc194df52c002cb35f2",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the extracted folder, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.",
