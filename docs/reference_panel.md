@@ -1,5 +1,10 @@
 # Optional extension: 1000 Genomes
 
+This document describes the older demonstration's optional extension. In the
+guided 2026 main path the GRCh38 reference is part of
+[module 5](../lessons/module_05_population_structure.Rmd): reference PCA,
+study projection and within-cohort PCs are separate tested operations.
+
 [Course home](../README.md) · [Lesson 2](../lessons/02_population_structure.Rmd)
 
 The [original PCA notebook](https://github.com/mgentiluomo/GWAS_training_session/blob/2025-original/01_Codes/02_PCA_GWAS_training_session_2025.Rmd)

@@ -1,5 +1,9 @@
 # Suggested teaching route: three sessions, twelve hours
 
+This timetable belongs to the earlier 600-sample demonstration. For the tested
+guided 2026 modules 0 to 7, start with the [main-path notebook map](../README.md#guided-2026-main-path-start-here).
+The main path has no fixed three-session timing requirement.
+
 [Course home](../README.md) · [Prepare your computer](setup.md)
 
 The independent modules can be used across courses or for self-study. This is one

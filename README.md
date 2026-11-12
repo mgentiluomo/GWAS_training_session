@@ -7,11 +7,52 @@ Manuel Gentiluomo · University of Pisa
 **Independent teaching materials for students across University of Pisa courses**
 
 Move from genotype files to an interpretable association analysis using
-**RStudio and PLINK 2**. Materials are in English. You only need basic experience
-importing a table into R and finding the terminal; the walkthrough explains the
-remaining steps.
+**RStudio and PLINK 2**. Materials are in English. No programming experience is
+assumed; the guided steps explain the commands, files and statistical terms.
 
-## Start here
+## Guided 2026 main path: start here
+
+The new course follows modules 0 to 7. No programming experience is assumed.
+Download the complete project and open `GWAS_training_session.Rproj`, then
+read and run the numbered steps in order.
+
+| Module | Canonical notebook |
+| --- | --- |
+| 0 | [Computer preparation](lessons/module_00_preparation.Rmd) |
+| 1 | [From DNA to array data](lessons/module_01_from_dna_to_array_data.Rmd) |
+| 2 | [Files and formats](lessons/module_02_files_and_formats.Rmd) |
+| 3 | [Sample QC](lessons/module_03_sample_quality_control.Rmd) |
+| 4 | [Variant QC](lessons/module_04_variant_quality_control.Rmd) |
+| 5 | [Population structure](lessons/module_05_population_structure.Rmd) |
+| 6 | [Association](lessons/module_06_association.Rmd) |
+| 7 | [Plots and final summary](lessons/module_07_plots_and_reporting.Rmd) |
+
+**The data release is not published yet.** The repository holds code and text,
+never genotype data. The verified simulated main path starts with 2,016 wells
+and 299,523 array entries; its final cohort has 1,811 samples, 238,513 post-QC
+variants and 236,815 association tests. Approved data URLs and SHA-256 values
+belong in `config.R`; its current hashes identify the local stage 1 test ZIP.
+See [data setup](docs/troubleshooting.md#downloading-the-encrypted-course-data).
+
+After preparing the tools and verified data, run the generated complete script
+with `source("scripts/run_main_path.R")`. It uses the same executable chunks as
+the notebooks and omits manual installation/download steps. Author checks can
+use `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR` for external input/output folders.
+
+Full genotype checkpoints are at 2.8, 3.8, 4.6 and 5.7; intermediate restarts
+replay stored operations and check counts. Final outputs include Manhattan,
+QQ and regional plots, lead variants with effect alleles/intervals, comparisons
+and `s7-8_summary.md`. See [Windows validation](VALIDATION.md) and the
+[session report](docs/session_report.md) for results and limits.
+
+The [website JSON schema](docs/site_content_schema.md) documents the 59 exported
+steps. No new website is deployed; site design still requires a mockup.
+Modules A/B and post-GWAS analysis were not started.
+
+## Earlier 600-sample demonstration
+
+The remaining instructions below document the earlier demonstration and browser
+draft, not the guided 0–7 main path. Do not mix their datasets or checkpoints.
 
 **Browser tutorial (review draft):** save
 [tutorial/index.html](https://raw.githubusercontent.com/mgentiluomo/GWAS_training_session/course/2026-guided-training/tutorial/index.html)

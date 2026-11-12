@@ -33,7 +33,9 @@ throwaway value. It must not become the classroom release.
 
 The package includes the small GRCh37 exercise. Historical full-size `DB_A` and
 `DB_1000G` inputs are absent from the authorised student folder and are not added.
-The final array naming, data version and public distribution remain author decisions.
+The array naming decision is now recorded in `CLAUDE.md`: GSA-style Illumina
+names and real GRCh38 positions, with the manufacturer manifest kept local.
+Classroom release creation and public distribution remain author decisions.
 
 ## Main-path checkpoint layout
 

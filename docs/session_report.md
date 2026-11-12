@@ -26,10 +26,12 @@ working area is `C:/WEB_site/data_sources/codex_work/`.
   2,016 wells and 299,523 variants. Password prompts and installer clicks remain
   manual checks; no real URL download was attempted.
 
-## Work in progress
+## Completed main path
 
-Module authoring and boundary checkpoint validation are continuing. Completed
-modules and unresolved checks will be recorded below before the final push.
+All eight main-path notebooks are implemented and executed on Windows. The
+generated complete script and the 59-step website export are also implemented.
+Modules were committed and pushed separately; subsequent recovery and export
+changes were kept in separate commits. All analytical outputs remain external.
 
 - Module 1: seven steps executed on Windows; annotation rows, 21 plates,
   2,016 wells and the three supplied report excerpts were checked. No genotype
@@ -91,3 +93,75 @@ modules and unresolved checks will be recorded below before the final push.
 - Local release staging: 105 files, 634,410,035 bytes, under codex_work/classroom-stage-2026.1,
   with a separate SHA-256 manifest. It includes the official chain and excludes
   imputation material and instructor keys. The old 55-file test ZIP is unchanged.
+
+## Script and website exports
+
+`scripts/run_main_path.R` is generated directly from executable notebook chunks;
+manual install/download chunks are omitted. It was executed against the staged
+package in `codex_work/combined_script_20261112/`, reproducing the summary,
+eight significant variants, all required figures and comparison hit counts.
+
+`scripts/build_tutorial.py` now exports one JSON per step under
+`site_content/steps/`, without reading genotype data or building the old demo
+website. The 59 exports preserve fixed blocks, R commands, PLINK commands and
+per-option explanations. Shared explanations come from the same notebook set.
+Figure placeholders include Gemini prompts and are explicitly unreviewed.
+The schema is documented in `docs/site_content_schema.md`; generated files must
+not become a second manually maintained source. Step 0.5 is labelled
+`manual_required`; automated URL tests used mocked local files only.
+
+## Verification record and external outputs
+
+- The generator's 36 tests and the five packaging checks passed.
+- The 20 download/setup regression checks (including the original local AES-256 ZIP),
+  session-locale checks, synthetic checkpoint
+  tests, seven real restart integrations and six export consistency tests passed.
+- `scripts/check_course.R` passed on Windows. All 59 steps satisfy the fixed
+  block order; executable chunks were evaluated from each notebook.
+- The student-artifact check covered all eight notebook sources against the
+  external instructor key and found no educator-only text. Expected results and
+  quick-check answers remain intentionally collapsed as required by the course.
+- RStudio's bundled Pandoc was found and used without installation. All eight
+  notebooks rendered to HTML externally. Initial image-path warnings were fixed
+  with absolute render-only image paths; plots appear within the expected-result
+  details blocks. The final analytical PNGs were visually inspected. HTML structure checks confirmed
+  six embedded result images with alt text and collapsed details by default;
+  browser layout sampling covered the original preparation and module 7 pages.
+  Captures of an all-expanded temporary review copy were blank, so expanded
+  details were checked structurally rather than claimed as fully browser-tested.
+- Final text QA found lossy question-mark substitutions in mathematical prose
+  introduced by a Windows shell pipe. Formulae now use clear ASCII notation
+  (`5e-8`, `r^2`, `1-p`, `+/-`), and a regression rejects those corrupt patterns.
+  The calculations were unchanged; JSON and the combined script were regenerated.
+
+External locations, all under `C:/WEB_site/data_sources/codex_work/`:
+
+| Path | Contents |
+| --- | --- |
+| `main_path_final_20261112/` | Fresh complete notebook run and verified checkpoint tree. |
+| `combined_script_20261112/` | Independent generated-script run. |
+| `classroom-stage-2026.1/` | Main-path inputs, official chain and release-ready checkpoint staging. |
+| `classroom-stage-2026.1.MANIFEST.tsv` | Staging inventory, byte counts and SHA-256. |
+| `rendered_notebooks_20261112/` | Rendered notebook HTML; generated course data are not committed. |
+| `rendered_notebook_run_20261112/` | Analytical outputs produced during notebook rendering. |
+
+The original simulated inputs, instructor key and local test ZIP were not
+overwritten. The manufacturer array manifest remains local; SHA-256 payload
+manifests are separate integrity inventories, not manufacturer design manifests.
+
+## Unverified items and decisions for the author
+
+No main-path executable step remains failed after the permitted repair attempts.
+Linux/macOS execution of the new main path, clean-machine installer actions,
+the masked RStudio prompt and broad accessibility/device coverage remain to test.
+The earlier Ubuntu AES-256 extraction result is recorded as author-reported,
+not as a test of the new complete main path.
+
+Before classroom distribution, approve the staged dataset and teaching policies,
+confirm licences, choose the classroom password outside the repository, create
+the encrypted release, and replace the local test URLs/checksums in `config.R`.
+The current HWE calibration is study-specific and should receive author review;
+it preserves the reference cutoff at this course size. No new GitHub data release
+or website was created. Website design still starts with an approved mockup.
+See `docs/open_issues.md` for precise limits. Modules A/B and post-GWAS work
+were not started.
