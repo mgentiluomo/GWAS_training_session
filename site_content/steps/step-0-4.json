@@ -6,7 +6,7 @@
   "anchor": "step-0-4",
   "title": "Download PLINK 2",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "57556ee52f4e5b582015b56d01f008ab6b530087654f08b600db8acc284d516a",
+  "source_sha256": "b0a47c92dba83a8ea3b7a92ff55a797c141a46026d2213e8518d26f9e41ae23a",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/). A build is a version of the program made for one system and processor. Follow these actions:\n\n1. Open the page. It lists several downloads. Choose the build whose name matches your system and processor from step 0.1. The names on the page can change.\n2. Save the ZIP file. A ZIP file is one compressed file that holds other files.\n3. Extract the ZIP file. On Windows, right-click it, choose \"Extract All\", then click \"Extract\". On macOS, double-click it.\n4. Inside you find the program. It is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](../docs/glossary.md#executable), the file your computer can run.\n5. Copy the executable into the `bin/` folder of the course project. You create the project at step 0.5. The ZIP file may hold other programs too. Copy only `plink2.exe` (or `plink2`).\n\nThe ZIP file is not the executable, so extract it first. When you finish, you should see `plink2.exe` or `plink2` inside the `bin` folder.",
