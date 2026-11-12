@@ -9,10 +9,7 @@ output:
     theme: readable
 ---
 
-Work from the project root. Read each step before running its R chunk. All data
-are simulated; these exercises cannot establish a finding about a real disease.
-See the [glossary](../docs/glossary.md) for the course vocabulary. Each module
-loads its inputs from disk; a saved R workspace is not required.
+Work from the project root. This is the main folder of the course project, the one that contains `config.R`. Read each step before you run its R chunk. All data are simulated, so these exercises cannot show a finding about a real disease. See the [glossary](../docs/glossary.md) for the course vocabulary. Each module loads its input files from disk, so you do not need a saved R workspace.
 
 ```{r module4_setup, include=FALSE}
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -22,21 +19,43 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+## Module 4 at a glance {#module-4-overview}
+
+**What you will do.** In this module you check each [variant](../docs/glossary.md#variant), not each person. A variant is a place in the DNA where people can carry different versions, called [alleles](../docs/glossary.md#allele). You remove variants that were measured badly or that are too rare to analyse. You also remove duplicated variants. At the end you save the cleaned dataset.
+
+**What you will learn.**
+
+- How to find variants with a low [call rate](../docs/glossary.md#call-rate), which means too many failed results.
+- Why failed results must not differ between [cases and controls](../docs/glossary.md#case-and-control), which is called [differential missingness](../docs/glossary.md#differential-missingness).
+- Why very rare variants are left out, using [minor allele frequency](../docs/glossary.md#maf).
+- How the [Hardy–Weinberg](../docs/glossary.md#hwe) test finds genotyping errors, and why its threshold depends on sample size.
+- How to check the X, Y and mitochondrial variants and how to merge duplicated variants.
+
+**How long it takes.** About 45 minutes. Step 4.5 is the slowest, because it runs three commands and reads a large table.
+
+A [sample](../docs/glossary.md#sample) is the DNA of one person measured on the array. Every step in this module removes variants, so the number of samples stays the same.
+
 ## 4.1 Variant call rate {#step-4-1}
 
 ### What we do
 
-Remove variants with call rate below 98% after sample QC.
+We remove variants with a call rate below 98%. We do this after sample [quality control](../docs/glossary.md#quality-control) (QC), which already removed the poor samples in module 3.
 
 ### Why
 
-Site missingness is recalculated in the retained cohort. A probe can perform poorly across many wells even when each well passes sample QC. The observed number of failing variants can exceed the number of deliberately planted failures because natural genotype patterns and earlier exclusions change the denominator.
+A call is the result for one variant in one sample. A failed call is called missing data, or [missingness](../docs/glossary.md#missingness). The call rate of a variant is the share of samples where the call worked.
+
+In module 3 we checked each sample. Now we check each variant in the samples that remain. A [probe](../docs/glossary.md#probe) is the small piece of DNA on the chip that measures one variant. A probe can work badly in many wells, even when every sample passes sample QC. A well is one small hole on the plate that holds one sample.
+
+The number of failing variants can be higher than the number of failures planted on purpose. The simulation planted 800 low-call variants. Natural patterns in the [genotypes](../docs/glossary.md#genotype) also cause some failures. The earlier removals also change which samples are counted.
 
 ### You need
 
-Full sample-QC boundary 3.8.
+The full dataset saved at the end of sample QC. This saved point is called a [checkpoint](../docs/glossary.md#checkpoint). Here it is boundary 3.8, made in step 3.8.
 
 ### Command
+
+Copy the R chunk into the R console (the window where you type R commands) and press Enter. R then runs the PLINK 2 program for you.
 
 ```{r s4-1}
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
@@ -50,11 +69,23 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048
 ```
 
-`--geno 0.02` removes variants with more than 2% missing calls in the retained samples. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+This is the same command written for a terminal, a window where you type commands. Here is what each option does.
+
+`--geno 0.02` removes variants with more than 2% missing calls in the remaining samples.
+
+`--pfile` selects the PLINK 2 input files.
+
+`--make-pgen` writes a new copy of the data in PLINK 2 format.
+
+`--out` sets the start of the names of the new files.
+
+`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work in parallel.
+
+`--memory 2048` sets the memory PLINK may use, in MiB (a unit of computer memory).
 
 <details><summary>Show the expected result</summary>
 
-801 variants removed, rather than exactly the 800 planted low-call sites. 1,844 samples and 295,559 variants remain.
+801 variants are removed. This is not exactly the 800 planted low-call variants. 1,844 samples and 295,559 variants remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -63,41 +94,45 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Poor probes, cluster-calling problems and sample-dependent failures. Inspect which samples are affected rather than assuming every rejected site has the same cause.
+It can reveal poor probes, problems in the software that assigns genotypes (called cluster calling) and failures that depend on the sample. Look at which samples are affected. Do not assume that every rejected variant has the same cause.
 
 ### Quick check
 
-Why can a simulation with 800 planted failures yield 801 observed exclusions?
+Why can a simulation with 800 planted failures give 801 removed variants?
 
 <details><summary>Show the answer</summary>
 
-The rule acts on observed data, including other sites, and its result is not constrained to the planted list.
+The rule works on the observed data, including other variants. Its result does not have to match the planted list.
 
 </details>
 
 ### Files created
 
-`s4-1_state.*`, excluded IDs and replay metadata.
+`s4-1_state.*`, the lists of excluded IDs and the records that let the course repeat this step.
 
 ## 4.2 Differential missingness {#step-4-2}
 
 ### What we do
 
-Test whether missing calls differ between cases and controls.
+We test whether missing calls differ between cases and controls.
 
 ### Why
 
-An overall high call rate can hide unequal missingness between outcome groups. Such a pattern can create spurious association if call failures correlate with genotype. A p-value measures how incompatible the observed group difference is with the equal-missingness model; it is not the probability that a site is an error. With many sites, some small p-values occur by chance. The course uses a prespecified screening cutoff of 0.00001.
+A variant can have a high overall call rate and still have unequal missingness in the two groups. Cases are people with the disease. Controls are people without it. Together they form the [phenotype](../docs/glossary.md#phenotype) groups. If failed calls depend on the genotype, this can create a false association.
+
+The test gives a [p-value](../docs/glossary.md#p-value). The p-value tells us how unlikely the observed difference would be if both groups had the same amount of missing data. It is not the probability that the variant is an error.
+
+With many variants, some small p-values appear by chance. So we use a screening cutoff that we fixed before the analysis. The cutoff is 0.00001.
 
 ### You need
 
-State 4.1 and Disease phenotype joined at 2.7.
+The dataset from step 4.1, which we call state 4.1. You also need the Disease column, which you joined in step 2.7.
 
 ### Command
 
@@ -119,11 +154,25 @@ bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided
 bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048
 ```
 
-`--test-missing` compares missingness by binary phenotype. R selects IDs with p < 0.00001; `--exclude` applies that list. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+The first command runs the test. R then makes a list of the variant IDs with p below 0.00001. The second command removes the variants on that list.
+
+`--test-missing` compares the missing calls of cases and controls.
+
+`--exclude` removes the variants named in the list file. This list is called an [exclusion list](../docs/glossary.md#exclusion-list).
+
+`--pfile` selects the PLINK 2 input files.
+
+`--make-pgen` writes a new copy of the data in PLINK 2 format.
+
+`--out` sets the start of the names of the new files.
+
+`--threads 2` limits PLINK to two worker threads.
+
+`--memory 2048` sets the memory PLINK may use, in MiB.
 
 <details><summary>Show the expected result</summary>
 
-120 variants excluded; 295,439 variants and 1,844 samples remain.
+120 variants are excluded. 295,439 variants and 1,844 samples remain.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -132,13 +181,13 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Case/control-dependent calling, processing differences and some genotype-dependent missingness. A significant test does not itself identify the laboratory mechanism.
+It can reveal calling that depends on case or control status, differences in how the groups were processed, and some missingness that depends on the genotype. A significant result does not tell you the cause in the laboratory.
 
 ### Quick check
 
@@ -146,27 +195,31 @@ Can a variant pass the overall 98% call-rate rule and still fail this check?
 
 <details><summary>Show the answer</summary>
 
-Yes. Its few missing calls can be concentrated in one phenotype group.
+Yes. Its few missing calls can all fall in one group, for example only in the cases.
 
 </details>
 
 ### Files created
 
-`.missing`, the reviewed exclusion list and `s4-2_state.*`.
+The `.missing` file, the reviewed exclusion list and `s4-2_state.*`.
 
 ## 4.3 Allele frequency {#step-4-3}
 
 ### What we do
 
-Keep variants with minor allele frequency of at least 1% for the main array scan.
+We keep variants with a minor allele frequency of at least 1%. We use this rule for the main array scan.
 
 ### Why
 
-Minor allele frequency (MAF) is the frequency of the less common allele in the analysed sample. Rare alleles give sparse genotype cells and unstable ordinary logistic estimates. A 1% filter is a course analysis choice, not a definition of biological relevance. Frequencies depend on ancestry, sample selection and how chromosome copy number is handled.
+The minor allele frequency (MAF) is how often the less common allele appears in the samples we analyse. For example, if one allele is found in 3 of 100 copies, the MAF is 3%.
+
+A rare allele gives very few samples in some genotype groups. The ordinary [logistic regression](../docs/glossary.md#logistic-regression), the test we use later for association, is then unstable. A 1% filter is a choice made for this course. It does not define what is biologically important.
+
+Frequencies depend on [ancestry](../docs/glossary.md#ancestry), which is the geographic origin of a person's ancestors. They also depend on how the samples were selected. They depend on how PLINK counts chromosome copies too. For example, men have one X chromosome and women have two.
 
 ### You need
 
-State 4.2.
+The dataset from step 4.2, which we call state 4.2.
 
 ### Command
 
@@ -182,11 +235,21 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048
 ```
 
-`--maf 0.01` excludes variants below 1% minor allele frequency, using PLINK's chromosome-aware allele counts. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+`--maf 0.01` removes variants with a minor allele frequency below 1%, and PLINK counts chromosome copies correctly for each chromosome.
+
+`--pfile` selects the PLINK 2 input files.
+
+`--make-pgen` writes a new copy of the data in PLINK 2 format.
+
+`--out` sets the start of the names of the new files.
+
+`--threads 2` limits PLINK to two worker threads.
+
+`--memory 2048` sets the memory PLINK may use, in MiB.
 
 <details><summary>Show the expected result</summary>
 
-56,420 variants excluded from the observed frequency distribution; 239,019 remain. No dedicated list of rare artefacts was planted.
+56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -195,41 +258,51 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Sparse variants with limited information in this sample. It does not establish whether a rare allele is genuine or whether it would be analysable in a larger study.
+It finds sparse variants, which carry little information in this sample. It does not tell you whether a rare allele is real. It also does not tell you whether the variant could be analysed in a larger study.
 
 ### Quick check
 
-Can an allele's minor/major label change between populations?
+Can the minor and major label of an allele change between populations?
 
 <details><summary>Show the answer</summary>
 
-Yes. The label describes frequency in the sample, not a fixed property of the allele.
+Yes. The label describes how common the allele is in the sample. It is not a fixed property of the allele.
 
 </details>
 
 ### Files created
 
-`s4-3_state.*` and replay exclusion list.
+`s4-3_state.*` and the list of excluded variants that lets the course repeat this step.
 
 ## 4.4 Hardy-Weinberg and sample size {#step-4-4}
 
 ### What we do
 
-Calculate a control-only exact mid-p Hardy-Weinberg test and apply an explicit sample-size-aware screening rule.
+We run an exact Hardy–Weinberg test in the controls only, using the mid-p version. Then we apply a threshold that depends on the sample size.
 
 ### Why
 
-Hardy-Weinberg equilibrium (HWE) predicts genotype proportions a^2, 2a(1-a) and (1-a)^2 under random mating and other idealised assumptions. Here a is the frequency of one allele; it is not the HWE test p-value. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(-6 - 0.001 * max(0, n_control - 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.
+Hardy–Weinberg equilibrium (HWE) predicts how common each genotype should be. Take one allele with frequency a. Then the three genotypes should have the proportions a^2, 2a(1-a) and (1-a)^2. This holds if people mate at random and a few other simple conditions are true. Here a is an allele frequency. It is not the p-value of the test.
+
+A lack of [heterozygotes](../docs/glossary.md#heterozygosity) (people with two different alleles) can have three causes. It can come from genotype calling errors. It can come from parents who are relatives. It can come from a mix of populations in one sample ([population stratification](../docs/glossary.md#population-stratification)).
+
+We test the [autosomes](../docs/glossary.md#autosome) only (chromosomes 1 to 22) and use only the controls. In this way a real disease effect in the cases is less likely to cause a removal.
+
+The test is exact, which means it counts every possible outcome instead of using an approximation. An exact test on discrete counts is often too strict. The [mid-p](../docs/glossary.md#mid-p-value) version corrects part of this.
+
+A larger sample can detect smaller departures from HWE. So one fixed cutoff does not suit every study. Our rule is set before the analysis: 10^(-6 - 0.001 * max(0, n_control - 1000)). Here n_control is the number of controls with a call at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. With more controls, the cutoff becomes stricter.
+
+This rule is a clear teaching choice. It is not a universal recommended threshold. Before you use it elsewhere, compare the distributions and look at the excess or deficit of heterozygotes.
 
 ### You need
 
-State 4.3 and its PSAM phenotype; no association results are used to choose the cutoff.
+The dataset from step 4.3, which we call state 4.3, and its PSAM file. The PSAM file lists the samples and their phenotype. We do not use any association results to choose the cutoff.
 
 ### Command
 
@@ -257,11 +330,31 @@ bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls
 bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
 ```
 
-`--keep` restricts only the diagnostic call to controls; `--chr 1-22` excludes sex chromosomes from this HWE calculation. `--hardy midp` reports the exact mid-p statistic; R applies the displayed sample-size rule and `--exclude` filters the full case/control matrix. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+The first command runs the test and the second command removes the failing variants.
+
+`--keep` limits the test to the controls, and only the first command uses it.
+
+`--chr 1-22` keeps chromosomes 1 to 22 and leaves out the sex chromosomes for this test.
+
+`--hardy midp` reports the exact mid-p test.
+
+R then applies the sample-size rule to the mid-p values and makes the list of failing variants.
+
+`--exclude` removes the failing variants from the full set of cases and controls.
+
+`--pfile` selects the PLINK 2 input files.
+
+`--make-pgen` writes a new copy of the data in PLINK 2 format.
+
+`--out` sets the start of the names of the new files.
+
+`--threads 2` limits PLINK to two worker threads.
+
+`--memory 2048` sets the memory PLINK may use, in MiB.
 
 <details><summary>Show the expected result</summary>
 
-167 variants excluded, leaving 238,852. Strong planted errors are not the only failures: eight unplanted sites and seven altered duplicate copies also fail, while some mild errors survive. rs4988235, rs12913832 and rs1426654 leave here and cannot be used as surviving module 5 markers.
+167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -270,41 +363,47 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Calling errors and population mixture. The unplanted failures demonstrate why HWE failure is not proof of technical error, and why association loci cannot be rescued after seeing their p-values.
+It can reveal genotype calling errors and a mix of populations. The unplanted failures show that a HWE failure is not proof of a technical error. They also show that we must not rescue association loci after we have seen their p-values.
 
 ### Quick check
 
-Can a mixture of two groups, each in HWE but with different allele frequencies, show a heterozygote deficit when pooled?
+Two groups each follow HWE but have different allele frequencies. If we pool them, can we see a deficit of heterozygotes?
 
 <details><summary>Show the answer</summary>
 
-Yes. Pooling can produce a deficit even without genotyping error.
+Yes. Pooling can create a deficit even when there is no genotyping error.
 
 </details>
 
 ### Files created
 
-Control ID list, `.hardy`, exclusion list and `s4-4_state.*`.
+The list of control IDs, the `.hardy` file, the exclusion list and `s4-4_state.*`.
 
 ## 4.5 Sex chromosomes, MT and duplicated sites {#step-4-5}
 
 ### What we do
 
-Review implausible chromosome-specific calls and collapse consistent duplicate genomic entries.
+We review calls that are impossible for the [sex chromosomes](../docs/glossary.md#sex-chromosomes) X and Y and for mitochondrial DNA (MT). We also merge duplicated entries that describe the same variant.
 
 ### Why
 
-Non-PAR X in males, Y and mitochondrial DNA have different copy-number expectations from autosomes. The exercise screens excess heterozygous male X/MT calls and Y calls in recorded females, using a 1% site-level rule. Real interpretation requires deeper laboratory and karyotype review. Distinct array IDs can refer to the same chromosome, coordinate and allele pair. We replace IDs with chromosome:position:REF:ALT, keep one consistent copy and remove both when genotype copies conflict. The imported REF remains provisional unless independently validated against a reference genome.
+Men have one X chromosome and one Y chromosome. Women have two X chromosomes. A chromosome with a single copy in a person is called [haploid](../docs/glossary.md#haploid). Mitochondrial DNA ([MT](../docs/glossary.md#mitochondrial-dna)) is a small circular DNA that comes from the mother only, so it is also treated as haploid. So the expected genotypes differ from those on chromosomes 1 to 22.
+
+The X chromosome has two small regions that behave like autosomes. They are the [pseudoautosomal regions](../docs/glossary.md#pseudoautosomal-region) (PAR). Step 3.3 already split them from the rest of X. The rest is called non-PAR X.
+
+This step looks for three kinds of impossible calls. The first is a heterozygous call on non-PAR X in men. The second is a heterozygous call on MT. The third is any call on Y in people recorded as women. We use a 1% rule for each variant: we remove it if more than 1% of the relevant samples show an impossible call. A real interpretation needs more laboratory work and a review of the chromosome analysis of each person.
+
+The second task is duplicates. Different array IDs can describe the same chromosome, position and allele pair. A [duplicated variant](../docs/glossary.md#duplicate-variant) is such a repeated entry. We rename every variant as chromosome:position:REF:ALT. REF is the [reference allele](../docs/glossary.md#reference-allele), the version found in the reference genome. ALT is the other version, the alternative allele. We keep one copy of each duplicate if the genotypes of the copies agree. We remove both copies if the genotypes disagree. The imported REF is only provisional until someone checks it against a reference genome.
 
 ### You need
 
-State 4.4 with PAR splitting already performed at 3.3.
+The dataset from step 4.4, which we call state 4.4. Step 3.3 must already have split the PAR regions.
 
 ### Command
 
@@ -341,11 +440,33 @@ bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclu
 bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048
 ```
 
-`--chr X,Y,MT` selects these chromosomes for diagnosis; `--export A` writes additive allele counts. `--set-all-var-ids` uses @ for chromosome, # for position, $r for REF and $a for ALT. Quote the template in a terminal to preserve dollar signs (use double quotes on Windows cmd). `--rm-dup exclude-mismatch list` keeps one matching copy, excludes mismatched groups and writes duplicate diagnostics. `--pfile` selects the native input; `--make-pgen` writes a new copy; `--out` names its files. `--threads 2` limits worker threads. `--memory 2048` sets the workspace budget in MiB.
+The three commands do three jobs. The first exports the X, Y and MT calls so that R can check them. The second removes the variants that failed the check. The third renames the variants and handles the duplicates.
+
+`--chr X,Y,MT` selects the X, Y and mitochondrial chromosomes for the check.
+
+`--export A` writes the additive allele counts, which are the numbers 0, 1 or 2 for each sample and variant.
+
+`--exclude` removes the variants named in the list file.
+
+`--set-all-var-ids` renames every variant with a template, where @ is the chromosome, # is the position, $r is the REF allele and $a is the ALT allele.
+
+Put the template in quotes in a terminal, so that the dollar signs stay unchanged. On Windows cmd, use double quotes.
+
+`--rm-dup exclude-mismatch list` keeps one copy of duplicates that match, removes both copies when the genotypes differ, and writes a report of the duplicates.
+
+`--pfile` selects the PLINK 2 input files.
+
+`--make-pgen` writes a new copy of the data in PLINK 2 format.
+
+`--out` sets the start of the names of the new files.
+
+`--threads 2` limits PLINK to two worker threads.
+
+`--memory 2048` sets the memory PLINK may use, in MiB.
 
 <details><summary>Show the expected result</summary>
 
-33 chromosome-specific failures removed. Duplicate review removes 306 entries: one of each of 280 concordant pairs and both members of 13 discordant pairs. Final variant count is 238,513.
+33 variants with impossible calls on the sex chromosomes or MT are removed. The duplicate review removes 306 entries. It keeps one of each of the 280 matching pairs, and it removes both members of the 13 pairs that disagree. The final number of variants is 238,513.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -354,41 +475,43 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### What this check can reveal
 
-Implausible haploid calls, annotation duplication and discordant duplicate genotyping. An ID change does not validate reference alleles or confer a new biological interpretation.
+It can reveal impossible haploid calls, repeated entries in the array annotation and duplicates with different genotypes. Changing an ID does not check the reference alleles. It also does not give the variant a new biological meaning.
 
 ### Quick check
 
-Why are both copies of a discordant duplicate removed rather than keeping the copy with the nicer association p-value?
+Why do we remove both copies of a duplicate with different genotypes? Why do we not keep the copy with the better association p-value?
 
 <details><summary>Show the answer</summary>
 
-The genotype discrepancy is unresolved; association evidence must not choose which technical record is trusted.
+The difference between the genotypes is not resolved. Association results must not decide which technical record to trust.
 
 </details>
 
 ### Files created
 
-Chromosome export, exclusion list, duplicate reports and `s4-5_state.*`.
+The chromosome export, the exclusion list, the duplicate reports and `s4-5_state.*`.
 
 ## 4.6 Variant QC summary and checkpoint {#step-4-6}
 
 ### What we do
 
-Save the complete post-variant-QC boundary and review what the filters achieved.
+We save the complete dataset after variant QC. Then we review what the filters did.
 
 ### Why
 
-QC thresholds trade retained information against technical risk. Record counts, software, build, exclusions and known limitations so that a reader can reproduce the same state. The retained set is ready for population structure assessment, not automatically free from confounding.
+Every QC threshold is a trade. We keep more information, or we lower the technical risk. Record the counts, the software, the genome build, the exclusions and the known limits. Then another reader can rebuild the same state.
+
+The final set is ready for the study of population structure. It is not automatically free from confounding. Confounding means that another factor, such as ancestry, creates a false link between a variant and the disease.
 
 ### You need
 
-State 4.5 and intermediate exclusion records.
+The dataset from step 4.5, which we call state 4.5, and the records of the earlier exclusions.
 
 ### Command
 
@@ -405,7 +528,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Full module 4 boundary: 1,844 samples, 238,513 variants; counts and SHA-256 agree with the snapshot.
+The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.
@@ -414,20 +537,31 @@ The tested PLINK version is defined in `config.R` and recorded in
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).
+Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
 ### Quick check
 
-Which separate source of bias still needs explicit assessment before association?
+Which other source of bias must we still check before the association test?
 
 <details><summary>Show the answer</summary>
 
-Population structure and ancestry differences between cases and controls.
+Population structure, which means differences in ancestry between cases and controls.
 
 </details>
 
 ### Files created
 
-`s4-6_state.*`, full `checkpoints/4.6/state.*`, updated replay index and count table.
+`s4-6_state.*`, the full `checkpoints/4.6/state.*`, the updated replay index and the count table.
+
+## Module 4 recap {#module-4-recap}
+
+- Step 4.1 removed 801 variants with a call rate below 98%.
+- Step 4.2 removed 120 variants whose missing calls differed between cases and controls.
+- Step 4.3 removed 56,420 variants with a minor allele frequency below 1%.
+- Step 4.4 removed 167 variants that failed the Hardy–Weinberg test in the controls.
+- Step 4.5 removed 33 variants with impossible calls on X, Y or MT, and 306 duplicate entries.
+- You saved the module 4 checkpoint: 1,844 samples and 238,513 variants.
+
+**Next:** Module 5 studies population structure, to check that cases and controls have similar ancestry.
