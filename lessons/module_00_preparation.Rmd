@@ -266,7 +266,7 @@ The source project contains code and text. The encrypted package contains the da
 
 ### You need
 
-The complete project folder, R and the approved archive. For the author test, set `COURSE_WORK_DIR` to the existing external work folder before you use the local command below. `COURSE_WORK_DIR` is an [environment variable](../docs/glossary.md#environment-variable): a named setting outside R that holds a value, such as a folder path. The instructor gives you the password separately.
+The complete project folder, R and the approved archive. Save the archive (`course-data-2026.1.zip`) and its small file `MANIFEST.tsv` together in one folder, for example your Downloads folder. The instructor gives you the password separately.
 
 ### Command
 
@@ -276,23 +276,25 @@ Run the following commands in the RStudio console after you open the project. If
 source("R/package_setup.R")
 install_course_packages()
 source("R/course.R")
-# For the published release, after its approved URLs and checksums are configured:
-download_course_data()
+# Only after the public release is published: remove the # at the start of the next line.
+# download_course_data()
 ```
 
-For the local test, use this command instead. It makes no network download:
+The first run of `install_course_packages()` can take several minutes and print many lines. Wait until the `>` prompt returns.
+
+Until the public release exists, use this command. It reads the archive from your computer and makes no network download. Replace the text in quotes with the place where you saved the ZIP file. Write the path with forward slashes (/), also on Windows:
 
 ```{r s0-5_local, eval=FALSE}
 download_course_data(
-  zip_path = file.path(Sys.getenv("COURSE_WORK_DIR"), "release", "course-data-2026.1.zip")
+  zip_path = "C:/Users/yourname/Downloads/course-data-2026.1.zip"
 )
 ```
 
-The function `download_course_data` uses `getPass` to ask for a masked password. A prompt asks for the password. Type it and press Enter. You will not see the letters appear. Do not write the password in this notebook, in a shared script or in your command history. Students have no separate terminal command to decrypt the archive. Both routes use the same R helper and the `archive` package. You do not need to install 7-Zip.
+The file `MANIFEST.tsv` must be in the same folder as the ZIP file. The function `download_course_data` uses `getPass` to ask for a masked password. A prompt asks for the password. Type it and press Enter. You will not see the letters appear. Do not write the password in this notebook, in a shared script or in your command history. Students have no separate terminal command to decrypt the archive. Both routes use the same R helper and the `archive` package. You do not need to install 7-Zip.
 
 <details><summary>Show the expected result</summary>
 
-For the local stage 1 archive, R prints `Course data are ready: 55 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
+R prints `Course data are ready: 105 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
 
 </details>
 
@@ -405,7 +407,7 @@ bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20
 
 <details><summary>Show the expected result</summary>
 
-The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages.
+The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.
 
 </details>
 
@@ -450,6 +452,8 @@ A successful check at step 0.7. Keep the output files and the notebook together 
 Read the list of checkpoints that came with your package. This command changes no files:
 
 ```{r s0-8_progress}
+source("R/guided.R")
+cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 ```
 
@@ -457,7 +461,7 @@ Terminal equivalent: call the R helper through Rscript after you set the same pr
 
 <details><summary>Show the expected result</summary>
 
-Before you start the analysis, every state in the updated checkpoint index is `not verified`. Full genotype sets exist at 2.8, 3.8, 4.6 and 5.7. The other states are rebuilt from stored lists and transformations. Diagnostic and analysis files have their own small checkpoints. The original stage 1 test ZIP has 55 files and has not been changed. It uses an older layout, with full filesets only at 4.6 and 5.6. Other folders are reported as `reference lists only`. Use the updated staged package for the new main-path restart routes. Do not mix the two layouts.
+Before you start the analysis, every state in the updated checkpoint index is `not verified`. Full genotype sets exist at 2.8, 3.8, 4.6 and 5.7. The other states are rebuilt from stored lists and transformations. Diagnostic and analysis files have their own small checkpoints. The list has about 30 rows, one for each saved state.
 
 </details>
 
@@ -481,7 +485,7 @@ To restart step 4.2, which completed step's files do you need?
 
 - You found your operating system and processor, and installed R, RStudio and PLINK 2.
 - You downloaded the course project and the encrypted data, and checked them with SHA-256 checksums.
-- The local test archive reported `Course data are ready: 55 files verified.`
+- The archive reported `Course data are ready: 105 files verified.`
 - The setup check ran PLINK on 20 variants and printed `Preflight passed.`
 - The starting data have 2,016 sample wells and 299,523 variants, which represent 2,000 simulated people.
 - You learned the routine for every step: read, run, compare.
