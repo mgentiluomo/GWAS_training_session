@@ -12,7 +12,7 @@ the timings to the class and full-dataset runtimes. Complete the core walkthroug
 before choosing extensions. Keep commands, counts, plots and interpretations in
 a short lab notebook.
 
-## Lesson 1 — Files and quality control
+## Lesson 1: Files and quality control
 
 **Goal:** explain each input file, execute PLINK commands and account for exclusions.
 
@@ -30,7 +30,7 @@ a short lab notebook.
 **Evidence of learning:** Q1–Q3 in [lesson 1](../lessons/01_quality_control.Rmd),
 a count table and an explanation of at least one filtering decision.
 
-## Lesson 2 — PCA and the analysis cohort
+## Lesson 2: PCA and the analysis cohort
 
 **Goal:** read PCA plots and build covariates with explicit identifier matching
 and missing-data handling.
@@ -50,7 +50,7 @@ and missing-data handling.
 **Evidence of learning:** Q4–Q6 in [lesson 2](../lessons/02_population_structure.Rmd),
 annotated PCA plots and a sample list whose exclusions can be explained.
 
-## Lesson 3 — Association and interpretation
+## Lesson 3: Association and interpretation
 
 **Goal:** interpret additive logistic models, compare adjustment strategies and
 write a supported results note.
