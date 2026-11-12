@@ -21,6 +21,10 @@ working area is `C:/WEB_site/data_sources/codex_work/`.
 
 - Unicode regression: PLINK completed its frequency probe in `café_α_中文`.
   Only ASCII relative paths reached PLINK. The caller's working directory was restored.
+- Module 0: all executable preparation chunks and fixed block order passed on
+  Windows with R 4.5.2 and PLINK 2 b.1.4. The original input was checked as
+  2,016 wells and 299,523 variants. Password prompts and installer clicks remain
+  manual checks; no real URL download was attempted.
 
 ## Work in progress
 
