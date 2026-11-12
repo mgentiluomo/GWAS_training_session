@@ -9,15 +9,11 @@ output:
     theme: readable
 ---
 
-This course follows a simulated genotyping study from laboratory exports to
-association results. You do not need previous programming experience. Read one
-step, run its R command in the RStudio console, and compare the result before
-continuing. Keep your computer's language and decimal settings as they are.
+This course follows a simulated study of [genotypes](../docs/glossary.md#genotype) (the DNA letters a person carries at chosen positions). It goes from laboratory files to [association](../docs/glossary.md#association) results. An association is a statistical link between a DNA difference and a trait. All data are simulated by a computer program, so they describe no real person. You do not need any programming experience. Read one step, run its command in the [console](../docs/glossary.md#console) of [RStudio](../docs/glossary.md#rstudio), and compare your result with the expected result. Then continue with the next step. Keep your computer's language and decimal settings as they are.
 
-Validation: executable preparation chunks passed on Windows. Installer actions and the masked RStudio prompt remain manual checks.
+Validation: the R commands in this module ran without errors on Windows. The software installers and the password prompt in RStudio are checked by hand.
 
-This notebook is the source for the guided preparation module. The older
-`01_quality_control.Rmd` belongs to a separate, smaller demonstration.
+This [notebook](../docs/glossary.md#notebook) is the source of the guided preparation module. A notebook is a file that mixes text and R commands. The older file `01_quality_control.Rmd` is a separate, smaller demonstration.
 
 ```{r module0_knit_root, include=FALSE}
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -25,49 +21,55 @@ if (requireNamespace("knitr", quietly = TRUE)) {
 }
 ```
 
+## Module 0 at a glance {#module-0-overview}
+
+**What you will do.** You will install three free programs: [R](../docs/glossary.md#r) (the language that runs our commands), RStudio (a window that makes R easier to use) and [PLINK 2](../docs/glossary.md#plink-2) (a program that analyses genotype files). You will download the course files and the course data. Then you will run a setup check that shows your computer is ready.
+
+**What you will learn.**
+
+- How to find out which system and processor your computer has.
+- How to install R, RStudio and PLINK 2.
+- How to open a project and run a command in the console.
+- Why checksums and a setup check protect your work.
+- The routine you will use in every step: read, run, compare.
+
+**How long it takes.** About 90 minutes. The slowest step is 0.5, because the data archive is large and the R packages must be installed.
+
 ## 0.1 What you need {#step-0-1}
 
 ### What we do
 
-Prepare a computer, a project folder and the tools used throughout the course.
+Prepare a computer, a project folder and the tools used in the whole course. In this step you only find out which system and processor you have.
+
+You can see this without R. On Windows, open Settings, then System, then About, and read "System type". On a Mac, click the Apple menu, then About This Mac. A line "Chip" with a name such as Apple M1 means Apple Silicon. A line "Processor" means an Intel Mac.
 
 ### Why
 
-R is the language that runs our commands. RStudio provides a console, file
-browser and editor around R. PLINK 2 is a separate program that processes
-genotypes. A genotype records the alleles observed at a DNA site. R starts
-PLINK for you, but installing R does not install PLINK.
+R is the language that runs our commands. RStudio gives you a console, a file browser and an editor around R. PLINK 2 is a separate program that processes genotypes. A genotype records the [alleles](../docs/glossary.md#allele) found at one DNA site. An allele is one version of the DNA letter at that site. R starts PLINK for you. Installing R does not install PLINK.
 
 ### You need
 
-A Windows, macOS or Linux computer; an internet connection for software and
-the approved data download; and a writable folder. The local data test does
-not require a network download. Keep space for the encrypted archive, an
-extracted copy and intermediate results. Required space grows as you work.
+A Windows, macOS or Linux computer. You need an internet connection to download the software and the approved data. You also need a folder where you can save files. The local data test does not need a network download. Keep free space for three things: the [encrypted archive](../docs/glossary.md#encrypted-archive) (a locked data file that needs a password), an extracted copy of it, and your results. The space you need grows as you work.
 
 ### Command
 
-Once R is installed, this safe command identifies your operating system:
+Once R is installed, this safe command shows your operating system:
 
 ```{r s0-1_system}
 Sys.info()[c("sysname", "release", "machine")]
 ```
 
-Terminal equivalent: `Rscript -e "print(Sys.info())"`. `-e` evaluates the R
-expression in quotes. Do not paste terminal commands into the R console.
+Terminal equivalent: `Rscript -e "print(Sys.info())"`. A [terminal](../docs/glossary.md#terminal) is a window where you type commands for the computer, outside R. The option `-e` tells Rscript to run the R expression in quotes. Do not paste terminal commands into the R console.
 
 <details><summary>Show the expected result</summary>
 
-A named list of system information: Windows, Darwin (macOS), or Linux, with
-your own system release and processor. These values depend on your computer.
-They are not genotype counts.
+R prints three named values. The value `sysname` is Windows, Darwin (macOS) or Linux. The value `release` is the version of your system. The value `machine` is your processor type. These values depend on your computer. They are not genotype counts.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If `Sys.info()` is not recognised, check that you are typing in the R console,
-which normally displays `>`. Continue with step 0.2 if R is not installed yet.
+If R says that `Sys.info()` is not recognised, check where you are typing. You must type in the R console, which normally shows `>` at the start of the line. If R is not installed yet, continue with step 0.2.
 
 </details>
 
@@ -85,44 +87,43 @@ None.
 
 ### What we do
 
-Install R from [CRAN](https://cran.r-project.org/). Select your operating
-system and its installation package. On Linux, follow CRAN's instructions for
-your distribution; package installation may require an administrator.
+Install R from [CRAN](https://cran.r-project.org/), the official website for R. Follow these actions:
+
+1. Open the CRAN page. Click the link for your system: "Download R for Windows", "Download R for macOS" or "Download R for Linux".
+2. On Windows, click "base" (or "install R for the first time"). Then click the link at the top that starts with "Download R" and ends with "for Windows".
+3. On macOS, click the `.pkg` file for your processor. Use the `arm64` file for Apple Silicon. Use the `x86_64` file for an Intel Mac. File names on the page can change a little.
+4. On Linux, follow the CRAN instructions for your distribution. Installing packages may need an administrator.
+5. Open the downloaded file. Accept the default choices. Click "Next" on Windows or "Continue" on macOS until the installer ends. If the computer asks for permission or a password, give it.
+
+After the installation you should see a new program called R. On Windows it is in the Start menu. On macOS it is in the Applications folder.
 
 ### Why
 
-The R interpreter reads the commands in the notebooks. A package adds
-functions to R; packages do not replace R itself.
+R reads the commands in the notebooks and runs them. An [R package](../docs/glossary.md#r-package) is an add-on that gives R more functions. Packages do not replace R itself.
 
 ### You need
 
-The system and processor identified at 0.1. On Apple Silicon use the ARM64
-build; Intel Macs use the Intel build. Do not mix processor builds.
+The system and processor you found at step 0.1. On a Mac with Apple Silicon, use the ARM64 build. On an Intel Mac, use the Intel build. Do not mix the two.
 
 ### Command
 
-Open R after installation and run:
+Open R from the Start menu or the Applications folder. A window with a `>` prompt appears. Type this command and press Enter:
 
 ```{r s0-2_r_version}
 R.version.string
 ```
 
-Terminal equivalent: `Rscript --version`. `--version` prints the installed
-version without running an analysis. If the terminal cannot find Rscript but
-RStudio can run R, use the R console; terminal PATH setup is not required here.
+Terminal equivalent: `Rscript --version`. The option `--version` prints the installed version without running an analysis. If the terminal cannot find `Rscript` but RStudio can run R, use the R console. You do not need to set up the terminal's PATH (the list of folders where it looks for programs) here.
 
 <details><summary>Show the expected result</summary>
 
-A line beginning `R version`. The version on your computer may differ from
-the Windows validation environment, R 4.5.2. Ubuntu extraction was also tested
-by the author using R 4.6.1.
+R prints one line that begins `R version`. Your version may differ from the Windows validation environment, which used R 4.5.2. The author also tested Ubuntu extraction with R 4.6.1.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If installation is blocked, ask the instructor or your institution's support
-team for an approved installation. Do not change your system language.
+If your computer blocks the installation, ask the instructor or your institution's support team for an approved installation. Do not change your system language.
 
 </details>
 
@@ -140,41 +141,41 @@ The R installer creates software files outside this course project.
 
 ### What we do
 
-Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it.
-Choose the build for your operating system. R must already be installed.
+Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:
+
+1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.
+2. Open the installer. On Windows, accept the default choices and click "Next" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.
+3. Start RStudio from the Start menu or the Applications folder.
+
+You should see a window with several panes (areas). One pane is called "Console". It shows a `>` prompt.
 
 ### Why
 
-The console runs commands now. The editor keeps commands in a notebook so you
-can read and rerun them later. R objects in memory disappear when R restarts;
-saved output files remain on disk.
+The console runs one command at a time. The editor keeps commands in a notebook, so you can read and rerun them later. R holds values, such as loaded data, in memory. These values disappear when R restarts. Files saved on disk remain.
 
 ### You need
 
-A working R installation from 0.2 and the RStudio installer.
+A working R installation from step 0.2 and the RStudio installer.
 
 ### Command
 
-In the RStudio console, run this small calculation:
+In the RStudio console, type this small calculation and press Enter:
 
 ```{r s0-3_console}
 2 + 3
 ```
 
-Terminal equivalent: `Rscript -e "print(2 + 3)"`. The console and terminal
-use the same R calculation. RStudio itself is opened through your applications menu.
+Terminal equivalent: `Rscript -e "print(2 + 3)"`. The console and the terminal use the same R calculation. You open RStudio itself from your applications menu.
 
 <details><summary>Show the expected result</summary>
 
-`[1] 5`. The `[1]` labels the first value printed; it is not part of the answer.
+`[1] 5`. The `[1]` marks the first value printed. It is not part of the answer.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If RStudio cannot find R, check that R was installed for the correct processor.
-Restart RStudio after installing R. A `+` prompt usually means an unfinished
-command; press Escape and enter the complete command again.
+If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, R is waiting for the rest of a command. Press Escape and type the complete command again.
 
 </details>
 
@@ -186,31 +187,33 @@ After restarting R, should you expect an unsaved object to remain in memory?
 
 ### Files created
 
-RStudio software files. No course data are created by the calculation.
+RStudio software files. The calculation creates no course data.
 
 ## 0.4 Download PLINK 2 {#step-0-4}
 
 ### What we do
 
-Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/).
-Extract the executable into the project's `bin/` folder. The executable is
-`plink2.exe` on Windows and `plink2` on macOS or Linux. Extract it first;
-the ZIP file is not the executable.
+Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/). A build is a version of the program made for one system and processor. Follow these actions:
+
+1. Open the page. It lists several downloads. Choose the build whose name matches your system and processor from step 0.1. The names on the page can change.
+2. Save the ZIP file. A ZIP file is one compressed file that holds other files.
+3. Extract the ZIP file. On Windows, right-click it, choose "Extract All", then click "Extract". On macOS, double-click it.
+4. Inside you find the program. It is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](../docs/glossary.md#executable), the file your computer can run.
+5. Copy the executable into the `bin/` folder of the course project. You create the project at step 0.5.
+
+The ZIP file is not the executable, so extract it first. When you finish, you should see `plink2.exe` or `plink2` inside the `bin` folder.
 
 ### Why
 
-PLINK 2 reads the genotype formats and computes QC and association statistics.
-PLINK 1.9 is a different program. Tested version information is held once in
-`config.R`; the setup check reports your version and warns if it differs.
+PLINK 2 reads the genotype file formats. It computes [quality control](../docs/glossary.md#quality-control) (QC) and association statistics. QC means checks that find samples or data that cannot be trusted. PLINK 1.9 is a different program, so it does not replace PLINK 2. The tested version is stored in one place, the settings file `config.R`. The setup check reports your version and warns you if it differs.
 
 ### You need
 
-Your system and processor from 0.1 and the extracted project from 0.5.
-You may download the executable first and copy it after extracting the project.
+Your system and processor from step 0.1, and the extracted project from step 0.5. You may download the executable first and copy it after you extract the project.
 
 ### Command
 
-After opening the project at 0.6, read the configured tested version:
+You can run this command after you open the project at step 0.6. If the project is not open yet, skip it now and come back later. It reads the tested PLINK 2 version from the settings file:
 
 ```{r s0-4_plink_setting}
 settings <- new.env(parent = baseenv())
@@ -218,24 +221,17 @@ sys.source("config.R", settings)
 settings$course_settings$tested_plink_version
 ```
 
-Terminal equivalent for checking the executable: `bin/plink2 --version`
-(Windows: `bin\plink2.exe --version`). `--version` requests the version string;
-it does not read data. The R setup check performs this call for you at 0.7.
+Terminal equivalent for checking the executable: `bin/plink2 --version` (Windows: `bin\plink2.exe --version`). The option `--version` asks PLINK 2 to print its version. It does not read data. The R setup check at step 0.7 makes this call for you.
 
 <details><summary>Show the expected result</summary>
 
-The configured tested PLINK 2 version is printed. At 0.7 the installed binary
-must identify itself as PLINK v2. A newer version produces a warning rather
-than an automatic failure solely because its version differs.
+R prints the PLINK 2 version used to test the course. At step 0.7 your own executable must identify itself as PLINK v2. A newer version gives a warning. A different version number alone does not make the check fail.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-On macOS or Linux an extracted executable may need execute permission. In a
-terminal at the project root, `chmod u+x bin/plink2` grants your user execute
-permission for that file. If institutional security blocks it, ask support.
-Do not disable computer security controls.
+On macOS or Linux, the extracted file may lack permission to run. Open a terminal in the project folder (the project root). Type `chmod u+x bin/plink2`. This command gives your user permission to run that file. If your institution's security blocks it, ask support. Do not switch off computer security controls.
 
 </details>
 
@@ -247,33 +243,34 @@ Can a file named `plink2.zip` be used as the executable?
 
 ### Files created
 
-`bin/plink2.exe` or `bin/plink2`, outside version control.
+`bin/plink2.exe` or `bin/plink2`. It stays outside [Git](../docs/glossary.md#git), the tool that records versions of the project files.
 
 ## 0.5 Download the course package {#step-0-5}
 
 ### What we do
 
-Download and extract the whole source project from its GitHub branch. Then
-obtain the matching encrypted data archive through the approved course channel.
-The GitHub Release does not exist yet: the current archive is a local author
-test. Its checksums are marked as test values in `config.R`.
+Download and extract the whole source project from its GitHub branch. Then get the matching encrypted data archive through the approved course channel. Follow these actions for the project:
+
+1. Open the GitHub page of the course branch that your instructor gives you. GitHub is a website that stores project files. A branch is one line of versions of a project.
+2. Click the green "Code" button. Then click "Download ZIP".
+3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.
+4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.
+
+Keep the whole folder together. Do not move single files out of it.
+
+The GitHub Release (the page that will hold the data archive) does not exist yet. The current archive is a local author test. Its checksums are marked as test values in `config.R`.
 
 ### Why
 
-The source project contains code and text. The encrypted package contains
-data. Checksums detect changed downloads; the password decrypts the archive.
-A correct password does not replace checksum verification.
+The source project contains code and text. The encrypted package contains the data. A [checksum](../docs/glossary.md#checksum) is a short code calculated from a file. If the file changes, the code changes. Checksums detect changed or damaged downloads. The password decrypts the archive. A correct password does not replace the checksum check.
 
 ### You need
 
-The complete project folder, R and the approved archive. For the author test,
-set `COURSE_WORK_DIR` to the existing external work folder before using the
-local command below. The instructor supplies the password separately.
+The complete project folder, R and the approved archive. For the author test, set `COURSE_WORK_DIR` to the existing external work folder before you use the local command below. `COURSE_WORK_DIR` is an [environment variable](../docs/glossary.md#environment-variable): a named setting outside R that holds a value, such as a folder path. The instructor gives you the password separately.
 
 ### Command
 
-Run the following interactively after opening the project. It is not run
-automatically when rendering this notebook:
+Run the following commands in the RStudio console after you open the project. If you have not opened it yet, do step 0.6 first and then return here. The commands do not run automatically when this notebook is rendered:
 
 ```{r s0-5_data, eval=FALSE}
 source("R/package_setup.R")
@@ -283,7 +280,7 @@ source("R/course.R")
 download_course_data()
 ```
 
-For the local test, use this instead; it makes no network download:
+For the local test, use this command instead. It makes no network download:
 
 ```{r s0-5_local, eval=FALSE}
 download_course_data(
@@ -291,26 +288,17 @@ download_course_data(
 )
 ```
 
-`download_course_data` uses `getPass` to ask for a masked password. Do not
-write the password in this notebook, a shared script or your command history.
-There is no separate terminal decryption command for students. Both routes
-use the same R helper and `archive`; no 7-Zip installation is required.
+The function `download_course_data` uses `getPass` to ask for a masked password. A prompt asks for the password. Type it and press Enter. You will not see the letters appear. Do not write the password in this notebook, in a shared script or in your command history. Students have no separate terminal command to decrypt the archive. Both routes use the same R helper and the `archive` package. You do not need to install 7-Zip.
 
 <details><summary>Show the expected result</summary>
 
-For the local stage 1 archive: `Course data are ready: 55 files verified.`
-The destination is `data/course/`. The archive and sidecar manifest must both
-match their configured SHA-256 values; all extracted payload files are checked.
+For the local stage 1 archive, R prints `Course data are ready: 55 files verified.` The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-An empty release URL means the public release has not been configured. Use
-the authorised local test or ask the instructor. A wrong password produces a
-message asking you to check typing and contact the instructor if needed.
-Never bypass a checksum failure. An existing destination is refused to protect
-your work. See [troubleshooting](../docs/troubleshooting.md).
+If the release address is empty, the public release is not set up yet. Use the authorised local test or ask the instructor. If the password is wrong, R shows a message that asks you to check your typing and to contact the instructor if needed. Never bypass a checksum failure. If the destination folder already exists, R refuses to continue. This protects your work. See [troubleshooting](../docs/troubleshooting.md).
 
 </details>
 
@@ -322,24 +310,25 @@ If the checksum differs but the password is accepted, should you use that downlo
 
 ### Files created
 
-Verified data under `data/course/`. Temporary download and extraction files
-are removed. Data and passwords are never added to Git.
+Verified data in `data/course/`. R removes the temporary download and extraction files. Data and passwords are never added to Git.
 
 ## 0.6 Open the project {#step-0-6}
 
 ### What we do
 
-Open `GWAS_training_session.Rproj` from the extracted folder. In RStudio,
-open this notebook from `lessons/`. Run commands in the console at the project root.
+Open the project, then open this notebook. Follow these actions:
+
+1. In the extracted folder, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.
+2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.
+3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.
 
 ### Why
 
-Relative paths are interpreted from the working directory. Keeping one project
-root avoids copying your personal absolute paths into every command.
+A [relative path](../docs/glossary.md#relative-path) gives the place of a file starting from the working directory. The working directory is the folder where R looks first. One project root means you never copy your personal full paths into commands.
 
 ### You need
 
-The complete extracted project from 0.5, not an individual downloaded notebook.
+The complete extracted project from step 0.5, not one downloaded notebook.
 
 ### Command
 
@@ -348,21 +337,17 @@ getwd()
 stopifnot(file.exists("config.R"), file.exists("R/course.R"))
 ```
 
-Terminal equivalent: from the project directory, run
-`Rscript -e "stopifnot(file.exists('config.R'))"`. `stopifnot` stops when a
-required condition is false. No output means this check passed.
+Terminal equivalent: from the project directory, run `Rscript -e "stopifnot(file.exists('config.R'))"`. The function `stopifnot` stops with an error when a required condition is false. If the check passes, it prints nothing.
 
 <details><summary>Show the expected result</summary>
 
-Your project folder is printed. The file checks finish without an error.
-Your personal folder path will differ from the author's path.
+R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-If `config.R` is absent, reopen the project from the extracted source folder.
-Do not create a blank replacement or rename a downloaded HTML page to `.R`.
+If `config.R` is missing, close RStudio and open the project again from the extracted source folder. Do not create an empty replacement file. Do not rename a downloaded HTML page to `.R`.
 
 </details>
 
@@ -374,26 +359,21 @@ Does a relative path starting `R/` refer to a folder on every computer's C drive
 
 ### Files created
 
-RStudio may create local project settings under `.Rproj.user/`; they are ignored by Git.
+RStudio may create local project settings in `.Rproj.user/`. Git ignores them.
 
 ## 0.7 Run the setup check {#step-0-7}
 
 ### What we do
 
-Check packages, locale, genotype file integrity and a small PLINK read/write operation.
+Run the setup check. It tests the R packages, the [locale](../docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](../docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`
 
 ### Why
 
-A program can print its version while still failing to read data or write
-results in a path containing spaces and non-English characters. Testing a
-real operation catches these failures before a long analysis.
+A program can print its version and still fail to read data. It can also fail to write results in a folder path that has spaces or non-English letters. A test with a real operation finds these failures before a long analysis.
 
 ### You need
 
-The executable from 0.4 and verified data from 0.5. The standard guided folder
-is `data/course/`. For an existing external installation, `COURSE_DATA_DIR`
-may identify the extracted data and `COURSE_OUTPUT_DIR` a separate output folder.
-These optional environment variables contain paths, never passwords.
+The executable from step 0.4 and the verified data from step 0.5. The standard guided data folder is `data/course/`. Some people use an existing external installation. For them, the environment variable `COURSE_DATA_DIR` can name the extracted data, and `COURSE_OUTPUT_DIR` can name a separate output folder. These optional variables contain paths and never passwords.
 
 ### Command
 
@@ -401,12 +381,19 @@ These optional environment variables contain paths, never passwords.
 source("scripts/preflight.R")
 ```
 
-Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. `--vanilla`
-starts without saved workspaces and startup files. Internally the R helper runs PLINK with these options. `--bfile` selects the
-input BED/BIM/FAM prefix. `--autosome` selects autosomal sites.
-`--thin-count 20` selects a small subset. `--seed 20261111` makes sampling
-repeatable. `--freq` reports allele frequencies. `--out` sets the output prefix. The exact command,
-including your paths and resource settings, is printed and recorded.
+Terminal equivalent: `Rscript --vanilla scripts/preflight.R`. The option `--vanilla` starts R without saved workspaces and startup files. Inside the setup check, the R helper runs PLINK with these options. The exact command, with your paths and resource settings, is printed and recorded.
+
+- `--bfile` selects the input files by their shared name prefix. The prefix covers files in the [BED/BIM/FAM](../docs/glossary.md#bed-bim-fam) format.
+
+- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22.
+
+- `--thin-count 20` keeps a small subset of 20 variants, chosen at random.
+
+- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable.
+
+- `--freq` reports allele frequencies, which show how common each allele is.
+
+- `--out` sets the prefix of the output files.
 
 For the standard project layout, the plain PLINK command is:
 
@@ -414,28 +401,17 @@ For the standard project layout, the plain PLINK command is:
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048
 ```
 
-`--threads 2` limits worker threads; `--memory 2048` sets the main workspace
-budget in MiB. On Windows the executable is `bin\plink2.exe`. The helper's
-regression probe intentionally uses a non-English path and translates it safely.
+`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time; `--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes). On Windows, the executable is `bin\plink2.exe`. The helper also runs a second test on purpose, with a folder name that has non-English letters. It translates that path in a safe way.
 
 <details><summary>Show the expected result</summary>
 
-The guided starting data have 2,016 sample wells and 299,523 variants. Wells
-include replicates; there are 2,000 simulated people. PLINK completes the
-20-variant frequency probe and R prints `Preflight passed. Report:` followed
-by the report path. The package installation check may print additional messages.
+The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. The setup check explains unavailable packages or a
-missing PLINK binary. On Windows it clears inherited locale requests that R
-cannot use, for this session only; startup warnings can appear before the
-script has a chance to run. Your Windows language stays unchanged. On Linux,
-the package preparation selects matching Posit binaries where available and
-explains development libraries if source installation is needed. Do not run
-later analytical steps until the setup check succeeds.
+Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need.
 
 </details>
 
@@ -447,59 +423,47 @@ Why does the setup check write a frequency report rather than only print a versi
 
 ### Files created
 
-`results/guided/software_versions.txt`, `results/guided/preflight.txt` and
-PLINK probe reports under its `path check/` folder. If `COURSE_OUTPUT_DIR` is
-set, the same files are written there instead. No source input is changed.
+`results/guided/software_versions.txt`, `results/guided/preflight.txt` and PLINK test reports in its `path check/` folder. If `COURSE_OUTPUT_DIR` is set, the same files go there instead. No source input is changed.
 
 ## 0.8 How to use this guide {#step-0-8}
 
 ### What we do
 
-Use the same reading, running and checking routine at every step.
+Use the same routine at every step: read, run, compare. Follow these actions:
+
+1. Read "What we do", "Why" and "You need".
+2. Run the command in the console.
+3. Open "Show the expected result" and compare it with your result.
+4. If your result differs, open "If something goes wrong".
+5. Answer the quick check.
 
 ### Why
 
-Running all commands at once makes the first mistake harder to locate.
-Saving files gives you a route back after a restart without relying on an R workspace.
+If you run all commands at once, the first mistake is hard to find. Saved files give you a way back after a restart. You do not depend on the R workspace, which is lost when R restarts.
 
 ### You need
 
-A successful check at 0.7. Keep the output files and the notebook together in
-their documented locations. The [glossary](../docs/glossary.md) explains terms
-used in the course, including quality control, alleles and association.
+A successful check at step 0.7. Keep the output files and the notebook together in their documented places. The [glossary](../docs/glossary.md) explains the terms used in the course, including quality control, alleles and association.
 
 ### Command
 
-Read your supplied checkpoint inventory without changing any files:
+Read the list of checkpoints that came with your package. This command changes no files:
 
 ```{r s0-8_progress}
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 ```
 
-Terminal equivalent: invoke the R helper through Rscript after setting the
-same project paths. There is no PLINK command for reporting course progress.
-`check_step("3.2")` compares that step with a supplied checkpoint;
-`restore_checkpoint("3.2")` restores step 3.1 so that you can restart 3.2.
-Both protect existing output folders.
+Terminal equivalent: call the R helper through Rscript after you set the same project paths. There is no PLINK command that reports course progress. A [checkpoint](../docs/glossary.md#checkpoint) is a saved state of the course files at the end of a step. The helper `check_step("3.2")` compares step 3.2 with a supplied checkpoint. The helper `restore_checkpoint("3.2")` rebuilds the state after step 3.1, so that you can restart step 3.2. Both protect existing output folders.
 
 <details><summary>Show the expected result</summary>
 
-Before analysis, states in the updated checkpoint index are `not verified`.
-Full genotype boundaries are 2.8, 3.8, 4.6 and 5.7; intermediate states are
-reconstructed from stored lists and transformations. Diagnostic and analysis
-files have separate small checkpoints. The unchanged original 55-file stage 1
-test ZIP uses the older layout: full filesets only at 4.6 and 5.6, with other
-folders reported as `reference lists only`. Use the updated staged package for
-the new main-path restart routes; do not mix the two layouts.
+Before you start the analysis, every state in the updated checkpoint index is `not verified`. Full genotype sets exist at 2.8, 3.8, 4.6 and 5.7. The other states are rebuilt from stored lists and transformations. Diagnostic and analysis files have their own small checkpoints. The original stage 1 test ZIP has 55 files and has not been changed. It uses an older layout, with full filesets only at 4.6 and 5.6. Other folders are reported as `reference lists only`. Use the updated staged package for the new main-path restart routes. Do not mix the two layouts.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
-A missing checkpoint is not evidence that you failed the analysis. It can mean
-the course package does not supply the required baseline, lists or index. Ask
-for the matching updated package; do not mix versions or claim that copying
-a list alone recreated genotypes.
+A missing checkpoint does not mean that you failed the analysis. The course package may not supply the baseline, lists or index that the checkpoint needs. Ask for the matching updated package. Do not mix versions. A copied list alone does not recreate the genotypes.
 
 </details>
 
@@ -511,4 +475,15 @@ To restart step 4.2, which completed step's files do you need?
 
 ### Files created
 
-None by `where_am_i`. Continue to module 1, which explains how the array data arise.
+`where_am_i` creates no files. Continue to module 1, which explains how the array data arise.
+
+## Module 0 recap {#module-0-recap}
+
+- You found your operating system and processor, and installed R, RStudio and PLINK 2.
+- You downloaded the course project and the encrypted data, and checked them with SHA-256 checksums.
+- The local test archive reported `Course data are ready: 55 files verified.`
+- The setup check ran PLINK on 20 variants and printed `Preflight passed.`
+- The starting data have 2,016 sample wells and 299,523 variants, which represent 2,000 simulated people.
+- You learned the routine for every step: read, run, compare.
+
+**Next:** Module 1 explains how the array data arise, from a DNA sample to a scanned chip.
