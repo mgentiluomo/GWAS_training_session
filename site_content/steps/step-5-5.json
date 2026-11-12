@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
+  "source_sha256": "35578e2340641fe333d6c6a6bc43ddd63819778c767cd55ec3c7a0a3c48d1e82",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a plot of the first two reference axes. Each reference group has its own label and symbol, and the study samples are added on top.",
@@ -40,6 +40,24 @@
       "asset": null,
       "gemini_prompt": "Create a schematic reference PCA beside a projection PCA, with a clear legend explaining fixed reference axes, arbitrary PC signs and study projection. Label all axes; use both shapes and a colour-blind-safe palette. Do not reproduce individual data points or infer ethnic identity.",
       "alt_text": "Reference samples form labelled genetic-variation clusters; most simulated study samples overlap the European reference pattern.",
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s5-5_saved_plot_preview_windows.png",
+      "platform": "windows",
+      "placement": "expected_result",
+      "alt_text": "Saved reference PCA image opened from RStudio Files on Windows, showing labelled axes and reference groups.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s5-5_saved_plot_preview_macos.png",
+      "platform": "macos",
+      "placement": "expected_result",
+      "alt_text": "Saved reference PCA image opened from RStudio Files on macOS, showing labelled axes and reference groups.",
+      "asset": null,
       "reviewed": false
     }
   ]

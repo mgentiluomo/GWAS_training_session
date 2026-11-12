@@ -6,7 +6,7 @@
   "anchor": "step-0-6",
   "title": "Open the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9",
+  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the folder you extracted or cloned at step 0.5, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.",
@@ -32,5 +32,24 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-6_project_panes_windows.png",
+      "platform": "windows",
+      "placement": "what_we_do",
+      "alt_text": "Course project open in RStudio on Windows, with the lesson in Source beside Console and Files.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-6_project_panes_macos.png",
+      "platform": "macos",
+      "placement": "what_we_do",
+      "alt_text": "Course project open in RStudio on macOS, with the lesson in Source beside Console and Files.",
+      "asset": null,
+      "reviewed": false
+    }
+  ]
 }

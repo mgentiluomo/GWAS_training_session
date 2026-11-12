@@ -6,7 +6,7 @@
   "anchor": "step-5-3",
   "title": "Match build, position and alleles",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
+  "source_sha256": "35578e2340641fe333d6c6a6bc43ddd63819778c767cd55ec3c7a0a3c48d1e82",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Check that the shared variants are really the same variants in both files, before the projection.",

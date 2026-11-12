@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import shlex
 
@@ -14,6 +14,7 @@ HEADING = re.compile(r"^## .*$", re.M)
 OVERVIEW = re.compile(r"^## Module (\d+) at a glance \{#module-\d+-overview\}\s*$", re.M)
 RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
+SCREENSHOT = re.compile(r"<!-- screenshot:\s*(.*?)\s*-->", re.S)
 BLOCKS = [
     ("what_we_do", "### What we do"), ("why", "### Why"),
     ("you_need", "### You need"), ("command", "### Command"),
@@ -78,6 +79,30 @@ def flag_explanation(flag: str, text: str) -> str | None:
     return None
 
 
+def screenshot_figures(body: str, root: Path = ROOT) -> list[dict]:
+    """Read screenshot declarations without creating images or broken asset links."""
+    figures = []
+    seen = set()
+    for match in SCREENSHOT.finditer(body):
+        spec = json.loads(match.group(1))
+        required = {"kind", "asset_path", "platform", "placement", "alt_text"}
+        if not isinstance(spec, dict) or set(spec) != required or not all(
+                isinstance(value, str) and value.strip() for value in spec.values()):
+            raise ValueError("A screenshot needs kind, asset_path, platform, placement and alt_text.")
+        path = PurePosixPath(spec["asset_path"])
+        if (spec["kind"] != "screenshot" or spec["platform"] not in {"windows", "macos"} or
+                spec["placement"] not in {name for name, _ in BLOCKS} or
+                path.is_absolute() or ".." in path.parts or "\\" in spec["asset_path"] or
+                path.parts[:2] != ("Figures", "screenshots") or path.suffix != ".png"):
+            raise ValueError("A screenshot needs a local PNG path under Figures/screenshots and a valid platform and block.")
+        candidate = (root / path).resolve()
+        if not candidate.is_relative_to(root.resolve()) or spec["asset_path"] in seen:
+            raise ValueError("Screenshot paths must stay inside the repository and be unique within a step.")
+        seen.add(spec["asset_path"])
+        figures.append({**spec, "asset": spec["asset_path"] if candidate.is_file() else None, "reviewed": False})
+    return figures
+
+
 def export_steps(root: Path = ROOT) -> list[dict]:
     records = []
     for path in notebook_paths(root):
@@ -120,7 +145,8 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             blocks["expected_result"] = CHUNK.sub("", blocks["expected_result"]).strip()
             figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\s*-->|\n\n|$)", body, re.S)
             figures = []
-            if figure_prompt or ".png" in blocks["command"]:
+            command_text = re.sub(r"<!--.*?-->", "", blocks["command"], flags=re.S)
+            if figure_prompt or ".png" in command_text:
                 prompt = figure_prompt.group(1).strip() if figure_prompt else (
                     f"Create a labelled teaching schematic for {match.group(3)}. "
                     "Use shapes and text as well as colour. Do not invent numeric course results, "
@@ -128,6 +154,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                 alt = re.search(r'fig[.]alt="([^"]+)"', body)
                 figures.append({"kind": "placeholder", "asset": None, "gemini_prompt": prompt,
                                 "alt_text": alt.group(1) if alt else f"Teaching schematic: {match.group(3)}.", "reviewed": False})
+            figures.extend(screenshot_figures(body, root))
             verified = "passed on Windows" in body or "executable preparation chunks passed on Windows" in text
             blocks = {name: re.sub(r"<!--.*?-->", "", content, flags=re.S).strip()
                       for name, content in blocks.items()}

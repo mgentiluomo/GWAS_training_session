@@ -6,7 +6,7 @@
   "anchor": "step-5-2",
   "title": "Prepare variants for reference PCA",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1",
+  "source_sha256": "35578e2340641fe333d6c6a6bc43ddd63819778c767cd55ec3c7a0a3c48d1e82",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Find the sites that are present in both the reference subset and the cleaned study. Only common sites on the [autosomes](../docs/glossary.md#autosome) (chromosomes 1 to 22) are used.",

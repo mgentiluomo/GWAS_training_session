@@ -6,7 +6,7 @@
   "anchor": "step-0-2",
   "title": "Install R",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9",
+  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install R from [CRAN](https://cran.r-project.org/), the official website for R. Follow these actions:\n\n1. Open the CRAN page. Click the link for your system: \"Download R for Windows\", \"Download R for macOS\" or \"Download R for Linux\".\n2. On Windows, click \"base\" (or \"install R for the first time\"). Then click the link at the top that starts with \"Download R\" and ends with \"for Windows\".\n3. On macOS, click the `.pkg` file for your processor. Use the `arm64` file for Apple Silicon. Use the `x86_64` file for an Intel Mac. File names on the page can change a little.\n4. On Linux, follow the CRAN instructions for your distribution. Installing packages may need an administrator.\n5. Open the downloaded file. Accept the default choices. Click \"Next\" on Windows or \"Continue\" on macOS until the installer ends. If the computer asks for permission or a password, give it.\n\nAfter the installation you should see a new program called R. On Windows it is in the Start menu. On macOS it is in the Applications folder.",
@@ -26,5 +26,24 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-2_r_download_windows.png",
+      "platform": "windows",
+      "placement": "what_we_do",
+      "alt_text": "CRAN page showing the Windows R download link.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-2_r_download_macos.png",
+      "platform": "macos",
+      "placement": "what_we_do",
+      "alt_text": "CRAN page showing the Apple Silicon and Intel R installer choices.",
+      "asset": null,
+      "reviewed": false
+    }
+  ]
 }

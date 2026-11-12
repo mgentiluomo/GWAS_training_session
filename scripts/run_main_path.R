@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9
+# SHA-256: 3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a
 
 # Chunk: s0-6_project
 getwd()
@@ -365,7 +365,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: bef105e6649d5f12bbfe37980b72ea8216e3120ed96e24310b575d7ed2bf3bd1
+# SHA-256: 35578e2340641fe333d6c6a6bc43ddd63819778c767cd55ec3c7a0a3c48d1e82
 
 # Chunk: setup
 source("R/guided.R")

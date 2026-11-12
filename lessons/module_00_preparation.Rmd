@@ -99,6 +99,9 @@ Install R from [CRAN](https://cran.r-project.org/), the official website for R. 
 
 After the installation you should see a new program called R. On Windows it is in the Start menu. On macOS it is in the Applications folder.
 
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-2_r_download_windows.png", "platform": "windows", "placement": "what_we_do", "alt_text": "CRAN page showing the Windows R download link."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-2_r_download_macos.png", "platform": "macos", "placement": "what_we_do", "alt_text": "CRAN page showing the Apple Silicon and Intel R installer choices."} -->
+
 ### Why
 
 R reads the commands in the notebooks and runs them. An [R package](../docs/glossary.md#r-package) is an add-on that gives R more functions. Packages do not replace R itself.
@@ -161,6 +164,9 @@ No code to run. Open RStudio from your applications menu. Find the Console pane 
 
 RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet.
 
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-3_rstudio_console_windows.png", "platform": "windows", "placement": "expected_result", "alt_text": "RStudio on Windows with the Console tab selected and an empty R prompt."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-3_rstudio_console_macos.png", "platform": "macos", "placement": "expected_result", "alt_text": "RStudio on macOS with the Console tab selected and an empty R prompt."} -->
+
 </details>
 
 <details><summary>If something goes wrong</summary>
@@ -208,6 +214,9 @@ No R code to run. Check that you extracted the ZIP and found `plink2.exe` on Win
 <details><summary>Show the expected result</summary>
 
 The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux. At step 0.7 your executable must identify itself as PLINK v2. A different build gives a warning. A different version number alone does not make the check fail.
+
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-4_plink_executable_windows.png", "platform": "windows", "placement": "expected_result", "alt_text": "Windows File Explorer showing plink2.exe extracted into the course bin folder."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-4_plink_executable_macos.png", "platform": "macos", "placement": "expected_result", "alt_text": "macOS Finder showing plink2 extracted into the course bin folder."} -->
 
 </details>
 
@@ -279,6 +288,9 @@ The function uses `getPass` to ask for a masked password. Type it and press
 Enter. You will not see the letters appear. Do not write the password in this
 notebook, a shared script or your command history. You do not need 7-Zip.
 
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-5_password_prompt_windows.png", "platform": "windows", "placement": "command", "alt_text": "Empty masked course password prompt opened from RStudio on Windows."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-5_password_prompt_macos.png", "platform": "macos", "placement": "command", "alt_text": "Empty masked course password prompt opened from RStudio on macOS."} -->
+
 <details><summary>Show the expected result</summary>
 
 On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
@@ -319,6 +331,9 @@ project again. If the password is wrong, check your typing and contact the
 instructor if needed. Never bypass a checksum failure. See
 [troubleshooting](../docs/troubleshooting.md).
 
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-5_incomplete_data_error_windows.png", "platform": "windows", "placement": "troubleshooting", "alt_text": "RStudio Console on Windows showing an incomplete-data error and its backup recovery command."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-5_incomplete_data_error_macos.png", "platform": "macos", "placement": "troubleshooting", "alt_text": "RStudio Console on macOS showing an incomplete-data error and its backup recovery command."} -->
+
 </details>
 
 ### Quick check
@@ -343,6 +358,9 @@ Open the project, then open this notebook. Follow these actions:
 1. In the folder you extracted or cloned at step 0.5, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.
 2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.
 3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.
+
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-6_project_panes_windows.png", "platform": "windows", "placement": "what_we_do", "alt_text": "Course project open in RStudio on Windows, with the lesson in Source beside Console and Files."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-6_project_panes_macos.png", "platform": "macos", "placement": "what_we_do", "alt_text": "Course project open in RStudio on macOS, with the lesson in Source beside Console and Files."} -->
 
 ### Why
 
@@ -434,6 +452,9 @@ bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20
 <details><summary>Show the expected result</summary>
 
 R first prints your system information, its version and the result `[1] 5` from the small calculation. It also prints the tested PLINK version from `config.R`. The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.
+
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-7_preflight_success_windows.png", "platform": "windows", "placement": "expected_result", "alt_text": "Successful Windows setup check in RStudio, with Preflight passed and the R prompt visible."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-7_preflight_success_macos.png", "platform": "macos", "placement": "expected_result", "alt_text": "Successful macOS setup check in RStudio, with Preflight passed and the R prompt visible."} -->
 
 </details>
 

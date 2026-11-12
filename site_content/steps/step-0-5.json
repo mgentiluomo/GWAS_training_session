@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Download the course package",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9",
+  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Download and extract the whole source project from the GitHub repository home. Then download the matching encrypted data archive from release `data-2026.1`. Follow these actions for the project:\n\n1. Open the [course repository home](https://github.com/mgentiluomo/GWAS_training_session). GitHub is a website that stores project files. Its default branch, `course/2026-guided-training`, contains the guided 2026 course. It is selected automatically.\n2. Click the green \"Code\" button. Then click \"Download ZIP\".\n3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.\n4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. Do not move single files out of it. No branch selection is needed.\n\nIf you already use Git, you can instead run `git clone https://github.com/mgentiluomo/GWAS_training_session.git` in a terminal. A plain clone gets the same 2026 course. You do not need a branch command.\n\nThe encrypted data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",
@@ -32,5 +32,42 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-5_password_prompt_windows.png",
+      "platform": "windows",
+      "placement": "command",
+      "alt_text": "Empty masked course password prompt opened from RStudio on Windows.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-5_password_prompt_macos.png",
+      "platform": "macos",
+      "placement": "command",
+      "alt_text": "Empty masked course password prompt opened from RStudio on macOS.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-5_incomplete_data_error_windows.png",
+      "platform": "windows",
+      "placement": "troubleshooting",
+      "alt_text": "RStudio Console on Windows showing an incomplete-data error and its backup recovery command.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-5_incomplete_data_error_macos.png",
+      "platform": "macos",
+      "placement": "troubleshooting",
+      "alt_text": "RStudio Console on macOS showing an incomplete-data error and its backup recovery command.",
+      "asset": null,
+      "reviewed": false
+    }
+  ]
 }

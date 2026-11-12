@@ -26,7 +26,7 @@ images, download data, publish a website or create an encrypted release.
 | `notebook_only_expected_code` | array | Render-only R helpers extracted from expected-result blocks; never display these as student instructions on the website. |
 | `plink` | object | Boolean `applicable`, literal `commands`, and one explanation per unique option name. |
 | `interactive_data` | optional object | Count-only threshold table at step 3.2; see below. |
-| `figures` | array | Placeholder records: `kind`, nullable `asset`, `gemini_prompt`, `alt_text`, `reviewed`. |
+| `figures` | array | Schematic placeholders or screenshot records. Both have `kind`, nullable `asset`, `alt_text` and `reviewed`. Screenshot fields are described below. |
 
 The block keys are `what_we_do`, `why`, `you_need`, `command`,
 `expected_result`, `troubleshooting`, optional `what_this_check_can_reveal`,
@@ -61,6 +61,32 @@ have `plink.applicable = false`; do not invent a PLINK command for a laboratory
 measurement. Terminal commands use the standard project paths; the R helper
 prints exact safe paths at runtime. Rendering a command must preserve quotes,
 dollar signs and template strings such as `@:#:$r:$a`.
+
+Screenshot declarations are stored in notebook HTML comments beside the
+relevant teaching block. They are removed from exported text blocks. For example:
+
+```html
+<!-- screenshot: {"kind":"screenshot","asset_path":"Figures/screenshots/s0-3_rstudio_console_windows.png","platform":"windows","placement":"expected_result","alt_text":"RStudio on Windows with the Console tab selected and an empty R prompt."} -->
+```
+
+The exporter adds a `figures` record with these fields:
+
+| Field | Meaning |
+| --- | --- |
+| `kind` | `screenshot`. A real software capture, not an illustration prompt. |
+| `asset_path` | Planned PNG path relative to the repository, under `Figures/screenshots/`. |
+| `asset` | `null` until that file exists. Then the same repository-relative path as `asset_path`. |
+| `platform` | `windows` or `macos`. |
+| `placement` | A teaching block key, such as `what_we_do`, `command`, `expected_result` or `troubleshooting`. |
+| `alt_text` | Draft accessible description from the notebook. |
+| `reviewed` | `false`. File existence alone does not establish privacy or teaching review. |
+
+Screenshot records have no `gemini_prompt`. The exporter never creates images.
+It rejects paths outside the repository and duplicate screenshot paths within
+a step. Rendering should show the matching platform capture beside its named
+block. A `null` asset must not create a broken image. Keep expected results and
+troubleshooting collapsed. The [capture list](screenshot_list.md) records what
+to show, what to hide and the draft alt text for each planned file.
 
 Figure placeholders are not generated images or verified result figures.
 Gemini prompts request a schematic to complement the actual analytical plot,

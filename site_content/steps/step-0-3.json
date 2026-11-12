@@ -6,7 +6,7 @@
   "anchor": "step-0-3",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9",
+  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
@@ -26,5 +26,24 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-3_rstudio_console_windows.png",
+      "platform": "windows",
+      "placement": "expected_result",
+      "alt_text": "RStudio on Windows with the Console tab selected and an empty R prompt.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-3_rstudio_console_macos.png",
+      "platform": "macos",
+      "placement": "expected_result",
+      "alt_text": "RStudio on macOS with the Console tab selected and an empty R prompt.",
+      "asset": null,
+      "reviewed": false
+    }
+  ]
 }

@@ -5,6 +5,7 @@ from pathlib import Path
 import shlex
 import re
 import unittest
+from unittest.mock import patch
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -102,10 +103,54 @@ class CourseExportsTests(unittest.TestCase):
                 if name != "what_this_check_can_reveal":
                     self.assertTrue(record["blocks"][name])
             for figure in record["figures"]:
-                self.assertIsNone(figure["asset"])
-                self.assertTrue(figure["gemini_prompt"])
+                if figure["kind"] == "placeholder":
+                    self.assertIsNone(figure["asset"])
+                    self.assertTrue(figure["gemini_prompt"])
+                else:
+                    self.assertEqual(figure["kind"], "screenshot")
+                    expected = figure["asset_path"] if (ROOT / figure["asset_path"]).is_file() else None
+                    self.assertEqual(figure["asset"], expected)
+                    self.assertNotIn("gemini_prompt", figure)
                 self.assertFalse(figure["reviewed"])
             self.assertNotIn("Gemini prompt:", record["blocks"]["files_created"])
+
+    def test_screenshot_capture_list_matches_notebook_declarations(self):
+        screenshots = [(r, f) for r in self.records for f in r["figures"] if f["kind"] == "screenshot"]
+        self.assertEqual(len(screenshots), 16)
+        expected = {"0.2": 2, "0.3": 2, "0.4": 2, "0.5": 4, "0.6": 2, "0.7": 2, "5.5": 2}
+        self.assertEqual({step: sum(r["id"] == step for r, _ in screenshots) for step in expected}, expected)
+        self.assertEqual(len({f["asset_path"] for _, f in screenshots}), 16)
+        checklist = (ROOT / "docs/screenshot_list.md").read_text(encoding="utf-8")
+        for record, figure in screenshots:
+            self.assertIn(Path(figure["asset_path"]).name, checklist)
+            self.assertIn(figure["alt_text"], checklist)
+            self.assertTrue(Path(figure["asset_path"]).name.startswith("s" + record["id"].replace(".", "-") + "_"))
+            self.assertTrue(figure["asset_path"].endswith("_" + figure["platform"] + ".png"))
+            self.assertIn(figure["placement"], record["blocks"])
+            self.assertNotIn("<!-- screenshot:", json.dumps(record["blocks"]))
+        self.assertEqual({r["id"] for r, _ in screenshots}, set(expected))
+
+    def test_screenshot_assets_resolve_only_when_the_file_exists(self):
+        spec = {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-3_console_windows.png",
+                "platform": "windows", "placement": "expected_result", "alt_text": "RStudio Console with an empty R prompt."}
+        body = "<!-- screenshot: " + json.dumps(spec) + " -->"
+        # Simulate the file's presence without creating an image.
+        with patch.object(Path, "is_file", return_value=False):
+            self.assertIsNone(exports.screenshot_figures(body)[0]["asset"])
+        with patch.object(Path, "is_file", return_value=True):
+            figure = exports.screenshot_figures(body)[0]
+            self.assertEqual(figure["asset"], spec["asset_path"])
+            self.assertEqual(figure["alt_text"], spec["alt_text"])
+            self.assertFalse(figure["reviewed"])
+        for changes in ({"asset_path": "../outside.png"}, {"asset_path": "/outside.png"},
+                        {"asset_path": "https://example.invalid/a.png"}, {"alt_text": ""},
+                        {"platform": "unknown"}, {"placement": "unknown"}, {"asset_path": "Figures/screenshots/a.svg"}):
+            with self.subTest(changes=changes):
+                bad = "<!-- screenshot: " + json.dumps({**spec, **changes}) + " -->"
+                with self.assertRaises(ValueError):
+                    exports.screenshot_figures(bad)
+        with self.assertRaises(ValueError):
+            exports.screenshot_figures(body + body)
 
     def test_installation_steps_need_no_r_commands_or_setup(self):
         for record in self.records[:4]:

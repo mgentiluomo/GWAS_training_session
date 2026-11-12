@@ -354,6 +354,9 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 ```
 
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s5-5_saved_plot_preview_windows.png", "platform": "windows", "placement": "expected_result", "alt_text": "Saved reference PCA image opened from RStudio Files on Windows, showing labelled axes and reference groups."} -->
+<!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s5-5_saved_plot_preview_macos.png", "platform": "macos", "placement": "expected_result", "alt_text": "Saved reference PCA image opened from RStudio Files on macOS, showing labelled axes and reference groups."} -->
+
 </details>
 
 <details><summary>If something goes wrong</summary>

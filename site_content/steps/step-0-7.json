@@ -6,7 +6,7 @@
   "anchor": "step-0-7",
   "title": "Run the setup check",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "8437281325ac040c9776f01aedb91d74af75521d64a560a6bc5cb42355a7cbf9",
+  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
   "verification": "unverified",
   "blocks": {
     "what_we_do": "Run the setup check. It tests the R packages, the [locale](../docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](../docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`",
@@ -67,5 +67,24 @@
       }
     ]
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-7_preflight_success_windows.png",
+      "platform": "windows",
+      "placement": "expected_result",
+      "alt_text": "Successful Windows setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-7_preflight_success_macos.png",
+      "platform": "macos",
+      "placement": "expected_result",
+      "alt_text": "Successful macOS setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "asset": null,
+      "reviewed": false
+    }
+  ]
 }
