@@ -87,7 +87,7 @@ Identify common autosomal sites in the supplied reference subset and the cleaned
 
 ### Why
 
-PCA should not be dominated by long stretches of correlated probes. The supplied reference was constructed from common, LD-pruned autosomal array sites, with an r? threshold of 0.15 in 200-kb windows and a 50,000-site cap. We intersect it with the study after QC rather than reintroduce sites that failed earlier checks. Study-specific PCs will be pruned again after defining the final cohort.
+PCA should not be dominated by long stretches of correlated probes. The supplied reference was constructed from common, LD-pruned autosomal array sites, with an r^2 threshold of 0.15 in 200-kb windows and a 50,000-site cap. We intersect it with the study after QC rather than reintroduce sites that failed earlier checks. Study-specific PCs will be pruned again after defining the final cohort.
 
 ### You need
 
@@ -242,7 +242,7 @@ bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/g
 bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048
 ```
 
-`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1?PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
+`--extract` retains audited shared sites; `--freq` writes reference frequencies. `--pca 10 allele-wts` computes ten axes and allele weights. `--read-freq` supplies the same frequencies to both projections. `--score` names the weights and the one-based ID/A1 columns (2 and 5 here); `header-read` uses the header, `no-mean-imputation` avoids mean-filling missing calls, and `variance-standardize` uses frequency-scaled genotypes. `--score-col-nums 6-15` selects PC1 to PC10. The R command derives column numbers from the actual header. `--pfile` reads the specified native genotype set; `--out` names reports; the helper adds `--threads 2` and `--memory 2048` for bounded threads and workspace MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -345,7 +345,7 @@ No. The plot summarises genetic variation relative to a selected reference, not 
 
 `s5-5_reference_projection.png`.
 
-Figure placeholder. Gemini prompt: Create a schematic reference PCA beside a projection PCA, with a clear legend explaining fixed reference axes, arbitrary PC signs and study projection. Label all axes; use both shapes and a colour-blind-safe palette. Do not reproduce individual data points or infer ethnic identity.
+<!-- Figure placeholder. Gemini prompt: Create a schematic reference PCA beside a projection PCA, with a clear legend explaining fixed reference axes, arbitrary PC signs and study projection. Label all axes; use both shapes and a colour-blind-safe palette. Do not reproduce individual data points or infer ethnic identity. -->
 
 ## 5.6 Define an ancestry-matched cohort {#step-5-6}
 
@@ -355,7 +355,7 @@ Apply the predefined six-standard-deviation rule on the first four projected PCs
 
 ### Why
 
-This teaching design focuses the main analysis on a broadly European-reference-matched cohort. For each of PC1?PC4, standardise the study score using the European reference mean and population standard deviation. Flag a sample if its largest absolute standardised distance exceeds six. This is a study-specific inclusion policy, not a universal ancestry classification. Apply it before inspecting association results and report exclusions.
+This teaching design focuses the main analysis on a broadly European-reference-matched cohort. For each of PC1 to PC4, standardise the study score using the European reference mean and population standard deviation. Flag a sample if its largest absolute standardised distance exceeds six. This is a study-specific inclusion policy, not a universal ancestry classification. Apply it before inspecting association results and report exclusions.
 
 ### You need
 

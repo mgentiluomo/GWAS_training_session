@@ -30,7 +30,7 @@ Compare the distribution of observed autosomal association p-values with a unifo
 
 ### Why
 
-A quantile?quantile (QQ) plot pairs ordered observed values with the values expected under a reference distribution. Under calibrated null tests, p-values are approximately uniform; ?log10 transforms small values into large positive values. A few strong associations lift the extreme tail. Broad deviation can reflect confounding, technical problems, model misspecification or many true small effects. A visual deviation alone cannot distinguish them. Correlated variants also mean the points are not independent observations.
+A quantile-quantile (QQ) plot pairs ordered observed values with the values expected under a reference distribution. Under calibrated null tests, p-values are approximately uniform; -log10 transforms small values into large positive values. A few strong associations lift the extreme tail. Broad deviation can reflect confounding, technical problems, model misspecification or many true small effects. A visual deviation alone cannot distinguish them. Correlated variants also mean the points are not independent observations.
 
 ### You need
 
@@ -85,7 +85,7 @@ No. A few true signals can lift the tail while most null tests remain calibrated
 
 `s7-1_qq.png`.
 
-Figure placeholder. Gemini prompt: Draw a teaching QQ schematic showing a diagonal null distribution, a tail-only departure and broad inflation in separate labelled panels. Explain possible causes without labelling every departure confounding; use line styles and text as well as colour.
+<!-- Figure placeholder. Gemini prompt: Draw a teaching QQ schematic showing a diagonal null distribution, a tail-only departure and broad inflation in separate labelled panels. Explain possible causes without labelling every departure confounding; use line styles and text as well as colour. -->
 
 ## 7.2 Genomic inflation factor {#step-7-2}
 
@@ -155,7 +155,7 @@ Plot association evidence along the autosomal genome.
 
 ### Why
 
-A Manhattan plot places chromosome and position on the horizontal axis and ?log10(p) vertically. Nearby high points can be correlated through LD and may represent one region. Position identifies where evidence is observed, not which gene causes an effect. The axis uses GRCh38 throughout. Alternating colours separate chromosomes; chromosome labels and position order also carry that information.
+A Manhattan plot places chromosome and position on the horizontal axis and -log10(p) vertically. Nearby high points can be correlated through LD and may represent one region. Position identifies where evidence is observed, not which gene causes an effect. The axis uses GRCh38 throughout. Alternating colours separate chromosomes; chromosome labels and position order also carry that information.
 
 ### You need
 
@@ -179,7 +179,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Three strong regions on chromosomes 3, 9 and 12, comprising eight variants below 5?10??. The moderate planted region does not reach that conventional threshold. Non-autosomal tests remain in the result table but are not placed on this autosomal figure.
+Three strong regions on chromosomes 3, 9 and 12, comprising eight variants below 5e-8. The moderate planted region does not reach that conventional threshold. Non-autosomal tests remain in the result table but are not placed on this autosomal figure.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
@@ -212,7 +212,7 @@ No. LD can make several tested variants tag the same underlying signal.
 
 `s7-3_manhattan.png`.
 
-Figure placeholder. Gemini prompt: Draw a schematic Manhattan plot with clearly labelled chromosomes and the conventional 5e-8 line. Mark a group of correlated points as one region, and state that a peak does not identify a causal gene. Do not invent gene annotations.
+<!-- Figure placeholder. Gemini prompt: Draw a schematic Manhattan plot with clearly labelled chromosomes and the conventional 5e-8 line. Mark a group of correlated points as one region, and state that a peak does not identify a causal gene. Do not invent gene annotations. -->
 
 ## 7.4 Multiple-testing thresholds {#step-7-4}
 
@@ -222,7 +222,7 @@ Compare the conventional GWAS threshold, scan-specific Bonferroni and false-disc
 
 ### Why
 
-Testing many null hypotheses creates many opportunities for false positives. Bonferroni divides a chosen family-wise error rate alpha by the number of tests; it controls the probability of at least one false rejection under its assumptions even when tests are dependent. The conventional 5?10?? threshold approximates 0.05 divided by one million common-variant tests; it is a convention, not a guarantee for every ancestry, sequencing design or analysis family. Benjamini?Hochberg (BH) targets a different quantity: the expected fraction of false discoveries among rejected tests under its conditions. Define the test family before inspecting results.
+Testing many null hypotheses creates many opportunities for false positives. Bonferroni divides a chosen family-wise error rate alpha by the number of tests; it controls the probability of at least one false rejection under its assumptions even when tests are dependent. The conventional 5e-8 threshold approximates 0.05 divided by one million common-variant tests; it is a convention, not a guarantee for every ancestry, sequencing design or analysis family. Benjamini-Hochberg (BH) targets a different quantity: the expected fraction of false discoveries among rejected tests under its conditions. Define the test family before inspecting results.
 
 ### You need
 
@@ -248,7 +248,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-236,815 finite tests imply a scan-specific Bonferroni threshold of approximately 2.11?10??. The conventional threshold gives eight discoveries. BH answers a different error-control question and may return more.
+236,815 finite tests imply a scan-specific Bonferroni threshold of approximately 2.11e-7. The conventional threshold gives eight discoveries. BH answers a different error-control question and may return more.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.
@@ -346,7 +346,7 @@ Examine the L2 region with LD relative to its lead variant.
 
 ### Why
 
-A regional plot separates position, association evidence and LD. L2 on chromosome 9 is used because L1 has only one genome-wide significant variant in this array subset. Nearby points with high r? to the lead can share association evidence. Low LD or several local peaks do not on their own establish multiple causal effects. No gene assignment or post-GWAS annotation is attempted here.
+A regional plot separates position, association evidence and LD. L2 on chromosome 9 is used because L1 has only one genome-wide significant variant in this array subset. Nearby points with high r^2 to the lead can share association evidence. Low LD or several local peaks do not on their own establish multiple causal effects. No gene assignment or post-GWAS annotation is attempted here.
 
 ### You need
 
@@ -527,7 +527,7 @@ A report must connect the study design, QC decisions, model, effect estimates, u
 
 ### You need
 
-Verified modules 0?6, figures and comparisons from 7.1?7.7.
+Verified modules 0 to 6, figures and comparisons from 7.1 to 7.7.
 
 ### Command
 

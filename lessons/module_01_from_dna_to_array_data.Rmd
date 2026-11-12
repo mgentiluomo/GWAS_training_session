@@ -135,7 +135,7 @@ No. Missing means no accepted genotype call; it is not a biological allele.
 
 None.
 
-Figure placeholder. Gemini prompt: Draw three separated two-channel intensity clusters for AA, AB and BB, with ambiguous observations left uncalled. Label the drawing schematic, not course data. Use labels and point shapes as well as colour.
+<!-- Figure placeholder. Gemini prompt: Draw three separated two-channel intensity clusters for AA, AB and BB, with ambiguous observations left uncalled. Label the drawing schematic, not course data. Use labels and point shapes as well as colour. -->
 
 ## 1.3 The Global Screening Array {#step-1-3}
 
@@ -166,7 +166,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Autosomes 1?22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.
+Autosomes 1 to 22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
@@ -322,7 +322,7 @@ Low DNA yield can cause many no-calls. Contamination can increase heterozygous c
 
 ### You need
 
-The sample sheet and score examples from 1.4?1.5.
+The sample sheet and score examples from 1.4 to 1.5.
 
 ### Command
 
@@ -378,7 +378,7 @@ The report excerpts show how calls are labelled. The matching BED/BIM/FAM set ho
 
 ### You need
 
-The matched laboratory export from 0.5; concepts from 1.1?1.6.
+The matched laboratory export from 0.5; concepts from 1.1 to 1.6.
 
 ### Command
 

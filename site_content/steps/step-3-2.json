@@ -6,7 +6,7 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8",
+  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Apply a 98% sample call-rate requirement after rough cleaning.",

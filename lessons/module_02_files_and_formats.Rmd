@@ -271,7 +271,7 @@ Compare laboratory allele pairs with the supplied plus-strand annotation; flip c
 
 ### Why
 
-The complementary bases are A?T and C?G. An A/C site on one strand is T/G on the other. Palindromic A/T and C/G sites have the same pair after a strand flip, so the pair alone cannot establish orientation. This course excludes them rather than guessing from frequency. Allele order is not strand: A/G and G/A contain the same pair.
+The complementary bases are A-T and C-G. An A/C site on one strand is T/G on the other. Palindromic A/T and C/G sites have the same pair after a strand flip, so the pair alone cannot establish orientation. This course excludes them rather than guessing from frequency. Allele order is not strand: A/G and G/A contain the same pair.
 
 ### You need
 

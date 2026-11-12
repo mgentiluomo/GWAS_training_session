@@ -58,7 +58,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
 ```
 
-`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2?2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+`--snp` selects one variant by its exact current ID. `--export A` writes the named-allele dosage (0, 1 or 2, with missing values separate). R constructs the 2-by-2 carrier table. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -97,7 +97,7 @@ Fit a one-variant logistic regression in R and connect dosage to the odds ratio.
 
 ### Why
 
-For binary outcome Y, logistic regression models log(p/(1?p)) = intercept + beta ? dosage, where p is the probability of being a case. An additive model assumes the same change in log odds for each additional counted allele. exp(beta) is the per-allele OR; it differs from the carrier contrast at 6.1. The standard error measures uncertainty in the estimated log OR. This unadjusted one-site example is not the final association result.
+For binary outcome Y, logistic regression models log(p/(1-p)) = intercept + beta * dosage, where p is the probability of being a case. An additive model assumes the same change in log odds for each additional counted allele. exp(beta) is the per-allele OR; it differs from the carrier contrast at 6.1. The standard error measures uncertainty in the estimated log OR. This unadjusted one-site example is not the final association result.
 
 ### You need
 
@@ -189,7 +189,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-1,811 complete matched covariate rows with Age and PC1?PC10. No duplicate or unmatched IDs; the design has full column rank.
+1,811 complete matched covariate rows with Age and PC1 to PC10. No duplicate or unmatched IDs; the design has full column rank.
 
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the instructor reference.
@@ -249,7 +249,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
 ```
 
-`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table and `--covar-name` selects Age and PC1?PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
+`--maf 0.01` rechecks the frequency rule in the final cohort. `--covar` loads the ID-keyed table and `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales numerical covariates for stable fitting without changing the tested genetic hypothesis. `--glm sex` includes recorded sex; `hide-covar` reports genetic tests rather than every covariate coefficient; `firth-fallback` uses Firth when needed. `--pfile` reads the final genotype state; `--out` sets the report prefix. The R helper adds `--threads 2` and `--memory 2048`, limiting worker threads and workspace MiB.
 
 <details><summary>Show the expected result</summary>
 
@@ -288,7 +288,7 @@ Identify effect allele, sample count, uncertainty, test type and fitting status.
 
 ### Why
 
-A1 is the allele whose dosage is tested, not automatically ALT, minor or harmful. OR estimates its multiplicative effect on odds. OBS_CT is the number of samples used at that variant and may vary with missing calls. ERRCODE describes model failures; a missing p-value must remain missing. A 95% confidence interval is exp(log(OR) ? 1.96 ? SE) under the fitted approximation. The interval describes estimation uncertainty under assumptions, not the chance this single interval contains a fixed truth.
+A1 is the allele whose dosage is tested, not automatically ALT, minor or harmful. OR estimates its multiplicative effect on odds. OBS_CT is the number of samples used at that variant and may vary with missing calls. ERRCODE describes model failures; a missing p-value must remain missing. A 95% confidence interval is exp(log(OR) +/- 1.96 * SE) under the fitted approximation. The interval describes estimation uncertainty under assumptions, not the chance this single interval contains a fixed truth.
 
 ### You need
 
@@ -351,7 +351,7 @@ Compare an explicitly forced Firth fit at a low-frequency retained autosomal sit
 
 ### Why
 
-Rare genotypes can have very few case or control observations. If a predictor separates outcomes completely, the ordinary maximum-likelihood coefficient can diverge. Firth penalisation reduces small-sample bias and can give finite estimates. It does not create information or fix confounding, miscalled genotypes or a poor study design. The main scan in this dataset did not actually require Firth fallback; we force it for a transparent teaching comparison at one retained low-frequency site. Sites below the 1% main-path filter are not reintroduced.
+Rare genotypes can have very few case or control observations. Ordinary logistic fitting uses maximum likelihood: it chooses coefficients that make the observed outcomes most plausible under the model. If a predictor separates outcomes completely, that coefficient can diverge. Firth penalisation reduces small-sample bias and can give finite estimates. It does not create information or fix confounding, miscalled genotypes or a poor study design. The main scan in this dataset did not actually require Firth fallback; we force it for a transparent teaching comparison at one retained low-frequency site. Sites below the 1% main-path filter are not reintroduced.
 
 ### You need
 

@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Download the course package",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "source_sha256": "02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Download and extract the whole source project from its GitHub branch. Then\nobtain the matching encrypted data archive through the approved course channel.\nThe GitHub Release does not exist yet: the current archive is a local author\ntest. Its checksums are marked as test values in `config.R`.",

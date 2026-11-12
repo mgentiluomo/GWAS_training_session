@@ -6,7 +6,7 @@
   "anchor": "step-0-3",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "source_sha256": "02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it.\nChoose the build for your operating system. R must already be installed.",

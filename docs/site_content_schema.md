@@ -54,6 +54,9 @@ the image, add a suitable asset, and replace the provisional alt text before
 publication. Tested data plots remain external generated outputs. Meaning must
 not rely on colour alone; the renderer must preserve text summaries and labels.
 
+Gemini production prompts are stored in notebook HTML comments and exported
+only as figure metadata. They are not displayed in student-facing text blocks.
+
 JSON contains code and teaching text only, never the instructor key, phenotype
 records, passwords, archive bytes or generated analytical tables. The R script
 omits `eval=FALSE` chunks for interactive installation and data retrieval. It

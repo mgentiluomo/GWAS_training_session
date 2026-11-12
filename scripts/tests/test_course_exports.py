@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import shlex
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +22,12 @@ class CourseExportsTests(unittest.TestCase):
         self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 7, 8, 8, 6, 7, 7, 8])
         self.assertEqual(self.records[0]["id"], "0.1")
         self.assertEqual(self.records[-1]["id"], "7.8")
+
+    def test_mathematical_text_has_no_lossy_question_mark_substitutions(self):
+        for path in exports.notebook_paths():
+            text = path.read_text(encoding="utf-8")
+            self.assertIsNone(re.search(r"\w\?\w|\?\?|\?log10|10\^\(\?", text), path.name)
+            self.assertNotIn("\ufffd", text)
 
     def test_committed_json_matches_canonical_sources(self):
         paths = list((ROOT / "site_content" / "steps").glob("*.json"))
@@ -47,6 +54,7 @@ class CourseExportsTests(unittest.TestCase):
                 self.assertIsNone(figure["asset"])
                 self.assertTrue(figure["gemini_prompt"])
                 self.assertFalse(figure["reviewed"])
+            self.assertNotIn("Gemini prompt:", record["blocks"]["files_created"])
 
     def test_combined_script_matches_chunks_and_omits_interactive_downloads(self):
         script = exports.main_script()

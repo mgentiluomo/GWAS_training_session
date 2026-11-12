@@ -6,13 +6,13 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8",
+  "source_sha256": "8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Select a less-correlated autosomal subset for heterozygosity, relatedness and later PCA.",
     "why": "Linkage disequilibrium (LD) is association between alleles at nearby sites. Dense correlated regions would otherwise receive more weight simply because they contain many probes. Pruning keeps a representative subset; it is not permanent deletion from the association matrix. Exclude long-range LD regions from this diagnostic subset. The GRCh38 intervals are explicit in the helper and are not a universal catalogue.",
     "you_need": "State 3.3.",
-    "command": "```{r s3-4}\nregions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1.",
+    "command": "```{r s3-4}\nregions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1.",
     "expected_result": "69,539 sites in `.prune.in`. The complete analysis state still has 296,360 variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Regions that dominate correlated-marker summaries. The retained subset depends on the input sample set and exact algorithm/version.",
@@ -36,23 +36,23 @@
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--exclude",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--geno",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--indep-pairwise",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--maf",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--memory",
@@ -60,7 +60,7 @@
       },
       {
         "name": "--out",
-        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1."
+        "explanation_markdown": "`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1."
       },
       {
         "name": "--pfile",

@@ -6,14 +6,14 @@
   "anchor": "step-1-3",
   "title": "The Global Screening Array",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "22c747c88f6b80cb0ff8d1c1acceebdd8cab10df17ea37e745cf178a7c1290ac",
+  "source_sha256": "2e77f0fcb1e320faaf4ee86e88b280841ec331ad31a3651745765616bcdbd57d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Recognise what an array includes and what it leaves unmeasured.",
     "why": "The Illumina Global Screening Array (GSA) targets a selected set of sites. It is not whole-genome sequencing: an unmeasured site cannot be called absent. The simulated course subset uses GSA-style Illumina names and real GRCh38 positions. The local manufacturer manifest is not redistributed. The student annotation supplies only the fields needed for this course; it does not reproduce the full proprietary design.",
     "you_need": "The annotation inspected at 1.1.",
     "command": "```{r s1-3}\ntable(ann$Chr)\nstopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
-    "expected_result": "Autosomes 1?22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
+    "expected_result": "Autosomes 1 to 22 plus X, Y and MT. There are 299,523 initial array entries; duplicated genomic sites can have distinct names and will be reviewed at 4.5.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "If a site is absent from the array, can you conclude that every participant has the reference allele there?\n\n<details><summary>Show the answer</summary>\n\nNo. Absence from the array means the site was not directly measured.\n\n</details>",
     "files_created": "None."

@@ -6,17 +6,17 @@
   "anchor": "step-7-1",
   "title": "QQ plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "a9e3a9af248e5e7b0f1d19acbbba759ee0dfecad4737eb886eecb7f595c058ab",
+  "source_sha256": "1049e15aee3ffe78bfd13b7489371278b381089bffd7f6d289e276d8f2c4b53a",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare the distribution of observed autosomal association p-values with a uniform-null reference.",
-    "why": "A quantile?quantile (QQ) plot pairs ordered observed values with the values expected under a reference distribution. Under calibrated null tests, p-values are approximately uniform; ?log10 transforms small values into large positive values. A few strong associations lift the extreme tail. Broad deviation can reflect confounding, technical problems, model misspecification or many true small effects. A visual deviation alone cannot distinguish them. Correlated variants also mean the points are not independent observations.",
+    "why": "A quantile-quantile (QQ) plot pairs ordered observed values with the values expected under a reference distribution. Under calibrated null tests, p-values are approximately uniform; -log10 transforms small values into large positive values. A few strong associations lift the extreme tail. Broad deviation can reflect confounding, technical problems, model misspecification or many true small effects. A visual deviation alone cannot distinguish them. Correlated variants also mean the points are not independent observations.",
     "you_need": "The adjusted association scan from 6.4.",
     "command": "```{r s7-1}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nautosomal <- results$CHROM %in% as.character(1:22)\nsave_plot(guided_path(cfg, \"7.1\", \"qq.png\"), function() plot_qq(results$P[autosomal], \"Adjusted simulated GWAS: autosomal QQ plot\"))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: no PLINK operation is needed for this R-only or laboratory step. The R chunk is the complete command; PLINK cannot perform a laboratory measurement.\n\nR reads or calculates the displayed values without changing the genotype files.",
     "expected_result": "Most points are close to the null diagonal, with a strong upper-tail departure. Missing, zero or invalid p-values are not plotted as arbitrary significant values.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks, instructor comparisons and final plot checks passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "Does a strong departure affecting only the extreme tail necessarily imply genome-wide confounding?\n\n<details><summary>Show the answer</summary>\n\nNo. A few true signals can lift the tail while most null tests remain calibrated.\n\n</details>",
-    "files_created": "`s7-1_qq.png`.\n\nFigure placeholder. Gemini prompt: Draw a teaching QQ schematic showing a diagonal null distribution, a tail-only departure and broad inflation in separate labelled panels. Explain possible causes without labelling every departure confounding; use line styles and text as well as colour."
+    "files_created": "`s7-1_qq.png`."
   },
   "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [

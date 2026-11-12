@@ -6,7 +6,7 @@
   "anchor": "step-1-2",
   "title": "How an array measures DNA",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "22c747c88f6b80cb0ff8d1c1acceebdd8cab10df17ea37e745cf178a7c1290ac",
+  "source_sha256": "2e77f0fcb1e320faaf4ee86e88b280841ec331ad31a3651745765616bcdbd57d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Separate a fluorescence measurement from a genotype call.",
@@ -16,7 +16,7 @@
     "expected_result": "A simulated Final Report header and the start of its data section. The supplied reports have genotype calls and GC scores; they do not contain raw intensity data, so this exercise cannot redraw cluster plots.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "Can a low-quality fluorescence measurement be treated as a confidently observed missing allele?\n\n<details><summary>Show the answer</summary>\n\nNo. Missing means no accepted genotype call; it is not a biological allele.\n\n</details>",
-    "files_created": "None.\n\nFigure placeholder. Gemini prompt: Draw three separated two-channel intensity clusters for AA, AB and BB, with ambiguous observations left uncalled. Label the drawing schematic, not course data. Use labels and point shapes as well as colour."
+    "files_created": "None."
   },
   "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [

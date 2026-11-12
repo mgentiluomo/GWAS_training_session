@@ -6,7 +6,7 @@
   "anchor": "step-5-3",
   "title": "Match build, position and alleles",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081",
+  "source_sha256": "6b9efdadd370f938728e9227191c5549fee91d7232f25f4980570cb0474b3758",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Audit shared variant identities before projection.",

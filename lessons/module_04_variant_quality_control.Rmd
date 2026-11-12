@@ -221,11 +221,11 @@ Yes. The label describes frequency in the sample, not a fixed property of the al
 
 ### What we do
 
-Calculate a control-only exact mid-p Hardy?Weinberg test and apply an explicit sample-size-aware screening rule.
+Calculate a control-only exact mid-p Hardy-Weinberg test and apply an explicit sample-size-aware screening rule.
 
 ### Why
 
-Hardy?Weinberg equilibrium (HWE) predicts genotype proportions p?, 2p(1?p) and (1?p)? under random mating and other idealised assumptions. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(?6 ? 0.001 ? max(0, n_control ? 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.
+Hardy-Weinberg equilibrium (HWE) predicts genotype proportions a^2, 2a(1-a) and (1-a)^2 under random mating and other idealised assumptions. Here a is the frequency of one allele; it is not the HWE test p-value. A deficit of heterozygotes can indicate calling errors, related parents or a mixture of populations. We test autosomal controls so a genuine disease effect in cases is less likely to drive exclusion. Mid-p reduces the conservatism of a discrete exact test. Larger samples detect smaller departures, so a fixed cutoff is not portable to every cohort. Our prespecified course rule is 10^(-6 - 0.001 * max(0, n_control - 1000)), applied using the non-missing control count at each site. At this course size it is 0.000001; above the 1,000-control calibration it becomes more stringent. This is a transparent teaching policy, not a universal recommended threshold. Compare distributions and heterozygote excess/deficit before adopting it elsewhere.
 
 ### You need
 

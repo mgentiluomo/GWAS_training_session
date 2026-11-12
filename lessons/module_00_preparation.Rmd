@@ -484,20 +484,22 @@ Both protect existing output folders.
 
 <details><summary>Show the expected result</summary>
 
-Before analysis, available full genotype checkpoints are `not started`.
-The current stage 1 package has full filesets only at 4.6 and 5.6; other
-reference folders contain removal lists. They are reported as `reference lists
-only`, never as completed analyses. Missing restart filesets must be supplied
-before those recovery routes can be used.
+Before analysis, states in the updated checkpoint index are `not verified`.
+Full genotype boundaries are 2.8, 3.8, 4.6 and 5.7; intermediate states are
+reconstructed from stored lists and transformations. Diagnostic and analysis
+files have separate small checkpoints. The unchanged original 55-file stage 1
+test ZIP uses the older layout: full filesets only at 4.6 and 5.6, with other
+folders reported as `reference lists only`. Use the updated staged package for
+the new main-path restart routes; do not mix the two layouts.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
 A missing checkpoint is not evidence that you failed the analysis. It can mean
-the course package does not yet supply that restart point. Ask for the matching
-complete checkpoint; do not mix different dataset versions or claim that copying
-a list recreated genotypes.
+the course package does not supply the required baseline, lists or index. Ask
+for the matching updated package; do not mix versions or claim that copying
+a list alone recreated genotypes.
 
 </details>
 

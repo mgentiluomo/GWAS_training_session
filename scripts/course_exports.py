@@ -89,7 +89,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             expected_render_code = [m.group(3).strip() for m in CHUNK.finditer(blocks["expected_result"])]
             # Notebook rendering helpers are author metadata, not student-facing website text.
             blocks["expected_result"] = CHUNK.sub("", blocks["expected_result"]).strip()
-            figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\n\n|$)", body, re.S)
+            figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\s*-->|\n\n|$)", body, re.S)
             figures = []
             if figure_prompt or ".png" in blocks["command"]:
                 prompt = figure_prompt.group(1).strip() if figure_prompt else (
@@ -100,6 +100,8 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                 figures.append({"kind": "placeholder", "asset": None, "gemini_prompt": prompt,
                                 "alt_text": alt.group(1) if alt else f"Teaching schematic: {match.group(3)}.", "reviewed": False})
             verified = "passed on Windows" in body or "executable preparation chunks passed on Windows" in text
+            blocks = {name: re.sub(r"<!--.*?-->", "", content, flags=re.S).strip()
+                      for name, content in blocks.items()}
             manual = bool(r_commands) and not any(command["run_by_default"] for command in r_commands)
             verification = "manual_required" if manual else (
                 "windows_executed" if verified and "UNVERIFIED" not in body and

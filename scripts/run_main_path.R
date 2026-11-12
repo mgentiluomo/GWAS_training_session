@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39
+# SHA-256: 02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da
 
 # Chunk: module0_knit_root
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -45,7 +45,7 @@ source("scripts/preflight.R")
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 22c747c88f6b80cb0ff8d1c1acceebdd8cab10df17ea37e745cf178a7c1290ac
+# SHA-256: 2e77f0fcb1e320faaf4ee86e88b280841ec331ad31a3651745765616bcdbd57d
 
 # Chunk: module1_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -97,7 +97,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 350d8a81bd381e68893269fc845f9924991b4d741df0bae4df1a0686e5cdd73d
+# SHA-256: 747ad2fecbc5fd22cfa03bbe74b4742af11c788a45acfbfeb6fc769e10c57088
 
 # Chunk: module2_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -198,7 +198,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: f8daa8b34a7a016e33ad3a1d6377cb0f0618ef4681ebec01b157a2ffa83d94b8
+# SHA-256: 8ce9a6bf74aee3f23fcab0b8b4cdb73a3fda329ee797687a3f21224cda2f627d
 
 # Chunk: module3_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -311,7 +311,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 006b3a4f0381921f35e054ff366909a4c8339f1ed5ce32f61a15d35949bab024
+# SHA-256: e2da6496768ffa4db380e2461b2f600aa9fe13c5419989da888b82f736c7b783
 
 # Chunk: module4_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -391,7 +391,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081
+# SHA-256: 6b9efdadd370f938728e9227191c5549fee91d7232f25f4980570cb0474b3758
 
 # Chunk: module5_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -505,7 +505,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 783b75de1cc2c0d3e29d0f87641dbd8ee2b87de17a8eb9abc55d8600aacc7b7d
+# SHA-256: a362bfeba80fbdf4acfabbc1919df3032efef1069d87c97512342cfe630ea528
 
 # Chunk: module6_setup
 if (requireNamespace("knitr", quietly = TRUE)) {
@@ -604,7 +604,7 @@ guided_artifact_checkpoint(cfg, "6.7", files)
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: a9e3a9af248e5e7b0f1d19acbbba759ee0dfecad4737eb886eecb7f595c058ab
+# SHA-256: 1049e15aee3ffe78bfd13b7489371278b381089bffd7f6d289e276d8f2c4b53a
 
 # Chunk: module7_setup
 if (requireNamespace("knitr", quietly = TRUE)) {

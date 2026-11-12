@@ -6,15 +6,15 @@
   "anchor": "step-0-8",
   "title": "How to use this guide",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "41b17e0ec199b9d1b80f87dbc1ccec073718dc1bd61e4fa3e8abb778a1bafe39",
+  "source_sha256": "02b745a3517a670e929660164992dc7d7b15b7a8dc6ca1ac450cc5564170e1da",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Use the same reading, running and checking routine at every step.",
     "why": "Running all commands at once makes the first mistake harder to locate.\nSaving files gives you a route back after a restart without relying on an R workspace.",
     "you_need": "A successful check at 0.7. Keep the output files and the notebook together in\ntheir documented locations. The [glossary](../docs/glossary.md) explains terms\nused in the course, including quality control, alleles and association.",
     "command": "Read your supplied checkpoint inventory without changing any files:\n\n```{r s0-8_progress}\nwhere_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)\n```\n\nTerminal equivalent: invoke the R helper through Rscript after setting the\nsame project paths. There is no PLINK command for reporting course progress.\n`check_step(\"3.2\")` compares that step with a supplied checkpoint;\n`restore_checkpoint(\"3.2\")` restores step 3.1 so that you can restart 3.2.\nBoth protect existing output folders.",
-    "expected_result": "Before analysis, available full genotype checkpoints are `not started`.\nThe current stage 1 package has full filesets only at 4.6 and 5.6; other\nreference folders contain removal lists. They are reported as `reference lists\nonly`, never as completed analyses. Missing restart filesets must be supplied\nbefore those recovery routes can be used.",
-    "troubleshooting": "A missing checkpoint is not evidence that you failed the analysis. It can mean\nthe course package does not yet supply that restart point. Ask for the matching\ncomplete checkpoint; do not mix different dataset versions or claim that copying\na list recreated genotypes.",
+    "expected_result": "Before analysis, states in the updated checkpoint index are `not verified`.\nFull genotype boundaries are 2.8, 3.8, 4.6 and 5.7; intermediate states are\nreconstructed from stored lists and transformations. Diagnostic and analysis\nfiles have separate small checkpoints. The unchanged original 55-file stage 1\ntest ZIP uses the older layout: full filesets only at 4.6 and 5.6, with other\nfolders reported as `reference lists only`. Use the updated staged package for\nthe new main-path restart routes; do not mix the two layouts.",
+    "troubleshooting": "A missing checkpoint is not evidence that you failed the analysis. It can mean\nthe course package does not supply the required baseline, lists or index. Ask\nfor the matching updated package; do not mix versions or claim that copying\na list alone recreated genotypes.",
     "quick_check": "To restart step 4.2, which completed step's files do you need?\n\n<details><summary>Show the answer</summary>Step 4.1, from the same course data version.</details>",
     "files_created": "None by `where_am_i`. Continue to module 1, which explains how the array data arise."
   },

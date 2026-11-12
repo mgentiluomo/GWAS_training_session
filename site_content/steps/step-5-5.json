@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "9962c14980cb4bbe83078da4ffddfa728b2dc9ba1b63a5e697edab9f616c9081",
+  "source_sha256": "6b9efdadd370f938728e9227191c5549fee91d7232f25f4980570cb0474b3758",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Visualise the first two reference axes, with labels and symbols for reference groups.",
@@ -16,7 +16,7 @@
     "expected_result": "A labelled reference/projection plot. Most study samples overlap European reference patterns, with a small number extending elsewhere. The exact orientation of a PC can reverse sign without changing its meaning.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and instructor reference counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
     "quick_check": "Does overlap with a reference group prove a person's nationality?\n\n<details><summary>Show the answer</summary>\n\nNo. The plot summarises genetic variation relative to a selected reference, not nationality or ethnicity.\n\n</details>",
-    "files_created": "`s5-5_reference_projection.png`.\n\nFigure placeholder. Gemini prompt: Create a schematic reference PCA beside a projection PCA, with a clear legend explaining fixed reference axes, arbitrary PC signs and study projection. Label all axes; use both shapes and a colour-blind-safe palette. Do not reproduce individual data points or infer ethnic identity."
+    "files_created": "`s5-5_reference_projection.png`."
   },
   "setup_code": "if (requireNamespace(\"knitr\", quietly = TRUE)) {\n  knitr::opts_knit$set(root.dir = normalizePath(if (file.exists(\"config.R\")) \".\" else \"..\"))\n}\nsource(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [

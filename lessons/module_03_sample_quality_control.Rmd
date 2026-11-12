@@ -256,7 +256,7 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
 
-`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r? = 0.2. `--out`, threads and memory have the meanings given at 3.1.
+`--chr 1-22` restricts to autosomes; `--maf 0.05` keeps common variants; `--geno 0.02` requires 98% variant call rate for this subset. `--exclude bed1` reads one-based inclusive intervals. `--indep-pairwise 200kb 0.2` prunes within 200-kb windows using squared correlation r^2 = 0.2. `--out`, threads and memory have the meanings given at 3.1.
 
 <details><summary>Show the expected result</summary>
 
