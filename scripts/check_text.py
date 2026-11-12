@@ -42,6 +42,9 @@ def main() -> int:
         sorted((ROOT / "docs").glob("*.md"))
     glossary = (ROOT / "docs" / "glossary.md").read_text(encoding="utf-8")
     anchors = set(GLOSSARY_ANCHOR.findall(glossary))
+    # Entries waiting in the staging folder count while a text pass is under way.
+    for staged in sorted((ROOT / "docs" / "_glossary_staging").glob("*.md")):
+        anchors |= set(GLOSSARY_ANCHOR.findall(staged.read_text(encoding="utf-8")))
     for path in files:
         raw = path.read_text(encoding="utf-8")
         rel = path.relative_to(ROOT).as_posix()
