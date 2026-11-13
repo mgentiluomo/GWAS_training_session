@@ -317,7 +317,7 @@ Otherwise the two sets of scores would not share the same coordinate system.
 
 **Why these values.** Ten components is PLINK's default and a course convention. Step 5.7 fixes how many enter the model. `--read-freq` gives both groups the same frequencies. `no-mean-imputation` leaves missing calls out of the average.
 
-**Pitfalls.** Projected study samples shrink towards the origin, and the bias grows from PC5 onwards, so read distances on later PCs with care. An allele with the wrong `A1` flips the sign of its contribution. A person from an ancestry absent from the reference tends to land near the closest reference group. The spelling `variance-standardize` is American; the course text says standardise.
+**Pitfalls.** Projected study samples shrink towards the origin, and the bias grows from PC5 onwards, so read distances on later PCs with care. An allele that does not match by name contributes nothing, so the score silently uses fewer sites. At an A/T or C/G site, a strand flip keeps the name but reverses the meaning and flips the sign of its contribution. This is why the shared sites are checked at step 5.3. A person from an ancestry absent from the reference tends to land near the closest reference group. The spelling `variance-standardize` is American; the course text says standardise.
 
 **References**
 

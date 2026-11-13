@@ -647,7 +647,7 @@ The `.kin0` report, the reviewed removal list and `s3-6_state.*`.
 
 **Why these values.** The cut-offs 0.354, 0.177 and 0.0442 sit between these expected values on a scale of powers of two. They are screening conventions. A parent and child cannot be told from full siblings by `KINSHIP` alone, but `IBS0` is close to zero for a parent and child.
 
-**Pitfalls.** The older `PI_HAT` takes allele frequencies from the whole sample, so mixed ancestry biases it. KING-robust does not have this weakness. Relatives also shape principal components. Remove them, or use methods built for related samples, before a PCA. Keep one person per pair by a rule that ignores disease status.
+**Pitfalls.** The older `PI_HAT` takes allele frequencies from the whole sample, so mixed ancestry biases it. KING-robust is far less sensitive to this, although admixed samples and pairs of different ancestry can still bias it. Relatives also shape principal components. Remove them, or use methods built for related samples, before a PCA. Keep one person per pair by a rule that ignores disease status.
 
 **References**
 

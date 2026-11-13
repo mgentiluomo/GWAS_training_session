@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
+  "source_sha256": "4ac8eeed377620aeb782c76f09d6704a29923c9e6b44d13bd1ee6388a2c45aca",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a plot of the first two reference axes. Each reference group has its own label and symbol, and the study samples are added on top.",

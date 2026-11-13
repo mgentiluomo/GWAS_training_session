@@ -177,7 +177,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18
+# SHA-256: 57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611
 
 # Chunk: setup
 source("R/guided.R")
@@ -365,7 +365,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d
+# SHA-256: 4ac8eeed377620aeb782c76f09d6704a29923c9e6b44d13bd1ee6388a2c45aca
 
 # Chunk: setup
 source("R/guided.R")
@@ -480,7 +480,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 22c731be4101779fb3a45b04030566f757ff668a5145e77fc065098d07f385c6
+# SHA-256: 7769ec3d7690f3756a6ec0912331e65081d88c30405b5da353a1ba00e7d240f8
 
 # Chunk: setup
 source("R/guided.R")

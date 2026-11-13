@@ -6,7 +6,7 @@
   "anchor": "step-6-7",
   "title": "First look and association checkpoint",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "22c731be4101779fb3a45b04030566f757ff668a5145e77fc065098d07f385c6",
+  "source_sha256": "7769ec3d7690f3756a6ec0912331e65081d88c30405b5da353a1ba00e7d240f8",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Summarise the valid tests. Save the key association files so that you can restart from here.",
