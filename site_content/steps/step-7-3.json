@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.3",
   "module": 7,
   "step": 3,
   "anchor": "step-7-3",
   "title": "Manhattan plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a Manhattan plot of the association results along the autosomes. The plot reads the summary statistics file made at step 6.8.",
@@ -42,5 +42,6 @@
       "alt_text": "Autosomal association peaks exceed the conventional threshold on chromosomes 3, 9 and 12.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "There are three strong regions, on chromosomes 3, 9 and 12."
 }

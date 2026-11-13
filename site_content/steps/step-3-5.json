@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "3.5",
   "module": 3,
   "step": 5,
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe",
+  "source_sha256": "a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
@@ -75,5 +75,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "13 wells with low F are removed."
 }

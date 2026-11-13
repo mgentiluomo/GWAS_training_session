@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.5",
   "module": 7,
   "step": 5,
   "anchor": "step-7-5",
   "title": "Clump correlated results",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.",
@@ -83,5 +83,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "There are three clumps."
 }

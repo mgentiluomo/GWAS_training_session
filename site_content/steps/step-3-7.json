@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "3.7",
   "module": 3,
   "step": 7,
   "anchor": "step-3-7",
   "title": "Batch effects",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe",
+  "source_sha256": "a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the call rate of each plate. A plate is a tray of 96 wells. We remove the plate that is clearly faulty in the simulated data.",
@@ -71,5 +71,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "Plate P14 has a median call rate of approximately 98.56%."
 }

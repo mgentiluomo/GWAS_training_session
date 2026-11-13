@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.7",
   "module": 7,
   "step": 7,
   "anchor": "step-7-7",
   "title": "Compare without PCs and without QC",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.",
@@ -84,5 +84,6 @@
       "alt_text": "QQ plots share a vertical scale; removing PCs and then sample and variant QC increases median inflation.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "Main analysis: 236,815 tests, eight hits, lambda about 1.016."
 }

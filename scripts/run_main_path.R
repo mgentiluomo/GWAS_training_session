@@ -6,30 +6,30 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f
+# SHA-256: fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b
 
-# Chunk: s0-6_project
+# Chunk: s0-4_project
 getwd()
 stopifnot(file.exists("config.R"), file.exists("R/course.R"))
-
-
-# Chunk: s0-7_preflight
 Sys.info()[c("sysname", "release", "machine")]
 R.version.string
 2 + 3
+
+
+# Chunk: s0-8_preflight
 settings <- new.env(parent = baseenv())
 sys.source("config.R", settings)
 settings$course_settings$tested_plink_version
 source("scripts/preflight.R")
 
 
-# Chunk: s0-8_progress
+# Chunk: course_progress
 source("R/guided.R")
 cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 538e9511d56d51abab6b53db8fb912cbb951a6d6a8d112be153e461b846372fe
+# SHA-256: 140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c
 
 # Chunk: setup
 source("R/guided.R")
@@ -79,7 +79,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: a06b8ad326befd58800f104948e5b9ed9a665e546e67b89a993934a87817d5a6
+# SHA-256: a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370
 
 # Chunk: setup
 source("R/guided.R")
@@ -177,7 +177,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe
+# SHA-256: a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18
 
 # Chunk: setup
 source("R/guided.R")
@@ -288,7 +288,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31
+# SHA-256: 230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c
 
 # Chunk: setup
 source("R/guided.R")
@@ -365,7 +365,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38
+# SHA-256: 2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d
 
 # Chunk: setup
 source("R/guided.R")
@@ -480,7 +480,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: a6360cb0801d6d913b94179ddd2151b78450ac7ffbf83547df9bcd1d813c7344
+# SHA-256: 22c731be4101779fb3a45b04030566f757ff668a5145e77fc065098d07f385c6
 
 # Chunk: setup
 source("R/guided.R")
@@ -599,7 +599,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e
+# SHA-256: ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816
 
 # Chunk: setup
 source("R/guided.R")

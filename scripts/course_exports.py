@@ -17,6 +17,8 @@ OVERVIEW = re.compile(r"^## Module (\d+) at a glance \{#module-\d+-overview\}\s*
 RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
 SCREENSHOT = re.compile(r"<!-- screenshot:\s*(.*?)\s*-->", re.S)
+STEP_META = re.compile(r"<!-- step_meta:\s*(.*?)\s*-->", re.S)
+SCHEMA_VERSION = "1.1"
 READING_NOTE = re.compile(r"^Reading, about (\d+) minutes\. You can come back to it later\.$", re.M)
 BLOCKS = [
     ("what_we_do", "### What we do"), ("why", "### Why"),
@@ -167,6 +169,41 @@ def screenshot_figures(body: str, root: Path = ROOT) -> list[dict]:
     return figures
 
 
+def step_metadata(metadata: dict, record: dict) -> dict:
+    """Validate optional UI metadata authored beside its canonical step."""
+    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line"}:
+        raise ValueError(f"Unknown step metadata in {record['id']}.")
+    result = {}
+    if "actions" in metadata:
+        actions = metadata["actions"]
+        if not isinstance(actions, list):
+            raise ValueError("Step actions must be a list.")
+        for action in actions:
+            if (not isinstance(action, dict) or set(action) - {"label", "url", "kind", "os"}
+                    or not {"label", "url", "kind"} <= set(action)
+                    or not isinstance(action["label"], str) or not action["label"].strip()
+                    or not isinstance(action["url"], str) or not action["url"].startswith("https://")
+                    or action["kind"] not in {"download", "page"}
+                    or ("os" in action and action["os"] not in {"windows", "macos", "linux"})):
+                raise ValueError("An action needs a label, HTTPS URL, download/page kind and optional valid OS.")
+        result["actions"] = actions
+    where = metadata.get("where", {})
+    if (not isinstance(where, dict)
+            or set(where) - {c["label"] for c in record["r_commands"]}
+            or any(value not in {"console", "terminal", "editor", "browser"} for value in where.values())):
+        raise ValueError("Command locations must name an R chunk and a valid execution location.")
+    for command in record["r_commands"]:
+        if command["label"] in where:
+            command["where"] = where[command["label"]]
+    if "success_line" in metadata:
+        line = metadata["success_line"]
+        if (not isinstance(line, str) or not line.strip() or "\n" in line or len(line) > 180
+                or line not in record["blocks"]["expected_result"]):
+            raise ValueError(f"The success line must be a short exact excerpt of the expected result in {record['id']}.")
+        result["success_line"] = line
+    return result
+
+
 def export_steps(root: Path = ROOT) -> list[dict]:
     records = []
     for path in notebook_paths(root):
@@ -233,7 +270,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             verification = "manual_required" if manual else (
                 "windows_executed" if verified and "UNVERIFIED" not in body and
                 "pending executable Windows verification" not in body else "unverified")
-            record = {"schema_version": "1.0", "id": f"{match.group(1)}.{match.group(2)}",
+            record = {"schema_version": SCHEMA_VERSION, "id": f"{match.group(1)}.{match.group(2)}",
                       "module": int(match.group(1)), "step": int(match.group(2)), "anchor": match.group(4),
                       "title": match.group(3), "source": path.relative_to(root).as_posix(),
                       "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
@@ -242,6 +279,11 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                       "notebook_only_expected_code": expected_render_code,
                       "plink": {"applicable": bool(commands), "commands": commands, "options": options},
                       "figures": figures}
+            metadata = STEP_META.findall(body)
+            if len(metadata) > 1:
+                raise ValueError(f"Duplicate step metadata in {record['id']}.")
+            if metadata:
+                record.update(step_metadata(json.loads(metadata[0]), record))
             interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
             if interactive:
                 record["interactive_data"] = json.loads(interactive.group(1))
@@ -266,7 +308,7 @@ def export_modules(root: Path = ROOT) -> list[dict]:
         overview, recap = OVERVIEW.search(text), RECAP.search(text)
         if not overview or not recap:
             raise ValueError(f"{path.name} needs a 'Module N at a glance' and a 'Module N recap' section.")
-        records.append({"schema_version": "1.0", "module": int(overview.group(1)),
+        records.append({"schema_version": SCHEMA_VERSION, "module": int(overview.group(1)),
                         "title": re.search(r'^title: "Module \d+: (.*)"', text, re.M).group(1),
                         "source": path.relative_to(root).as_posix(),
                         "source_sha256": hashlib.sha256(text.encode()).hexdigest(),

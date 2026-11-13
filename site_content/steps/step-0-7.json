@@ -1,90 +1,87 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "0.7",
   "module": 0,
   "step": 7,
   "anchor": "step-0-7",
-  "title": "Run the setup check",
+  "title": "Request the password and download the data",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
-  "verification": "windows_executed",
+  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Run the setup check. It tests the R packages, the [locale](docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`",
-    "why": "A program can print its version and still fail to read data. It can also fail to write results in a folder path that has spaces or non-English letters. A test with a real operation finds these failures before a long analysis.",
-    "you_need": "The executable from step 0.4 and the verified data from step 0.5. The standard guided data folder is `data/course/`. Some people use an existing external installation. For them, the environment variable `COURSE_DATA_DIR` can name the extracted data, and `COURSE_OUTPUT_DIR` can name a separate output folder. These optional variables contain paths and never passwords.",
-    "command": "```{r s0-7_preflight}\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3\nsettings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. The option `--vanilla` starts R without saved workspaces and startup files. Inside the setup check, the R helper runs PLINK with these options. The exact command, with your paths and resource settings, is printed and recorded.\n\n- `--bfile` selects the input files by their shared name prefix. The prefix covers files in the [BED/BIM/FAM](docs/glossary.md#bed-bim-fam) format.\n\n- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22.\n\n- `--thin-count 20` keeps a small subset of 20 variants, chosen at random.\n\n- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable.\n\n- `--freq` reports allele frequencies, which show how common each allele is.\n\n- `--out` sets the prefix of the output files.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time; `--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes). On Windows, the executable is `bin\\plink2.exe`. The helper also runs a second test on purpose, with a folder name that has non-English letters. It translates that path in a safe way.",
-    "expected_result": "R first prints your system information, its version and the result `[1] 5` from the small calculation. It also prints the tested PLINK version from `config.R`. The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.",
-    "troubleshooting": "Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need.",
-    "quick_check": "Why does the setup check write a frequency report rather than only print a version?\n\n<details><summary>Show the answer</summary>It tests actual data reading and file writing, including a path containing spaces and non-English characters.</details>",
-    "files_created": "`results/guided/software_versions.txt`, `results/guided/preflight.txt` and PLINK test reports in its `path check/` folder. If `COURSE_OUTPUT_DIR` is set, the same files go there instead. No source input is changed."
+    "what_we_do": "Request the course password, then download the matching encrypted data with `download_course_data()`. The data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",
+    "why": "The source project contains code and text. The encrypted package contains the data. A [checksum](docs/glossary.md#checksum) is a short code calculated from a file. If the file changes, the code changes. Checksums detect changed or damaged downloads. The password decrypts the archive. A correct password does not replace the checksum check.",
+    "you_need": "The complete project folder, R and an internet connection. The command below downloads `course-data-2026.1.zip` and its small manifest file, `MANIFEST.tsv`, for you.\n\nRequest the password with your university email through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access). In class, you can scan the QR code to open the same form. The form accepts University of Pisa email addresses at `unipi.it` and all its subdomains. Examples include `studenti.unipi.it`, `phd.unipi.it` and `biologia.unipi.it`. It sends the password automatically to these addresses. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.\n\nThe packages from step 0.5 and the executable from step 0.6. Keep the project from step 0.4 open.",
+    "command": "Run this command in the RStudio console. It does not run automatically when the\nnotebook is rendered:\n\n```{r s0-7_data, eval=FALSE}\ndownload_course_data()\n```\n\nThe function uses `getPass` to ask for a masked password. Type it and press\nEnter. You will not see the letters appear. Do not write the password in this\nnotebook, a shared script or your command history. You do not need 7-Zip.",
+    "expected_result": "On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.",
+    "troubleshooting": "If the download fails, check your internet connection. As a local fallback,\nopen the release page linked above. Save `course-data-2026.1.zip` and\n`MANIFEST.tsv` together in one folder. Then run:\n\n```r\ndownload_course_data(zip_path = file.choose())\n```\n\nA file selection window opens. Choose the published ZIP file. Do not choose\nthe manifest or the project ZIP. The helper checks the same SHA-256 values.\n\nIf the data folder exists but cannot be verified, R reports what it found.\nThis includes a missing manifest, missing files or changed files. For the\nstandard folder, run the exact recovery command:\n\n```r\ndownload_course_data(overwrite = TRUE)\n```\n\nThe helper verifies a fresh copy first. It then moves the old folder and its\nmanifest to a dated backup before replacing them. It prints the backup path.\nIt never silently deletes the old data. Use that backup if you need earlier work.\n\nOlder installations did not keep the verification manifest. They need this\nbackup and reinstall once. Later runs verify the saved manifest and all data\nfiles without a download or a password prompt.\n\nIf R says that the release is not configured, download the current course\nproject again. If the password is wrong, check your typing and contact the\ninstructor if needed. Never bypass a checksum failure. See\n[troubleshooting](docs/troubleshooting.md).",
+    "quick_check": "If the checksum differs but the password is accepted, should you use that download?\n\n<details><summary>Show the answer</summary>No. Obtain the approved matching package before continuing.</details>",
+    "files_created": "Verified data in `data/course/` and the verification manifest at\n`data/course.MANIFEST.tsv`. The manifest stays beside the folder, so the\npackage still contains 108 files. R removes temporary download and extraction\nfiles. Data, manifests and passwords are never added to Git."
   },
   "setup_code": "",
   "r_commands": [
     {
-      "label": "s0-7_preflight",
-      "code": "Sys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3\nsettings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version\nsource(\"scripts/preflight.R\")",
-      "run_by_default": true
+      "label": "s0-7_data",
+      "code": "download_course_data()",
+      "run_by_default": false,
+      "where": "console"
     }
   ],
   "notebook_only_expected_code": [],
   "plink": {
-    "applicable": true,
-    "commands": [
-      "bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-7_probe --threads 2 --memory 2048"
-    ],
-    "options": [
-      {
-        "name": "--autosome",
-        "explanation_markdown": "- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22."
-      },
-      {
-        "name": "--bfile",
-        "explanation_markdown": "- `--bfile` selects the input files by their shared name prefix."
-      },
-      {
-        "name": "--freq",
-        "explanation_markdown": "- `--freq` reports allele frequencies, which show how common each allele is."
-      },
-      {
-        "name": "--memory",
-        "explanation_markdown": "`--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes)."
-      },
-      {
-        "name": "--out",
-        "explanation_markdown": "- `--out` sets the prefix of the output files."
-      },
-      {
-        "name": "--seed",
-        "explanation_markdown": "- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable."
-      },
-      {
-        "name": "--thin-count",
-        "explanation_markdown": "- `--thin-count 20` keeps a small subset of 20 variants, chosen at random."
-      },
-      {
-        "name": "--threads",
-        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time"
-      }
-    ]
+    "applicable": false,
+    "commands": [],
+    "options": []
   },
   "figures": [
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-7_preflight_success_windows.png",
+      "asset_path": "Figures/screenshots/s0-7_password_prompt_windows.png",
       "platform": "windows",
-      "placement": "expected_result",
-      "alt_text": "Successful Windows setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "placement": "command",
+      "alt_text": "Empty masked course password prompt opened from RStudio on Windows.",
       "asset": null,
       "reviewed": false
     },
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-7_preflight_success_macos.png",
+      "asset_path": "Figures/screenshots/s0-7_password_prompt_macos.png",
       "platform": "macos",
-      "placement": "expected_result",
-      "alt_text": "Successful macOS setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "placement": "command",
+      "alt_text": "Empty masked course password prompt opened from RStudio on macOS.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-7_incomplete_data_error_windows.png",
+      "platform": "windows",
+      "placement": "troubleshooting",
+      "alt_text": "RStudio Console on Windows showing an incomplete-data error and its backup recovery command.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-7_incomplete_data_error_macos.png",
+      "platform": "macos",
+      "placement": "troubleshooting",
+      "alt_text": "RStudio Console on macOS showing an incomplete-data error and its backup recovery command.",
       "asset": null,
       "reviewed": false
     }
-  ]
+  ],
+  "actions": [
+    {
+      "label": "Request the course password",
+      "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access",
+      "kind": "page"
+    },
+    {
+      "label": "Course data release",
+      "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1",
+      "kind": "page"
+    }
+  ],
+  "success_line": "Course data are ready: 108 files verified."
 }

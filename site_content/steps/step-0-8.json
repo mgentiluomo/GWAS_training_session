@@ -1,36 +1,93 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "0.8",
   "module": 0,
   "step": 8,
   "anchor": "step-0-8",
-  "title": "How to use this guide",
+  "title": "Run the setup check",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
+  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Use the same routine at every step: read, run, compare. Follow these actions:\n\n1. Read \"What we do\", \"Why\" and \"You need\".\n2. Run the command in the console.\n3. Open \"Show the expected result\" and compare it with your result.\n4. If your result differs, open \"If something goes wrong\".\n5. Answer the quick check.",
-    "why": "If you run all commands at once, the first mistake is hard to find. Saved files give you a way back after a restart. You do not depend on the R workspace, which is lost when R restarts.",
-    "you_need": "A successful check at step 0.7. Keep the output files and the notebook together in their documented places. The [glossary](docs/glossary.md) explains the terms used in the course, including quality control, alleles and association.\n\nEvery file that the steps create is saved in the folder `results/guided/` of the project. The list \"Files created\" at the end of each step gives the file names. To look at a file in RStudio, open the Files pane, click `results`, then `guided`.",
-    "command": "Read the list of checkpoints that came with your package. This command changes no files:\n\n```{r s0-8_progress}\nsource(\"R/guided.R\")\ncfg <- guided_init()\nwhere_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)\n```\n\nTerminal equivalent: call the R helper through Rscript after you set the same project paths. There is no PLINK command that reports course progress. A [checkpoint](docs/glossary.md#checkpoint) is a saved state of the course files at the end of a step. The helper `check_step(\"3.2\")` compares step 3.2 with a supplied checkpoint. The helper `restore_checkpoint(\"3.2\")` rebuilds the state after step 3.1, so that you can restart step 3.2. Both protect existing output folders.",
-    "expected_result": "Before you start the analysis, every state in the updated checkpoint index is `not verified`. Full genotype sets exist at 2.8, 3.8, 4.6 and 5.7. The other states are rebuilt from stored lists and transformations. Diagnostic and analysis files have their own small checkpoints. The list has about 30 rows, one for each saved state.",
-    "troubleshooting": "A missing checkpoint does not mean that you failed the analysis. The course package may not supply the baseline, lists or index that the checkpoint needs. Ask for the matching updated package. Do not mix versions. A copied list alone does not recreate the genotypes.",
-    "quick_check": "To restart step 4.2, which completed step's files do you need?\n\n<details><summary>Show the answer</summary>Step 4.1, from the same course data version.</details>",
-    "files_created": "`where_am_i` creates no files. Continue to module 1, which explains how the array data arise."
+    "what_we_do": "Run the setup check. It tests the R packages, the [locale](docs/glossary.md#locale) (your computer's language and number settings), the integrity of the genotype files, and a small PLINK read and write operation. This test uses 20 [variants](docs/glossary.md#variant), which are DNA positions that differ between people. At the end you should see the message `Preflight passed.`",
+    "why": "A program can print its version and still fail to read data. It can also fail to write results in a folder path that has spaces or non-English letters. A test with a real operation finds these failures before a long analysis.",
+    "you_need": "The executable from step 0.6 and the verified data from step 0.7. The standard guided data folder is `data/course/`. Some people use an existing external installation. For them, the environment variable `COURSE_DATA_DIR` can name the extracted data, and `COURSE_OUTPUT_DIR` can name a separate output folder. These optional variables contain paths and never passwords.",
+    "command": "```{r s0-8_preflight}\nsettings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version\nsource(\"scripts/preflight.R\")\n```\n\nTerminal equivalent: `Rscript --vanilla scripts/preflight.R`. The option `--vanilla` starts R without saved workspaces and startup files. Inside the setup check, the R helper runs PLINK with these options. The exact command, with your paths and resource settings, is printed and recorded.\n\n- `--bfile` selects the input files by their shared name prefix. The prefix covers files in the [BED/BIM/FAM](docs/glossary.md#bed-bim-fam) format.\n\n- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22.\n\n- `--thin-count 20` keeps a small subset of 20 variants, chosen at random.\n\n- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable.\n\n- `--freq` reports allele frequencies, which show how common each allele is.\n\n- `--out` sets the prefix of the output files.\n\nFor the standard project layout, the plain PLINK command is:\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-8_probe --threads 2 --memory 2048\n```\n\n`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time; `--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes). On Windows, the executable is `bin\\plink2.exe`. The helper also runs a second test on purpose, with a folder name that has non-English letters. It translates that path in a safe way.",
+    "expected_result": "The setup check prints one short line per check, with `PASS` or the problem. It keeps the full PLINK output in `results/guided/preflight.txt` (or the folder selected by `COURSE_OUTPUT_DIR`). The tested PLINK version is printed before the checks.\n\n`Preflight passed.`\n\nThe guided starting data have 2,016 sample wells and 299,523 variants, representing 2,000 simulated people. PLINK finishes the frequency test on 20 variants. The report can show sex as \"ambiguous\". This is normal at this stage: the starting FAM has no recorded sex. The probe reads autosomal variants and does not perform the sex check from step 3.3. A path such as `PATHCH~1` in the report is the safe form of a folder with non-English letters.\n\nVerification: the same package, genotype and PLINK read/write checks passed on Windows before this output change.",
+    "troubleshooting": "Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need.",
+    "quick_check": "Why does the setup check write a frequency report rather than only print a version?\n\n<details><summary>Show the answer</summary>It tests actual data reading and file writing, including a path containing spaces and non-English characters.</details>",
+    "files_created": "`results/guided/software_versions.txt`, `results/guided/preflight.txt` and PLINK test reports in its `path check/` folder. If `COURSE_OUTPUT_DIR` is set, the same files go there instead. No source input is changed."
   },
   "setup_code": "",
   "r_commands": [
     {
-      "label": "s0-8_progress",
-      "code": "source(\"R/guided.R\")\ncfg <- guided_init()\nwhere_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)",
-      "run_by_default": true
+      "label": "s0-8_preflight",
+      "code": "settings <- new.env(parent = baseenv())\nsys.source(\"config.R\", settings)\nsettings$course_settings$tested_plink_version\nsource(\"scripts/preflight.R\")",
+      "run_by_default": true,
+      "where": "console"
     }
   ],
   "notebook_only_expected_code": [],
   "plink": {
-    "applicable": false,
-    "commands": [],
-    "options": []
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-8_probe --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--autosome",
+        "explanation_markdown": "- `--autosome` keeps only autosomal variants, which are those on chromosomes 1 to 22."
+      },
+      {
+        "name": "--bfile",
+        "explanation_markdown": "- `--bfile` selects the input files by their shared name prefix."
+      },
+      {
+        "name": "--freq",
+        "explanation_markdown": "- `--freq` reports allele frequencies, which show how common each allele is."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--memory 2048` sets the main workspace of PLINK to 2048 MiB (about 2 gigabytes)."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "- `--out` sets the prefix of the output files."
+      },
+      {
+        "name": "--seed",
+        "explanation_markdown": "- `--seed 20261111` sets the starting number of the random choice, so the sampling is repeatable."
+      },
+      {
+        "name": "--thin-count",
+        "explanation_markdown": "- `--thin-count 20` keeps a small subset of 20 variants, chosen at random."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads, which are parts of the computer that work at the same time"
+      }
+    ]
   },
-  "figures": []
+  "figures": [
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-8_preflight_success_windows.png",
+      "platform": "windows",
+      "placement": "expected_result",
+      "alt_text": "Successful Windows setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "asset": null,
+      "reviewed": false
+    },
+    {
+      "kind": "screenshot",
+      "asset_path": "Figures/screenshots/s0-8_preflight_success_macos.png",
+      "platform": "macos",
+      "placement": "expected_result",
+      "alt_text": "Successful macOS setup check in RStudio, with Preflight passed and the R prompt visible.",
+      "asset": null,
+      "reviewed": false
+    }
+  ],
+  "actions": [],
+  "success_line": "Preflight passed."
 }

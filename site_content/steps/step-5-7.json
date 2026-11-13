@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "5.7",
   "module": 5,
   "step": 7,
   "anchor": "step-5-7",
   "title": "Cohort PCs and how many to include",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate new PCs in the retained study cohort, look at the eigenvalues and save the full state.",
@@ -86,5 +86,6 @@
       "alt_text": "The first cohort eigenvalue is much larger than the subsequent nine; ten PCs are prespecified for association.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants."
 }

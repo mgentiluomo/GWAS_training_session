@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "3.2",
   "module": 3,
   "step": 2,
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe",
+  "source_sha256": "a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",
@@ -66,6 +66,7 @@
     ]
   },
   "figures": [],
+  "success_line": "42 more wells are removed. 1,971 samples and 296,360 variants remain.",
   "interactive_data": {
     "kind": "sample_call_rate_threshold_counts",
     "source_state": "3.1",

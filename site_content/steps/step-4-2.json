@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "4.2",
   "module": 4,
   "step": 2,
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31",
+  "source_sha256": "230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We test whether missing calls differ between cases and controls.",
@@ -65,5 +65,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "120 variants are excluded. 295,439 variants and 1,844 samples remain."
 }

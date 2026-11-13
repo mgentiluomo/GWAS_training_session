@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.4",
   "module": 7,
   "step": 4,
   "anchor": "step-7-4",
   "title": "Multiple-testing thresholds",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare three ways to decide which p-values are small enough to call a result: the usual GWAS threshold, a Bonferroni threshold for this scan and a false-discovery-rate adjustment.",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7."
 }

@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.6",
   "module": 7,
   "step": 6,
   "anchor": "step-7-6",
   "title": "Regional plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.",
@@ -93,5 +93,6 @@
       "alt_text": "Four L2 variants pass the genome-wide threshold; symbol and colour indicate LD with the chromosome 9 lead.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "L2 has four genome-wide significant variants."
 }

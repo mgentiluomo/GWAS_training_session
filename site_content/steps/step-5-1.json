@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "5.1",
   "module": 5,
   "step": 1,
   "anchor": "step-5-1",
   "title": "Why ancestry matters",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn how [population structure](docs/glossary.md#population-stratification) can mislead an association study. Then look at the reference samples we will use.",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS."
 }

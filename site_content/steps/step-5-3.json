@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "5.3",
   "module": 5,
   "step": 3,
   "anchor": "step-5-3",
   "title": "Match build, position and alleles",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Check that the shared variants are really the same variants in both files, before the projection.",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair."
 }

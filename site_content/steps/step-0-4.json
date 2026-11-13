@@ -1,25 +1,32 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "0.4",
   "module": 0,
   "step": 4,
   "anchor": "step-0-4",
-  "title": "Download PLINK 2",
+  "title": "Open the project and check R",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
-  "verification": "manual_required",
+  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/). A build is a version of the program made for one system and processor. Follow these actions:\n\n1. Open the page. It lists several downloads. Choose the build whose name matches your system and processor from step 0.1. The names on the page can change.\n2. Save the ZIP file. A ZIP file is one compressed file that holds other files.\n3. Extract the ZIP file. On Windows, right-click it, choose \"Extract All\", then click \"Extract\". On macOS, double-click it.\n4. Inside you find the program. It is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](docs/glossary.md#executable), the file your computer can run.\n5. Copy the executable into the `bin/` folder of the course project. You create the project at step 0.5. The ZIP file may hold other programs too. Copy only `plink2.exe` (or `plink2`).\n\nThe ZIP file is not the executable, so extract it first. When you finish, you should see `plink2.exe` or `plink2` inside the `bin` folder.",
-    "why": "PLINK 2 reads the genotype file formats. It computes [quality control](docs/glossary.md#quality-control) (QC) and association statistics. QC means checks that find samples or data that cannot be trusted. PLINK 1.9 is a different program, so it does not replace PLINK 2. The tested version is stored in one place, the settings file `config.R`. The setup check reports your version and warns you if it differs.",
-    "you_need": "Your system and processor from step 0.1, and the extracted project from step 0.5. You may download the executable first and copy it after you extract the project.",
-    "command": "No R code to run. Check that you extracted the ZIP and found `plink2.exe` on Windows, or `plink2` on macOS or Linux. Copy it into the project's `bin` folder after step 0.5. The setup check at step 0.7 reports the tested and installed versions.",
-    "expected_result": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux. At step 0.7 your executable must identify itself as PLINK v2. A different build gives a warning. A different version number alone does not make the check fail.",
-    "troubleshooting": "On macOS or Linux, the extracted file may lack permission to run. Open a terminal in the project folder (the project root). Type `chmod u+x bin/plink2`. This command gives your user permission to run that file. If your institution's security blocks it, ask support. Do not switch off computer security controls.",
-    "quick_check": "Can a file named `plink2.zip` be used as the executable?\n\n<details><summary>Show the answer</summary>No. Extract the matching executable from it.</details>",
-    "files_created": "`bin/plink2.exe` or `bin/plink2`. It stays outside [Git](docs/glossary.md#git), the tool that records versions of the project files."
+    "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the folder you extracted or cloned at step 0.3, double-click `GWAS_course.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_course` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](docs/glossary.md#working-directory), which is the main folder of the project.",
+    "why": "A [relative path](docs/glossary.md#relative-path) gives the place of a file starting from the working directory. The working directory is the folder where R looks first. One project root means you never copy your personal full paths into commands.",
+    "you_need": "The complete extracted or cloned 2026 project from step 0.3, not one downloaded notebook. No branch change is needed.",
+    "command": "```{r s0-4_project}\ngetwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3\n```\n\nRun these commands in the RStudio Console. The function `stopifnot` stops with an error when a required condition is false. If the file checks pass, they print nothing.",
+    "expected_result": "R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.\n\nR prints your system information, its version and the result `[1] 5` from the small calculation. The R version may differ from the validation environment.\n\n`[1] 5`\n\nVerification: the project, version and calculation commands passed on Windows before this reordering.",
+    "troubleshooting": "If `config.R` is missing, close RStudio and open the project again from the extracted source folder. Do not create an empty replacement file. Do not rename a downloaded HTML page to `.R`.",
+    "quick_check": "Does a relative path starting `R/` refer to a folder on every computer's C drive?\n\n<details><summary>Show the answer</summary>No. It refers to the R folder under the current project root.</details>",
+    "files_created": "RStudio may create local project settings in `.Rproj.user/`. Git ignores them."
   },
   "setup_code": "",
-  "r_commands": [],
+  "r_commands": [
+    {
+      "label": "s0-4_project",
+      "code": "getwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3",
+      "run_by_default": true,
+      "where": "console"
+    }
+  ],
   "notebook_only_expected_code": [],
   "plink": {
     "applicable": false,
@@ -29,21 +36,23 @@
   "figures": [
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-4_plink_executable_windows.png",
+      "asset_path": "Figures/screenshots/s0-4_project_panes_windows.png",
       "platform": "windows",
-      "placement": "expected_result",
-      "alt_text": "Windows File Explorer showing plink2.exe extracted into the course bin folder.",
+      "placement": "what_we_do",
+      "alt_text": "Course project open in RStudio on Windows, with the lesson in Source beside Console and Files.",
       "asset": null,
       "reviewed": false
     },
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-4_plink_executable_macos.png",
+      "asset_path": "Figures/screenshots/s0-4_project_panes_macos.png",
       "platform": "macos",
-      "placement": "expected_result",
-      "alt_text": "macOS Finder showing plink2 extracted into the course bin folder.",
+      "placement": "what_we_do",
+      "alt_text": "Course project open in RStudio on macOS, with the lesson in Source beside Console and Files.",
       "asset": null,
       "reviewed": false
     }
-  ]
+  ],
+  "actions": [],
+  "success_line": "[1] 5"
 }

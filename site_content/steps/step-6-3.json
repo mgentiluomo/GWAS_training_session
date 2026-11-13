@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "6.3",
   "module": 6,
   "step": 3,
   "anchor": "step-6-3",
   "title": "Prepare covariates",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "a6360cb0801d6d913b94179ddd2151b78450ac7ffbf83547df9bcd1d813c7344",
+  "source_sha256": "22c731be4101779fb3a45b04030566f757ff668a5145e77fc065098d07f385c6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Join age and ten principal components ([PCs](docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10."
 }

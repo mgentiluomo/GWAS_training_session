@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "module": 5,
   "title": "Population structure",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "overview_markdown": "**What you will do.** You compare your study samples with a reference set of people from known world regions. You calculate a few numbers for each person that describe their genetic background. You then remove the few samples whose background is very different from the rest.\n\n**What you will learn.**\n\n- Why differences in [ancestry](docs/glossary.md#ancestry) between cases and controls can create false results.\n- How a [principal component](docs/glossary.md#pca-pc) (PC) summarises genetic variation in one number per person.\n- How to place study samples on reference axes and draw them in a plot.\n- How to flag ancestry outliers with one fixed rule.\n- How to choose and justify the number of PCs for the later analysis.\n\n**How long it takes.** About 60 minutes. The slowest step is 5.4, which runs PLINK three times.",
   "recap_markdown": "- You compared the study with a GRCh38 reference subset of 1,062 samples.\n- You kept 48,614 shared sites, and all of them matched on chromosome, position and alleles.\n- You placed 1,844 study samples on the reference axes and drew the plot.\n- You applied the six-standard-deviation rule and excluded 33 outlier records.\n- 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.\n\n**Next:** module 6, where you run the association test and use these PCs as covariates."
 }

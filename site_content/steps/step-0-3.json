@@ -1,22 +1,22 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "0.3",
   "module": 0,
   "step": 3,
   "anchor": "step-0-3",
-  "title": "Install RStudio",
+  "title": "Download and extract the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
+  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
   "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Install [RStudio Desktop](https://docs.posit.co/ide/user/download.html) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the download page. Go to \"RStudio Desktop\". Click the installer link for your operating system. Save the file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
-    "why": "The console runs one command at a time. The editor keeps commands in a notebook, so you can read and rerun them later. R holds values, such as loaded data, in memory. These values disappear when R restarts. Files saved on disk remain.",
-    "you_need": "A working R installation from step 0.2 and the RStudio installer.",
-    "command": "No code to run. Open RStudio from your applications menu. Find the Console pane and check that it shows a `>` prompt. You will run your first course commands at step 0.5.",
-    "expected_result": "RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet.",
-    "troubleshooting": "If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, press Escape to return to an empty prompt.",
-    "quick_check": "After restarting R, should you expect an unsaved object to remain in memory?\n\n<details><summary>Show the answer</summary>No. Reload it from a saved file or rerun the command that creates it.</details>",
-    "files_created": "RStudio software files. No course data are created."
+    "what_we_do": "Download and extract the whole source project. Follow these actions:\n\n1. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip) from release `project-2026.1`. This fixed version contains the course project, not the encrypted data.\n2. On Windows, right-click the ZIP and choose \"Extract All\", then \"Extract\". On macOS, double-click the ZIP. On Linux, use your file manager to extract it.\n3. Extract it under `C:/` on Windows or your home folder on macOS and Linux. The ZIP supplies its own `GWAS_course` folder. The standard paths are `C:/GWAS_course` and `~/GWAS_course`.\n4. Open that folder. You should see `config.R`, `GWAS_course.Rproj` and the folders `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. You may use another writable location or folder name. Do not nest a second copy of the project inside it.\n\nIf you already use Git, a plain `git clone https://github.com/mgentiluomo/GWAS_training_session.git` also works. Its default branch is `course/2026-guided-training`. The default folder name `GWAS_training_session` is valid. Open `GWAS_course.Rproj` inside it; no folder or branch rename is needed.",
+    "why": "The source project contains code and text. The encrypted data are separate and are downloaded at step 0.7. One project folder keeps the relative paths consistent.",
+    "you_need": "R and RStudio from steps 0.1 and 0.2, an internet connection and a folder where you can save files.",
+    "command": "No R code to run. Download and extract the whole project as described above.",
+    "expected_result": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`. The standard folder is `C:/GWAS_course` on Windows or `~/GWAS_course` on macOS and Linux. Other writable folder names also work.",
+    "troubleshooting": "If `config.R` is missing, check that you opened the extracted project folder. Do not use a single downloaded notebook. Do not create an empty replacement file or rename a downloaded HTML page to `.R`.",
+    "quick_check": "Does downloading the source project also download the encrypted classroom data?\n\n<details><summary>Show the answer</summary>No. Download the matching data at step 0.7.</details>",
+    "files_created": "The complete extracted source project."
   },
   "setup_code": "",
   "r_commands": [],
@@ -26,24 +26,13 @@
     "commands": [],
     "options": []
   },
-  "figures": [
+  "figures": [],
+  "actions": [
     {
-      "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-3_rstudio_console_windows.png",
-      "platform": "windows",
-      "placement": "expected_result",
-      "alt_text": "RStudio on Windows with the Console tab selected and an empty R prompt.",
-      "asset": null,
-      "reviewed": false
-    },
-    {
-      "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-3_rstudio_console_macos.png",
-      "platform": "macos",
-      "placement": "expected_result",
-      "alt_text": "RStudio on macOS with the Console tab selected and an empty R prompt.",
-      "asset": null,
-      "reviewed": false
+      "label": "Download the project ZIP",
+      "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip",
+      "kind": "download"
     }
-  ]
+  ],
+  "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`."
 }

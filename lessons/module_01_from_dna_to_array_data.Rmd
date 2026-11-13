@@ -42,6 +42,8 @@ cfg <- guided_init()
 
 ## 1.1 SNPs and genotypes {#step-1-1}
 
+
+<!-- step_meta: {"success_line": "The annotation contains 299,523 rows."} -->
 ### What we do
 
 Learn the difference between a DNA site, an allele and a genotype.
@@ -101,6 +103,8 @@ None.
 
 ## 1.2 How an array measures DNA {#step-1-2}
 
+
+<!-- step_meta: {"success_line": "The top of a simulated Final Report: first the header, then the start of the data section."} -->
 ### What we do
 
 Learn why a fluorescence measurement is not the same as a genotype call.
@@ -164,6 +168,8 @@ None.
 
 ## 1.3 The Global Screening Array {#step-1-3}
 
+
+<!-- step_meta: {"success_line": "Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA)."} -->
 ### What we do
 
 Learn what the array measures and what it leaves unmeasured.
@@ -222,6 +228,8 @@ None.
 
 ## 1.4 From sample to scanned chip {#step-1-4}
 
+
+<!-- step_meta: {"success_line": "Twenty-one plates, each with 96 wells, give 2,016 measurements."} -->
 ### What we do
 
 Follow the identity of a sample through a plate and a laboratory well.
@@ -284,6 +292,8 @@ None.
 
 ## 1.5 Calling genotypes {#step-1-5}
 
+
+<!-- step_meta: {"success_line": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus."} -->
 ### What we do
 
 Read the call and score columns, and do not treat the score as certainty.
@@ -347,6 +357,8 @@ None.
 
 ## 1.6 Problems born in the laboratory {#step-1-6}
 
+
+<!-- step_meta: {"success_line": "The table has the information that you need to study batch membership and labelled replicates."} -->
 ### What we do
 
 Link laboratory problems to the quality-control checks of later modules.
@@ -407,6 +419,8 @@ None.
 
 ## 1.7 The export {#step-1-7}
 
+
+<!-- step_meta: {"success_line": "2,016 sample wells and 299,523 variants."} -->
 ### What we do
 
 Understand how the reports relate to the genotype files used for the analysis.

@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.8",
   "module": 7,
   "step": 8,
   "anchor": "step-7-8",
   "title": "Final summary and reporting",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Write a clear summary of the whole simulated main path. Save the final results and figures so that others can check them.",
@@ -40,5 +40,6 @@
       "alt_text": "Teaching schematic: Final summary and reporting.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures."
 }

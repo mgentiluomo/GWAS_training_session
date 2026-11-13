@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "1.7",
   "module": 1,
   "step": 7,
   "anchor": "step-1-7",
   "title": "The export",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "538e9511d56d51abab6b53db8fb912cbb951a6d6a8d112be153e461b846372fe",
+  "source_sha256": "140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Understand how the reports relate to the genotype files used for the analysis.",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "2,016 sample wells and 299,523 variants."
 }

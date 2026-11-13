@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "2.4",
   "module": 2,
   "step": 4,
   "anchor": "step-2-4",
   "title": "First overview",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a06b8ad326befd58800f104948e5b9ed9a665e546e67b89a993934a87817d5a6",
+  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We measure how much data is missing, before we decide which samples or sites to remove.",
@@ -56,5 +56,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "You get a sample report and a variant report."
 }

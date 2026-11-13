@@ -40,6 +40,8 @@ cfg <- guided_init()
 
 ## 6.1 One variant by hand {#step-6-1}
 
+
+<!-- step_meta: {"success_line": "A table of carriers and non-carriers in the retained cohort, and a finite odds ratio."} -->
 ### What we do
 
 Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.
@@ -107,6 +109,8 @@ No. Odds and probability are different things. An odds ratio is usually not the 
 
 ## 6.2 The additive logistic model {#step-6-2}
 
+
+<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value)."} -->
 ### What we do
 
 Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.
@@ -167,6 +171,8 @@ The example model exists only in R memory. The genotype export from 6.1 stays on
 
 ## 6.3 Prepare covariates {#step-6-3}
 
+
+<!-- step_meta: {"success_line": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10."} -->
 ### What we do
 
 Join age and ten principal components ([PCs](../docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).
@@ -235,6 +241,8 @@ The rows must belong to the correct sample IDs. Each row must match its own samp
 
 ## 6.4 Run the association scan {#step-6-4}
 
+
+<!-- step_meta: {"success_line": "The frequency check in the final cohort removes another 1,698 variants."} -->
 ### What we do
 
 Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.
@@ -299,6 +307,8 @@ No. The p-value depends on the effect, the uncertainty and the sample size. Also
 
 ## 6.5 Read association output {#step-6-5}
 
+
+<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12."} -->
 ### What we do
 
 Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.
@@ -362,6 +372,8 @@ Read the reason for the failure. Keep the p-value as missing. Do not replace it 
 
 ## 6.6 Sparse genotypes and Firth correction {#step-6-6}
 
+
+<!-- step_meta: {"success_line": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele."} -->
 ### What we do
 
 Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.
@@ -446,6 +458,8 @@ The chosen variant ID, the forced Firth report and the log files.
 
 ## 6.7 First look and association checkpoint {#step-6-7}
 
+
+<!-- step_meta: {"success_line": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values."} -->
 ### What we do
 
 Summarise the valid tests. Save the key association files so that you can restart from here.
@@ -510,6 +524,8 @@ No. Nearby variants can share one signal because of [LD](../docs/glossary.md#ld)
 
 ## 6.8 Create the summary statistics file {#step-6-8}
 
+
+<!-- step_meta: {"success_line": "The summary statistics file has 236,815 rows, one for each tested variant."} -->
 ### What we do
 
 Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.

@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "3.6",
   "module": 3,
   "step": 6,
   "anchor": "step-3-6",
   "title": "Relatedness and duplicates",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe",
+  "source_sha256": "a17b991a1400692149afd61f24ee72b7b6f5568c0d9b8800630c325b41ab4d18",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.",
@@ -80,5 +80,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "There are 19 duplicate-class pairs and ten first-degree pairs."
 }

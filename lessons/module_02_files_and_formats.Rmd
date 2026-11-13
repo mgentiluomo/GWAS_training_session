@@ -40,6 +40,8 @@ cfg <- guided_init()
 
 ## 2.1 The starting files {#step-2-1}
 
+
+<!-- step_meta: {"success_line": "You see 2,016 sample wells and 299,523 variant entries before QC."} -->
 ### What we do
 
 We identify the complete set of files exported by the laboratory. We keep these input files unchanged.
@@ -98,6 +100,8 @@ None.
 
 ## 2.2 Convert to PLINK 2 native format {#step-2-2}
 
+
+<!-- step_meta: {"success_line": "The 2,016 samples and 299,523 variants are all kept."} -->
 ### What we do
 
 We convert the matched BED, BIM and FAM files to PGEN, PVAR and PSAM files.
@@ -158,6 +162,8 @@ No. The storage format and the genome assembly are two separate properties.
 
 ## 2.3 Sample and variant tables {#step-2-3}
 
+
+<!-- step_meta: {"success_line": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows."} -->
 ### What we do
 
 We read the sample table and the variant table. We do not change them.
@@ -219,6 +225,8 @@ None.
 
 ## 2.4 First overview {#step-2-4}
 
+
+<!-- step_meta: {"success_line": "You get a sample report and a variant report."} -->
 ### What we do
 
 We measure how much data is missing, before we decide which samples or sites to remove.
@@ -287,6 +295,8 @@ If F_MISS is 0.03, what is the call rate?
 
 ## 2.5 Alleles and strand {#step-2-5}
 
+
+<!-- step_meta: {"success_line": "400 sites are flipped and 3,013 sites are excluded. 2,016 samples and 296,510 variants remain."} -->
 ### What we do
 
 We compare the allele pairs from the laboratory with the supplied plus-strand annotation. We flip the pairs that are complementary. We remove the sites that are ambiguous or incompatible.
@@ -371,6 +381,8 @@ The flip and exclusion lists, and `s2-5_state.pgen/.pvar/.psam`.
 
 ## 2.6 Genome builds and lift-over {#step-2-6}
 
+
+<!-- step_meta: {"success_line": "The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file."} -->
 ### What we do
 
 We convert the separate GRCh37 exercise to GRCh38 in R. We use a chain file for this one direction. We keep the exercise apart from the main analysis.
@@ -453,6 +465,8 @@ No. You must still check the alleles and the reverse-strand mappings.
 
 ## 2.7 Add phenotype and covariates {#step-2-7}
 
+
+<!-- step_meta: {"success_line": "All 2,016 wells are matched, and 296,510 variants remain."} -->
 ### What we do
 
 We join the extra information to each well by its identity. A well that holds a labelled technical replicate gets the information of the original person.
@@ -525,6 +539,8 @@ The phenotype describes the person. The rows of the export describe measured wel
 
 ## 2.8 Module 2 checkpoint {#step-2-8}
 
+
+<!-- step_meta: {"success_line": "You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants."} -->
 ### What we do
 
 We save the first complete set of native files that you can restart from. We record its checked size.

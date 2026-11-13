@@ -1,9 +1,9 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "module": 4,
   "title": "Variant quality control",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31",
+  "source_sha256": "230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c",
   "overview_markdown": "**What you will do.** In this module you check each [variant](docs/glossary.md#variant), not each person. A variant is a place in the DNA where people can carry different versions, called [alleles](docs/glossary.md#allele). You remove variants that were measured badly or that are too rare to analyse. You also remove duplicated variants. At the end you save the cleaned dataset.\n\n**What you will learn.**\n\n- How to find variants with a low [call rate](docs/glossary.md#call-rate), which means too many failed results.\n- Why failed results must not differ between [cases and controls](docs/glossary.md#case-and-control), which is called [differential missingness](docs/glossary.md#differential-missingness).\n- Why very rare variants are left out, using [minor allele frequency](docs/glossary.md#maf).\n- How the [Hardy–Weinberg](docs/glossary.md#hwe) test finds genotyping errors, and why its threshold depends on sample size.\n- How to check the X, Y and mitochondrial variants and how to merge duplicated variants.\n\n**How long it takes.** About 45 minutes. Step 4.5 is the slowest, because it runs three commands and reads a large table.\n\nA [sample](docs/glossary.md#sample) is the DNA of one person measured on the array. Every step in this module removes variants, so the number of samples stays the same.",
   "recap_markdown": "- Step 4.1 removed 801 variants with a call rate below 98%.\n- Step 4.2 removed 120 variants whose missing calls differed between cases and controls.\n- Step 4.3 removed 56,420 variants with a minor allele frequency below 1%.\n- Step 4.4 removed 167 variants that failed the Hardy–Weinberg test in the controls.\n- Step 4.5 removed 33 variants with impossible calls on X, Y or MT, and 306 duplicate entries.\n- You saved the module 4 checkpoint: 1,844 samples and 238,513 variants.\n\n**Next:** Module 5 studies population structure, to check that cases and controls have similar ancestry."
 }

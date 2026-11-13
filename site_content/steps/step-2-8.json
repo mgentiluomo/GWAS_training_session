@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "2.8",
   "module": 2,
   "step": 8,
   "anchor": "step-2-8",
   "title": "Module 2 checkpoint",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a06b8ad326befd58800f104948e5b9ed9a665e546e67b89a993934a87817d5a6",
+  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the first complete set of native files that you can restart from. We record its checked size.",
@@ -32,5 +32,6 @@
     "commands": [],
     "options": []
   },
-  "figures": []
+  "figures": [],
+  "success_line": "You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants."
 }

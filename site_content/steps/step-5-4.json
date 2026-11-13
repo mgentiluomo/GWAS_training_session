@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "5.4",
   "module": 5,
   "step": 4,
   "anchor": "step-5-4",
   "title": "Reference PCA and study projection",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.",
@@ -78,5 +78,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "The study projection contains 1,844 samples."
 }

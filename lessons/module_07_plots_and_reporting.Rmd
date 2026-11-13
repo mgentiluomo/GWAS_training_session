@@ -40,6 +40,8 @@ cfg <- guided_init()
 
 ## 7.1 QQ plot {#step-7-1}
 
+
+<!-- step_meta: {"success_line": "Most points are close to the diagonal line."} -->
 ### What we do
 
 Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
@@ -109,6 +111,8 @@ No. A few true signals can lift the highest points while most other tests stay c
 
 ## 7.2 Genomic inflation factor {#step-7-2}
 
+
+<!-- step_meta: {"success_line": "Lambda is approximately 1.016."} -->
 ### What we do
 
 Calculate lambda for the autosomal variants. Then read it together with the QQ plot.
@@ -171,6 +175,8 @@ No. Lambda summarises the middle of all the tests. It does not show that one sin
 
 ## 7.3 Manhattan plot {#step-7-3}
 
+
+<!-- step_meta: {"success_line": "There are three strong regions, on chromosomes 3, 9 and 12."} -->
 ### What we do
 
 Draw a Manhattan plot of the association results along the autosomes. The plot reads the summary statistics file made at step 6.8.
@@ -240,6 +246,8 @@ No. Because of LD, several tested variants can point to the same single signal.
 
 ## 7.4 Multiple-testing thresholds {#step-7-4}
 
+
+<!-- step_meta: {"success_line": "There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7."} -->
 ### What we do
 
 Compare three ways to decide which p-values are small enough to call a result: the usual GWAS threshold, a Bonferroni threshold for this scan and a false-discovery-rate adjustment.
@@ -305,6 +313,8 @@ No. The rate describes the whole set of discoveries on average. It is not a prob
 
 ## 7.5 Clump correlated results {#step-7-5}
 
+
+<!-- step_meta: {"success_line": "There are three clumps."} -->
 ### What we do
 
 Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.
@@ -370,6 +380,8 @@ Yes. The clumps depend on these settings and on the samples used to measure LD.
 
 ## 7.6 Regional plot {#step-7-6}
 
+
+<!-- step_meta: {"success_line": "L2 has four genome-wide significant variants."} -->
 ### What we do
 
 Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.
@@ -458,6 +470,8 @@ No. The lead variant is the strongest association among the sites that we tested
 
 ## 7.7 Compare without PCs and without QC {#step-7-7}
 
+
+<!-- step_meta: {"success_line": "Main analysis: 236,815 tests, eight hits, lambda about 1.016."} -->
 ### What we do
 
 Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.
@@ -554,6 +568,8 @@ Two comparison association outputs, the age table, `s7-7_comparison.tsv` and `s7
 
 ## 7.8 Final summary and reporting {#step-7-8}
 
+
+<!-- step_meta: {"success_line": "A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures."} -->
 ### What we do
 
 Write a clear summary of the whole simulated main path. Save the final results and figures so that others can check them.

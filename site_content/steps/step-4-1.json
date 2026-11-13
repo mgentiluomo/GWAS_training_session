@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "4.1",
   "module": 4,
   "step": 1,
   "anchor": "step-4-1",
   "title": "Variant call rate",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "774557348c076df43f6bfbbf3201efd0a088690525cdcdf61581438fb3c8ac31",
+  "source_sha256": "230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We remove variants with a call rate below 98%. We do this after sample [quality control](docs/glossary.md#quality-control) (QC), which already removed the poor samples in module 3.",
@@ -60,5 +60,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "801 variants are removed."
 }

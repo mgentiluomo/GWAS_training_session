@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "6.6",
   "module": 6,
   "step": 6,
   "anchor": "step-6-6",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "a6360cb0801d6d913b94179ddd2151b78450ac7ffbf83547df9bcd1d813c7344",
+  "source_sha256": "22c731be4101779fb3a45b04030566f757ff668a5145e77fc065098d07f385c6",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",
@@ -75,5 +75,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele."
 }

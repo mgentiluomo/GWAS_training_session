@@ -1,4 +1,4 @@
-# Website step content schema, version 1.0
+# Website step content schema, version 1.1
 
 The canonical sources are `lessons/module_00_*.Rmd` through
 `lessons/module_07_*.Rmd`. Do not edit generated JSON or the combined R script.
@@ -13,7 +13,7 @@ images, download data, publish a website or create an encrypted release.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
-| `schema_version` | string | Currently `1.0`. |
+| `schema_version` | string | Currently `1.1`. |
 | `id`, `module`, `step` | string, integer, integer | Stable identifier such as `3.2` and its components. |
 | `anchor` | string | Stable page anchor, such as `step-3-2`. |
 | `title` | string | Step title from the notebook. |
@@ -22,7 +22,9 @@ images, download data, publish a website or create an encrypted release.
 | `verification` | string | `windows_executed`, `manual_required` or `unverified`; read alongside the session report's limits. |
 | `blocks` | object | The fixed teaching blocks, in their source order, as Markdown/HTML. |
 | `setup_code` | string | Student setup required before the step. Excludes the `knit_setup` chunk. Empty when no setup is needed. |
-| `r_commands` | array | Source chunk `label`, literal R `code`, and boolean `run_by_default`. |
+| `r_commands` | array | Source chunk `label`, literal R `code`, boolean `run_by_default`, and optional `where` (default `console`). |
+| `actions` | optional array | Button records `{label, url, kind, os?}`. `kind` is `download` or `page`; optional `os` is `windows`, `macos` or `linux`. An empty array means no button is needed. |
+| `success_line` | optional string | At most 180 characters, one exact excerpt copied from the step's expected result. Omit when no single visible result is suitable. |
 | `notebook_only_expected_code` | array | Render-only R helpers extracted from expected-result blocks; never display these as student instructions on the website. |
 | `plink` | object | Boolean `applicable`, literal `commands`, and one explanation per unique option name. |
 | `interactive_data` | optional object | Count-only threshold table at step 3.2; see below. |
@@ -40,16 +42,40 @@ They run when knitting a notebook. The website setup and combined R script omit
 them. Keep student setup, such as loading `R/guided.R` and initialising `cfg`,
 in a separate chunk. Do not mix it into `knit_setup`.
 
-Steps 0.1 to 0.4 have no R command blocks and no `setup_code`.
-Their `r_commands` arrays are empty and their verification is `manual_required`.
-They use operating system settings and installer windows. R checks start later.
-Render an empty command array without a code panel. Hide the module setup panel
-when `setup_code` is empty. The operating system and version checks run at 0.7.
+Steps 0.1, 0.2, 0.3 and 0.6 use browser, installer and file-manager
+instructions. Their `r_commands` arrays and `setup_code` are empty. Step 0.4
+checks the project, operating system, R version and calculation. Step 0.5
+installs packages and loads the data helper with `eval=FALSE`. Step 0.7 runs
+the interactive data download with `eval=FALSE`. Step 0.8 runs preflight.
+The whole-path script omits installation and download chunks.
 
-`windows_executed` refers to the executable R chunks, not to untested installer
-clicks or masked GUI prompts. Step 0.5 is `manual_required`: its interactive
-download chunks are intentionally not run by the whole-path script. Local ZIP
-extraction and the URL branch have separate integration/mocked tests.
+`windows_executed` concerns executable R chunks. It does not verify installer
+clicks, Gatekeeper, SmartScreen or masked GUI prompts. Manual-only steps use
+`manual_required`. Old Windows verification statements describe the checks
+before the preparation reordering; the current validation report records reruns.
+
+Optional UI metadata is authored in a single notebook comment per step:
+
+```html
+<!-- step_meta: {"actions":[],"where":{"s0-4_project":"console"},"success_line":"[1] 5"} -->
+```
+
+The exporter removes this comment from visible blocks. It exports `actions`
+and `success_line` at step level. The comment's `where` map uses source R chunk
+labels and exports each value on the corresponding `r_commands` entry. Allowed
+values are `console`, `terminal`, `editor` and `browser`. An omitted value means
+`console`; an unknown label or location fails export. Steps without an R command
+have no command location. Buttons require non-empty labels and HTTPS URLs.
+`kind: download` denotes a file action; `kind: page` opens a page. An OS filter
+only controls which button is displayed, not software compatibility.
+
+All eight module 0 steps explicitly supply `actions` and `success_line`, and all
+their R commands specify `where`. Console-only steps have `actions: []`.
+Success excerpts for other executable steps remain in their canonical notebook
+comments. Reading-only steps 1.8 to 1.11 omit `success_line`: their expected
+results describe understanding, not one visible output. Never manufacture an
+output or infer an unprinted PASS message. Source changes invalidate the old
+excerpt and fail export until the author updates it.
 
 PLINK option explanations come from the step's prose. Each `plink.options` entry has `name` and `explanation_markdown`, containing
 only the sentence or clause explaining that option. Shared options may reuse
@@ -66,7 +92,7 @@ Screenshot declarations are stored in notebook HTML comments beside the
 relevant teaching block. They are removed from exported text blocks. For example:
 
 ```html
-<!-- screenshot: {"kind":"screenshot","asset_path":"Figures/screenshots/s0-3_rstudio_console_windows.png","platform":"windows","placement":"expected_result","alt_text":"RStudio on Windows with the Console tab selected and an empty R prompt."} -->
+<!-- screenshot: {"kind":"screenshot","asset_path":"Figures/screenshots/s0-2_rstudio_console_windows.png","platform":"windows","placement":"expected_result","alt_text":"RStudio on Windows with the Console tab selected and an empty R prompt."} -->
 ```
 
 The exporter adds a `figures` record with these fields:
@@ -144,9 +170,9 @@ main-path state. It stays external alongside its PLINK command and log.
 ## Optional ninth block: Under the hood and literature
 
 `blocks.under_the_hood` is present only for steps whose notebook carries the block.
-Steps without it export exactly as before: the key is absent, not empty. The schema
-version stays `1.0`, because the object only gains an optional key, like
-`what_this_check_can_reveal`. A site that ignores unknown block keys keeps working
+Steps without it export exactly as before: the key is absent, not empty. Schema `1.1` documents this block together with the three optional UI fields.
+The block was already present on the published guided branch at commit
+`4c99e7c`; this revision does not remove it or alter its content. A site that ignores unknown block keys keeps working
 unchanged; to show the block it must render the key.
 
 In the notebook the block is a collapsed section placed after `### Files created`, so the
@@ -192,7 +218,7 @@ edited by hand.
 
 | Field | Meaning |
 | --- | --- |
-| `schema_version` | `1.0`. |
+| `schema_version` | `1.1`. |
 | `module`, `title` | Module number and title from the notebook header. |
 | `source`, `source_sha256` | Notebook path and the SHA-256 of its text. |
 | `overview_markdown` | The "Module N at a glance" section: what the student will do, learn and how long it takes. |

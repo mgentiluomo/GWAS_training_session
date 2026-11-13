@@ -218,7 +218,7 @@ class CourseExportsTests(unittest.TestCase):
             report = Path(folder) / "test.smiss"
             report.write_text("IID\tMISSING_CT\tOBS_CT\n" +
                               "".join(f"private{i}\t3\t100\n" for i in range(42)) +
-                              "boundary\t2\t100\n" + "complete\t0\t100\n" * 1970)
+                              "boundary\t2\t100\n" + "complete\t0\t100\n" * 1970, encoding="utf-8")
             data = author.aggregate(report)
             self.assertEqual(data["rows"][14]["samples_below"], 0)  # exactly 97% passes
             self.assertEqual(data["rows"][16]["samples_below"], 42)  # exactly 98% passes
@@ -227,7 +227,7 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_required_blocks_and_figure_prompts(self):
         for record in self.records:
-            if (record["module"] != 0 or record["step"] >= 5) and not (record["module"] == 1 and record["step"] >= 8):
+            if (record["module"] != 0 or record["step"] in {4, 5, 7, 8}) and not (record["module"] == 1 and record["step"] >= 8):
                 self.assertTrue(record["r_commands"])
             self.assertTrue(record["setup_code"] or record["module"] == 0 or not record["r_commands"])
             for name, _ in exports.BLOCKS:
@@ -248,7 +248,7 @@ class CourseExportsTests(unittest.TestCase):
     def test_screenshot_capture_list_matches_notebook_declarations(self):
         screenshots = [(r, f) for r in self.records for f in r["figures"] if f["kind"] == "screenshot"]
         self.assertEqual(len(screenshots), 16)
-        expected = {"0.2": 2, "0.3": 2, "0.4": 2, "0.5": 4, "0.6": 2, "0.7": 2, "5.5": 2}
+        expected = {"0.1": 2, "0.2": 2, "0.4": 2, "0.6": 2, "0.7": 4, "0.8": 2, "5.5": 2}
         self.assertEqual({step: sum(r["id"] == step for r, _ in screenshots) for step in expected}, expected)
         self.assertEqual(len({f["asset_path"] for _, f in screenshots}), 16)
         checklist = (ROOT / "docs/screenshot_list.md").read_text(encoding="utf-8")
@@ -284,7 +284,7 @@ class CourseExportsTests(unittest.TestCase):
             exports.screenshot_figures(body + body)
 
     def test_installation_steps_need_no_r_commands_or_setup(self):
-        for record in self.records[:4]:
+        for record in [r for r in self.records if r["id"] in {"0.1", "0.2", "0.3", "0.6"}]:
             with self.subTest(step=record["id"]):
                 self.assertEqual(record["r_commands"], [])
                 self.assertEqual(record["setup_code"], "")
@@ -294,24 +294,24 @@ class CourseExportsTests(unittest.TestCase):
         system_step = self.records[0]
         self.assertIn("System type", system_step["blocks"]["what_we_do"])
         self.assertIn("Settings", system_step["blocks"]["what_we_do"])
-        check = next(r for r in self.records if r["id"] == "0.7")
+        check = next(r for r in self.records if r["id"] == "0.4")
         code = "\n".join(c["code"] for c in check["r_commands"])
         self.assertIn("Sys.info()", code)
         self.assertIn("R.version.string", code)
-        self.assertIn('source("scripts/preflight.R")', code)
-        installer = next(r for r in self.records if r["id"] == "0.3")
+        preflight = next(r for r in self.records if r["id"] == "0.8")
+        self.assertIn('source("scripts/preflight.R")', preflight["r_commands"][0]["code"])
+        installer = next(r for r in self.records if r["id"] == "0.2")
         download_url = "https://docs.posit.co/ide/user/download.html"
         self.assertIn(download_url, installer["blocks"]["what_we_do"])
         self.assertIn('Go to "RStudio Desktop"', installer["blocks"]["what_we_do"])
         old_url = "https://posit.co/download/" + "rstudio-desktop/"
-        for source in ("lessons/module_00_preparation.Rmd", "docs/legacy_demo.md",
-                       "scripts/build_tutorial.py", "tutorial/index.html"):
+        for source in ("lessons/module_00_preparation.Rmd", "docs/legacy_demo.md", "tutorial/index.html"):
             text = (ROOT / source).read_text(encoding="utf-8")
             self.assertNotIn(old_url, text)
             self.assertIn(download_url, text)
 
     def test_data_download_has_one_main_command_and_a_file_chooser_fallback(self):
-        record = next(r for r in self.records if r["id"] == "0.5")
+        record = next(r for r in self.records if r["id"] == "0.7")
         self.assertEqual([c["code"] for c in record["r_commands"]], ["download_course_data()"])
         self.assertNotIn("zip_path", record["blocks"]["command"])
         self.assertNotIn("yourname", json.dumps(record))
@@ -341,7 +341,29 @@ class CourseExportsTests(unittest.TestCase):
         self.assertEqual((ROOT / "scripts" / "run_main_path.R").read_text(encoding="utf-8"), script)
         self.assertNotIn("download_course_data(", script)
         self.assertIn("# Chunk: s7-8", script)
-        self.assertIn("# Chunk: s0-7_preflight", script)
+        self.assertIn("# Chunk: s0-8_preflight", script)
+        self.assertNotIn("install_course_packages()", script)
+        self.assertIn("# Chunk: course_progress", script)
+
+    def test_ui_metadata_is_source_backed_and_optional(self):
+        for record in self.records:
+            self.assertEqual(record["schema_version"], "1.1")
+            if record["module"] == 0:
+                self.assertIn("actions", record)
+                self.assertIn("success_line", record)
+                self.assertTrue(all(c["where"] == "console" for c in record["r_commands"]))
+            if "success_line" in record:
+                self.assertIn(record["success_line"], record["blocks"]["expected_result"])
+            self.assertNotIn("<!-- step_meta:", json.dumps(record["blocks"]))
+        self.assertEqual([r["id"] for r in self.records if "success_line" not in r], ["1.8", "1.9", "1.10", "1.11"])
+        record = {"id": "test", "blocks": {"expected_result": "A real result."},
+                  "r_commands": [{"label": "example"}]}
+        for bad in ({"success_line": "Invented output."}, {"where": {"missing": "console"}},
+                    {"where": {"example": "unknown"}}, {"actions": [{"label": "bad", "url": "javascript:alert(1)", "kind": "page"}]}):
+            with self.subTest(metadata=bad), self.assertRaises(ValueError):
+                exports.step_metadata(bad, record)
+        self.assertEqual(exports.step_metadata({}, record), {})
+        self.assertNotIn("where", record["r_commands"][0])
 
 
 if __name__ == "__main__":

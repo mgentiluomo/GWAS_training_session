@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "7.1",
   "module": 7,
   "step": 1,
   "anchor": "step-7-1",
   "title": "QQ plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "341642557de703ca688df6d973db7b69d1dfb365037c86268aade830713e1e4e",
+  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](docs/glossary.md#autosome) variants, on chromosomes 1 to 22.\n\nThe plot reads the [summary statistics file](docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.",
@@ -42,5 +42,6 @@
       "alt_text": "Most adjusted autosomal tests follow the null diagonal, with an upper-tail departure from a few association signals.",
       "reviewed": false
     }
-  ]
+  ],
+  "success_line": "Most points are close to the diagonal line."
 }

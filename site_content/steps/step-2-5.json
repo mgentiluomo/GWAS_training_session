@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "2.5",
   "module": 2,
   "step": 5,
   "anchor": "step-2-5",
   "title": "Alleles and strand",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a06b8ad326befd58800f104948e5b9ed9a665e546e67b89a993934a87817d5a6",
+  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the allele pairs from the laboratory with the supplied plus-strand annotation. We flip the pairs that are complementary. We remove the sites that are ambiguous or incompatible.",
@@ -65,5 +65,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "400 sites are flipped and 3,013 sites are excluded. 2,016 samples and 296,510 variants remain."
 }

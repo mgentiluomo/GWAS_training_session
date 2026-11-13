@@ -40,6 +40,8 @@ cfg <- guided_init()
 
 ## 5.1 Why ancestry matters {#step-5-1}
 
+
+<!-- step_meta: {"success_line": "This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS."} -->
 ### What we do
 
 Learn how [population structure](../docs/glossary.md#population-stratification) can mislead an association study. Then look at the reference samples we will use.
@@ -101,6 +103,8 @@ None.
 
 ## 5.2 Prepare variants for reference PCA {#step-5-2}
 
+
+<!-- step_meta: {"success_line": "48,614 shared sites are kept for the reference PCA and the projection."} -->
 ### What we do
 
 Find the sites that are present in both the reference subset and the cleaned study. Only common sites on the [autosomes](../docs/glossary.md#autosome) (chromosomes 1 to 22) are used.
@@ -165,6 +169,8 @@ No. The comparison with the reference uses only the study sites that passed QC.
 
 ## 5.3 Match build, position and alleles {#step-5-3}
 
+
+<!-- step_meta: {"success_line": "All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair."} -->
 ### What we do
 
 Check that the shared variants are really the same variants in both files, before the projection.
@@ -230,6 +236,8 @@ None. If a variant does not match, the code stops before the projection.
 
 ## 5.4 Reference PCA and study projection {#step-5-4}
 
+
+<!-- step_meta: {"success_line": "The study projection contains 1,844 samples."} -->
 ### What we do
 
 Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.
@@ -322,6 +330,8 @@ Otherwise the two sets of scores would not share the same coordinate system.
 
 ## 5.5 Plot the reference and projected study {#step-5-5}
 
+
+<!-- step_meta: {"success_line": "A labelled plot of the reference with the projected study."} -->
 ### What we do
 
 Draw a plot of the first two reference axes. Each reference group has its own label and symbol, and the study samples are added on top.
@@ -400,6 +410,8 @@ No. The plot summarises genetic variation compared with a chosen reference. It d
 
 ## 5.6 Define an ancestry-matched cohort {#step-5-6}
 
+
+<!-- step_meta: {"success_line": "33 remaining outlier records are excluded. 1,811 samples and 238,513 variants remain."} -->
 ### What we do
 
 Apply a rule, fixed in advance, to the first four projected PCs. The rule flags samples that are more than six standard deviations from the European reference.
@@ -477,6 +489,8 @@ A difference that is weak or invisible on the first two axes can appear on later
 
 ## 5.7 Cohort PCs and how many to include {#step-5-7}
 
+
+<!-- step_meta: {"success_line": "Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants."} -->
 ### What we do
 
 Calculate new PCs in the retained study cohort, look at the eigenvalues and save the full state.

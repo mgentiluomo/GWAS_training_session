@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "5.6",
   "module": 5,
   "step": 6,
   "anchor": "step-5-6",
   "title": "Define an ancestry-matched cohort",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
+  "source_sha256": "2b6ddd61076713608389488f1a8e4f00f759ba228e97358d5cd9cb5e1b56aa7d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Apply a rule, fixed in advance, to the first four projected PCs. The rule flags samples that are more than six standard deviations from the European reference.",
@@ -60,5 +60,6 @@
       }
     ]
   },
-  "figures": []
+  "figures": [],
+  "success_line": "33 remaining outlier records are excluded. 1,811 samples and 238,513 variants remain."
 }

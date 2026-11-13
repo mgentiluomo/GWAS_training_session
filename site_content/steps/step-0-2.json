@@ -1,22 +1,22 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "id": "0.2",
   "module": 0,
   "step": 2,
   "anchor": "step-0-2",
-  "title": "Install R",
+  "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
+  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
   "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Install R from [CRAN](https://cran.r-project.org/), the official website for R. Follow these actions:\n\n1. Open the CRAN page. Click the link for your system: \"Download R for Windows\", \"Download R for macOS\" or \"Download R for Linux\".\n2. On Windows, click \"base\" (or \"install R for the first time\"). Then click the link at the top that starts with \"Download R\" and ends with \"for Windows\".\n3. On macOS, click the `.pkg` file for your processor. Use the `arm64` file for Apple Silicon. Use the `x86_64` file for an Intel Mac. File names on the page can change a little.\n4. On Linux, follow the CRAN instructions for your distribution. Installing packages may need an administrator.\n5. Open the downloaded file. Accept the default choices. Click \"Next\" on Windows or \"Continue\" on macOS until the installer ends. If the computer asks for permission or a password, give it.\n\nAfter the installation you should see a new program called R. On Windows it is in the Start menu. On macOS it is in the Applications folder.",
-    "why": "R reads the commands in the notebooks and runs them. An [R package](docs/glossary.md#r-package) is an add-on that gives R more functions. Packages do not replace R itself.",
-    "you_need": "The system and processor you found at step 0.1. On a Mac with Apple Silicon, use the ARM64 build. On an Intel Mac, use the Intel build. Do not mix the two.",
-    "command": "No code to run. Open R from the Start menu or the Applications folder. Check that its window opens. Step 0.7 checks the installed version after you have opened the course project.",
-    "expected_result": "The R application opens. Its window shows version information and a `>` prompt. Your version may differ from the Windows validation environment, which used R 4.5.2. The author also tested Ubuntu extraction with R 4.6.1.",
-    "troubleshooting": "If your computer blocks the installation, ask the instructor or your institution's support team for an approved installation. Do not change your system language.",
-    "quick_check": "Does the R installer also install RStudio?\n\n<details><summary>Show the answer</summary>No. Install RStudio separately at step 0.3.</details>",
-    "files_created": "The R installer creates software files outside this course project."
+    "what_we_do": "Install [RStudio Desktop](https://docs.posit.co/ide/user/download.html) and open it. R must already be installed (step 0.1). Follow these actions:\n\n1. Open the download page. Go to \"RStudio Desktop\". Click the installer link for your operating system. Save the file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
+    "why": "The console runs one command at a time. The editor keeps commands in a notebook, so you can read and rerun them later. R holds values, such as loaded data, in memory. These values disappear when R restarts. Files saved on disk remain.",
+    "you_need": "A working R installation from step 0.1 and the RStudio installer.",
+    "command": "No code to run. Open RStudio from your applications menu. Find the Console pane and check that it shows a `>` prompt. You will run your first course commands at step 0.4.",
+    "expected_result": "RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet.",
+    "troubleshooting": "If RStudio cannot find R, check that you installed R for the correct processor. Restart RStudio after you install R. If the prompt shows `+` instead of `>`, press Escape to return to an empty prompt.",
+    "quick_check": "After restarting R, should you expect an unsaved object to remain in memory?\n\n<details><summary>Show the answer</summary>No. Reload it from a saved file or rerun the command that creates it.</details>",
+    "files_created": "RStudio software files. No course data are created."
   },
   "setup_code": "",
   "r_commands": [],
@@ -29,21 +29,29 @@
   "figures": [
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-2_r_download_windows.png",
+      "asset_path": "Figures/screenshots/s0-2_rstudio_console_windows.png",
       "platform": "windows",
-      "placement": "what_we_do",
-      "alt_text": "CRAN page showing the Windows R download link.",
+      "placement": "expected_result",
+      "alt_text": "RStudio on Windows with the Console tab selected and an empty R prompt.",
       "asset": null,
       "reviewed": false
     },
     {
       "kind": "screenshot",
-      "asset_path": "Figures/screenshots/s0-2_r_download_macos.png",
+      "asset_path": "Figures/screenshots/s0-2_rstudio_console_macos.png",
       "platform": "macos",
-      "placement": "what_we_do",
-      "alt_text": "CRAN page showing the Apple Silicon and Intel R installer choices.",
+      "placement": "expected_result",
+      "alt_text": "RStudio on macOS with the Console tab selected and an empty R prompt.",
       "asset": null,
       "reviewed": false
     }
-  ]
+  ],
+  "actions": [
+    {
+      "label": "Download RStudio Desktop",
+      "url": "https://docs.posit.co/ide/user/download.html",
+      "kind": "page"
+    }
+  ],
+  "success_line": "RStudio opens and the Console pane shows a `>` prompt."
 }
