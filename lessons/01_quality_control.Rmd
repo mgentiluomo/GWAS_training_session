@@ -23,7 +23,7 @@ challenges at the end. You do not need to finish them to start lesson 2.
 
 ## Start with a clean session
 
-Open `GWAS_training_session.Rproj`, then this notebook. Use **Session → Restart R**.
+Open `GWAS_course.Rproj`, then this notebook. Use **Session → Restart R**.
 Run one chunk at a time with the green arrow, or Ctrl+Shift+Enter on Windows/Linux
 and Cmd+Shift+Enter on macOS. Do not use Run All before reading the lesson.
 

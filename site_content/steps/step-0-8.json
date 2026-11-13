@@ -6,7 +6,7 @@
   "anchor": "step-0-8",
   "title": "How to use this guide",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "32471a38bddece08dd78adf522746b0a1be962ebbf82f4cd4bffe9b2ef562ccb",
+  "source_sha256": "b3a8951a50ef88de9fe805eb5817dbb424ca6de16e84965599551a6b43a5738f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Use the same routine at every step: read, run, compare. Follow these actions:\n\n1. Read \"What we do\", \"Why\" and \"You need\".\n2. Run the command in the console.\n3. Open \"Show the expected result\" and compare it with your result.\n4. If your result differs, open \"If something goes wrong\".\n5. Answer the quick check.",

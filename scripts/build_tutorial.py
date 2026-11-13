@@ -153,7 +153,7 @@ home = f'''
 setup = f'''
 <span class="eyebrow">Before the class</span><h1>A working starting point.</h1>
 <p class="lead">Keep your computer in your preferred language. We use explicit file conventions and a single RStudio project.</p>
-<h2>1. Download the complete project</h2><p>Download the ZIP and extract it into a writable local folder. Open <code>GWAS_training_session.Rproj</code>. Keep its folders together; do not move individual notebooks into a new folder.</p>
+<h2>1. Download the complete project</h2><p>Download the ZIP and extract it into a writable local folder. Open <code>GWAS_course.Rproj</code>. Keep its folders together; do not move individual notebooks into a new folder.</p>
 <div class="actions"><a class="button" href="{PROJECT}">Download the RStudio project</a><a class="button secondary" href="{REPO}/tree/{BRANCH}">Browse the source on GitHub</a></div>
 <p class="quiet">This preview points to the review branch. The main branch is not yet the revised course.</p>
 <h2>2. Install R and RStudio</h2><p>Install <a href="https://cran.r-project.org/">R</a> first, then <a href="https://docs.posit.co/ide/user/download.html">RStudio Desktop</a>. Open the project and find the R console: it usually has a <code>&gt;</code> prompt.</p>

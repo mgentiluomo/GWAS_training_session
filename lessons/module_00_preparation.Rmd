@@ -245,7 +245,7 @@ Download and extract the whole source project from the GitHub repository home. T
 1. Open the [course repository home](https://github.com/mgentiluomo/GWAS_training_session). GitHub is a website that stores project files. Its default branch, `course/2026-guided-training`, contains the guided 2026 course. It is selected automatically.
 2. Click the green "Code" button. Then click "Download ZIP".
 3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.
-4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.
+4. Open the extracted folder. You should see the files `config.R` and `GWAS_course.Rproj`, and folders such as `R`, `lessons` and `scripts`.
 
 Keep the whole folder together. Do not move single files out of it. No branch selection is needed.
 
@@ -355,7 +355,7 @@ files. Data, manifests and passwords are never added to Git.
 
 Open the project, then open this notebook. Follow these actions:
 
-1. In the folder you extracted or cloned at step 0.5, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.
+1. In the folder you extracted or cloned at step 0.5, double-click `GWAS_course.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_course` at the top right.
 2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.
 3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.
 

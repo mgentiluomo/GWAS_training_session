@@ -7,7 +7,7 @@ chunks. Later errors are often consequences of that first failure.
 
 | Message or symptom | Check and next action |
 |---|---|
-| Cannot open `R/course.R` | Extract the whole project and reopen `GWAS_training_session.Rproj`. |
+| Cannot open `R/course.R` | Extract the whole project and reopen `GWAS_course.Rproj`. |
 | PLINK 2 not found | Extract the executable directly into `bin/`. A ZIP or PLINK 1.9 is not sufficient. |
 | Permission denied / incompatible executable | Check OS/CPU build and executable permissions; use the matching official download. |
 | BED missing | Check mode; generate demo data or obtain the matching class BED. |

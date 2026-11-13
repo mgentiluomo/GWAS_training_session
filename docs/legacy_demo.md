@@ -57,7 +57,7 @@ modes are saved in separate directories.
 
 ## Working in the project
 
-- Open [GWAS_training_session.Rproj](../GWAS_training_session.Rproj) each session.
+- Open [GWAS_course.Rproj](../GWAS_course.Rproj) each session.
 - Edit settings in [config.R](../config.R), then run `lessons/` in order.
 - Find outputs in `results/demo/` or `results/course/`, including versions, logs,
   command records and tables. Generated data and results are ignored by Git.
@@ -95,7 +95,7 @@ settings, not measured total memory requirements for every dataset.
 At the [repository home](https://github.com/mgentiluomo/GWAS_training_session), select **Code > Download ZIP**
 and extract the archive into a local writable folder. The default branch supplies
 the 2026 course and the separate demo. No branch change is needed. Keep all folders together. Double-click
-`GWAS_training_session.Rproj`.
+`GWAS_course.Rproj`.
 
 **Check:** the Files pane shows `config.R`, `R/`, `scripts/`, `docs/` and `lessons/`.
 In the **R console**, run:
