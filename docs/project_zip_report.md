@@ -1,29 +1,36 @@
 # Student project ZIP verification, 13 November 2026
 
-No release was created and no file uploaded. The project-file rename is the
-separate local commit `8fb4ea4`. Other reviewed source changes remain
-uncommitted. The ZIP is a working-source snapshot; its per-file hashes, not
-that commit alone, identify its complete contents.
+No release was created and no file uploaded. The ZIP was built with
+`scripts/package_project.py --fresh-check --check-urls` from the pushed commit
+`f06116adc52e5f2f68185608a4f13c8b8f4833d8` on `course/2026-guided-training`,
+with a clean working tree before and after the build. All 52 members are
+byte-identical to that commit. It replaces the earlier working-source snapshot
+`ce4ebea3111093c7c05dbb19df21de1de61353da0ae0fef734117911590f9443`, which was
+built before the source changes were committed.
 
 | Item | Result |
 | --- | --- |
 | Release tag | `project-2026.1` |
 | Asset | `GWAS_course-2026.1.zip` |
 | Checksum sidecar | `GWAS_course-2026.1.zip.sha256` |
+| Source commit | `f06116adc52e5f2f68185608a4f13c8b8f4833d8` (pushed; clean tree) |
 | Files | 52 |
-| ZIP bytes | 162873 |
-| Uncompressed file bytes | 496346 |
-| SHA-256 | `ce4ebea3111093c7c05dbb19df21de1de61353da0ae0fef734117911590f9443` |
+| ZIP bytes | 163050 |
+| Uncompressed file bytes | 496858 |
+| SHA-256 | `377de24a5b287adcae34ecbc8a87dfb8acfeba4ad02bc2353403b7bc61e9b992` |
 | Outer folder | `GWAS_course/` |
 | Local links and anchors | 423 checked; all resolve inside the ZIP |
-| Website requests | 70 HTTP 2xx; six HTTP 403; asset URL pending publication |
+| Website requests | 77 checked: 70 HTTP 2xx (54 with 200, 16 with 203); six HTTP 403; the project asset URL pending publication |
+| Fresh-folder test | Passed as `GWAS_course` and after renaming to `GWAS_training_session` |
 
 The ZIP, checksum and machine-readable inventory are outside the repository:
-`C:/WEB_site/data_sources/codex_work/project-2026.1-review-20261113-checked/`.
+`C:/WEB_site/data_sources/codex_work/project-2026.1-review-20261113-claude/`.
 `project-verification.json` lists every source hash, local target, website URL,
 HTTP result and fresh-test log directory. A website request blocked with
 HTTP 403 remains unverified. No other HTTP error remained in the final run.
-The future project asset URL cannot resolve until the author publishes it.
+The project asset URL,
+`https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip`,
+cannot resolve until the author publishes it.
 
 ## Final allowlist
 
@@ -91,10 +98,15 @@ The inventory and reports stay beside the ZIP, not inside it.
 
 ## Verification
 
-- The 22 guided-export tests and four project-package tests passed.
-- The text check reported zero errors and zero warnings.
+- Before the commits, the full check set passed on Windows with R 4.5.2: text
+  check (zero errors, zero warnings), guided-export tests, `check_course.R`,
+  the preflight output test, the project-package tests, the other R tests, the
+  author tests, the legacy tutorial build, `test_guided_modules.R` for modules
+  0 to 7 and `test_main_path_recovery.R` on the staged classroom data.
+  `test_package_release.py` needs `COURSE_RELEASE_PASSWORD` and
+  `check_tutorial.cjs` needs Playwright; neither was available.
 - ZIP CRC, exact member inventory, source-byte equality and SHA-256 passed.
-- Two builds from the same sources produced identical ZIP bytes.
+  The SHA-256 sidecar matches a recomputed hash.
 - The fresh extracted project passed with folder name `GWAS_course`.
 - The same project passed after its folder was renamed `GWAS_training_session`.
 - Each folder passed root-file checks, R version display, `2 + 3`, syntax and
@@ -102,7 +114,9 @@ The inventory and reports stay beside the ZIP, not inside it.
 - Child R processes inherited no `LANG`, `LANGUAGE` or `LC_*` requests.
   Parent-shell and operating-system settings were unchanged.
 - Verified existing classroom inputs were supplied externally. PLINK was
-  copied into the extracted `bin/` after extraction, following step 0.6.
+  copied into the extracted `bin/` after extraction, following step 0.6
+  (PLINK 2.0 b.1.4 executable SHA-256
+  `05255a1945e03108b06948993a95fe8341ab3cd903b6ff55b0dfc5a067dcfa00`).
   Neither the data nor the executable is a ZIP member.
 
 The first fixture used an external `PLINK2_BIN` path and failed in Windows
