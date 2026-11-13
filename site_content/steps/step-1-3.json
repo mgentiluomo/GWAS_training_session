@@ -6,7 +6,7 @@
   "anchor": "step-1-3",
   "title": "The Global Screening Array",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "77e4397fd6d8689a819224833a2bd43476dc80b3c886da87e4986617ed42d3d4",
+  "source_sha256": "538e9511d56d51abab6b53db8fb912cbb951a6d6a8d112be153e461b846372fe",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn what the array measures and what it leaves unmeasured.",

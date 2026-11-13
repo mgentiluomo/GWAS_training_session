@@ -6,7 +6,7 @@
   "anchor": "step-1-11",
   "title": "How large projects share genetic data",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "77e4397fd6d8689a819224833a2bd43476dc80b3c886da87e4986617ed42d3d4",
+  "source_sha256": "538e9511d56d51abab6b53db8fb912cbb951a6d6a8d112be153e461b846372fe",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nCompare three controlled-access resources. [Controlled access](../docs/glossary.md#controlled-access) means that approved researchers use data under specified permissions.",

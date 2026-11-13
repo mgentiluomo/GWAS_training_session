@@ -769,11 +769,11 @@ Read [the multi-sample VCF](../examples/formats/invented_example_multisample.vcf
 | `INFO` | Site annotations declared in the header. |
 | `FORMAT` | Names and order of fields in each sample column. |
 | Sample columns | Values for that sample, following `FORMAT`. |
-| `GT` | [Allele indices](../docs/glossary.md#vcf-genotype): zero is REF and one is the first ALT. |
-| `DS` | [Dosage](../docs/glossary.md#dosage), the expected ALT count. |
-| `GP` | [Genotype probabilities](../docs/glossary.md#genotype-probability). |
-| `R2` | An imputation-quality annotation whose definition depends on its producer. |
-| `END` | Last included position of a gVCF reference block. |
+| `GT` (sample field) | [Allele indices](../docs/glossary.md#vcf-genotype): zero is REF and one is the first ALT. |
+| `DS` (sample field) | [Dosage](../docs/glossary.md#dosage), the expected ALT count. |
+| `GP` (sample field) | [Genotype probabilities](../docs/glossary.md#genotype-probability). |
+| `R2` (INFO field) | An imputation-quality annotation whose definition depends on its producer. |
+| `END` (INFO field) | Last included position of a gVCF reference block. |
 
 A dot marks missing information. `0/1` means REF/first ALT; `./.` is missing. A slash leaves allele order unknown. A vertical bar records [phase](../docs/glossary.md#phasing), the arrangement across chromosome copies. A gVCF reference block uses `<NON_REF>` and `END` to represent a non-variant stretch.
 
@@ -814,6 +814,7 @@ Open [the Final Report](../examples/formats/invented_example_final_report.txt). 
 **Common mistakes**
 
 - GC Score is not a disease probability.
+- "Forward" is Illumina's [dbSNP](../docs/glossary.md#dbsnp)-based forward strand. It is not always the GRCh38 plus strand. See [2.5](module_02_files_and_formats.Rmd#step-2-5).
 - Actual exports can select different columns. Check the header before importing.
 - Missing calls use `-` here. Strand labels need the matching manifest and the checks at [2.5](module_02_files_and_formats.Rmd#step-2-5).
 
@@ -830,7 +831,7 @@ Inspect [PED](../examples/formats/invented_example_plink1.ped), [MAP](../example
 | Father ID | Father identifier; zero means unknown. |
 | Mother ID | Mother identifier; zero means unknown. |
 | Sex | In FAM/TFAM/PED: 1 male, 2 female, 0 unknown. |
-| Phenotype | Recorded outcome; `-9` means missing in this example. |
+| Phenotype | In case-control data, 1 is control and 2 is case. `-9` is missing. |
 | Allele pairs | Two alleles per variant in PED, or per sample in TPED; `0 0` means missing. |
 | Chromosome | First variant field in MAP, TPED and BIM. |
 | Variant ID | Second variant field. |
@@ -941,7 +942,7 @@ Step 1.9 and the linked invented examples. No classroom data or password is need
 
 ### Command
 
-No code to run. This is a reading-only step. The shell examples in Why show conversion syntax only.
+No code to run. This is a reading-only step. The shell examples are in the "Example syntax, do not run" boxes.
 
 <details><summary>Show the expected result</summary>
 
@@ -951,7 +952,7 @@ You can explain the header and fields of each example. The genotype files descri
 
 <details><summary>If something goes wrong</summary>
 
-A binary file will not look like a readable table. Use its JSON description and hex dump. The illustrative conversion outputs are not needed for any later step.
+A binary file will not look like a readable table. Use the description and byte view shown next to the example. The illustrative conversion outputs are not needed for any later step.
 
 </details>
 

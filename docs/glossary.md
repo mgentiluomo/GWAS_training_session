@@ -767,3 +767,7 @@ A method that fits patterns in data to make predictions or classifications. In v
 ### Biallelic and multiallelic {#biallelic-multiallelic}
 
 A biallelic site has two alleles. A multiallelic site has more than two, so its VCF record can list several alternative alleles beside the reference allele. Reducing a multiallelic file to biallelic records requires explicit rules.
+
+### dbSNP {#dbsnp}
+
+A public catalogue of short genetic variants. Records can have an rs identifier. Its strand information does not automatically establish the plus strand of a particular genome build.
