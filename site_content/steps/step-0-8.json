@@ -6,8 +6,8 @@
   "anchor": "step-0-8",
   "title": "How to use this guide",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fbf82f4a600bda58a432d6f4f4c2d56aee440e51b042fc6f5c9608b28d844118",
-  "verification": "unverified",
+  "source_sha256": "32471a38bddece08dd78adf522746b0a1be962ebbf82f4cd4bffe9b2ef562ccb",
+  "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Use the same routine at every step: read, run, compare. Follow these actions:\n\n1. Read \"What we do\", \"Why\" and \"You need\".\n2. Run the command in the console.\n3. Open \"Show the expected result\" and compare it with your result.\n4. If your result differs, open \"If something goes wrong\".\n5. Answer the quick check.",
     "why": "If you run all commands at once, the first mistake is hard to find. Saved files give you a way back after a restart. You do not depend on the R workspace, which is lost when R restarts.",

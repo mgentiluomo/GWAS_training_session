@@ -6,8 +6,8 @@
   "anchor": "step-0-6",
   "title": "Open the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fbf82f4a600bda58a432d6f4f4c2d56aee440e51b042fc6f5c9608b28d844118",
-  "verification": "unverified",
+  "source_sha256": "32471a38bddece08dd78adf522746b0a1be962ebbf82f4cd4bffe9b2ef562ccb",
+  "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the folder you extracted or cloned at step 0.5, double-click `GWAS_training_session.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_training_session` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.",
     "why": "A [relative path](../docs/glossary.md#relative-path) gives the place of a file starting from the working directory. The working directory is the folder where R looks first. One project root means you never copy your personal full paths into commands.",

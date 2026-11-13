@@ -381,6 +381,8 @@ Terminal equivalent: from the project directory, run `Rscript -e "stopifnot(file
 
 <details><summary>Show the expected result</summary>
 
+<!-- Verification: the project-root R commands passed on Windows in the fresh-copy end-to-end run on 13 November 2026 (commit caeae1a). Opening the project through the RStudio interface was not exercised. -->
+
 R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.
 
 </details>
@@ -451,6 +453,8 @@ bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20
 
 <details><summary>Show the expected result</summary>
 
+<!-- Verification: the setup-check R commands passed on Windows in the fresh-copy end-to-end run on 13 November 2026 (commit caeae1a). The package checks and PLINK read/write probe completed, including the path with non-English characters. -->
+
 R first prints your system information, its version and the result `[1] 5` from the small calculation. It also prints the tested PLINK version from `config.R`. The guided starting data have 2,016 sample wells and 299,523 variants. A sample well is one position on a laboratory plate that holds one DNA sample. Some wells hold the same person again, which are replicates. The wells represent 2,000 simulated people. PLINK finishes the frequency test on 20 variants. Then R prints `Preflight passed. Report:` followed by the path of the report. The package check may print extra messages. R also prints the PLINK command and PLINK's own messages. One test path shows short names such as `PATHCH~1`. This is normal: it is the safe form of the folder with non-English letters.
 
 <!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-7_preflight_success_windows.png", "platform": "windows", "placement": "expected_result", "alt_text": "Successful Windows setup check in RStudio, with Preflight passed and the R prompt visible."} -->
@@ -509,6 +513,8 @@ where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 Terminal equivalent: call the R helper through Rscript after you set the same project paths. There is no PLINK command that reports course progress. A [checkpoint](../docs/glossary.md#checkpoint) is a saved state of the course files at the end of a step. The helper `check_step("3.2")` compares step 3.2 with a supplied checkpoint. The helper `restore_checkpoint("3.2")` rebuilds the state after step 3.1, so that you can restart step 3.2. Both protect existing output folders.
 
 <details><summary>Show the expected result</summary>
+
+<!-- Verification: the progress-helper R commands passed on Windows in the fresh-copy end-to-end run on 13 November 2026 (commit caeae1a). The fresh working folder was inspected without changing the course inputs. -->
 
 Before you start the analysis, every state in the updated checkpoint index is `not verified`. Full genotype sets exist at 2.8, 3.8, 4.6 and 5.7. The other states are rebuilt from stored lists and transformations. Diagnostic and analysis files have their own small checkpoints. The list has about 30 rows, one for each saved state.
 

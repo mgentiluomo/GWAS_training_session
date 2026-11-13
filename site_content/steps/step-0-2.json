@@ -6,7 +6,7 @@
   "anchor": "step-0-2",
   "title": "Install R",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fbf82f4a600bda58a432d6f4f4c2d56aee440e51b042fc6f5c9608b28d844118",
+  "source_sha256": "32471a38bddece08dd78adf522746b0a1be962ebbf82f4cd4bffe9b2ef562ccb",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install R from [CRAN](https://cran.r-project.org/), the official website for R. Follow these actions:\n\n1. Open the CRAN page. Click the link for your system: \"Download R for Windows\", \"Download R for macOS\" or \"Download R for Linux\".\n2. On Windows, click \"base\" (or \"install R for the first time\"). Then click the link at the top that starts with \"Download R\" and ends with \"for Windows\".\n3. On macOS, click the `.pkg` file for your processor. Use the `arm64` file for Apple Silicon. Use the `x86_64` file for an Intel Mac. File names on the page can change a little.\n4. On Linux, follow the CRAN instructions for your distribution. Installing packages may need an administrator.\n5. Open the downloaded file. Accept the default choices. Click \"Next\" on Windows or \"Continue\" on macOS until the installer ends. If the computer asks for permission or a password, give it.\n\nAfter the installation you should see a new program called R. On Windows it is in the Start menu. On macOS it is in the Applications folder.",

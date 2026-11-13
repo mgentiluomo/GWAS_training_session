@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Download the course package",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fbf82f4a600bda58a432d6f4f4c2d56aee440e51b042fc6f5c9608b28d844118",
+  "source_sha256": "32471a38bddece08dd78adf522746b0a1be962ebbf82f4cd4bffe9b2ef562ccb",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Download and extract the whole source project from the GitHub repository home. Then download the matching encrypted data archive from release `data-2026.1`. Follow these actions for the project:\n\n1. Open the [course repository home](https://github.com/mgentiluomo/GWAS_training_session). GitHub is a website that stores project files. Its default branch, `course/2026-guided-training`, contains the guided 2026 course. It is selected automatically.\n2. Click the green \"Code\" button. Then click \"Download ZIP\".\n3. Extract the ZIP file into a folder where you can save files, for example in Documents. Use the same method as at step 0.4.\n4. Open the extracted folder. You should see the files `config.R` and `GWAS_training_session.Rproj`, and folders such as `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. Do not move single files out of it. No branch selection is needed.\n\nIf you already use Git, you can instead run `git clone https://github.com/mgentiluomo/GWAS_training_session.git` in a terminal. A plain clone gets the same 2026 course. You do not need a branch command.\n\nThe encrypted data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",
