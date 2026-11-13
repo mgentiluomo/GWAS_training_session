@@ -30,7 +30,7 @@ class FormatExamplesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=ROOT / "examples") as folder:
             source = Path(folder) / "source"
             source.mkdir()
-            (source / "unexpected.txt").write_text("invented example\n")
+            (source / "unexpected.txt").write_text("invented example\n", encoding="utf-8")
             destination = Path(folder) / "export"
             with patch.object(examples, "EXAMPLES", source), self.assertRaisesRegex(ValueError, "complete set"):
                 examples.export_formats(destination)
@@ -60,20 +60,20 @@ class FormatExamplesTests(unittest.TestCase):
         self.assertEqual((flags >> 2) & 15, 2)
         for extension in ("bed", "pgen", "bgen"):
             raw = example_path("." + extension).read_bytes()
-            self.assertIn(raw[:32].hex(" "), example_path("." + extension + ".hex.txt").read_text())
+            self.assertIn(raw[:32].hex(" "), example_path("." + extension + ".hex.txt").read_text(encoding="utf-8"))
 
     def test_reference_reads_sex_and_dosage_consistency(self):
         fasta = example_path(".fasta").read_bytes()
-        name, length, offset, bases, width = example_path(".fasta.fai").read_text().strip().split("\t")
+        name, length, offset, bases, width = example_path(".fasta.fai").read_text(encoding="utf-8").strip().split("\t")
         self.assertEqual((name, length, bases, width), ("toy1", "60", "60", "61"))
         self.assertEqual(fasta[int(offset):int(offset) + 60], b"ACGT" * 15)
-        reads = example_path(".fastq").read_text().splitlines()
+        reads = example_path(".fastq").read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(reads), 8)
         for i in (0, 4):
             self.assertEqual(len(reads[i+1]), len(reads[i+3]))
-        fam = [line.split() for line in example_path(".fam").read_text().splitlines()]
+        fam = [line.split() for line in example_path(".fam").read_text(encoding="utf-8").splitlines()]
         self.assertEqual([row[4] for row in fam], ["1", "2", "0", "2"])
-        for line in example_path("dosages.vcf").read_text().splitlines():
+        for line in example_path("dosages.vcf").read_text(encoding="utf-8").splitlines():
             if line.startswith("#"):
                 continue
             for field in line.split("\t")[9:]:
@@ -105,7 +105,7 @@ class FormatExamplesTests(unittest.TestCase):
                     self.assertNotIn("not reference-validated", note)
                     self.assertNotIn("label is", note)
                 committed = ROOT / "site_content/formats" / (source.name + ".json")
-                self.assertEqual(json.loads(committed.read_text()), entry)
+                self.assertEqual(json.loads(committed.read_text(encoding="utf-8")), entry)
             self.assertEqual({e["format"] for e in entries if not e["asset"]}, {"IDAT", "GTC", "CEL", "BAM", "CRAM", "POD5"})
 
 

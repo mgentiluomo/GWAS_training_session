@@ -45,7 +45,7 @@ def esc(text):
     return html.escape(str(text), quote=True)
 
 
-notebook = (ROOT / "lessons/01_quality_control.Rmd").read_text()
+notebook = (ROOT / "legacy/demo_2025/01_quality_control.Rmd").read_text(encoding="utf-8")
 chunks = dict(re.findall(r"^```\{r\s+([^,}\s]+)[^\n]*\}\n(.*?)^```\s*$", notebook, re.M | re.S))
 
 
@@ -140,8 +140,8 @@ home = f'''
 <div class="actions"><a class="button" href="#setup">Prepare your computer</a><a class="button secondary" href="#qc">Start the QC walkthrough</a></div>
 <div class="cards">
 <article class="card"><span class="step-no">Module 01 · Core pathway</span><h3>Quality control</h3><p>Meet the files, investigate missing calls and document which samples and variants remain.</p><span class="pill">Guided web lesson</span><a class="card-link" href="#qc">Open the walkthrough →</a></article>
-<article class="card"><span class="step-no">Module 02 · Core pathway</span><h3>Population structure</h3><p>Explore genetic similarity with PCA and prepare a defensible analysis sample set.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/02_population_structure.Rmd">Open lesson 2 on GitHub →</a></article>
-<article class="card"><span class="step-no">Module 03 · Core pathway</span><h3>Association</h3><p>Compare logistic models and interpret odds ratios, Manhattan plots and QQ plots.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/lessons/03_association.Rmd">Open lesson 3 on GitHub →</a></article>
+<article class="card"><span class="step-no">Module 02 · Core pathway</span><h3>Population structure</h3><p>Explore genetic similarity with PCA and prepare a defensible analysis sample set.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/legacy/demo_2025/02_population_structure.Rmd">Open lesson 2 on GitHub →</a></article>
+<article class="card"><span class="step-no">Module 03 · Core pathway</span><h3>Association</h3><p>Compare logistic models and interpret odds ratios, Manhattan plots and QQ plots.</p><span class="pill">RStudio notebook</span><a class="card-link" href="{REPO}/blob/{BRANCH}/legacy/demo_2025/03_association.Rmd">Open lesson 3 on GitHub →</a></article>
 </div>
 <div class="hero"><h2>One task at a time. More than one way to keep up.</h2><p>Run the core steps first. If you are ready for more, try a challenge. If your computer is blocked, read the worked outputs or use a matching checkpoint and return to the error later.</p><a href="#help">Find a way back into the lesson →</a></div>
 <div class="two-col"><section><h2>What you need</h2><ul><li>Basic experience opening a table in R.</li><li>Your own Windows, macOS or Linux computer.</li><li>R, RStudio and PLINK 2 for the analytical work.</li></ul><p>You can read the tutorial and try its browser exercises without installing the analysis software.</p></section><section><h2>What you will produce</h2><ul><li>An auditable QC count table.</li><li>PCA and an explicit sample list.</li><li>Association results and a short interpretation.</li></ul><p>The modules can be used separately or combined. One suggested teaching route uses three four-hour sessions, including breaks.</p></section></div>
@@ -195,11 +195,11 @@ prune <- file.path(cfg$qc, "prune")
 king <- file.path(cfg$qc, "relatedness")
 final <- file.path(cfg$qc, "qc_final")'''
 
-fam_head = [line.split() for line in (DEMO/'DB_demo.fam').read_text().splitlines()[:3]]
-bim_head = [line.split() for line in (DEMO/'DB_demo.bim').read_text().splitlines()[:3]]
+fam_head = [line.split() for line in (DEMO/'DB_demo.fam').read_text(encoding="utf-8").splitlines()[:3]]
+bim_head = [line.split() for line in (DEMO/'DB_demo.bim').read_text(encoding="utf-8").splitlines()[:3]]
 qc = '''<span class="eyebrow">Module 01 · Core walkthrough</span><h1>Quality control.<br>Keep track of every decision.</h1>
 <p class="lead">Before testing association, ask whether the genotype data are sufficiently complete and whether the samples fit the planned analysis.</p>
-<p>Open <code>lessons/01_quality_control.Rmd</code> in RStudio. Read this page alongside it. Run one chunk at a time; the web page itself does not run R or PLINK.</p>
+<p>Open <code>legacy/demo_2025/01_quality_control.Rmd</code> in RStudio. Read this page alongside it. Run one chunk at a time; the web page itself does not run R or PLINK.</p>
 <nav class="section-toc" aria-label="Quality control steps"><a href="#qc-start">1. Start a clean session</a><a href="#qc-files">2. Understand the files</a><a href="#qc-baseline">3. Establish the baseline</a><a href="#qc-missing">4. Inspect missingness</a><a href="#qc-filter">5. Filter and count</a><a href="#qc-het">6. Review heterozygosity</a><a href="#qc-related">7. Review relatedness</a><a href="#qc-finish">8. Save the checkpoint</a></nav>'''
 qc += step('01','qc-start','Start a clean session.',
     '<p>Open the project and restart R. Use the notebook’s Run button if keyboard shortcuts differ on your keyboard. The first chunk loads the shared helpers and checks the matching genotype files.</p>' + code('qc-setup') +
@@ -266,7 +266,7 @@ qc += step('08','qc-finish','Save a checkpoint you can explain.',
     details('Compare your explanation','<p>The KING cutoff supplies a retained-sample list. It is applied to the full MAF-filtered set, so relatives can be removed without intentionally discarding its variants. Inspect the PLINK log and sample/variant count table; counts alone do not validate every QC decision.</p>') +
     checkpoint('I have a complete final genotype set and can account for the exclusions.','qc-checkpoint') +
     '<div class="hero"><h2>Ready for population structure.</h2><p>Next, use the QC-passing data to calculate PCs, inspect structure and prepare an explicit analysis sample list.</p>' +
-    f'<a class="button" href="{REPO}/blob/{BRANCH}/lessons/02_population_structure.Rmd">Open the PCA notebook</a></div>')
+    f'<a class="button" href="{REPO}/blob/{BRANCH}/legacy/demo_2025/02_population_structure.Rmd">Open the PCA notebook</a></div>')
 qc += end(('setup','Preparation'),('practice','Practice and explain'))
 
 practice = '''<span class="eyebrow">Module 01 · Practice</span><h1>Make the decisions yours.</h1>
@@ -340,8 +340,8 @@ PAGES = [('home','Tutorial home',home),('setup','Before the class',setup),('qc',
          ('practice','Practice',practice),('downloads','Files and checkpoints',downloads),('help','Troubleshooting',help_page),('glossary','Glossary',glossary)]
 nav = ''.join(f'<a class="nav-link" href="#{key}"><span class="nav-number">{str(i+1).zfill(2)}</span>{title}</a>' for i,(key,title,_) in enumerate(PAGES))
 sections = ''.join(f'<article class="page" id="{key}" data-page="{key}" data-title="{esc(title)}">{body}</article>' for key,title,body in PAGES)
-css = (ROOT/'tutorial_src/style.css').read_text()
-js = (ROOT/'tutorial_src/app.js').read_text()
+css = (ROOT/'tutorial_src/style.css').read_text(encoding="utf-8")
+js = (ROOT/'tutorial_src/app.js').read_text(encoding="utf-8")
 document = f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GWAS Practical Tutorial · Manuel Gentiluomo</title><meta name="description" content="Independent GWAS teaching materials by Manuel Gentiluomo for students across University of Pisa courses. Quality control, RStudio setup and simulated-data checkpoints.">
@@ -354,5 +354,5 @@ document = f'''<!doctype html>
 <footer class="footer"><p>Manuel Gentiluomo · University of Pisa</p><p>Reading and browser exercises do not submit student responses. Checklist ticks are stored only in this browser when available. Demo data are simulated.</p><p>Draft web tutorial: preparation and lesson 1. Lessons 2–3 are available as RStudio notebooks. Linux analytical validation; Windows/macOS checks remain.</p></footer></div>
 <div id="toast" class="toast" role="status" hidden></div>
 <script type="application/json" id="sample-missingness-data">{json.dumps(sample_missing)}</script><script>{js}</script></body></html>'''
-(OUT/'index.html').write_text(document)
+(OUT/'index.html').write_text(document, encoding="utf-8")
 print(f'Built {OUT.relative_to(ROOT)}/index.html ({len(document):,} characters), {len(PACKAGES)} demo stage descriptions; no data archives written.')

@@ -27,7 +27,7 @@ a short lab notebook.
 | 155–210 | Pruning, heterozygosity and relatedness |
 | 210–240 | Count table, interpretation and checkpoint |
 
-**Evidence of learning:** Q1–Q3 in [lesson 1](../lessons/01_quality_control.Rmd),
+**Evidence of learning:** Q1–Q3 in [lesson 1](../legacy/demo_2025/01_quality_control.Rmd),
 a count table and an explanation of at least one filtering decision.
 
 ## Lesson 2: PCA and the analysis cohort
@@ -47,7 +47,7 @@ and missing-data handling.
 | 195–225 | Complete-case covariates and common sample list |
 | 225–240 | Cohort rationale and checkpoint |
 
-**Evidence of learning:** Q4–Q6 in [lesson 2](../lessons/02_population_structure.Rmd),
+**Evidence of learning:** Q4–Q6 in [lesson 2](../legacy/demo_2025/02_population_structure.Rmd),
 annotated PCA plots and a sample list whose exclusions can be explained.
 
 ## Lesson 3: Association and interpretation
@@ -66,7 +66,7 @@ write a supported results note.
 | 170–215 | Compare models and write the results note |
 | 215–240 | Limits, replication and follow-up |
 
-**Evidence of learning:** Q7–Q9 in [lesson 3](../lessons/03_association.Rmd),
+**Evidence of learning:** Q7–Q9 in [lesson 3](../legacy/demo_2025/03_association.Rmd),
 two figures and a five-sentence results note. A small p-value alone is not the goal.
 
 ## Working at different speeds

@@ -9,7 +9,7 @@ output:
     number_sections: true
 ---
 
-[Course home](../README.md) · [Previous: PCA](02_population_structure.Rmd) · [Troubleshooting](../docs/troubleshooting.md)
+[Course home](../../README.md) · [Previous: PCA](02_population_structure.Rmd) · [Troubleshooting](../../docs/troubleshooting.md)
 
 ## Your destination
 
@@ -187,4 +187,4 @@ the model logs and `model_comparison.tsv` with your interpretation.
   annotation, PRS or Mendelian randomisation. Distinguish what the current GWAS
   estimates from the additional assumptions each follow-up needs.
 
-[Return to course home](../README.md)
+[Return to course home](../../README.md)

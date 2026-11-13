@@ -28,7 +28,7 @@ class PackagingTests(unittest.TestCase):
     def test_unknown_file(self):
         source = self.root / "unknown"
         source.mkdir()
-        (source / "unexpected.txt").write_text("fixture")
+        (source / "unexpected.txt").write_text("fixture", encoding="utf-8")
         with self.assertRaises(ValueError):
             release.inventory(source)
 

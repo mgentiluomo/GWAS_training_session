@@ -9,7 +9,7 @@ output:
     number_sections: true
 ---
 
-[Course home](../README.md) · [Setup](../docs/setup.md) · [Next: PCA](02_population_structure.Rmd)
+[Course home](../../README.md) · [Setup](../../docs/setup.md) · [Next: PCA](02_population_structure.Rmd)
 
 ## Your destination
 
@@ -36,7 +36,7 @@ print(check_bed(cfg$input))
 
 **Check your result:** the message identifies `demo` or `course`. Demo means
 simulated practice data, not the original study. A missing BED message means you
-must complete [setup](../docs/setup.md) before continuing.
+must complete [setup](../../docs/setup.md) before continuing.
 
 ### Which window am I using?
 
@@ -185,7 +185,7 @@ to retain also depends on call quality and study design.
 
 Your checkpoint is the **three-file set** `01_qc/qc_final.bed/.bim/.fam` plus
 `metadata.tsv` and the count table. Lesson 2 reads files from disk; it does not
-depend on this R environment. See [recovery](../docs/troubleshooting.md#rejoining-the-class).
+depend on this R environment. See [recovery](../../docs/troubleshooting.md#rejoining-the-class).
 
 **Exit check — Q3:** sample counts decrease at the relatedness step, but almost all
 variants remain. Explain why this is different from using the pruned variants as

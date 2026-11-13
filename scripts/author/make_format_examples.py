@@ -223,7 +223,7 @@ def vcf(dosages=False):
 def normalised_genotypes(path: Path):
     """Compare identities and allele letters, not the arbitrary REF/ALT ordering."""
     samples, rows = (), []
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         if line.startswith("#CHROM"):
             samples = tuple(line.split("\t")[9:])
         elif not line.startswith("#"):

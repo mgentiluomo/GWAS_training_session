@@ -9,7 +9,7 @@ output:
     number_sections: true
 ---
 
-[Course home](../README.md) · [Previous: QC](01_quality_control.Rmd) · [Next: association](03_association.Rmd)
+[Course home](../../README.md) · [Previous: QC](01_quality_control.Rmd) · [Next: association](03_association.Rmd)
 
 ## Your destination
 
@@ -35,7 +35,7 @@ metadata <- load_metadata(cfg)
 
 **Check your result:** QC files are present in the same data mode you used in
 lesson 1. If you are rejoining the class, use the checkpoint instructions in
-[troubleshooting](../docs/troubleshooting.md#rejoining-the-class).
+[troubleshooting](../../docs/troubleshooting.md#rejoining-the-class).
 
 ## Choose the study samples and prune variants
 
@@ -181,7 +181,7 @@ Which file records the decision?
   PLINK 2 does not automatically restrict HWE tests to controls.
 - The original course includes a 1000 Genomes exercise. Before merging, confirm
   genome build, variant identity, allele orientation and ambiguous sites. Read
-  [reference-panel guidance](../docs/reference_panel.md). Do not blindly flip all
+  [reference-panel guidance](../../docs/reference_panel.md). Do not blindly flip all
   mismatching variants or assign ancestry from a two-PC distance rule alone.
 - Compare 5 and 10 PCs using a documented sensitivity plan, rather than choosing
   whichever model gives the smallest p-value.

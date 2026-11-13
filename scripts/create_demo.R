@@ -64,4 +64,4 @@ writeLines(c("SIMULATED PRACTICE DATA", "Seed: 20261111", "600 samples; 6000 var
              "Phenotype simulated from age, sex, group and demo_rs2000.",
              "Not a reference population or a human disease study."), file.path(meta, "README.txt"))
 print(check_bed(cfg$input))
-cat("Demo created. Open lessons/01_quality_control.Rmd and run its first chunk.\n")
+cat("Demo created. Open legacy/demo_2025/01_quality_control.Rmd and run its first chunk.\n")

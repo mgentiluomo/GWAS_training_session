@@ -1,7 +1,8 @@
 # From the project root: source("scripts/check_course.R")
 # Parses all new R sources and notebook chunks, then checks key data safeguards.
 source("R/course.R")
-notebooks <- list.files("lessons", pattern = "[.]Rmd$", full.names = TRUE)
+notebooks <- c(list.files("lessons", pattern = "[.]Rmd$", full.names = TRUE),
+               list.files("legacy/demo_2025", pattern = "[.]Rmd$", full.names = TRUE))
 extract_chunks <- function(path) {
   lines <- readLines(path, warn = FALSE)
   starts <- grep("^```\\{r[ ,}]", lines)
@@ -68,7 +69,7 @@ cat("Syntax and identifier/p-value safeguards passed.\n")
 # Optional full execution. This intentionally overwrites the demo run only.
 if (identical(Sys.getenv("GWAS_RUN_DEMO_CHECK"), "1")) {
   source("scripts/create_demo.R")
-  for (p in notebooks) {
+  for (p in list.files("legacy/demo_2025", pattern = "[.]Rmd$", full.names = TRUE)) {
     cat("\nEXECUTING", p, "in a new lesson environment\n")
     lesson <- new.env(parent = globalenv())
     for (chunk in extract_chunks(p)) eval(chunk, envir = lesson)

@@ -1,3 +1,11 @@
+# Current preparation and export checks
+
+The separate demonstration notebooks are in `legacy/demo_2025/`. Its optional
+`GWAS_RUN_DEMO_CHECK=1` execution check is retained. Use
+`scripts/tests/test_guided_modules.R` and `scripts/run_main_path.R` for the
+current main path. The historical validation records below describe earlier
+revisions, including their old module 0 numbering.
+
 # Revision checks
 
 ## Guided modules 0 to 7: verified on Windows, 12 November 2026
