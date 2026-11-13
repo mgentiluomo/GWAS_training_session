@@ -6,7 +6,7 @@
   "anchor": "step-1-6",
   "title": "Problems born in the laboratory",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "26bd798c02cd360024b4591703d27e7d12f7c8a9f8f2486cb30ee11f471367b2",
+  "source_sha256": "77e4397fd6d8689a819224833a2bd43476dc80b3c886da87e4986617ed42d3d4",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Link laboratory problems to the quality-control checks of later modules.",

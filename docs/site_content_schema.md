@@ -183,3 +183,11 @@ this catalogue to select the matching asset under `formats/examples/`.
 
 Steps 1.8 to 1.11 have no executable commands and no `setup_code`. Conversion
 syntax appears in their reading text only. It never enters the main-path script.
+
+The reading-only steps open with a reading-time note in the notebook. The exporter
+preserves it at the start of `blocks.what_we_do` so the site can display it using
+its existing first block. The stated minutes are the word count divided by 200,
+rounded up. The count includes prose, tables, headings, answers and reference
+labels. It excludes the reading-time note, URLs, fenced code and hidden figure
+metadata. `reading_word_count()` in `scripts/course_exports.py` defines the rule.
+Exporting fails if a stated time disagrees with this count.

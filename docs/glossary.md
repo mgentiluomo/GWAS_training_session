@@ -723,3 +723,47 @@ Read length is the number of measured bases in one read. Short reads usually spa
 ### Natural logarithm {#logarithm}
 
 The logarithm with base e. In this course beta = log(odds ratio), so exponentiating beta recovers the odds ratio.
+
+### Short read {#short-read}
+
+A sequence read usually spanning hundreds of bases or fewer. Read length differs from sequencing depth, which counts how many reads cover a base.
+
+### Nanopore {#nanopore}
+
+A very small opening used as a sensor. Changes in an electrical signal can reveal features of a molecule passing through it. Roche SBX and Oxford Nanopore use different nanopore-based methods.
+
+### Base modification {#base-modification}
+
+A chemical change to a DNA or RNA base. Native modifications are present on the original molecule. Detecting them requires a suitable measurement and analysis model.
+
+### Methylation {#methylation}
+
+The addition of a methyl group, a small chemical group, to a molecule. DNA methylation can modify cytosine without changing its identity as a C base.
+
+### 5mC {#5mc}
+
+5-methylcytosine, a cytosine base with an added methyl group. Native-DNA sequencing can estimate its presence from signal features with suitable models.
+
+### Unaligned BAM: uBAM {#ubam}
+
+A BAM file storing read sequences, qualities and annotations before genomic alignment. It does not give a genomic placement for each read. PacBio HiFi and ONT Dorado use this representation.
+
+### Storage units: TB and PB {#storage-units}
+
+A byte is eight bits. In decimal units, one terabyte (TB) is one trillion bytes and one petabyte (PB) is 1,000 TB. Binary units such as TiB and PiB use powers of two instead.
+
+### Project-level VCF: pVCF {#pvcf}
+
+A VCF that combines variant calls across a project or cohort. It can contain many samples and extensive per-sample annotations. A reduced representation may retain selected fields only.
+
+### Centimorgan {#centimorgan}
+
+A unit of genetic distance based on chromosome exchanges during inheritance. One centimorgan corresponds approximately to a one per cent chance of an exchange between two nearby sites in one generation. It is not a fixed number of base pairs.
+
+### Machine learning {#machine-learning}
+
+A method that fits patterns in data to make predictions or classifications. In variant filtering, a fitted model can help distinguish poor calls from reliable ones.
+
+### Biallelic and multiallelic {#biallelic-multiallelic}
+
+A biallelic site has two alleles. A multiallelic site has more than two, so its VCF record can list several alternative alleles beside the reference allele. Reducing a multiallelic file to biallelic records requires explicit rules.

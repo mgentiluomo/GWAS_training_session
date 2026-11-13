@@ -16,6 +16,7 @@ OVERVIEW = re.compile(r"^## Module (\d+) at a glance \{#module-\d+-overview\}\s*
 RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
 SCREENSHOT = re.compile(r"<!-- screenshot:\s*(.*?)\s*-->", re.S)
+READING_NOTE = re.compile(r"^Reading, about (\d+) minutes\. You can come back to it later\.$", re.M)
 BLOCKS = [
     ("what_we_do", "### What we do"), ("why", "### Why"),
     ("you_need", "### You need"), ("command", "### Command"),
@@ -54,6 +55,20 @@ def split_blocks(body: str) -> dict[str, str]:
 
 def prose(text: str) -> str:
     return re.sub(r"^```.*?^```\s*$", "", text, flags=re.M | re.S)
+
+
+def reading_word_count(text: str) -> int:
+    """Count prose, tables, headings, answers and reference labels at 200 words/minute.
+
+    Exclude the reading note itself, URLs, code fences and hidden figure metadata.
+    Keep field names and numeric examples as words, including underscores.
+    """
+    visible = READING_NOTE.sub("", text)
+    visible = re.sub(r"<!--.*?-->", "", visible, flags=re.S)
+    visible = prose(visible)
+    visible = re.sub(r"!?\[([^\]]*)\]\([^)]+\)", r"\1", visible)
+    visible = re.sub(r"https?://\S+|\{#[^}]+\}|<[^>]+>", "", visible)
+    return len(re.findall(r"\b\w+(?:[.'/-]\w+)*\b", visible))
 
 
 def flag_explanation(flag: str, text: str) -> str | None:
@@ -118,6 +133,13 @@ def export_steps(root: Path = ROOT) -> list[dict]:
             following = [h.start() for h in HEADING.finditer(text) if h.start() > match.start()]
             body = text[match.end():following[0] if following else len(text)]
             blocks = split_blocks(body)
+            reading = READING_NOTE.search(body)
+            if reading:
+                words = reading_word_count(body)
+                if int(reading.group(1)) != max(1, (words + 199) // 200):
+                    raise ValueError(f"Update the reading time for step {match.group(1)}.{match.group(2)}: {words} words.")
+                # Keep the opening note visible in the site's existing first block.
+                blocks["what_we_do"] = reading.group() + "\n\n" + blocks["what_we_do"]
             commands = []
             for fence in re.findall(r"^```sh\s*\n(.*?)^```\s*$", blocks["command"], re.M | re.S):
                 commands.extend(line.strip() for line in fence.splitlines() if line.strip().startswith("bin/"))

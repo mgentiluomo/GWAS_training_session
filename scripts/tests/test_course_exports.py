@@ -35,11 +35,43 @@ class CourseExportsTests(unittest.TestCase):
             self.assertEqual(record["plink"]["commands"], [])
             self.assertIn("No code to run", record["blocks"]["command"])
             self.assertIn("pubmed.ncbi.nlm.nih.gov", record["blocks"]["why"])
+            text = (ROOT / record["source"]).read_text(encoding="utf-8")
+            heading = next(m for m in exports.STEP.finditer(text)
+                           if f"{m.group(1)}.{m.group(2)}" == record["id"])
+            end = next(m.start() for m in exports.HEADING.finditer(text) if m.start() > heading.start())
+            body = text[heading.end():end]
+            opening = body.strip().splitlines()[0]
+            note = exports.READING_NOTE.fullmatch(opening)
+            self.assertIsNotNone(note)
+            self.assertEqual(int(note.group(1)), (exports.reading_word_count(body) + 199) // 200)
+            self.assertTrue(record["blocks"]["what_we_do"].startswith(opening))
         journey = next(r for r in readings if r["id"] == "1.9")
         self.assertEqual(len(journey["figures"]), 1)
         self.assertIn("Three data journeys", journey["figures"][0]["alt_text"])
         self.assertNotIn("samtools view", exports.main_script())
         self.assertNotIn("--bgen", exports.main_script())
+
+    def test_reading_count_ignores_urls_code_and_hidden_metadata(self):
+        text = ("Reading, about 1 minutes. You can come back to it later.\n\n"
+                "[Two words](https://example.invalid/a?b=c)\n"
+                "| Field | Meaning |\n| --- | --- |\n| GT | Called genotype |\n"
+                "<!-- Hidden words -->\n```sh\nnot part of prose\n```\n")
+        self.assertEqual(exports.reading_word_count(text), 7)
+
+    def test_format_syntax_is_explicitly_read_only_and_tables_are_scannable(self):
+        record = next(r for r in self.records if r["id"] == "1.10")
+        text = record["blocks"]["why"]
+        sections = re.split(r"^#### ", text, flags=re.M)[1:]
+        self.assertEqual(len(sections), 9)
+        for section in sections:
+            self.assertIn("| Field | Meaning |", section)
+            self.assertIn("**Common mistakes**", section)
+        examples = re.findall(r"<details><summary>Example syntax, do not run</summary>(.*?)</details>", text, re.S)
+        self.assertEqual(len(examples), 4)
+        self.assertEqual(sum(part.count("```sh") for part in examples), text.count("```sh"))
+        for phrase in ("No vendor binary is fabricated", "not genuine imputation",
+                       "The filenames here are explanatory names"):
+            self.assertNotIn(phrase, text)
 
     def test_format_examples_links_and_exported_assets_resolve(self):
         from urllib.parse import unquote
@@ -67,8 +99,10 @@ class CourseExportsTests(unittest.TestCase):
     def test_mathematical_text_has_no_lossy_question_mark_substitutions(self):
         for path in exports.notebook_paths():
             text = path.read_text(encoding="utf-8")
-            self.assertIsNone(re.search(r"\w\?\w|\?\?|\?log10|10\^\(\?", text), path.name)
             self.assertNotIn("\ufffd", text)
+            # Query strings in legitimate source URLs are not mathematical corruption.
+            visible = re.sub(r"https?://[^\s)]+", "", text)
+            self.assertIsNone(re.search(r"\w\?\w|\?\?|\?log10|10\^\(\?", visible), path.name)
 
     def test_committed_json_matches_canonical_sources(self):
         paths = list((ROOT / "site_content" / "steps").glob("*.json"))
