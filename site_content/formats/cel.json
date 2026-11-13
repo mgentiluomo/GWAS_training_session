@@ -12,7 +12,6 @@
     }
   ],
   "header_notes": [
-    "Description only. No vendor or read binary is fabricated.",
     "Consult the linked documentation for version-specific headers and fields."
   ],
   "magic_bytes": null,

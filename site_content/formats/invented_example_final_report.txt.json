@@ -37,11 +37,9 @@
     }
   ],
   "header_notes": [
-    "invented example; no real individuals.",
-    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
-    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Invented example; no real individuals.",
     "[Header] contains example metadata and [Data] introduces the table.",
-    "This is a teaching subset, not a real GenomeStudio export or vendor specification."
+    "Available columns vary between exports; read the column header before importing."
   ],
   "magic_bytes": null,
   "size_bytes": 667,

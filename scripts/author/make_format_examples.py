@@ -27,8 +27,7 @@ def catalogue_entry(path: Path) -> dict:
     suffix = next(key for key, value in FILES.items() if value == name)
     binary = suffix in {".bed", ".pgen", ".bgen"}
     fields = {}
-    notes = ["invented example; no real individuals.", "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
-             "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated."]
+    notes = ["Invented example; no real individuals."]
     format_name, producer, stage = suffix.strip(), "Offline teaching generator", "Teaching illustration only"
     if suffix.endswith(".vcf"):
         format_name, stage = "gVCF" if suffix == ".g.vcf" else "VCF", "Variant calling or imputation, before analysis"
@@ -56,12 +55,12 @@ def catalogue_entry(path: Path) -> dict:
     elif suffix == ".pvar":
         fields = {k: VCF_FIELDS[k] for k in ("CHROM", "POS", "ID", "REF", "ALT", "FILTER")}
         producer, stage = "PLINK 2 --make-pgen", "Variant metadata paired with PGEN"
-        notes += ["Double-hash metadata lines may precede the column header.", "REF from the invented VCF is retained; this does not check GRCh38."]
+        notes += ["Double-hash metadata lines may precede the column header.", "REF is retained from the input VCF."]
     elif suffix == ".psam":
         fields = {k: FAM[k] for k in ("FID", "IID", "SEX")}
         fields["SEX"] = "Sex code: 1 male, 2 female, NA unknown in this PSAM."
         producer, stage = "PLINK 2 --make-pgen", "Sample metadata paired with PGEN"
-        notes += ["The hash-prefixed header names fields; sex 0 means unknown."]
+        notes += ["The hash-prefixed header names fields; NA means unknown sex in this file."]
     elif suffix == ".sample":
         fields = {"ID_1": "First sample identifier, here the family identifier.", "ID_2": "Second sample identifier, here the individual identifier.", "missing": "Proportion of missing genotype calls across the five exported sites.", "sex": "Sex code, where NA is unknown, 1 male and 2 female."}
         producer, stage = "PLINK 2 BGEN export", "Sample order alongside BGEN probabilities"
@@ -80,20 +79,20 @@ def catalogue_entry(path: Path) -> dict:
         fields = dict(zip(("QNAME", "FLAG", "RNAME", "POS", "MAPQ", "CIGAR", "RNEXT", "PNEXT", "TLEN", "SEQ", "QUAL"),
             ("Read identifier.", "Bit flags, zero here for an unpaired forward alignment.", "Reference contig name toy1.", "One-based alignment start.", "Mapping quality, here an invented score of 60.", "Operations consuming read or reference bases: M is aligned bases and I is a read insertion.", "Mate reference name, * because these reads are unpaired.", "Mate position, zero because no mate is supplied.", "Template length, zero because these reads are unpaired.", "Read bases.", "Phred+33 base qualities.")))
         format_name, stage = "SAM", "Aligned reads before variant calling"
-        notes += ["@HD declares version and sort order, @SQ names toy1 and its length, and @CO labels the example.", "The second read has 4M1I5M: ten read bases aligned across nine reference bases."]
+        notes += ["@HD declares version and sort order, @SQ names toy1 and its length, and @CO contains a comment.", "The second read has 4M1I5M: ten read bases aligned across nine reference bases."]
     elif suffix == "final_report.txt":
         fields = {"SNP Name": "Invented array marker identifier.", "Sample ID": "Invented sample identifier.", "Allele1 - Forward": "First called allele on the forward strand, or - when missing.", "Allele2 - Forward": "Second called allele on the forward strand, or - when missing.", "GC Score": "Illustrative calling confidence, not a calibrated probability.", "X": "Invented first normalised intensity.", "Y": "Invented second normalised intensity."}
         format_name, stage = "Illumina-style Final Report", "Array calling export before PLINK conversion"
-        notes += ["[Header] contains example metadata and [Data] introduces the table.", "This is a teaching subset, not a real GenomeStudio export or vendor specification."]
+        notes += ["[Header] contains example metadata and [Data] introduces the table.", "Available columns vary between exports; read the column header before importing."]
     elif suffix == "intervals.bed":
         fields = {"chrom": "Chromosome name with chr prefix.", "chromStart": "Zero-based first included coordinate.", "chromEnd": "First excluded coordinate.", "name": "Invented interval identifier."}
         format_name, stage = "UCSC BED", "Genomic intervals for annotation"
-        notes += ["The optional track line labels the example; this is unrelated to binary PLINK BED."]
+        notes += ["The optional track line names the interval set; this text format is unrelated to binary PLINK BED."]
     elif suffix == "summary.tsv":
         fields = dict(zip(("chromosome", "base_pair_location", "variant_id", "effect_allele", "other_allele", "effect_allele_frequency", "odds_ratio", "beta", "standard_error", "p_value", "n"),
             ("Chromosome label.", "One-based variant position.", "Invented variant identifier.", "Allele for which the effect is reported.", "The other allele at the site.", "Effect-allele fraction among non-missing calls.", "Illustrative odds ratio, not fitted to the four samples.", "Natural logarithm of the illustrative odds ratio.", "Illustrative uncertainty of beta on the log-odds scale.", "Illustrative association p-value.", "Number of non-missing sample genotypes.")))
         format_name, stage = "Course summary statistics TSV", "Association results for sharing"
-        notes += ["The comment labels the example; the next line names columns.", "Uses the course standard columns; this is not a complete GWAS-SSF submission with required study metadata."]
+        notes += ["The first line is a comment; the next line names columns.", "Uses the course standard columns; this is not a complete GWAS-SSF submission with required study metadata."]
     elif binary:
         producer, stage = "PLINK 2 VCF conversion", "Compact genotypes or probabilities for association"
         fields = {"header": "Binary header identifies the encoding and dimensions where the specification requires them.", "payload": "Packed genotypes for BED/PGEN, or compressed genotype probabilities for BGEN."}
@@ -141,7 +140,7 @@ def export_formats(destination: Path) -> list[dict]:
     for name, (producer, stage, content, specification) in descriptions.items():
         entry = {"schema_version": "1.0", "file_name": None, "format": name, "encoding": "binary",
                  "producer": producer, "pipeline_position": stage, "columns_or_fields": [{"name": "records", "meaning": content + "."}],
-                 "header_notes": ["Description only. No vendor or read binary is fabricated.", "Consult the linked documentation for version-specific headers and fields."],
+                 "header_notes": ["Consult the linked documentation for version-specific headers and fields."],
                  "magic_bytes": None, "specification": specification, "asset": None}
         write(destination / (name.lower() + ".json"), json.dumps(entry, indent=2) + "\n")
         entries.append(entry)

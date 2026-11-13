@@ -17,9 +17,7 @@
     }
   ],
   "header_notes": [
-    "invented example; no real individuals.",
-    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
-    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Invented example; no real individuals.",
     "Not a text table; consult the format specification for byte layout.",
     "The ASCII bgen signature is at byte offset 16, not at the start; layout 2 implements BGEN 1.2."
   ],

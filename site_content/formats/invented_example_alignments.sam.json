@@ -53,10 +53,8 @@
     }
   ],
   "header_notes": [
-    "invented example; no real individuals.",
-    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
-    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
-    "@HD declares version and sort order, @SQ names toy1 and its length, and @CO labels the example.",
+    "Invented example; no real individuals.",
+    "@HD declares version and sort order, @SQ names toy1 and its length, and @CO contains a comment.",
     "The second read has 4M1I5M: ten read bases aligned across nine reference bases."
   ],
   "magic_bytes": null,

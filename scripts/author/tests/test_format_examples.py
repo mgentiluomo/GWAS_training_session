@@ -100,7 +100,10 @@ class FormatExamplesTests(unittest.TestCase):
                 self.assertEqual(source.read_bytes(), (Path(folder) / entry["asset"]).read_bytes())
                 self.assertTrue(entry["columns_or_fields"])
                 self.assertEqual(entry["label"], "invented example")
-                self.assertIn("invented example", " ".join(entry["header_notes"]))
+                self.assertEqual(entry["header_notes"][0], "Invented example; no real individuals.")
+                for note in entry["header_notes"]:
+                    self.assertNotIn("not reference-validated", note)
+                    self.assertNotIn("label is", note)
                 committed = ROOT / "site_content/formats" / (source.name + ".json")
                 self.assertEqual(json.loads(committed.read_text()), entry)
             self.assertEqual({e["format"] for e in entries if not e["asset"]}, {"IDAT", "GTC", "CEL", "BAM", "CRAM", "POD5"})
