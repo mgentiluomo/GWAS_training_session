@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_plink2.pgen",
+  "format": ".pgen",
+  "encoding": "binary",
+  "producer": "PLINK 2 VCF conversion",
+  "pipeline_position": "Compact genotypes or probabilities for association",
+  "columns_or_fields": [
+    {
+      "name": "header",
+      "meaning": "Binary header identifies the encoding and dimensions where the specification requires them."
+    },
+    {
+      "name": "payload",
+      "meaning": "Packed genotypes for BED/PGEN, or compressed genotype probabilities for BGEN."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Not a text table; consult the format specification for byte layout.",
+    "6c 1b identifies PGEN; later header bytes define its storage mode and dimensions."
+  ],
+  "magic_bytes": {
+    "first_bytes_hex": "6c 1b 10 05 00 00 00 04 00 00 00 40 1c 00 00 00 00 00 00 00 00 00 00 01 01 01 01 01 64 91 36 24",
+    "signature_hex": "6c 1b",
+    "signature_offset": 0
+  },
+  "size_bytes": 33,
+  "sha256": "b4a712b0dbe2e12f221cd98b5062d4e97b6721703c9c0d9222102ddf0d2918c3",
+  "asset": "examples/invented_example_plink2.pgen"
+}

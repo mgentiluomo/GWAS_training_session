@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_dosages.vcf",
+  "format": "VCF",
+  "encoding": "text",
+  "producer": "Offline teaching generator",
+  "pipeline_position": "Variant calling or imputation, before analysis",
+  "columns_or_fields": [
+    {
+      "name": "CHROM",
+      "meaning": "Chromosome name."
+    },
+    {
+      "name": "POS",
+      "meaning": "One-based position of the first reference base."
+    },
+    {
+      "name": "ID",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "REF",
+      "meaning": "Reference allele in this invented example."
+    },
+    {
+      "name": "ALT",
+      "meaning": "Alternative allele, or a symbolic allele such as NON_REF."
+    },
+    {
+      "name": "QUAL",
+      "meaning": "Variant quality score, a dot when not supplied."
+    },
+    {
+      "name": "FILTER",
+      "meaning": "PASS denotes no failed example filter."
+    },
+    {
+      "name": "INFO",
+      "meaning": "Site annotations, including END or R2 when declared in the header."
+    },
+    {
+      "name": "FORMAT",
+      "meaning": "Names and order of the sample fields."
+    },
+    {
+      "name": "S1-S4",
+      "meaning": "Sample values follow FORMAT; the gVCF contains only S1."
+    },
+    {
+      "name": "GT",
+      "meaning": "Genotype allele indices, where 0 is REF, 1 is the first ALT, and a dot is missing."
+    },
+    {
+      "name": "DS",
+      "meaning": "Expected ALT count, equal to GP(0/1) plus twice GP(1/1) for a diploid biallelic site, or GP(1) when haploid."
+    },
+    {
+      "name": "GP",
+      "meaning": "Probabilities for 0/0, 0/1 and 1/1 in diploid calls, or 0 and 1 in haploid calls."
+    },
+    {
+      "name": "R2",
+      "meaning": "Invented imputation quality annotation, not calculated from these four samples."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Double-hash lines declare metadata; the single-hash CHROM line names columns.",
+    "PASS and dot values here do not establish biological validity."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 1261,
+  "sha256": "c5cdc80aaa69e08f806d0a4a807884910302792c6a0535410c4f5e51c391562d",
+  "asset": "examples/invented_example_dosages.vcf"
+}

@@ -1,2 +1,0 @@
-invented example: first 32 bytes of invented example.bgen
-38 00 00 00 14 00 00 00 05 00 00 00 04 00 00 00 62 67 65 6e 09 00 00 80 24 00 00 00 04 00 00 00

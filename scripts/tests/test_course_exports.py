@@ -46,10 +46,23 @@ class CourseExportsTests(unittest.TestCase):
         for record in self.records:
             for target in re.findall(r"\]\((\.\./examples/formats/[^)]+)\)", "\n".join(record["blocks"].values())):
                 path = ROOT / "lessons" / unquote(target)
+                self.assertNotRegex(path.name, r"\s")
                 self.assertTrue(path.exists(), target)
                 if path.is_file():
                     copied = ROOT / "site_content/formats/examples" / path.name
                     self.assertEqual(copied.read_bytes(), path.read_bytes())
+        reading = next(r for r in self.records if r["id"] == "1.10")
+        for line in reading["blocks"]["why"].splitlines():
+            if not line.startswith("plink2 "):
+                continue
+            tokens = shlex.split(line)
+            for option in ("--vcf", "--update-sex", "--bgen", "--sample", "--bfile"):
+                if option not in tokens:
+                    continue
+                name = tokens[tokens.index(option) + 1]
+                suffixes = (".bed", ".bim", ".fam") if option == "--bfile" else ("",)
+                for suffix in suffixes:
+                    self.assertTrue((ROOT / "examples/formats" / (name + suffix)).is_file(), line)
 
     def test_mathematical_text_has_no_lossy_question_mark_substitutions(self):
         for path in exports.notebook_paths():

@@ -6,7 +6,7 @@
   "anchor": "step-1-2",
   "title": "How an array measures DNA",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "7fc7730beab59bd66db1b50f9113eecb59591a0767eb8ecad51a2323999732e9",
+  "source_sha256": "26bd798c02cd360024b4591703d27e7d12f7c8a9f8f2486cb30ee11f471367b2",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn why a fluorescence measurement is not the same as a genotype call.",

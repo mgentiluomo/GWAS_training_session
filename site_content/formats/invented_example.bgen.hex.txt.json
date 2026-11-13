@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example.bgen.hex.txt",
+  "format": "Hex dump",
+  "encoding": "text",
+  "producer": "Offline teaching generator",
+  "pipeline_position": "Human-readable view of binary bytes",
+  "columns_or_fields": [
+    {
+      "name": "line 1",
+      "meaning": "The label names the corresponding invented binary file."
+    },
+    {
+      "name": "line 2",
+      "meaning": "The first 32 bytes, or the whole file if shorter, are written as hexadecimal pairs."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 154,
+  "sha256": "634f3d62abbcaf757aed02030f45303bbd5f1a82630db3ff322d145b69300355",
+  "asset": "examples/invented_example.bgen.hex.txt"
+}

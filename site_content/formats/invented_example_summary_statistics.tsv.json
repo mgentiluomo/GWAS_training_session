@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_summary_statistics.tsv",
+  "format": "Course summary statistics TSV",
+  "encoding": "text",
+  "producer": "Offline teaching generator",
+  "pipeline_position": "Association results for sharing",
+  "columns_or_fields": [
+    {
+      "name": "chromosome",
+      "meaning": "Chromosome label."
+    },
+    {
+      "name": "base_pair_location",
+      "meaning": "One-based variant position."
+    },
+    {
+      "name": "variant_id",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "effect_allele",
+      "meaning": "Allele for which the effect is reported."
+    },
+    {
+      "name": "other_allele",
+      "meaning": "The other allele at the site."
+    },
+    {
+      "name": "effect_allele_frequency",
+      "meaning": "Effect-allele fraction among non-missing calls."
+    },
+    {
+      "name": "odds_ratio",
+      "meaning": "Illustrative odds ratio, not fitted to the four samples."
+    },
+    {
+      "name": "beta",
+      "meaning": "Natural logarithm of the illustrative odds ratio."
+    },
+    {
+      "name": "standard_error",
+      "meaning": "Illustrative uncertainty of beta on the log-odds scale."
+    },
+    {
+      "name": "p_value",
+      "meaning": "Illustrative association p-value."
+    },
+    {
+      "name": "n",
+      "meaning": "Number of non-missing sample genotypes."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "The comment labels the example; the next line names columns.",
+    "Uses the course standard columns; this is not a complete GWAS-SSF submission with required study metadata."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 478,
+  "sha256": "b4bda74ce5927b48d45bcc86ef925bc29549dbe7050713bb115e6dec7294f0cf",
+  "asset": "examples/invented_example_summary_statistics.tsv"
+}

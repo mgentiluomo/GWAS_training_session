@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_plink1_transposed.tfam",
+  "format": ".tfam",
+  "encoding": "text",
+  "producer": "PLINK 2 VCF export",
+  "pipeline_position": "Called genotypes for association tools",
+  "columns_or_fields": [
+    {
+      "name": "FID",
+      "meaning": "Family identifier, set equal to the invented sample identifier."
+    },
+    {
+      "name": "IID",
+      "meaning": "Individual identifier S1 to S4."
+    },
+    {
+      "name": "PAT",
+      "meaning": "Father identifier, zero when not supplied."
+    },
+    {
+      "name": "MAT",
+      "meaning": "Mother identifier, zero when not supplied."
+    },
+    {
+      "name": "SEX",
+      "meaning": "Sex code: 1 male, 2 female, 0 unknown."
+    },
+    {
+      "name": "PHENO",
+      "meaning": "Phenotype code, -9 when not supplied."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "No header line is permitted in this example format."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 60,
+  "sha256": "60fe81913764625a7624f96e81da9760e19c6b665428880b46518a963eefb450",
+  "asset": "examples/invented_example_plink1_transposed.tfam"
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example.bgen",
+  "format": ".bgen",
+  "encoding": "binary",
+  "producer": "PLINK 2 VCF conversion",
+  "pipeline_position": "Compact genotypes or probabilities for association",
+  "columns_or_fields": [
+    {
+      "name": "header",
+      "meaning": "Binary header identifies the encoding and dimensions where the specification requires them."
+    },
+    {
+      "name": "payload",
+      "meaning": "Packed genotypes for BED/PGEN, or compressed genotype probabilities for BGEN."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Not a text table; consult the format specification for byte layout.",
+    "The ASCII bgen signature is at byte offset 16, not at the start; layout 2 implements BGEN 1.2."
+  ],
+  "magic_bytes": {
+    "first_bytes_hex": "38 00 00 00 14 00 00 00 05 00 00 00 04 00 00 00 62 67 65 6e 09 00 00 80 24 00 00 00 04 00 00 00",
+    "signature_hex": "62 67 65 6e",
+    "signature_offset": 16
+  },
+  "size_bytes": 408,
+  "sha256": "a87131d0aea833a9758624da0e124ec8f2a488c2e22767b914289fb3454fe074",
+  "asset": "examples/invented_example.bgen"
+}

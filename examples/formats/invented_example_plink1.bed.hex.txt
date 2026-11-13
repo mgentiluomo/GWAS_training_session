@@ -1,0 +1,2 @@
+invented example: first 32 bytes of invented_example_plink1.bed
+6c 1b 01 8b 2e d8 cb 2c

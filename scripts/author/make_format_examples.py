@@ -1,7 +1,7 @@
 """Generate and validate tiny invented examples. Offline. Requires the configured PLINK 2.
 
 Run: python -I -B scripts/author/make_format_examples.py
-Binary and strict index formats carry the label in their filename and JSON.
+Filenames use underscores. Comments and JSON retain the readable invented example label.
 No non-standard bytes are inserted into these files.
 """
 from __future__ import annotations
@@ -24,16 +24,16 @@ VCF_FIELDS = {"CHROM": "Chromosome name.", "POS": "One-based position of the fir
 def catalogue_entry(path: Path) -> dict:
     """Describe a valid example without pretending binary bytes are text columns."""
     name = path.name
-    suffix = name.removeprefix(LABEL)
+    suffix = next(key for key, value in FILES.items() if value == name)
     binary = suffix in {".bed", ".pgen", ".bgen"}
     fields = {}
-    notes = ["invented example; no real individuals.", "The label is in the filename and this description when the format has no comment field.",
+    notes = ["invented example; no real individuals.", "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
              "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated."]
     format_name, producer, stage = suffix.strip(), "Offline teaching generator", "Teaching illustration only"
     if suffix.endswith(".vcf"):
         format_name, stage = "gVCF" if suffix == ".g.vcf" else "VCF", "Variant calling or imputation, before analysis"
         fields = dict(VCF_FIELDS)
-        if suffix != " imputed.vcf":
+        if suffix != "dosages.vcf":
             for key in ("DS", "GP", "R2"):
                 fields.pop(key)
         if suffix != ".g.vcf":
@@ -81,15 +81,15 @@ def catalogue_entry(path: Path) -> dict:
             ("Read identifier.", "Bit flags, zero here for an unpaired forward alignment.", "Reference contig name toy1.", "One-based alignment start.", "Mapping quality, here an invented score of 60.", "Operations consuming read or reference bases: M is aligned bases and I is a read insertion.", "Mate reference name, * because these reads are unpaired.", "Mate position, zero because no mate is supplied.", "Template length, zero because these reads are unpaired.", "Read bases.", "Phred+33 base qualities.")))
         format_name, stage = "SAM", "Aligned reads before variant calling"
         notes += ["@HD declares version and sort order, @SQ names toy1 and its length, and @CO labels the example.", "The second read has 4M1I5M: ten read bases aligned across nine reference bases."]
-    elif suffix == " Final Report.txt":
+    elif suffix == "final_report.txt":
         fields = {"SNP Name": "Invented array marker identifier.", "Sample ID": "Invented sample identifier.", "Allele1 - Forward": "First called allele on the forward strand, or - when missing.", "Allele2 - Forward": "Second called allele on the forward strand, or - when missing.", "GC Score": "Illustrative calling confidence, not a calibrated probability.", "X": "Invented first normalised intensity.", "Y": "Invented second normalised intensity."}
         format_name, stage = "Illumina-style Final Report", "Array calling export before PLINK conversion"
         notes += ["[Header] contains example metadata and [Data] introduces the table.", "This is a teaching subset, not a real GenomeStudio export or vendor specification."]
-    elif suffix == " intervals.bed":
+    elif suffix == "intervals.bed":
         fields = {"chrom": "Chromosome name with chr prefix.", "chromStart": "Zero-based first included coordinate.", "chromEnd": "First excluded coordinate.", "name": "Invented interval identifier."}
         format_name, stage = "UCSC BED", "Genomic intervals for annotation"
         notes += ["The optional track line labels the example; this is unrelated to binary PLINK BED."]
-    elif suffix == " summary.tsv":
+    elif suffix == "summary.tsv":
         fields = dict(zip(("chromosome", "base_pair_location", "variant_id", "effect_allele", "other_allele", "effect_allele_frequency", "odds_ratio", "beta", "standard_error", "p_value", "n"),
             ("Chromosome label.", "One-based variant position.", "Invented variant identifier.", "Allele for which the effect is reported.", "The other allele at the site.", "Effect-allele fraction among non-missing calls.", "Illustrative odds ratio, not fitted to the four samples.", "Natural logarithm of the illustrative odds ratio.", "Illustrative uncertainty of beta on the log-odds scale.", "Illustrative association p-value.", "Number of non-missing sample genotypes.")))
         format_name, stage = "Course summary statistics TSV", "Association results for sharing"
@@ -120,15 +120,15 @@ def catalogue_entry(path: Path) -> dict:
 def export_formats(destination: Path) -> list[dict]:
     """Copy only the authorised tiny examples. Never run PLINK during site export."""
     files = sorted(p for p in EXAMPLES.iterdir() if p.is_file())
-    if not files or sum(p.stat().st_size for p in files) >= 100000 or any(LABEL not in p.name for p in files):
-        raise ValueError("Expected labelled invented examples below 100 KB.")
+    if {p.name for p in files} != set(FILES.values()) or sum(p.stat().st_size for p in files) >= 100000:
+        raise ValueError("Expected the complete set of invented examples below 100 KB, with descriptive names and no spaces.")
     target = destination / "examples"
     target.mkdir(parents=True, exist_ok=True)
     entries = []
     for path in files:
         entry = catalogue_entry(path)
         shutil.copyfile(path, target / path.name)
-        slug = path.name.replace(" ", "-") + ".json"
+        slug = path.name + ".json"
         write(destination / slug, json.dumps(entry, ensure_ascii=False, indent=2) + "\n")
         entries.append(entry)
     descriptions = {
@@ -150,6 +150,32 @@ def export_formats(destination: Path) -> list[dict]:
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLES = ROOT / "examples/formats"
 LABEL = "invented example"
+# Stable names shared by the generator, catalogue, exporter and tests.
+FILES = {'.vcf': 'invented_example_multisample.vcf',
+ 'dosages.vcf': 'invented_example_dosages.vcf',
+ '.fasta': 'invented_example_reference.fasta',
+ '.fasta.fai': 'invented_example_reference.fasta.fai',
+ '.fastq': 'invented_example_reads.fastq',
+ '.sam': 'invented_example_alignments.sam',
+ '.g.vcf': 'invented_example_sample.g.vcf',
+ 'final_report.txt': 'invented_example_final_report.txt',
+ '.ped': 'invented_example_plink1.ped',
+ '.map': 'invented_example_plink1.map',
+ '.tped': 'invented_example_plink1_transposed.tped',
+ '.tfam': 'invented_example_plink1_transposed.tfam',
+ '.bed': 'invented_example_plink1.bed',
+ '.bim': 'invented_example_plink1.bim',
+ '.fam': 'invented_example_plink1.fam',
+ '.pgen': 'invented_example_plink2.pgen',
+ '.pvar': 'invented_example_plink2.pvar',
+ '.psam': 'invented_example_plink2.psam',
+ '.bgen': 'invented_example.bgen',
+ '.sample': 'invented_example.sample',
+ 'intervals.bed': 'invented_example_intervals.bed',
+ 'summary.tsv': 'invented_example_summary_statistics.tsv',
+ '.bed.hex.txt': 'invented_example_plink1.bed.hex.txt',
+ '.pgen.hex.txt': 'invented_example_plink2.pgen.hex.txt',
+ '.bgen.hex.txt': 'invented_example.bgen.hex.txt'}
 SAMPLES = ("S1", "S2", "S3", "S4")
 VARIANTS = (
     ("1", 100001, "toy_v1", "A", "G", ("0/0", "0/1", "1/1", "0/1")),
@@ -220,24 +246,32 @@ def generate(plink: Path) -> dict:
     EXAMPLES.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="format-build-", dir=EXAMPLES) as temporary:
         folder = Path(temporary)
-        base = folder / LABEL
-        source = Path(str(base) + ".vcf")
+        def staged(kind):
+            return folder / FILES[kind]
+
+        source = staged(".vcf")
         write(source, vcf())
-        write(Path(str(base) + " imputed.vcf"), vcf(True))
+        write(staged("dosages.vcf"), vcf(True))
         write(folder / "sex.tsv", "#FID\tIID\tSEX\nS1\tS1\t1\nS2\tS2\t2\nS3\tS3\t0\nS4\tS4\t2\n")
         common = ["--vcf", str(source), "--double-id", "--update-sex", str(folder / "sex.tsv")]
-        for option in (["--make-bed"], ["--make-pgen"], ["--export", "ped"],
-                       ["--export", "tped"], ["--export", "bgen-1.2", "bits=8"]):
-            run(plink, folder, *common, *option, "--out", str(base))
+        outputs = ((["--make-bed"], ".bed"), (["--make-pgen"], ".pgen"),
+                   (["--export", "ped"], ".ped"), (["--export", "tped"], ".tped"),
+                   (["--export", "bgen-1.2", "bits=8"], ".bgen"))
+        for option, kind in outputs:
+            run(plink, folder, *common, *option, "--out", staged(kind).with_suffix(""))
         # PLINK writes CRLF on Windows. Canonical LF keeps text bytes portable.
         # Binary files are copied unchanged and are never decoded as text.
-        for suffix in (".ped", ".map", ".tped", ".tfam", ".bim", ".fam", ".pvar", ".psam", ".sample"):
-            path = Path(str(base) + suffix)
+        for kind in (".ped", ".map", ".tped", ".tfam", ".bim", ".fam", ".pvar", ".psam", ".sample"):
+            path = staged(kind)
             write(path, path.read_text(encoding="utf-8"))
+        pvar = staged(".pvar")
+        write(pvar, "##source=invented example\n" + pvar.read_text(encoding="utf-8"))
         imports = {"vcf": ["--vcf", source, "--double-id"],
-                   "bed": ["--bfile", base], "pgen": ["--pfile", base],
-                   "ped": ["--pedmap", base], "tped": ["--tfile", base],
-                   "bgen": ["--bgen", str(base) + ".bgen", "ref-first", "--sample", str(base) + ".sample"]}
+                   "bed": ["--bfile", staged(".bed").with_suffix("")],
+                   "pgen": ["--pfile", staged(".pgen").with_suffix("")],
+                   "ped": ["--pedmap", staged(".ped").with_suffix("")],
+                   "tped": ["--tfile", staged(".tped").with_suffix("")],
+                   "bgen": ["--bgen", staged(".bgen"), "ref-first", "--sample", staged(".sample")]}
         expected = normalised_genotypes(source)
         checks = {}
         for kind, arguments in imports.items():
@@ -248,18 +282,18 @@ def generate(plink: Path) -> dict:
                 raise ValueError(f"Genotype round trip differs for {kind}: {observed}")
             checks[kind] = "4 samples, 5 variants, identical allele genotypes, 1 missing genotype"
         reference = ">toy1 invented example\n" + "ACGT" * 15 + "\n"
-        write(folder / f"{LABEL}.fasta", reference)
-        write(folder / f"{LABEL}.fasta.fai", f"toy1\t60\t{reference.index(chr(10)) + 1}\t60\t61\n")
-        write(folder / f"{LABEL}.fastq", "@read1 invented example\nACGTACGTAC\n+\nIIIIIIIIII\n@read2 invented example\nACGTAACGTA\n+\nIIIIIIIIII\n")
-        write(folder / f"{LABEL}.sam", "@HD\tVN:1.6\tSO:coordinate\n@SQ\tSN:toy1\tLN:60\n@CO\tinvented example\nread1\t0\ttoy1\t1\t60\t10M\t*\t0\t0\tACGTACGTAC\tIIIIIIIIII\nread2\t0\ttoy1\t21\t60\t4M1I5M\t*\t0\t0\tACGTAACGTA\tIIIIIIIIII\n")
-        write(folder / f"{LABEL}.g.vcf", '##fileformat=VCFv4.2\n##source=invented example\n##contig=<ID=1,length=248956422>\n##ALT=<ID=NON_REF,Description="Any unobserved alternate allele">\n##INFO=<ID=END,Number=1,Type=Integer,Description="Last included reference position">\n##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n1\t99991\t.\tA\t<NON_REF>\t.\tPASS\tEND=100000\tGT\t0/0\n1\t100001\ttoy_v1\tA\tG,<NON_REF>\t.\tPASS\t.\tGT\t0/0\n')
+        write(staged(".fasta"), reference)
+        write(staged(".fasta.fai"), f"toy1\t60\t{reference.index(chr(10)) + 1}\t60\t61\n")
+        write(staged(".fastq"), "@read1 invented example\nACGTACGTAC\n+\nIIIIIIIIII\n@read2 invented example\nACGTAACGTA\n+\nIIIIIIIIII\n")
+        write(staged(".sam"), "@HD\tVN:1.6\tSO:coordinate\n@SQ\tSN:toy1\tLN:60\n@CO\tinvented example\nread1\t0\ttoy1\t1\t60\t10M\t*\t0\t0\tACGTACGTAC\tIIIIIIIIII\nread2\t0\ttoy1\t21\t60\t4M1I5M\t*\t0\t0\tACGTAACGTA\tIIIIIIIIII\n")
+        write(staged(".g.vcf"), '##fileformat=VCFv4.2\n##source=invented example\n##contig=<ID=1,length=248956422>\n##ALT=<ID=NON_REF,Description="Any unobserved alternate allele">\n##INFO=<ID=END,Number=1,Type=Integer,Description="Last included reference position">\n##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">\n#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n1\t99991\t.\tA\t<NON_REF>\t.\tPASS\tEND=100000\tGT\t0/0\n1\t100001\ttoy_v1\tA\tG,<NON_REF>\t.\tPASS\t.\tGT\t0/0\n')
         report = "[Header]\nContent\tinvented example; not a vendor export\n[Data]\nSNP Name\tSample ID\tAllele1 - Forward\tAllele2 - Forward\tGC Score\tX\tY\n"
         for _, _, vid, ref, alt, calls in VARIANTS:
             for sample, gt in zip(SAMPLES, calls):
                 pair = ["-", "-"] if gt == "./." else [(ref, alt)[int(x)] for x in gt.split("/")]
                 report += "\t".join([vid, sample, *pair, "0" if gt == "./." else "0.95", "100", "120"]) + "\n"
-        write(folder / f"{LABEL} Final Report.txt", report)
-        write(folder / f"{LABEL} intervals.bed", 'track name="invented example"\n' + "".join(f"chr{c}\t{p-1}\t{p}\t{v}\n" for c, p, v, *_ in VARIANTS))
+        write(staged("final_report.txt"), report)
+        write(staged("intervals.bed"), 'track name="invented example"\n' + "".join(f"chr{c}\t{p-1}\t{p}\t{v}\n" for c, p, v, *_ in VARIANTS))
         stats = "# invented example; effects are illustrative, not estimates from four samples\nchromosome\tbase_pair_location\tvariant_id\teffect_allele\tother_allele\teffect_allele_frequency\todds_ratio\tbeta\tstandard_error\tp_value\tn\n"
         for i, (c, p, v, ref, alt, calls) in enumerate(VARIANTS):
             called = [g for g in calls if g != "./."]
@@ -269,16 +303,14 @@ def generate(plink: Path) -> dict:
             freq = sum(g.count("1") for g in allele_calls) / sum(map(len, allele_calls))
             odds = 1.1 + i / 10
             stats += f"{c}\t{p}\t{v}\t{alt}\t{ref}\t{freq:.6g}\t{odds:.6g}\t{math.log(odds):.10g}\t0.2\t0.5\t{len(called)}\n"
-        write(folder / f"{LABEL} summary.tsv", stats)
-        suffixes = [".vcf", " imputed.vcf", ".fasta", ".fasta.fai", ".fastq", ".sam", ".g.vcf",
-                    " Final Report.txt", ".ped", ".map", ".tped", ".tfam", ".bed", ".bim", ".fam",
-                    ".pgen", ".pvar", ".psam", ".bgen", ".sample", " intervals.bed", " summary.tsv"]
-        for suffix in suffixes:
-            name = LABEL + suffix
-            shutil.copyfile(folder / name, EXAMPLES / name)
+        write(staged("summary.tsv"), stats)
+        for kind, name in FILES.items():
+            if not kind.endswith(".hex.txt"):
+                shutil.copyfile(folder / name, EXAMPLES / name)
         for extension in ("bed", "pgen", "bgen"):
-            path = EXAMPLES / f"{LABEL}.{extension}"
-            write(EXAMPLES / f"{LABEL}.{extension}.hex.txt", f"invented example: first 32 bytes of {path.name}\n{path.read_bytes()[:32].hex(' ')}\n")
+            path = EXAMPLES / FILES["." + extension]
+            write(EXAMPLES / FILES["." + extension + ".hex.txt"],
+                  f"invented example: first 32 bytes of {path.name}\n{path.read_bytes()[:32].hex(' ')}\n")
     total = sum(p.stat().st_size for p in EXAMPLES.iterdir() if p.is_file())
     if total >= 100000:
         raise ValueError(f"Examples exceed the 100 KB limit: {total}")

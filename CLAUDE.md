@@ -123,7 +123,7 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 
 - Tiny teaching examples are allowed only in `examples/formats/`. They describe no real individuals. Their combined size must stay below 100,000 bytes.
 - Generate them with `scripts/author/make_format_examples.py`. Generation is reproducible and uses no network access.
-- Every file is labelled "invented example". Use a format-native comment or description where supported. Binary formats and strict index tables cannot accept arbitrary comments. Their file names and accompanying JSON carry the label instead. Never corrupt a format to insert a label.
+- Every file is labelled "invented example". Use a format-native comment or description where supported. Binary formats and strict index tables cannot accept arbitrary comments. Use descriptive file names without spaces, with the prefix `invented_example`. Accompanying JSON retains the literal label "invented example" for every file, including binaries and strict tables. Never corrupt a format to insert a label.
 - The exporter may copy these exact examples to `site_content/formats/examples/` for website delivery. This is a generated mirror, not a second data source. JSON descriptions live in `site_content/formats/`.
 - Do not invent vendor binary files. Describe IDAT, GTC, CEL, BAM, CRAM and POD5 without creating example binaries.
 - All other data files remain forbidden in Git. Passwords are always forbidden.

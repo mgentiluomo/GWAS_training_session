@@ -29,7 +29,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 7fc7730beab59bd66db1b50f9113eecb59591a0767eb8ecad51a2323999732e9
+# SHA-256: 26bd798c02cd360024b4591703d27e7d12f7c8a9f8f2486cb30ee11f471367b2
 
 # Chunk: setup
 source("R/guided.R")

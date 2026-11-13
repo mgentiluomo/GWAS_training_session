@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_plink1_transposed.tped",
+  "format": ".tped",
+  "encoding": "text",
+  "producer": "PLINK 2 VCF export",
+  "pipeline_position": "Called genotypes for association tools",
+  "columns_or_fields": [
+    {
+      "name": "CHR",
+      "meaning": "Chromosome code."
+    },
+    {
+      "name": "ID",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "CM",
+      "meaning": "Genetic map distance, zero because none is supplied."
+    },
+    {
+      "name": "BP",
+      "meaning": "One-based base-pair position."
+    },
+    {
+      "name": "sample allele pairs",
+      "meaning": "Two columns per sample store nucleotide alleles, with 0 0 for a missing call."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "No header line is permitted."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 172,
+  "sha256": "4d2cbfa2ee7748278a40ad5a8673e1f6c4e2ada26bcfb405ce384dc287d58dbc",
+  "asset": "examples/invented_example_plink1_transposed.tped"
+}

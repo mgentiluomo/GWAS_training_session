@@ -174,8 +174,9 @@ field), `header_notes`, `magic_bytes` and `asset`. Concrete examples also record
 `label`, `size_bytes` and `sha256`. `asset` is relative to the formats folder.
 Description-only records have null `file_name`, `asset` and `magic_bytes`; they
 link to official documentation. No vendor binary is supplied. Binary examples
-have companion hex dumps. Strict indexes and binaries carry the invented-example
-label in their filename and JSON because arbitrary comments would corrupt them.
+have companion hex dumps. File names are descriptive and contain no spaces. Every JSON description retains
+the literal label "invented example". Strict indexes and binaries use this JSON
+label because arbitrary comments would corrupt them.
 The copied bytes are identical, including newlines and FASTA index offsets.
 When resolving notebook links under `../examples/formats/`, the website can use
 this catalogue to select the matching asset under `formats/examples/`.

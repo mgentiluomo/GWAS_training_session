@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "label": "invented example",
+  "file_name": "invented_example_plink2.pvar",
+  "format": ".pvar",
+  "encoding": "text",
+  "producer": "PLINK 2 --make-pgen",
+  "pipeline_position": "Variant metadata paired with PGEN",
+  "columns_or_fields": [
+    {
+      "name": "CHROM",
+      "meaning": "Chromosome name."
+    },
+    {
+      "name": "POS",
+      "meaning": "One-based position of the first reference base."
+    },
+    {
+      "name": "ID",
+      "meaning": "Invented variant identifier."
+    },
+    {
+      "name": "REF",
+      "meaning": "Reference allele in this invented example."
+    },
+    {
+      "name": "ALT",
+      "meaning": "Alternative allele, or a symbolic allele such as NON_REF."
+    },
+    {
+      "name": "FILTER",
+      "meaning": "PASS denotes no failed example filter."
+    }
+  ],
+  "header_notes": [
+    "invented example; no real individuals.",
+    "The literal invented example label is in this JSON and in native comments where supported; strict formats use JSON only.",
+    "Coordinates resemble GRCh38 but alleles and positions are invented, not reference-validated.",
+    "Double-hash metadata lines may precede the column header.",
+    "REF from the invented VCF is retained; this does not check GRCh38."
+  ],
+  "magic_bytes": null,
+  "size_bytes": 350,
+  "sha256": "52dc9cbb3e2389bc021cfbd918c6f06017bd1c4e3a95d90d35796b32599b37ba",
+  "asset": "examples/invented_example_plink2.pvar"
+}
