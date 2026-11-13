@@ -2,29 +2,37 @@
 
 No release was created and no file uploaded. The ZIP was built with
 `scripts/package_project.py --fresh-check --check-urls` from the pushed commit
-`f06116adc52e5f2f68185608a4f13c8b8f4833d8` on `course/2026-guided-training`,
+`e4ede0f3f29d5a60c4e66243295ffc0b8b04085d` on `course/2026-guided-training`,
 with a clean working tree before and after the build. All 52 members are
-byte-identical to that commit. It replaces the earlier working-source snapshot
-`ce4ebea3111093c7c05dbb19df21de1de61353da0ae0fef734117911590f9443`, which was
-built before the source changes were committed.
+byte-identical to that commit.
+
+It replaces two earlier builds. The working-source snapshot
+`ce4ebea3111093c7c05dbb19df21de1de61353da0ae0fef734117911590f9443` was built
+before the source changes were committed. The build from commit `f06116a`
+(`377de24a5b287adcae34ecbc8a87dfb8acfeba4ad02bc2353403b7bc61e9b992`) differs
+from this one in two members only, both changed by commit `61ec467`, which
+removed a Markdown link from the step 6.2 `success_line`:
+`lessons/module_06_association.Rmd` (the `step_meta` comment) and
+`scripts/run_main_path.R` (its module 6 SHA-256 comment). This report is not
+a ZIP member, so committing it does not change the ZIP.
 
 | Item | Result |
 | --- | --- |
 | Release tag | `project-2026.1` |
 | Asset | `GWAS_course-2026.1.zip` |
 | Checksum sidecar | `GWAS_course-2026.1.zip.sha256` |
-| Source commit | `f06116adc52e5f2f68185608a4f13c8b8f4833d8` (pushed; clean tree) |
+| Source commit | `e4ede0f3f29d5a60c4e66243295ffc0b8b04085d` (pushed; clean tree) |
 | Files | 52 |
-| ZIP bytes | 163050 |
-| Uncompressed file bytes | 496858 |
-| SHA-256 | `377de24a5b287adcae34ecbc8a87dfb8acfeba4ad02bc2353403b7bc61e9b992` |
+| ZIP bytes | 163044 |
+| Uncompressed file bytes | 496830 |
+| SHA-256 | `2902bb25c08392b2640b115314c3e1c7160923d898b66a31318af99b47783b0d` |
 | Outer folder | `GWAS_course/` |
 | Local links and anchors | 423 checked; all resolve inside the ZIP |
 | Website requests | 77 checked: 70 HTTP 2xx (54 with 200, 16 with 203); six HTTP 403; the project asset URL pending publication |
 | Fresh-folder test | Passed as `GWAS_course` and after renaming to `GWAS_training_session` |
 
 The ZIP, checksum and machine-readable inventory are outside the repository:
-`C:/WEB_site/data_sources/codex_work/project-2026.1-review-20261113-claude/`.
+`C:/WEB_site/data_sources/codex_work/project-2026.1-review-20261113-claude-2/`.
 `project-verification.json` lists every source hash, local target, website URL,
 HTTP result and fresh-test log directory. A website request blocked with
 HTTP 403 remains unverified. No other HTTP error remained in the final run.
