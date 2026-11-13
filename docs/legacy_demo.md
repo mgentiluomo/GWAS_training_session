@@ -82,7 +82,7 @@ workflow, not a complete production GWAS protocol.
 ### 1. Install R and RStudio
 
 Install [R from CRAN](https://cran.r-project.org/) first, then
-[RStudio Desktop](https://posit.co/download/rstudio-desktop/). Use a current
+[RStudio Desktop](https://docs.posit.co/ide/user/download.html). Use a current
 supported R release. Validation for this revision uses R 4.5.0.
 
 For the small demo, 8 GB RAM and a few GB of free disk space are a reasonable

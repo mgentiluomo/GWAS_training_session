@@ -140,9 +140,9 @@ The R installer creates software files outside this course project.
 
 ### What we do
 
-Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:
+Install [RStudio Desktop](https://docs.posit.co/ide/user/download.html) and open it. R must already be installed (step 0.2). Follow these actions:
 
-1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.
+1. Open the download page. Go to "RStudio Desktop". Click the installer link for your operating system. Save the file.
 2. Open the installer. On Windows, accept the default choices and click "Next" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.
 3. Start RStudio from the Start menu or the Applications folder.
 

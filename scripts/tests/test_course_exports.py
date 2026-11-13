@@ -207,6 +207,16 @@ class CourseExportsTests(unittest.TestCase):
         self.assertIn("Sys.info()", code)
         self.assertIn("R.version.string", code)
         self.assertIn('source("scripts/preflight.R")', code)
+        installer = next(r for r in self.records if r["id"] == "0.3")
+        download_url = "https://docs.posit.co/ide/user/download.html"
+        self.assertIn(download_url, installer["blocks"]["what_we_do"])
+        self.assertIn('Go to "RStudio Desktop"', installer["blocks"]["what_we_do"])
+        old_url = "https://posit.co/download/" + "rstudio-desktop/"
+        for source in ("lessons/module_00_preparation.Rmd", "docs/legacy_demo.md",
+                       "scripts/build_tutorial.py", "tutorial/index.html"):
+            text = (ROOT / source).read_text(encoding="utf-8")
+            self.assertNotIn(old_url, text)
+            self.assertIn(download_url, text)
 
     def test_data_download_has_one_main_command_and_a_file_chooser_fallback(self):
         record = next(r for r in self.records if r["id"] == "0.5")

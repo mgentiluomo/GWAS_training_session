@@ -6,10 +6,10 @@
   "anchor": "step-0-3",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "3a3eff7d774935e2e0642961c2298ba885c1f0477ecb4b3e9eb0f123d6ddd99a",
+  "source_sha256": "fbf82f4a600bda58a432d6f4f4c2d56aee440e51b042fc6f5c9608b28d844118",
   "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the RStudio Desktop page. Click the download button for your operating system. Save the installer file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
+    "what_we_do": "Install [RStudio Desktop](https://docs.posit.co/ide/user/download.html) and open it. R must already be installed (step 0.2). Follow these actions:\n\n1. Open the download page. Go to \"RStudio Desktop\". Click the installer link for your operating system. Save the file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
     "why": "The console runs one command at a time. The editor keeps commands in a notebook, so you can read and rerun them later. R holds values, such as loaded data, in memory. These values disappear when R restarts. Files saved on disk remain.",
     "you_need": "A working R installation from step 0.2 and the RStudio installer.",
     "command": "No code to run. Open RStudio from your applications menu. Find the Console pane and check that it shows a `>` prompt. You will run your first course commands at step 0.5.",

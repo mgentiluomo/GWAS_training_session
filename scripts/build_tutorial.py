@@ -156,7 +156,7 @@ setup = f'''
 <h2>1. Download the complete project</h2><p>Download the ZIP and extract it into a writable local folder. Open <code>GWAS_training_session.Rproj</code>. Keep its folders together; do not move individual notebooks into a new folder.</p>
 <div class="actions"><a class="button" href="{PROJECT}">Download the RStudio project</a><a class="button secondary" href="{REPO}/tree/{BRANCH}">Browse the source on GitHub</a></div>
 <p class="quiet">This preview points to the review branch. The main branch is not yet the revised course.</p>
-<h2>2. Install R and RStudio</h2><p>Install <a href="https://cran.r-project.org/">R</a> first, then <a href="https://posit.co/download/rstudio-desktop/">RStudio Desktop</a>. Open the project and find the R console: it usually has a <code>&gt;</code> prompt.</p>
+<h2>2. Install R and RStudio</h2><p>Install <a href="https://cran.r-project.org/">R</a> first, then <a href="https://docs.posit.co/ide/user/download.html">RStudio Desktop</a>. Open the project and find the R console: it usually has a <code>&gt;</code> prompt.</p>
 {block('getwd()\nfile.exists("config.R")','R console · check the project')}
 {callout('<strong>Check:</strong> the second command returns <code>TRUE</code>. If not, reopen the project instead of editing paths in every lesson.', 'check')}
 <h2>3. Add PLINK 2 for your system</h2><p>Download from the <a href="https://www.cog-genomics.org/plink/2.0/">official PLINK 2 page</a>, extract the archive, and put the executable in the project’s <code>bin/</code> folder. The tested Linux build is beta 1.4, 7 November 2026; record the actual build you use.</p>
