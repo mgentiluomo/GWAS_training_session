@@ -76,8 +76,9 @@ class CourseExportsTests(unittest.TestCase):
     def test_format_examples_links_and_exported_assets_resolve(self):
         from urllib.parse import unquote
         for record in self.records:
-            for target in re.findall(r"\]\((\.\./examples/formats/[^)]+)\)", "\n".join(record["blocks"].values())):
-                path = ROOT / "lessons" / unquote(target)
+            for target in re.findall(r"\]\((examples/formats/[^)]+)\)", "\n".join(record["blocks"].values())):
+                # Exported links are paths from the repository root.
+                path = ROOT / unquote(target)
                 self.assertNotRegex(path.name, r"\s")
                 self.assertTrue(path.exists(), target)
                 if path.is_file():
@@ -95,6 +96,63 @@ class CourseExportsTests(unittest.TestCase):
                 suffixes = (".bed", ".bim", ".fam") if option == "--bfile" else ("",)
                 for suffix in suffixes:
                     self.assertTrue((ROOT / "examples/formats" / (name + suffix)).is_file(), line)
+
+    def test_relative_links_are_exported_as_repository_paths(self):
+        text = ("[a](../docs/glossary.md#r) [b](module_02_files_and_formats.Rmd#step-2-5) "
+                "[c](../examples/formats/) [d](https://example.org/x) [e](#here) "
+                '<a href="../docs/troubleshooting.md">t</a>\n```r\nx[1](../docs/not-a-link.md)\n```\n')
+        out = exports.normalise_links(text)
+        for expected in ("](docs/glossary.md#r)", "](lessons/module_02_files_and_formats.Rmd#step-2-5)",
+                         "](examples/formats/)", "](https://example.org/x)", "](#here)",
+                         'href="docs/troubleshooting.md"', "x[1](../docs/not-a-link.md)"):
+            self.assertIn(expected, out)
+        with self.assertRaises(ValueError):
+            exports.normalise_links("[x](../../outside.md)")
+
+    def test_every_exported_internal_link_resolves_from_the_repository_root(self):
+        link = re.compile(r"(?<!!)\]\(([^)\s]+)\)|href=\"([^\"]+)\"")
+        anchor = re.compile(r"\{#([A-Za-z0-9_-]+)\}")
+        texts = [json.dumps(r["blocks"]) for r in self.records]
+        texts += [m["overview_markdown"] + m["recap_markdown"] for m in exports.export_modules()]
+        checked = 0
+        for text in texts:
+            text = text.replace("\\n", "\n").replace('\\"', '"')
+            for match in link.finditer(text):
+                target = match.group(1) or match.group(2)
+                if re.match(r"[A-Za-z][A-Za-z0-9+.-]*:|#", target):
+                    continue
+                path, _, fragment = target.partition("#")
+                resolved = ROOT / path
+                self.assertTrue(resolved.exists(), target)
+                if fragment and resolved.suffix in {".md", ".Rmd"}:
+                    self.assertIn(fragment, anchor.findall(resolved.read_text(encoding="utf-8")), target)
+                checked += 1
+        self.assertGreater(checked, 300)
+
+    def test_under_the_hood_block_is_optional_last_and_sourced(self):
+        pilot = {"3.4", "3.5", "3.6", "5.4", "6.6"}
+        for record in self.records:
+            blocks = record["blocks"]
+            if record["id"] not in pilot:
+                self.assertNotIn("under_the_hood", blocks)
+                continue
+            self.assertEqual(list(blocks)[-1], "under_the_hood")
+            text = blocks["under_the_hood"]
+            words = len(re.findall(r"\b\w+(?:[.'/-]\w+)*\b", text))
+            self.assertTrue(150 <= words <= 350, (record["id"], words))
+            for heading in ("**What the tool computes.**", "**Why these values.**", "**Pitfalls.**", "**References**"):
+                self.assertIn(heading, text)
+            references = re.findall(r"^\d+\. .*$", text, re.M)
+            self.assertTrue(2 <= len(references) <= 4, record["id"])
+            for reference in references:
+                self.assertRegex(reference, r"PMID \d+\.|doi:10\.\d+/\S+\.")
+            self.assertNotIn("—", text)
+        with self.assertRaises(ValueError):
+            exports.split_blocks("### What we do\nx\n### Why\nx\n### You need\nx\n### Command\nx\n"
+                                 "<details><summary>Show the expected result</summary>x</details>\n"
+                                 "<details><summary>If something goes wrong</summary>x</details>\n"
+                                 "<details><summary>Under the hood & literature</summary>x</details>\n"
+                                 "### Quick check\nx\n### Files created\nx\n")
 
     def test_mathematical_text_has_no_lossy_question_mark_substitutions(self):
         for path in exports.notebook_paths():
@@ -173,7 +231,7 @@ class CourseExportsTests(unittest.TestCase):
                 self.assertTrue(record["r_commands"])
             self.assertTrue(record["setup_code"] or record["module"] == 0 or not record["r_commands"])
             for name, _ in exports.BLOCKS:
-                if name != "what_this_check_can_reveal":
+                if name not in exports.OPTIONAL_BLOCKS:
                     self.assertTrue(record["blocks"][name])
             for figure in record["figures"]:
                 if figure["kind"] == "placeholder":

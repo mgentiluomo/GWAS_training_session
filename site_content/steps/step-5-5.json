@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "35578e2340641fe333d6c6a6bc43ddd63819778c767cd55ec3c7a0a3c48d1e82",
+  "source_sha256": "69bba388e903e3c30d88e1ea24754443b48fb1335b3ca236c5b19d60071c2f38",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a plot of the first two reference axes. Each reference group has its own label and symbol, and the study samples are added on top.",
@@ -14,7 +14,7 @@
     "you_need": "The score files from step 5.4, and the reference sample table.",
     "command": "```{r s5-5}\nref <- guided_table(paste0(guided_path(cfg, \"5.4\", \"ref_scores\"), \".sscore\"))\nstudy <- guided_table(paste0(guided_path(cfg, \"5.4\", \"study_scores\"), \".sscore\"))\nmetadata <- guided_table(file.path(cfg$data_dir, \"pca_reference\", \"ref1000g_grch38.psam\"))\ngroup <- metadata$SuperPop[match(ref$IID, metadata$IID)]\nlevels <- sort(unique(group)); code <- match(group, levels)\ncolours <- c(\"#0072B2\", \"#D55E00\", \"#009E73\", \"#CC79A7\", \"#E69F00\")\npng(guided_path(cfg, \"5.5\", \"reference_projection.png\"), width = 1200, height = 850, res = 140)\nplot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,\n  xlab = \"Reference PC1 score\", ylab = \"Reference PC2 score\", main = \"GRCh38 reference and projected simulated study\")\npoints(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = \"#333333\")\nlegend(\"topright\", legend = c(levels, \"Study projection\"), col = c(colours[seq_along(levels)], \"#333333\"), pch = c(seq_along(levels), 20), cex = 0.8)\ninvisible(dev.off())\ncat(\"The plot was saved to \", guided_path(cfg, \"5.5\", \"reference_projection.png\"), \"\\n\", sep = \"\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
     "expected_result": "A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose \"View File\").\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
-    "troubleshooting": "Stop at the first error message. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different dataset version. See [troubleshooting](../docs/troubleshooting.md).",
+    "troubleshooting": "Stop at the first error message. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different dataset version. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Does overlap with a reference group prove a person's nationality?\n\n<details><summary>Show the answer</summary>\n\nNo. The plot summarises genetic variation compared with a chosen reference. It does not show nationality or ethnicity.\n\n</details>",
     "files_created": "`s5-5_reference_projection.png`."
   },

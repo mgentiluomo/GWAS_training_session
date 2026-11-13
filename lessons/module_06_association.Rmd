@@ -427,6 +427,23 @@ No. It makes the fit more stable, but the uncertainty can stay large.
 
 The chosen variant ID, the forced Firth report and the log files.
 
+<details><summary>Under the hood & literature</summary>
+
+**What the tool computes.** Ordinary logistic regression chooses the coefficients that maximise the likelihood. Firth regression subtracts a penalty from it, which removes the leading term of the small-sample bias and keeps the estimates finite. When one genotype group holds only cases or only controls, the ordinary estimate does not exist. The report gives `OR` (the exponential of the coefficient for the `A1` allele), its standard error, the Z statistic and `P`. PLINK 2 reports an asymptotic p-value from the Wald Z statistic, also for Firth fits.
+
+**Why these values.** The main scan used `firth-fallback`, PLINK's default, which switches to Firth only when the ordinary fit fails. We force `firth` once so you can compare. The 1% frequency filter keeps the rarest variants out of the scan.
+
+**Pitfalls.** Firth shrinks estimates towards no effect and gives no new information. With few carriers the Wald p-value can mislead. Penalised likelihood ratio tests and profile confidence intervals are often preferable to the Wald test. For low-count variants (roughly fewer than 400 minor alleles), simulations favour a Firth test over the plain Wald, score or likelihood ratio tests in joint analysis. Always look at the carrier counts and doubt genotype calls at rare variants. The spelling `--covar-variance-standardize` is American; the course text says standardise.
+
+**References**
+
+1. Firth D (1993) Bias reduction of maximum likelihood estimates. Biometrika 80:27-38. doi:10.1093/biomet/80.1.27.
+2. Albert A, Anderson JA (1984) On the existence of maximum likelihood estimates in logistic regression models. Biometrika 71:1-10. doi:10.1093/biomet/71.1.1.
+3. Heinze G, Schemper M (2002) A solution to the problem of separation in logistic regression. Stat Med 21:2409-2419. PMID 12210625.
+4. Ma C et al. (2013) Recommended joint and meta-analysis strategies for case-control association testing of single low-count variants. Genet Epidemiol 37:539-550. PMID 23788246.
+
+</details>
+
 ## 6.7 First look and association checkpoint {#step-6-7}
 
 ### What we do

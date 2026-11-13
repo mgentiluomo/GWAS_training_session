@@ -6,7 +6,7 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "c2702f9293dc0b15faf4f388e1aab3684d0ddd75859edb34775407260df5c39f",
+  "source_sha256": "535ce3f5f0a195323e9718485ae75696d98dfde1779efa6038683d5a018649fe",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",
@@ -14,8 +14,8 @@
     "you_need": "State 3.1 and the call-rate definition from step 2.4.",
     "command": "```{r s3-2}\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.1\"), \"--mind\", \"0.02\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.2\")))\nops <- guided_replay_lists(cfg, \"3.2\", \"3.1\")\nguided_register(cfg, \"3.2\", \"3.1\", 1971, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048\n```\n\n`--mind 0.02` removes samples with more than 2% missing calls. This is the same as a call rate below 98%. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
     "expected_result": "42 more wells are removed. 1,971 samples and 296,360 variants remain.\n\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
-    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](../docs/troubleshooting.md).",
-    "what_this_check_can_reveal": "Moderate sample failures that the rough screen did not catch. Missingness can be linked to the [phenotype](../docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be linked to a [batch](../docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.",
+    "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
+    "what_this_check_can_reveal": "Moderate sample failures that the rough screen did not catch. Missingness can be linked to the [phenotype](docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be linked to a [batch](docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.",
     "quick_check": "A well has 1% missing calls. What is its call rate? Does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\nThe call rate is 99%. The well passes the 98% call-rate rule.\n\n</details>",
     "files_created": "`s3-2_state.*`, the list of removed samples and the replay metadata."
   },

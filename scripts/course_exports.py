@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import posixpath
 from pathlib import Path, PurePosixPath
 import re
 import shlex
@@ -24,7 +25,51 @@ BLOCKS = [
     ("troubleshooting", "<details><summary>If something goes wrong</summary>"),
     ("what_this_check_can_reveal", "### What this check can reveal"),
     ("quick_check", "### Quick check"), ("files_created", "### Files created"),
+    # Optional ninth block for readers who want the statistics and the literature behind a step.
+    # It must come last, after "Files created", so the beginner path ends where it always did.
+    ("under_the_hood", "<details><summary>Under the hood & literature</summary>"),
 ]
+OPTIONAL_BLOCKS = {"what_this_check_can_reveal", "under_the_hood"}
+COLLAPSED_BLOCKS = {"expected_result", "troubleshooting", "under_the_hood"}
+FENCE = re.compile(r"^```.*?^```\s*$", re.M | re.S)
+MD_LINK = re.compile(r"(\]\()([^)\s]+)((?:\s+\"[^\"]*\")?\))")
+HTML_HREF = re.compile(r"(\bhref=\")([^\"]+)(\")")
+SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+
+
+def repo_relative(target: str, base: str = "lessons") -> str:
+    """Rewrite a link written relative to the notebook folder as a path from the repository root.
+
+    Absolute URLs, same-page anchors and root-absolute paths are returned unchanged.
+    """
+    if not target or SCHEME.match(target) or target.startswith(("#", "/", "?")):
+        return target
+    path, hash_mark, fragment = target.partition("#")
+    resolved = posixpath.normpath(posixpath.join(base, path))
+    if resolved == ".." or resolved.startswith("../") or resolved == ".":
+        raise ValueError(f"A link leaves the repository: {target}")
+    if path.endswith("/"):
+        resolved += "/"
+    return resolved + hash_mark + fragment
+
+
+def normalise_links(text: str, base: str = "lessons") -> str:
+    """Make every relative link in exported Markdown a path from the repository root.
+
+    Notebooks sit in lessons/, so their links are written relative to that folder. Readers of the
+    exported JSON resolve them from the repository root. Fenced code is never changed.
+    """
+    def fix(segment: str) -> str:
+        segment = MD_LINK.sub(lambda m: m.group(1) + repo_relative(m.group(2), base) + m.group(3), segment)
+        return HTML_HREF.sub(lambda m: m.group(1) + repo_relative(m.group(2), base) + m.group(3), segment)
+
+    parts, last = [], 0
+    for fence in FENCE.finditer(text):
+        parts.append(fix(text[last:fence.start()]))
+        parts.append(fence.group())
+        last = fence.end()
+    parts.append(fix(text[last:]))
+    return "".join(parts)
 
 
 def notebook_paths(root: Path = ROOT) -> list[Path]:
@@ -40,16 +85,19 @@ def split_blocks(body: str) -> dict[str, str]:
     positions = [(body.index(marker), name, marker) for name, marker in BLOCKS if marker in body]
     positions.sort()
     names = [name for _, name, _ in positions]
-    required = [name for name, _ in BLOCKS if name != "what_this_check_can_reveal"]
+    required = [name for name, _ in BLOCKS if name not in OPTIONAL_BLOCKS]
     if [name for name in names if name in required] != required:
         raise ValueError("A step is missing a fixed block or uses the wrong block order.")
+    if "under_the_hood" in names and names[-1] != "under_the_hood":
+        raise ValueError("The 'Under the hood & literature' block must come after 'Files created'.")
     result = {}
     for i, (start, name, marker) in enumerate(positions):
         end = positions[i + 1][0] if i + 1 < len(positions) else len(body)
         content = body[start + len(marker):end].strip()
-        if name in {"expected_result", "troubleshooting"}:
+        if name in COLLAPSED_BLOCKS:
             content = re.sub(r"\s*</details>\s*$", "", content).strip()
-        result[name] = content
+        # Links are written relative to lessons/ in the notebooks; the export uses repository paths.
+        result[name] = normalise_links(content)
     return result
 
 
@@ -222,8 +270,8 @@ def export_modules(root: Path = ROOT) -> list[dict]:
                         "title": re.search(r'^title: "Module \d+: (.*)"', text, re.M).group(1),
                         "source": path.relative_to(root).as_posix(),
                         "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
-                        "overview_markdown": re.sub(r"<!--.*?-->", "", section_text(text, overview), flags=re.S).strip(),
-                        "recap_markdown": re.sub(r"<!--.*?-->", "", section_text(text, recap), flags=re.S).strip()})
+                        "overview_markdown": normalise_links(re.sub(r"<!--.*?-->", "", section_text(text, overview), flags=re.S).strip()),
+                        "recap_markdown": normalise_links(re.sub(r"<!--.*?-->", "", section_text(text, recap), flags=re.S).strip())})
     return records
 
 

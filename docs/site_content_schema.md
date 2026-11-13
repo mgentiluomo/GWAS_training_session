@@ -30,7 +30,7 @@ images, download data, publish a website or create an encrypted release.
 
 The block keys are `what_we_do`, `why`, `you_need`, `command`,
 `expected_result`, `troubleshooting`, optional `what_this_check_can_reveal`,
-`quick_check` and `files_created`. Preserve this order. Expected results and
+`quick_check`, `files_created` and optional `under_the_hood`. Preserve this order. Expected results and
 troubleshooting are collapsed by default; quick-check answers retain their
 native `<details>` markup. Keep step numbers visible and provide previous/next
 navigation when the approved website design is implemented.
@@ -140,6 +140,49 @@ The author tool checks the 2,013 input wells and the 42 exclusions at 98%.
 It compares integer cross-products to avoid rounding `F_MISS` at boundaries.
 The source report uses PLINK 2.0 b.1.4 (7 November 2026), on the verified Windows
 main-path state. It stays external alongside its PLINK command and log.
+
+## Optional ninth block: Under the hood and literature
+
+`blocks.under_the_hood` is present only for steps whose notebook carries the block.
+Steps without it export exactly as before: the key is absent, not empty. The schema
+version stays `1.0`, because the object only gains an optional key, like
+`what_this_check_can_reveal`. A site that ignores unknown block keys keeps working
+unchanged; to show the block it must render the key.
+
+In the notebook the block is a collapsed section placed after `### Files created`, so the
+beginner path ends where it always did:
+
+```html
+<details><summary>Under the hood & literature</summary>
+
+**What the tool computes.** ...
+
+**Why these values.** ...
+
+**Pitfalls.** ...
+
+**References**
+
+1. Author A et al. (year) Title. Journal volume:pages. PMID 12345678.
+
+</details>
+```
+
+The exporter strips the closing `</details>`, as for the other collapsed blocks, and
+rejects a step where the block is not last. The block has four to six paragraphs for a PhD
+student: what the tool computes, why the course uses its values, edge cases and pitfalls, and
+two to four primary references, each with a PMID or DOI checked against PubMed or the DOI
+resolver. It stays between 150 and 350 words and adds no command. It is currently written for
+steps 3.4, 3.5, 3.6, 5.4 and 6.6 only.
+
+## Links in exported text
+
+Notebooks sit in `lessons/` and write relative links from that folder, for example
+`../docs/glossary.md#r` or `module_02_files_and_formats.Rmd#step-2-5`. The exporter rewrites every
+relative Markdown or HTML link in the blocks and in the module overview and recap as a path from
+the repository root: `docs/glossary.md#r`, `lessons/module_02_files_and_formats.Rmd#step-2-5`,
+`examples/formats/`. Absolute URLs, same-page anchors and fenced code are left alone, and a link
+that would leave the repository stops the export. Never fix links by editing the exported JSON.
 
 ## Module pages
 

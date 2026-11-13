@@ -421,6 +421,23 @@ No. We use pruning only for specific checks and for the PCA. The association sca
 
 `s3-4_high_ld.bed1`, `.prune.in/.prune.out` and the logs.
 
+<details><summary>Under the hood & literature</summary>
+
+**What the tool computes.** `--indep-pairwise 200kb 0.2` moves a 200 kb window along each chromosome one variant at a time. In each window it calculates r^2, the squared correlation between the genotype counts (0, 1 or 2) of two variants, from unphased hard calls. For every pair above 0.2 it drops one of the two. `.prune.in` lists the kept variants and `.prune.out` the dropped ones. No genotype is deleted.
+
+**Why these values.** The window, the limit of 0.2 and the 5% frequency filter are conventions, not laws. A looser limit such as 0.5 keeps more variants. Windows counted in variants, with a step above 1, are also widely used. Here the filter leaves 69,539 sites, enough for the checks that follow.
+
+**Pitfalls.** Some regions, such as the HLA region on chromosome 6, are correlated over very long distances. Pruning thins them but does not remove their pull on principal components, so the course excludes listed regions first. The list belongs to one genome build and is not complete. The pruned set also depends on the samples, the frequency filter and the scan order, so another cohort gives another list. Never use it for the association scan.
+
+**References**
+
+1. Price AL et al. (2008) Long-range LD can confound genome scans in admixed populations. Am J Hum Genet 83:132-135. PMID 18606306.
+2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
+3. Privé F et al. (2020) Efficient toolkit implementing best practices for principal component analysis of population genetic data. Bioinformatics 36:4449-4457. PMID 32415959.
+4. Chang CC et al. (2015) Second-generation PLINK: rising to the challenge of larger and richer datasets. GigaScience 4:7. PMID 25722852.
+
+</details>
+
 ## 3.5 Heterozygosity {#step-3-5}
 
 ### What we do
@@ -500,6 +517,23 @@ A high value can have a biological cause or an ancestry cause. A symmetric numer
 ### Files created
 
 The `.het` report, the low-F removal list, the high-F review list and `s3-5_state.*`.
+
+<details><summary>Under the hood & literature</summary>
+
+**What the tool computes.** For each sample, `--het` reports the observed number of homozygous genotypes (`O(HOM)`), the number expected from the allele frequencies (`E(HOM)`), the number of genotypes read (`OBS_CT`) and `F = (O(HOM) - E(HOM)) / (OBS_CT - E(HOM))`. F is near 0 when homozygosity matches expectation. It is positive with excess homozygosity and negative with excess heterozygosity. The expected count uses allele frequencies estimated from the samples in the file.
+
+**Why these values.** The mean minus or plus three standard deviations is a convention. Here it gives limits of about -0.082 and +0.097. Fixed F limits and other estimators (`fhat1` to `fhat3`, from GCTA) exist. The course removes only the low end and flags the high end for review, because a high F can have a biological or ancestry cause.
+
+**Pitfalls.** Pooled allele frequencies mislead when ancestry is mixed. A sample from a small ancestry group tends to look too homozygous, and an admixed sample too heterozygous. Check ancestry (module 5) before you trust either tail. Contamination raises heterozygosity, but a low F alone does not prove it. The result also depends on the pruned set, because correlated variants distort the expectation.
+
+**References**
+
+1. Purcell S et al. (2007) PLINK: a tool set for whole-genome association and population-based linkage analyses. Am J Hum Genet 81:559-575. PMID 17701901.
+2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
+3. Yang J et al. (2011) GCTA: a tool for genome-wide complex trait analysis. Am J Hum Genet 88:76-82. PMID 21167468.
+4. Jun G et al. (2012) Detecting and estimating contamination of human DNA samples in sequencing and array-based genotype data. Am J Hum Genet 91:839-848. PMID 23103226.
+
+</details>
 
 ## 3.6 Relatedness and duplicates {#step-3-6}
 
@@ -594,6 +628,23 @@ No. One person can be part of several pairs. Review the whole network of relatio
 ### Files created
 
 The `.kin0` report, the reviewed removal list and `s3-6_state.*`.
+
+<details><summary>Under the hood & literature</summary>
+
+**What the tool computes.** `--make-king-table` applies the KING-robust estimator to every pair of samples, using autosomal hard calls. It compares how often the two people carry opposite homozygous genotypes (`IBS0`) and how often both are heterozygous (`HETHET`), and it does not need allele frequencies from the sample. `KINSHIP` is the kinship coefficient, the chance that an allele drawn from each person is identical by descent. Expected values are 0.5 for a duplicate, 0.25 for a parent and child or full siblings, 0.125 for second-degree and 0.0625 for third-degree pairs. `NSNP` is the number of variants compared.
+
+**Why these values.** The cut-offs 0.354, 0.177 and 0.0442 sit between these expected values on a scale of powers of two. They are screening conventions. A parent and child cannot be told from full siblings by `KINSHIP` alone, but `IBS0` is close to zero for a parent and child.
+
+**Pitfalls.** The older `PI_HAT` takes allele frequencies from the whole sample, so mixed ancestry biases it. KING-robust does not have this weakness. Relatives also shape principal components. Remove them, or use methods built for related samples, before a PCA. Keep one person per pair by a rule that ignores disease status.
+
+**References**
+
+1. Manichaikul A et al. (2010) Robust relationship inference in genome-wide association studies. Bioinformatics 26:2867-2873. PMID 20926424.
+2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
+3. Conomos MP et al. (2015) Robust inference of population structure for ancestry prediction and correction of stratification in the presence of relatedness. Genet Epidemiol 39:276-293. PMID 25810074.
+4. Purcell S et al. (2007) PLINK: a tool set for whole-genome association and population-based linkage analyses. Am J Hum Genet 81:559-575. PMID 17701901.
+
+</details>
 
 ## 3.7 Batch effects {#step-3-7}
 
