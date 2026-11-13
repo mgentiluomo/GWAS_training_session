@@ -14,10 +14,11 @@ assumed. The guided steps explain the commands, files and statistical terms.
 
 The course follows modules 0 to 7. No programming experience is assumed.
 Start with module 0, which prepares your computer (see [setup](docs/setup.md)).
-Open the [repository home](https://github.com/mgentiluomo/GWAS_training_session), choose **Code > Download ZIP**
-and extract the complete project. The default branch is `course/2026-guided-training`.
+Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip)
+from the versioned project release and extract the complete project. The default branch is `course/2026-guided-training`.
 No branch selection is needed. If you already use Git, `git clone https://github.com/mgentiluomo/GWAS_training_session.git`
-gets the same 2026 course. Open `GWAS_course.Rproj` from the extracted
+gets the same 2026 course. Its default folder name `GWAS_training_session` also works.
+Open `GWAS_course.Rproj` from the extracted
 or cloned folder. Then read and run the numbered steps in order.
 
 | Module | Canonical notebook |
@@ -49,8 +50,8 @@ use `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR` for external input/output folders.
 Full genotype checkpoints are at 2.8, 3.8, 4.6 and 5.7; intermediate restarts
 replay stored operations and check counts. Final outputs include Manhattan,
 QQ and regional plots, lead variants with effect alleles/intervals, comparisons
-and `s7-8_summary.md`. See [Windows validation](VALIDATION.md) and the
-[session report](docs/session_report.md) for results and limits.
+and `s7-8_summary.md`. See [Windows validation](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/VALIDATION.md) and the
+[session report](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/session_report.md) for results and limits.
 
 Module 1 has 11 steps. Steps 1.8 to 1.11 are reading only. They compare data
 sources, explain file formats and introduce large data resources. The
@@ -58,7 +59,7 @@ sources, explain file formats and introduce large data resources. The
 from the classroom dataset. Regenerate them offline with
 `python -I -B scripts/author/make_format_examples.py`, using the configured PLINK 2.
 
-The [website JSON schema](docs/site_content_schema.md) documents the 64 exported
+The [website JSON schema](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/site_content_schema.md) documents the 64 exported
 steps. No new website is deployed; site design still requires a mockup.
 Modules A/B and post-GWAS analysis were not started.
 
@@ -80,7 +81,7 @@ The tutorial is an independent resource with a wider audience and scope.
 **[Troubleshooting and recovery](docs/troubleshooting.md)** ·
 **[Glossary](docs/glossary.md)** ·
 **[International computer settings](docs/international_setup.md)** ·
-**[1000 Genomes extension](docs/reference_panel.md)**
+**[1000 Genomes extension](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/reference_panel.md)**
 
 ## Software references
 
@@ -105,8 +106,8 @@ commit hash or release version that you used.
 
 ## Older demonstration (separate from the guided course)
 
-The repository also holds an older demonstration with 600 simulated samples and
-three short lessons. It is not part of the guided course. It uses different data
+The full Git repository also holds an older demonstration with 600 simulated samples and
+three short lessons. It is excluded from the student ZIP and is not part of the guided course. It uses different data
 and folders. Do not follow it by mistake. If you need it, read
-[docs/legacy_demo.md](docs/legacy_demo.md). The original 2025 notebooks are kept
+[docs/legacy_demo.md](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/legacy_demo.md). The original 2025 notebooks are kept
 in the tag [2025-original](https://github.com/mgentiluomo/GWAS_training_session/tree/2025-original/01_Codes).

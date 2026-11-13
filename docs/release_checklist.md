@@ -1,5 +1,66 @@
 # Release checklist: data-2026.1
 
+## Student project releases
+
+The project source package is separate from the encrypted data release.
+Use tag `project-2026.1`, asset `GWAS_course-2026.1.zip` and sidecar
+`GWAS_course-2026.1.zip.sha256`. Never use a `latest` URL. The author publishes
+the reviewed assets; the packaging script does not upload or create releases.
+
+The project file is `GWAS_course.Rproj`. The ZIP has one outer folder,
+`GWAS_course/`. This is an archive layout rule, not a runtime requirement:
+a Git clone into `GWAS_training_session/` or another writable folder must work.
+
+The exact student allowlist is:
+
+- `lessons/` (tracked student notebook sources).
+- `R/` (tracked student R sources).
+- `config.R` and `GWAS_course.Rproj`.
+- `scripts/preflight.R`, `scripts/run_main_path.R`, `scripts/check_course.R`
+  and `scripts/install_packages.R`.
+- `examples/formats/` (tracked tiny invented examples only).
+- `bin/README.md`, `README.md`, `LICENSE` and `LICENSE-CONTENT.md`.
+- `docs/setup.md`, `docs/troubleshooting.md`, `docs/glossary.md`,
+  `docs/international_setup.md` and `docs/data.md`.
+
+Exclude `scripts/author/`, `build/`, `site_content/`, `tutorial*`, `legacy/`,
+instructor files, author working documents, local data, results, binaries,
+credentials and caches. Include no files merely because they are untracked
+in an allowed directory. The packager records each included file's SHA-256
+and checks local links and anchors against the final ZIP inventory. Links to
+excluded documents must use their website URL instead of a relative path.
+
+Build outside the repository with `scripts/package_project.py`, then run its
+fresh-folder check. Check the archive CRC, sole outer folder, exact allowlist,
+file hashes and `.Rproj` name. The fresh-folder check runs syntax and setup
+checks on the extracted copy and repeats the root checks with the folder
+named `GWAS_training_session`. It does not install software or publish assets.
+On Windows, remove inherited `LANG`, `LANGUAGE` and `LC_*` variables from the
+test child process only; the open locale issue is documented separately.
+
+```powershell
+python -B scripts/package_project.py --output C:/project-release-review `
+  --fresh-check --check-urls `
+  --rscript "C:/Program Files/R/R-4.5.2/bin/Rscript.exe" `
+  --data-dir C:/verified-course-data --plink C:/GWAS_course/bin/plink2.exe
+```
+
+Use a new external destination and the complete verified classroom staging
+folder. The test provisions PLINK in the extracted `bin/` after extraction;
+the ZIP itself contains no executable. No classroom password is needed for
+already verified inputs. Review every website status in
+`project-verification.json`. A blocked request is unverified, not a passing
+link. The future asset URL is explicitly pending author publication.
+
+After publication, **any change to `lessons/`, `R/` or student scripts requires
+a new project release**, for example `project-2026.1.1`, with a new ZIP and
+checksum, an updated step 0.3 action URL and a new site sync. Do not replace a
+published asset silently. Keep the project tag and asset version consistent.
+The corresponding data release and analytical results do not change merely
+because the project source has a new version.
+
+The remaining sections below record the separate data-release procedure.
+
 This checklist is for the course author. It creates the encrypted data release
 `data-2026.1` on GitHub and connects it to the course. Nothing in it has been
 done yet: the release does not exist, and the repository contains no password.
