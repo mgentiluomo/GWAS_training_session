@@ -68,7 +68,7 @@ Modules 0 to 7 form the main path; A and B are additional.
 
 | Module | Topic |
 | --- | --- |
-| 0 | Preparing the computer: what you need (0.1), install R (0.2), install RStudio (0.3), download PLINK 2 (0.4), download the course package (0.5), open the project (0.6), run the setup check (0.7), how to use this guide (0.8) |
+| 0 | Preparing the computer: install R (0.1), install RStudio (0.2), download the project (0.3), open the project and check R (0.4), install packages (0.5), put PLINK 2 in bin/ (0.6), request the password and download data (0.7), run preflight (0.8) |
 | 1 | From DNA to array data: SNPs and genotypes (1.1), how a genotyping array works (1.2), the Global Screening Array (1.3), from sample to scanned chip (1.4), calling genotypes (1.5), problems born in the lab (1.6), the export (1.7), data sources (1.8), format map (1.9), format fields and invented examples (1.10), large data resources (1.11) |
 | 2 | Files and formats: the starting files (2.1), convert to binary format (2.2), samples and variants files (2.3), first overview (2.4), alleles and strand (2.5), genome builds GRCh37 and GRCh38 (2.6), add phenotype and covariates (2.7), checkpoint (2.8) |
 | 3 | Sample QC: rough clean (3.1), call rate (3.2), sex check (3.3), LD pruning (3.4), heterozygosity (3.5), relatedness and duplicates (3.6), batch effects (3.7), summary (3.8) |
@@ -132,3 +132,13 @@ The built dataset has 2,000 individuals (1,000 cases, 1,000 controls), 2,016 mea
 
 - Binary format for the course: PLINK 2 native (pgen/pvar/psam, with a box on bed/bim/fam) is proposed.
 - Final numbers of the simulated dataset.
+
+## Preparation revision, November 2026
+
+The three later demo notebooks live in `legacy/demo_2025/`. The legacy builder
+and links use that folder; `2025-original` is a different archive. Module 0 now follows
+the eight actions in the course structure above. The guide routine and
+`where_am_i()` remain in the unnumbered closing section. The current project
+file is `GWAS_course.Rproj`; the approved rename is in its own commit. Folder
+names remain arbitrary, including the default clone folder `GWAS_training_session`.
+Schema 1.1 adds optional actions, command locations and exact success excerpts.

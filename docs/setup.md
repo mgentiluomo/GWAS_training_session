@@ -13,15 +13,22 @@ The default branch is `course/2026-guided-training`. No branch change is needed.
 
 Module 0 covers these steps:
 
-1. What you need (0.1).
-2. Install R (0.2) and RStudio (0.3).
-3. Download PLINK 2 (0.4) and the course package (0.5).
-4. Open the project (0.6) and run the setup check (0.7).
-5. How to use the guide (0.8).
+1. Install R (0.1).
+2. Install RStudio (0.2).
+3. Download and extract the project to `C:/GWAS_course` or `~/GWAS_course` (0.3).
+4. Open the project and check the working directory, R version and `2 + 3` (0.4).
+5. Install the R packages (0.5).
+6. Put the matching PLINK 2 executable in `bin/` (0.6).
+7. Request the password and run `download_course_data()` (0.7).
+8. Run `scripts/preflight.R` (0.8).
+
+Open `GWAS_course.Rproj` from the extracted or cloned folder. The ZIP supplies
+its own `GWAS_course/` folder. A Git clone may keep its default folder name
+`GWAS_training_session`; the checks do not require a particular folder name.
 
 Keep your computer in its own language. The course checks decimal marks and file
 conventions by itself. See [international settings](international_setup.md).
 
 If a problem appears, read [troubleshooting](troubleshooting.md).
 
-The [older separate demonstration](legacy_demo.md) has its own setup instructions.
+The [older separate demonstration](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/legacy_demo.md) stays outside the student ZIP.

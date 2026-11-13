@@ -1,5 +1,11 @@
 # Student rehearsal
 
+Historical report: module 0 step numbers below refer to the order before the
+November 2026 reorganisation. Current actions are: install R 0.1, install
+RStudio 0.2, download the project 0.3, open the project 0.4, install packages
+0.5, add PLINK 2 0.6, download data 0.7 and run preflight 0.8.
+
+
 Date: 12 November 2026. Branch: `course/2026-guided-training`.
 
 This note records an unattended rehearsal of the main path by a simulated beginner.

@@ -504,7 +504,7 @@ course_config <- function(root = ".", data_dir = NULL, output_dir = NULL) {
   exe <- if (.Platform$OS.type == "windows") "plink2.exe" else "plink2"
   candidates <- c(cfg$plink2, file.path(root, "bin", exe), unname(Sys.which("plink2")))
   candidates <- candidates[nzchar(candidates) & file.exists(candidates)]
-  if (!length(candidates)) stop("PLINK 2 was not found. Extract it into bin/; see docs/setup.md.")
+  if (!length(candidates)) stop("PLINK 2 was not found. Extract it into bin/; see https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-6.")
   cfg$plink2 <- normalizePath(candidates[1], mustWork = TRUE)
   version <- system2(cfg$plink2, "--version", stdout = TRUE, stderr = TRUE)
   if (!is.null(attr(version, "status")) || !any(grepl("PLINK v2", version, fixed = TRUE)))
@@ -662,7 +662,7 @@ run_plink <- function(cfg, args, expected = character()) {
   # system2 quotes the executable. Quote each argument so paths with spaces work.
   output <- suppressWarnings(system2(executable, args = shQuote(args), stdout = TRUE, stderr = TRUE))
   writeLines(output, paste0(prefix, ".console.txt"))
-  cat(paste(tail(output, 10), collapse = "\n"), "\n")
+  cat(paste(if (isTRUE(cfg$preflight)) output else tail(output, 10), collapse = "\n"), "\n")
   status <- attr(output, "status")
   if (!is.null(status) && status != 0L) stop("PLINK stopped. Read ", prefix, ".console.txt before continuing.")
   require_files(expected)

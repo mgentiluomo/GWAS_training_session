@@ -1,5 +1,11 @@
 # Contact address verification, 12 November 2026
 
+Historical module 0 step numbers in earlier entries use the old sequence.
+Current actions are: install R 0.1, install RStudio 0.2, download the project
+0.3, open the project 0.4, install packages 0.5, add PLINK 2 0.6, download data
+0.7 and run preflight 0.8. The unchanged progress helper is now in the module 0 recap.
+
+
 Checked `CLAUDE.md`, `README.md`, `lessons/module_00_preparation.Rmd`,
 `docs/troubleshooting.md`, `docs/release_checklist.md` and this report for
 incomplete contact sentences. No missing address or unresolved email reference
