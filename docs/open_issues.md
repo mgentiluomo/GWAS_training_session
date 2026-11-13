@@ -6,6 +6,33 @@ The items below are delivery/platform limits, not silently accepted QC failures.
 
 ## Before classroom distribution
 
+### Windows: inherited C.UTF-8 locale prevents UTF-8 table reading
+
+Observed on 13 November 2026 with R 4.5.2 on Windows. A child R process
+inheriting `LANG=C.UTF-8` or related `LC_*` requests emits startup warnings
+such as `Setting LC_CTYPE=C.UTF-8 failed`. The UTF-8/BOM table regression then
+stops with `Could not safely read locale.tsv: invalid input found on input
+connection`. A Windows student with this inherited locale cannot reliably
+read UTF-8 course tables containing accented text. This is an environment
+failure, not a genotype, threshold or analysis failure.
+
+Removing `LANG`, `LANGUAGE`, `LC_ALL` and every `LC_*` variable only from the
+child process environment allowed the unchanged `scripts/check_course.R` to
+finish: `Syntax and identifier/p-value safeguards passed.` The parent shell
+and Windows language settings were not changed.
+
+Proposed fix, not implemented: extend `R/session_locale.R` to recognise
+unsupported inherited UTF-8 locale aliases on Windows, clear those requests
+for the R process and recover a working native Windows character locale even
+after startup has fallen back to `C`. Keep `LC_NUMERIC=C`, preserve supported
+locale requests and leave operating-system settings unchanged. Add a fresh
+Windows subprocess regression with inherited `C.UTF-8`, checking accented
+UTF-8/BOM table reading and restoration of unrelated session settings. Check
+the realised `LC_CTYPE` after recovery rather than assuming that clearing an
+environment variable repairs an already-started process. Startup warnings
+can precede any R helper, so document that limit and the process-only launch
+workaround as well. `R/session_locale.R` is unchanged in this revision.
+
 1. Run the new main-path notebooks and preflight package preparation on Linux
    and macOS. The earlier author-reported Ubuntu archive extraction result does
    not validate the whole new notebook path or every Posit binary repository.
