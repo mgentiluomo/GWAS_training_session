@@ -110,7 +110,7 @@ No. Odds and probability are different things. An odds ratio is usually not the 
 ## 6.2 The additive logistic model {#step-6-2}
 
 
-<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value)."} -->
+<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value."} -->
 ### What we do
 
 Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.

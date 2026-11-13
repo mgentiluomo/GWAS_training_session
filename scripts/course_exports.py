@@ -169,6 +169,9 @@ def screenshot_figures(body: str, root: Path = ROOT) -> list[dict]:
     return figures
 
 
+MARKDOWN_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
+
+
 def step_metadata(metadata: dict, record: dict) -> dict:
     """Validate optional UI metadata authored beside its canonical step."""
     if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line"}:
@@ -197,9 +200,12 @@ def step_metadata(metadata: dict, record: dict) -> dict:
             command["where"] = where[command["label"]]
     if "success_line" in metadata:
         line = metadata["success_line"]
+        # The line is compared with the screen, so it holds plain words: no Markdown link. It must
+        # still be an exact excerpt of the expected result as a reader sees it (link labels only).
+        visible = MARKDOWN_LINK.sub(r"\1", record["blocks"]["expected_result"])
         if (not isinstance(line, str) or not line.strip() or "\n" in line or len(line) > 180
-                or line not in record["blocks"]["expected_result"]):
-            raise ValueError(f"The success line must be a short exact excerpt of the expected result in {record['id']}.")
+                or MARKDOWN_LINK.search(line) or line not in visible):
+            raise ValueError(f"The success line must be a short exact excerpt of the expected result, without links, in {record['id']}.")
         result["success_line"] = line
     return result
 

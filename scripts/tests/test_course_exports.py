@@ -353,12 +353,18 @@ class CourseExportsTests(unittest.TestCase):
                 self.assertIn("success_line", record)
                 self.assertTrue(all(c["where"] == "console" for c in record["r_commands"]))
             if "success_line" in record:
-                self.assertIn(record["success_line"], record["blocks"]["expected_result"])
+                line = record["success_line"]
+                visible = exports.MARKDOWN_LINK.sub(r"\1", record["blocks"]["expected_result"])
+                self.assertIn(line, visible)
+                # A line to compare with the screen: plain words, no Markdown link, at most 180 characters.
+                self.assertIsNone(exports.MARKDOWN_LINK.search(line), record["id"])
+                self.assertLessEqual(len(line), 180, record["id"])
             self.assertNotIn("<!-- step_meta:", json.dumps(record["blocks"]))
         self.assertEqual([r["id"] for r in self.records if "success_line" not in r], ["1.8", "1.9", "1.10", "1.11"])
         record = {"id": "test", "blocks": {"expected_result": "A real result."},
                   "r_commands": [{"label": "example"}]}
-        for bad in ({"success_line": "Invented output."}, {"where": {"missing": "console"}},
+        for bad in ({"success_line": "Invented output."}, {"success_line": "A [real](docs/glossary.md#r) result."},
+                    {"success_line": "A real result." + " x" * 90}, {"where": {"missing": "console"}},
                     {"where": {"example": "unknown"}}, {"actions": [{"label": "bad", "url": "javascript:alert(1)", "kind": "page"}]}):
             with self.subTest(metadata=bad), self.assertRaises(ValueError):
                 exports.step_metadata(bad, record)

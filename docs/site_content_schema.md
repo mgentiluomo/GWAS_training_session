@@ -24,7 +24,7 @@ images, download data, publish a website or create an encrypted release.
 | `setup_code` | string | Student setup required before the step. Excludes the `knit_setup` chunk. Empty when no setup is needed. |
 | `r_commands` | array | Source chunk `label`, literal R `code`, boolean `run_by_default`, and optional `where` (default `console`). |
 | `actions` | optional array | Button records `{label, url, kind, os?}`. `kind` is `download` or `page`; optional `os` is `windows`, `macos` or `linux`. An empty array means no button is needed. |
-| `success_line` | optional string | At most 180 characters, one exact excerpt copied from the step's expected result. Omit when no single visible result is suitable. |
+| `success_line` | optional string | At most 180 characters, one exact excerpt of the step's expected result as the reader sees it (a link counts as its label). Plain words only: no Markdown link, because students compare the line with their screen. Omit when no single visible result is suitable. |
 | `notebook_only_expected_code` | array | Render-only R helpers extracted from expected-result blocks; never display these as student instructions on the website. |
 | `plink` | object | Boolean `applicable`, literal `commands`, and one explanation per unique option name. |
 | `interactive_data` | optional object | Count-only threshold table at step 3.2; see below. |

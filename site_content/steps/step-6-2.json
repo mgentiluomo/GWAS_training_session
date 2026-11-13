@@ -6,7 +6,7 @@
   "anchor": "step-6-2",
   "title": "The additive logistic model",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "7769ec3d7690f3756a6ec0912331e65081d88c30405b5da353a1ba00e7d240f8",
+  "source_sha256": "e1dd9b8bd283d42d872fe3566f8aab06a2825dd778366f9c3f8cbc8e29b7ea0f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit a [logistic regression](docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.",
@@ -33,5 +33,5 @@
     "options": []
   },
   "figures": [],
-  "success_line": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value)."
+  "success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value."
 }
