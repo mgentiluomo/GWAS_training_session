@@ -4,3 +4,6 @@
 # Preserve byte offsets and checksums in the authorised invented examples.
 examples/formats/** -text
 site_content/formats/examples/** -text
+
+# Generated site content: identical bytes on every system.
+site_content/**/*.json text eol=lf

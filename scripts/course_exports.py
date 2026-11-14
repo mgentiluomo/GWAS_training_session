@@ -472,20 +472,20 @@ def main() -> None:
         args.export_steps.mkdir(parents=True, exist_ok=True)
         for record in records:
             destination = args.export_steps / (record["anchor"] + ".json")
-            destination.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            destination.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
         modules = export_modules()
         module_dir = args.export_steps.parent / "modules"
         module_dir.mkdir(parents=True, exist_ok=True)
         for record in modules:
             (module_dir / f"module-{record['module']}.json").write_text(
-                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
         spec = importlib.util.spec_from_file_location("format_examples", ROOT / "scripts/author/make_format_examples.py")
         formats = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(formats)
         entries = formats.export_formats(args.export_steps.parent / "formats")
         print(f"Exported {len(records)} steps, {len(modules)} module pages and {len(entries)} format descriptions with tiny invented examples; no classroom data or website deployment created.")
     if args.export_main_script:
-        args.export_main_script.write_text(main_script(), encoding="utf-8")
+        args.export_main_script.write_text(main_script(), encoding="utf-8", newline="\n")
         print(f"Exported {args.export_main_script} from canonical notebook chunks.")
 
 
