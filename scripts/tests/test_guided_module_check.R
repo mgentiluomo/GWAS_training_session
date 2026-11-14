@@ -187,6 +187,38 @@ test_guided_module_check <- function() {
   stopifnot(identical(message, paste0(
     "Some saved files from step 3.8 are missing: results/guided/s3-8_missing.pgen",
     '. Finish module 3 first. Or restart here with: restore_checkpoint("4.1") (use an empty folder).')))
+  # Module 5 needs the complete variant checkpoint and all reference files.
+  module5 <- guided_module_inputs[["5"]]
+  stopifnot(identical(module5$checkpoint, "4.6"), identical(module5$restart_step, "5.1"),
+            identical(module5$data, paste0("pca_reference/ref1000g_grch38", c(".pgen", ".pvar", ".psam"))),
+            identical(module5$output, c("s4-6_state.pgen", "s4-6_state.pvar", "s4-6_state.psam")))
+  module5_data <- file.path("data/course", module5$data)
+  module5_output <- file.path("results/guided", module5$output)
+  module5_fails <- function(missing, data = FALSE) {
+    message <- tryCatch({ guided_check_module(5); stop("Expected an error") }, error = conditionMessage)
+    expected <- if (data) paste0(
+      "Course metadata are missing. Complete step 0.7 before module 5. Missing: ", paste(missing, collapse = ", ")) else paste0(
+      "Some saved files from step 4.6 are missing: ", paste(missing, collapse = ", "),
+      '. Finish module 4 first. Or restart here with: restore_checkpoint("5.1") (use an empty folder).')
+    stopifnot(identical(message, expected))
+  }
+  module5_fails(module5_data, data = TRUE)
+  touch(module5_data)
+  module5_fails(module5_output)
+  touch(module5_output)
+  for (path in module5_data) {
+    unlink(path)
+    module5_fails(path, data = TRUE)
+    touch(path)
+  }
+  for (path in module5_output) {
+    unlink(path)
+    module5_fails(path)
+    touch(path)
+  }
+  stopifnot(identical(capture.output(result <- guided_check_module(5)),
+                      "Module 5 input files are present."), isTRUE(result))
+  cat("Module 5 input checks passed: all three checkpoint files and all three reference files.\n")
   guided_module_inputs[["0"]] <<- list(checkpoint = NULL, restart_step = NULL,
                                       data = character(0), output = character(0))
   stopifnot(isTRUE(guided_check_project_root()),

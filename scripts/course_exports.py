@@ -176,6 +176,8 @@ MARKDOWN_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 
 # Bare words with special PLINK meaning, rather than file paths or numeric values.
 PLINK_MODIFIERS = {
+    "--pca": {"allele-wts"},
+    "--score": {"header-read", "no-mean-imputation", "variance-standardize"},
     "--exclude": {"bed1"}, "--missing": {"sample-only"},
     "--hardy": {"midp"}, "--export": {"A"},
     "--rm-dup": {"exclude-mismatch", "list"},

@@ -502,7 +502,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 4ac8eeed377620aeb782c76f09d6704a29923c9e6b44d13bd1ee6388a2c45aca
+# SHA-256: e3c104a02a37ae7e55c2d3a52d243f52727b139f299811843e57b40c09277828
 
 # Chunk: setup
 source("R/guided.R")
@@ -510,62 +510,83 @@ cfg <- guided_init()
 
 
 # Chunk: s5-1
+# 1. Read the reference sample table.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 reference_samples <- guided_table(paste0(reference, ".psam"))
+# 2. Count the samples in each reference group.
 table(reference_samples$SuperPop)
 
 
 # Chunk: s5-2
+# 1. Read the study and reference site tables.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference_sites <- guided_table(paste0(reference, ".pvar"))
+# 2. Find the site names that occur in both tables.
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
+# 3. Save the shared site names and check their number.
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
 stopifnot(length(common) == 48614L)
 cat(length(common), "shared autosomal sites kept\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 
 
 # Chunk: s5-3
+# 1. Read the shared site names and both site tables.
 common <- readLines(guided_path(cfg, "5.2", "common.txt"))
 study <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 ref <- guided_table(paste0(reference, ".pvar"))
+# 2. Match site names and compare allele pairs in either order.
 a <- match(common, study$ID); b <- match(common, ref$ID)
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+# 3. Check chromosomes, positions and alleles and print the matched count.
 stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
   all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
 cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
 
 
 # Chunk: s5-4
+# 1. Set the reference input, shared site list and output names.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 common <- guided_path(cfg, "5.2", "common.txt")
 fit <- guided_path(cfg, "5.4", "reference")
+# 2. Calculate ten reference components and save their allele contributions.
 run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))
+# 3. Find the columns containing site names, alleles and component contributions.
 weights <- guided_table(paste0(fit, ".eigenvec.allele"))
 id_column <- match("ID", names(weights)); allele_column <- match("A1", names(weights))
 first_pc <- match("PC1", names(weights))
+# 4. Prepare the same reference frequencies and scoring rules for both groups.
 score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),
   id_column, allele_column, "header-read", "no-mean-imputation", "variance-standardize",
   "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
+# 5. Place the reference samples on the fixed reference axes.
 run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))
+# 6. Place the study samples on the same reference axes.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".eigenval", ".eigenvec.allele")), paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"), paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore")), parent = "5.2")
 
 
 # Chunk: s5-5
+# 1. Read both score tables and the reference group labels.
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+# 2. Match the reference labels to samples and choose group symbols and colours.
 group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
+# 3. Open a picture file and plot the first two reference components.
 png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
 plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
   xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
+# 4. Add the study samples and a key for the groups.
 points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
 legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+# 5. Finish saving the picture and print its location.
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
 
@@ -577,35 +598,47 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s5-6
+# 1. Read the reference and study scores and reference group labels.
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+# 2. Select the European reference samples and the first four component scores.
 eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"
 columns <- paste0("PC", 1:4, "_AVG")
 r <- sapply(ref[eur, columns, drop = FALSE], as.numeric)
 s <- sapply(study[columns], as.numeric)
+# 3. Measure each study score's distance from the reference mean using its spread.
 centre <- colMeans(r)
 spread <- sqrt(colMeans(sweep(r, 2, centre, "-")^2))
 z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
+# 4. List samples more than six standard deviations away on any selected component.
 bad <- study$IID[apply(abs(z), 1, max) > 6]
 remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
+# 5. Remove the listed samples and save the retained study group.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "5.6", "4.6")
 guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 
 
 # Chunk: s5-7
+# 1. Prepare the regions to exclude and the site selection output name.
 regions <- guided_high_ld(cfg)
 prune <- guided_path(cfg, "5.7", "prune")
+# 2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
+# 3. Calculate ten components within the retained study group using the selected sites.
 report <- guided_path(cfg, "5.7", "pca")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
+# 4. Read how much variation each component explains and plot these values.
 eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
 png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
 plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
+# 5. Finish saving the picture and print its location.
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
 file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
 check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)

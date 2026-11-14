@@ -24,7 +24,11 @@ guided_module_inputs <- list(
 `4` = list(
   checkpoint = "3.8", restart_step = "4.1",
   data = character(0),
-  output = c("s3-8_state.pgen", "s3-8_state.pvar", "s3-8_state.psam"))
+  output = c("s3-8_state.pgen", "s3-8_state.pvar", "s3-8_state.psam")),
+`5` = list(
+  checkpoint = "4.6", restart_step = "5.1",
+  data = c("pca_reference/ref1000g_grch38.pgen", "pca_reference/ref1000g_grch38.pvar", "pca_reference/ref1000g_grch38.psam"),
+  output = c("s4-6_state.pgen", "s4-6_state.pvar", "s4-6_state.psam"))
 )
 guided_check_project_root <- function() {
   if (!file.exists("config.R") || !file.exists("R/guided.R")) {

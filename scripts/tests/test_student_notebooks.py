@@ -17,6 +17,15 @@ import student_notebooks as students
 
 
 class StudentNotebookTests(unittest.TestCase):
+    def test_reference_projection_modifier_order(self):
+        self.assertEqual(exports.plink_option_order(
+            "bin/plink2 --pca 10 allele-wts --score weights 2 5 header-read "
+            "no-mean-imputation variance-standardize --score-col-nums 6-15"), [
+                ("--pca", ["allele-wts"]),
+                ("--score", ["header-read", "no-mean-imputation", "variance-standardize"]),
+                ("--score-col-nums", []),
+            ])
+
     def test_tracked_pilot_is_current(self):
         students.export_notebooks(ROOT / "notebooks", check=True)
 
