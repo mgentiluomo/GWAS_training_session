@@ -50,8 +50,12 @@ class PackagingTests(unittest.TestCase):
 
     def test_encrypted_round_trip(self):
         # The caller supplies a throwaway password. No password is stored here.
-        password = os.environ["COURSE_RELEASE_PASSWORD"]
+        password = os.environ.get("COURSE_RELEASE_PASSWORD")
+        if not password:
+            self.skipTest("COURSE_RELEASE_PASSWORD is not set. Set a throwaway password to run the encrypted round trip.")
         sevenzip = Path(r"C:\Program Files\7-Zip\7z.exe")
+        if not sevenzip.is_file():
+            self.skipTest(f"7-Zip not found at {sevenzip}. The encrypted round trip needs it.")
         output = self.root / "release"
         result = release.build(self.source, output, sevenzip)
         self.assertEqual(result["files"], 1)
