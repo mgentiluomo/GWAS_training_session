@@ -6,13 +6,13 @@
   "anchor": "step-3-3",
   "title": "Recorded and genetic sex",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611",
+  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We move the [pseudo-autosomal regions](docs/glossary.md#pseudoautosomal-region) (PARs) out of the rest of the X chromosome. We then compare the recorded sex of each person with the X and Y patterns in the DNA. Finally, we review the wells where the two do not agree.",
     "why": "The [sex chromosomes](docs/glossary.md#sex-chromosomes) are X and Y. The PARs are small regions that exist on both X and Y. They can swap material (recombine) like other chromosomes. A man therefore has two copies of them. We must not treat these two copies as the single X of a man.\n\nPLINK computes an X inbreeding coefficient, called [F](docs/glossary.md#f-statistic). It shows how [homozygous](docs/glossary.md#homozygous) the X looks. Homozygous means that both copies of a site carry the same allele. PLINK also counts the Y calls. These two values can show that the recorded sex does not fit the DNA.\n\nA flagged well can have several causes. It can be a sample swap, an unusual [karyotype](docs/glossary.md#karyotype) (an unusual number of sex chromosomes), poor calls or incomplete records. A flag is not a clinical diagnosis.\n\nIn this simulation, we remove the flagged wells for the main teaching analysis.",
     "you_need": "State 3.2 and the recorded sex that we joined to the data at step 2.7.",
-    "command": "```{r s3-3}\nsplit <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-2_state --split-par b38 --make-pgen --out results/guided/s3-3_par --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/guided/s3-3_sexcheck --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048\n```\n\n`--split-par b38` gives the PAR sites their own region, using the PAR boundaries of GRCh38 (the version of the human reference genome that this course uses). `--check-sex` compares the recorded sex with the genotype patterns; `max-female-xf` and `min-male-xf` set the limits of the X coefficient for recorded females and males; the two `ycount` limits set the limits of the number of Y calls. `--remove` reads the reviewed list of samples and removes them. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
+    "command": "```{r s3-3}\n# 1. Choose names for the chromosome files and sex report.\nsplit <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\n# 2. Label the regions shared by the X and Y chromosomes.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\n# 3. Compare recorded sex with the X and Y chromosome results.\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\n# 4. Read the report and list samples that need to be removed.\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\n# 5. Save the dataset without the flagged samples.\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-2_state --split-par b38 --make-pgen --out results/guided/s3-3_par --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/guided/s3-3_sexcheck --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048\n```\n\n`--split-par b38` gives the PAR sites their own region, using the PAR boundaries of GRCh38 (the version of the human reference genome that this course uses). `--check-sex` compares the recorded sex with the genotype patterns; `max-female-xf` and `min-male-xf` set the limits of the X coefficient for recorded females and males; the two `ycount` limits set the limits of the number of Y calls. `--remove` reads the reviewed list of samples and removes them. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
     "expected_result": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Sex mismatch and unusual X or Y patterns. This includes one simulated XXY-like profile (a person with two X chromosomes and one Y chromosome). Do not infer a real diagnosis from a course threshold.",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s3-3",
-      "code": "split <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)",
+      "code": "# 1. Choose names for the chromosome files and sex report.\nsplit <- guided_path(cfg, \"3.3\", \"par\")\nreport <- guided_path(cfg, \"3.3\", \"sexcheck\")\n# 2. Label the regions shared by the X and Y chromosomes.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.2\"), \"--split-par\", \"b38\", \"--make-pgen\", \"--out\", split))\n# 3. Compare recorded sex with the X and Y chromosome results.\nrun_plink(cfg, c(\"--pfile\", split, \"--check-sex\", \"max-female-xf=0.2\", \"min-male-xf=0.8\",\n  \"max-female-ycount=100\", \"min-male-ycount=1000\", \"--out\", report))\n# 4. Read the report and list samples that need to be removed.\nsexcheck <- guided_table(paste0(report, \".sexcheck\"))\nbad <- sexcheck$IID[sexcheck$STATUS != \"OK\"]\nremove_file <- guided_list(bad, guided_path(cfg, \"3.3\", \"remove.txt\"), TRUE)\n# 5. Save the dataset without the flagged samples.\nrun_plink(cfg, c(\"--pfile\", split, \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.3\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.3\", \"3.2\", extra = data.frame(option = \"--split-par\", value = \"b38\"))\nguided_register(cfg, \"3.3\", \"3.2\", 1963, 296360, operations = ops)",
       "run_by_default": true
     }
   ],
@@ -76,5 +76,89 @@
     ]
   },
   "figures": [],
-  "success_line": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2."
+  "student_summary": "We compare recorded sex with patterns in the X and Y chromosome calls. We remove flagged wells from this teaching analysis because a mismatch needs review before the sample is used.",
+  "student_plink_options": [
+    {
+      "label": "label the shared X and Y regions",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--split-par",
+          "explanation": "Uses GRCh38 boundaries (b38) to label the shared regions of X and Y separately."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    },
+    {
+      "label": "compare recorded sex with DNA",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--check-sex",
+          "explanation": "Compares recorded sex with X chromosome patterns and the number of observed Y calls.",
+          "modifiers": [
+            {
+              "name": "max-female-xf",
+              "explanation": "Sets 0.2 as the largest X coefficient accepted for a recorded female."
+            },
+            {
+              "name": "min-male-xf",
+              "explanation": "Sets 0.8 as the smallest X coefficient accepted for a recorded male."
+            },
+            {
+              "name": "max-female-ycount",
+              "explanation": "Accepts at most 100 observed Y calls for a recorded female."
+            },
+            {
+              "name": "min-male-ycount",
+              "explanation": "Requires at least 1000 observed Y calls for a recorded male."
+            }
+          ]
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    },
+    {
+      "label": "remove samples flagged by the sex check",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--remove",
+          "explanation": "Removes the samples named in the supplied sample list."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    }
+  ],
+  "success_line": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same."
+  ],
+  "student_expected_result": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change."
 }

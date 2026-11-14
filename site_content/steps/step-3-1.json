@@ -6,13 +6,13 @@
   "anchor": "step-3-1",
   "title": "Rough cleaning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611",
+  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "First we remove [wells](docs/glossary.md#well) that were read very badly. A well is a small hole in a plate that holds the DNA of one sample. Then we remove [variants](docs/glossary.md#variant) (also called sites) that were read very badly. A variant is a place in the DNA where people differ.",
     "why": "Some wells fail in the laboratory. For these wells, many results are missing. [Missingness](docs/glossary.md#missingness) is the share of [genotypes](docs/glossary.md#genotype) that could not be read. A genotype is the pair of DNA letters that a person has at one site.\n\nGross failures distort later summaries of missingness and of [heterozygosity](docs/glossary.md#heterozygosity). Heterozygosity means that a person carries two different [alleles](docs/glossary.md#allele) (versions of the DNA letter) at a site.\n\nFirst, we remove samples with more than 10% missing genotypes. Second, we recompute the missingness of each variant on the samples that remain. Third, we remove variants with more than 10% missingness.\n\nThe order matters. Removing poor wells can improve the apparent [call rate](docs/glossary.md#call-rate) of a site. The call rate is the share of genotypes that were read successfully. This step is only a first screen. It is not the final 98% call-rate rule.",
     "you_need": "The full 2.8 checkpoint.",
-    "command": "```{r s3-1}\ninput <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out results/guided/s3-1_samples --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048\n```\n\nThere are two separate commands on purpose. The second command works on the samples that survive the first.\n\n`--mind 0.10` removes wells with more than 10% missingness. `--geno 0.10` removes sites with more than 10% missingness in the wells that remain. `--pfile` selects the input fileset in the PLINK 2 native format. `--make-pgen` saves the result as a new fileset (a saved state). `--out` sets the name prefix of the output files. `--threads 2` limits the number of worker threads (parallel jobs). `--memory 2048` sets the memory limit to 2048 MiB (about 2 gigabytes).",
+    "command": "```{r s3-1}\n# 1. Choose the input files and the names for the saved files.\ninput <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\n# 2. Remove samples with more than 10% of calls missing.\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\n# 3. Remove variants with more than 10% of calls missing.\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out results/guided/s3-1_samples --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048\n```\n\nThere are two separate commands on purpose. The second command works on the samples that survive the first.\n\n`--mind 0.10` removes wells with more than 10% missingness. `--geno 0.10` removes sites with more than 10% missingness in the wells that remain. `--pfile` selects the input fileset in the PLINK 2 native format. `--make-pgen` saves the result as a new fileset (a saved state). `--out` sets the name prefix of the output files. `--threads 2` limits the number of worker threads (parallel jobs). `--memory 2048` sets the memory limit to 2048 MiB (about 2 gigabytes).",
     "expected_result": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Failed wells and sites that failed badly. This check cannot tell you the biological or technical cause by itself.",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s3-1",
-      "code": "input <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)",
+      "code": "# 1. Choose the input files and the names for the saved files.\ninput <- guided_path(cfg, \"2.8\")\nrough <- guided_path(cfg, \"3.1\", \"samples\")\n# 2. Remove samples with more than 10% of calls missing.\nrun_plink(cfg, c(\"--pfile\", input, \"--mind\", \"0.10\", \"--make-pgen\", \"--out\", rough))\n# 3. Remove variants with more than 10% of calls missing.\nrun_plink(cfg, c(\"--pfile\", rough, \"--geno\", \"0.10\", \"--make-pgen\", \"--out\", guided_path(cfg, \"3.1\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.1\", \"2.8\")\nguided_register(cfg, \"3.1\", \"2.8\", 2013, 296360, operations = ops)",
       "run_by_default": true
     }
   ],
@@ -66,5 +66,54 @@
     ]
   },
   "figures": [],
-  "success_line": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain."
+  "student_summary": "We remove samples and variants with very many missing calls. This first clean prevents the worst failures from distorting the checks that follow.",
+  "student_plink_options": [
+    {
+      "label": "remove poor samples",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--mind",
+          "explanation": "Removes samples with more than 10% missing calls."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    },
+    {
+      "label": "remove poor variants",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--geno",
+          "explanation": "Removes variants with more than 10% missing calls in the input dataset."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    }
+  ],
+  "success_line": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same."
+  ],
+  "student_expected_result": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain."
 }

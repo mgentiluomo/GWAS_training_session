@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 
 # Content export does not import plotting libraries, read data or build the old demo site.
-if "--export-steps" in sys.argv or "--export-main-script" in sys.argv:
+if any(option in sys.argv for option in ("--export-steps", "--export-main-script", "--export-notebooks")):
     from course_exports import main
     main()
     raise SystemExit(0)

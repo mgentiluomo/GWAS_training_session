@@ -6,13 +6,13 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611",
+  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
     "why": "A heterozygote carries two different alleles at a site. PLINK's F statistic compares the homozygosity that we observe with the homozygosity that we expect from the allele frequencies.\n\nA negative F can mean too much heterozygosity. One possible cause is [contamination](docs/glossary.md#contamination), which means that the sample is mixed with DNA from another person. A high positive F can come from parents who are related to each other. It can also come from [population structure](docs/glossary.md#population-stratification) (groups with different ancestry) or from technical effects.\n\nWe remove samples with an F below the mean minus three population [standard deviations](docs/glossary.md#standard-deviation). The standard deviation (SD) shows how spread out the values are. We flag samples with an F above the mean plus three standard deviations for review.\n\nIn this module, a high F is not an automatic reason to exclude a sample.",
     "you_need": "State 3.3 and the diagnostic subset (the pruned list) from step 3.4.",
-    "command": "```{r s3-5}\nreport <- guided_path(cfg, \"3.5\", \"het\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048\n```\n\n`--extract` limits the calculation to the sites on the pruning list. `--het` reports heterozygosity statistics for each sample. R calculates the review thresholds. `--remove` takes the selected low-F samples out of the complete data. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
+    "command": "```{r s3-5}\n# 1. Choose the name for the report of matching DNA letters.\nreport <- guided_path(cfg, \"3.5\", \"het\")\n# 2. Measure matching DNA letters using the selected variants.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\n# 3. Read the report and calculate the average and spread of F.\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\n# 4. Find samples with unusually low or high F values.\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\n# 5. Save the high F review list and the low F removal list.\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\n# 6. Save the dataset without the low F samples.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\n# 7. Print the average, spread and numbers of flagged samples.\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048\n```\n\n`--extract` limits the calculation to the sites on the pruning list. `--het` reports heterozygosity statistics for each sample. R calculates the review thresholds. `--remove` takes the selected low-F samples out of the complete data. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
     "expected_result": "13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Too much or too little heterozygosity. These are ideas to check, not proof of contamination or of related parents.",
@@ -24,7 +24,7 @@
   "r_commands": [
     {
       "label": "s3-5",
-      "code": "report <- guided_path(cfg, \"3.5\", \"het\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)",
+      "code": "# 1. Choose the name for the report of matching DNA letters.\nreport <- guided_path(cfg, \"3.5\", \"het\")\n# 2. Measure matching DNA letters using the selected variants.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--extract\", paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"), \"--het\", \"--out\", report))\n# 3. Read the report and calculate the average and spread of F.\nhet <- guided_table(paste0(report, \".het\"))\nf <- as.numeric(het$F)\nmean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))\n# 4. Find samples with unusually low or high F values.\nlow <- het$IID[f < mean_f - 3 * sd_f]\nhigh <- het$IID[f > mean_f + 3 * sd_f]\n# 5. Save the high F review list and the low F removal list.\nguided_list(high, guided_path(cfg, \"3.5\", \"flag_high.txt\"), TRUE)\nremove_file <- guided_list(low, guided_path(cfg, \"3.5\", \"remove.txt\"), TRUE)\n# 6. Save the dataset without the low F samples.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.5\")))\n# 7. Print the average, spread and numbers of flagged samples.\nprint(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.5\", \"3.3\")\nguided_register(cfg, \"3.5\", \"3.4\", 1950, 296360, operations = ops)",
       "run_by_default": true
     }
   ],
@@ -76,5 +76,54 @@
     ]
   },
   "figures": [],
-  "success_line": "13 wells with low F are removed."
+  "student_summary": "We check whether each sample has unusually many or few genotypes with two different alleles. We remove the unusually high-heterozygosity samples and keep the low-heterozygosity samples flagged for review, because an unusual value alone does not prove an error.",
+  "student_plink_options": [
+    {
+      "label": "measure matching DNA letters",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--extract",
+          "explanation": "Uses only the variants named in the supplied variant list."
+        },
+        {
+          "name": "--het",
+          "explanation": "Reports how often each sample has two matching alleles, compared with what the allele frequencies predict. R uses this report to calculate F and the review thresholds."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    },
+    {
+      "label": "remove samples with unusually few matching letters",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--remove",
+          "explanation": "Removes the samples named in the supplied sample list."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    }
+  ],
+  "success_line": "13 wells with low F are removed.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same."
+  ],
+  "student_expected_result": "13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain."
 }

@@ -6,13 +6,13 @@
   "anchor": "step-3-7",
   "title": "Batch effects",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611",
+  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the call rate of each plate. A plate is a tray of 96 wells. We remove the plate that is clearly faulty in the simulated data.",
     "why": "Samples that are processed together can share the same technical faults (artefacts). We call this a batch effect. We compare the laboratory groups with the call rate and with the heterozygosity.\n\nA plate with many cases must not be removed only because it has many cases. Here we remove a plate because its technical measurements are poor.\n\nAfter you remove any batch, check again how cases and controls are spread across the data.",
     "you_need": "State 3.6 and the sample sheet from step 1.4. You also need the heterozygosity report from step 3.5.",
-    "command": "```{r s3-7}\nreport <- guided_path(cfg, \"3.7\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results/guided/s3-7_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048\n```\n\n`--missing sample-only` writes the report of missingness for each well and skips the report for variants. R matches this report to the plates by [IID](docs/glossary.md#fid-iid) (the sample identifier). R then compares the [median](docs/glossary.md#median) of each plate and writes the reviewed removal list. The median is the middle value of a list of numbers. `--pfile`, `--remove`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at steps 3.1 and 3.3.",
+    "command": "```{r s3-7}\n# 1. Choose the name for the missing-call report.\nreport <- guided_path(cfg, \"3.7\", \"missing\")\n# 2. Count missing calls for each sample.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\n# 3. Read the report and match each sample to its laboratory plate.\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\n# 4. Calculate and print the middle call rate for each plate.\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\n# 5. Find the plate with the most missing calls and check its name.\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\n# 6. Write the list of samples from the faulty plate.\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\n# 7. Save the dataset without samples from that plate.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results/guided/s3-7_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048\n```\n\n`--missing sample-only` writes the report of missingness for each well and skips the report for variants. R matches this report to the plates by [IID](docs/glossary.md#fid-iid) (the sample identifier). R then compares the [median](docs/glossary.md#median) of each plate and writes the reviewed removal list. The median is the middle value of a list of numbers. `--pfile`, `--remove`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at steps 3.1 and 3.3.",
     "expected_result": "Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "A laboratory effect that a group of samples shares. The same pattern can confound an association (mix up the effect of the group with the effect of the disease) if the processing groups and the phenotype groups overlap.",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s3-7",
-      "code": "report <- guided_path(cfg, \"3.7\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)",
+      "code": "# 1. Choose the name for the missing-call report.\nreport <- guided_path(cfg, \"3.7\", \"missing\")\n# 2. Count missing calls for each sample.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--missing\", \"sample-only\", \"--out\", report))\n# 3. Read the report and match each sample to its laboratory plate.\nmissing <- guided_table(paste0(report, \".smiss\"))\nmetadata <- guided_metadata(cfg)\nplate <- metadata$Plate[match(missing$IID, metadata$IID)]\n# 4. Calculate and print the middle call rate for each plate.\nmedian_missing <- tapply(as.numeric(missing$F_MISS), plate, median)\nprint(sort(1 - median_missing))\n# 5. Find the plate with the most missing calls and check its name.\nworst <- names(which.max(median_missing))\nstopifnot(worst == \"P14\")\n# 6. Write the list of samples from the faulty plate.\nremove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, \"3.7\", \"remove.txt\"), TRUE)\n# 7. Save the dataset without samples from that plate.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.6\"), \"--remove\", remove_file, \"--make-pgen\", \"--out\", guided_path(cfg, \"3.7\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"3.7\", \"3.6\")\nguided_register(cfg, \"3.7\", \"3.6\", 1844, 296360, operations = ops)",
       "run_by_default": true
     }
   ],
@@ -72,5 +72,56 @@
     ]
   },
   "figures": [],
-  "success_line": "Plate P14 has a median call rate of approximately 98.56%."
+  "student_summary": "We compare the fraction of successful genotype calls across laboratory plates. We remove the faulty plate in these simulated data because samples processed together can share technical problems.",
+  "student_plink_options": [
+    {
+      "label": "measure missing calls by sample",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--missing",
+          "explanation": "Writes a report of missing genotype calls.",
+          "modifiers": [
+            {
+              "name": "sample-only",
+              "explanation": "Writes one row per sample and skips the report for variants."
+            }
+          ]
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    },
+    {
+      "label": "remove samples from the faulty plate",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--remove",
+          "explanation": "Removes the samples named in the supplied sample list."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    }
+  ],
+  "success_line": "Plate P14 has a median call rate of approximately 98.56%.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same."
+  ],
+  "student_expected_result": "Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain."
 }

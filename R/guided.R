@@ -1,6 +1,44 @@
 # Shared mechanics for guided notebooks. Analytical commands stay in their chunks.
 source("R/course.R")
 
+# BEGIN GENERATED MODULE 3 INPUTS
+# Source: module_meta in lessons/module_03_sample_quality_control.Rmd.
+# Regenerate with --export-notebooks; do not edit this table.
+guided_module_inputs <- list(`3` = list(
+  checkpoint = "2.8", restart_step = "3.1",
+  data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
+  output = c("s2-8_state.pgen", "s2-8_state.pvar", "s2-8_state.psam")))
+# END GENERATED MODULE 3 INPUTS
+
+guided_check_module <- function(module) {
+  if (!file.exists("config.R") || !file.exists("R/guided.R")) {
+    stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)
+  }
+  if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))
+  spec <- guided_module_inputs[[as.character(module)]]
+  if (is.null(spec)) stop("No input check is defined for module ", module, ".", call. = FALSE)
+  data_dir <- Sys.getenv("COURSE_DATA_DIR", unset = "data/course")
+  output_dir <- Sys.getenv("COURSE_OUTPUT_DIR", unset = "results/guided")
+  data_files <- file.path(data_dir, spec$data)
+  output_files <- file.path(output_dir, spec$output)
+  if (any(!file.exists(data_files))) {
+    stop("Course metadata are missing. Complete step 0.7 before module 3. Missing: ",
+         paste(data_files[!file.exists(data_files)], collapse = ", "), call. = FALSE)
+  }
+  if (any(!file.exists(output_files))) {
+    arguments <- encodeString(spec$restart_step, quote = '"')
+    if (data_dir != "data/course") arguments <- c(arguments, paste0("data_dir = ", encodeString(data_dir, quote = '"')))
+    if (output_dir != "results/guided") arguments <- c(arguments, paste0("work_dir = ", encodeString(output_dir, quote = '"')))
+    restart <- paste0("restore_checkpoint(", paste(arguments, collapse = ", "), ")")
+    stop("Some saved files from step ", spec$checkpoint, " are missing: ",
+         paste(output_files[!file.exists(output_files)], collapse = ", "),
+         ". Finish module 2 first. Or restart here with: ", restart,
+         " (use an empty folder).", call. = FALSE)
+  }
+  cat("Module 3 input files are present.\n")
+  invisible(TRUE)
+}
+
 guided_init <- function() {
   source("R/session_locale.R")
   normalise_course_locale()

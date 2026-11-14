@@ -6,13 +6,13 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611",
+  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We select a smaller set of [autosomal](docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.",
     "why": "[Linkage disequilibrium](docs/glossary.md#ld) (LD) means that alleles at nearby sites are correlated. A dense region with many correlated sites would count too much, only because the array has many [probes](docs/glossary.md#probe) there. A probe is the piece of DNA on the array that measures one site.\n\n[LD pruning](docs/glossary.md#ld-pruning) keeps one representative subset of sites. It does not delete the other sites from the association data.\n\nWe also leave out the long-range LD regions, where the correlation reaches over very long distances. The GRCh38 intervals are listed in the helper function. They are not a complete catalogue for all studies.",
     "you_need": "State 3.3.",
-    "command": "```{r s3-4}\nregions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed1` leaves out the sites inside the listed regions. The file gives them as one-based inclusive intervals (positions counted from 1, with both ends included). `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
+    "command": "```{r s3-4}\n# 1. Write the list of regions where nearby variants are strongly linked.\nregions <- guided_high_ld(cfg)\n# 2. Select variants with less similar patterns of DNA letters.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\n# 3. Check and print how many variants were selected.\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048\n```\n\n`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed1` leaves out the sites inside the listed regions. The file gives them as one-based inclusive intervals (positions counted from 1, with both ends included). `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.",
     "expected_result": "The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Regions that would otherwise dominate summaries made from correlated markers. The subset that you keep depends on the input samples and on the exact version of the algorithm.",
@@ -24,7 +24,7 @@
   "r_commands": [
     {
       "label": "s3-4",
-      "code": "regions <- guided_high_ld(cfg)\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")",
+      "code": "# 1. Write the list of regions where nearby variants are strongly linked.\nregions <- guided_high_ld(cfg)\n# 2. Select variants with less similar patterns of DNA letters.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"3.3\"), \"--chr\", \"1-22\", \"--maf\", \"0.05\", \"--geno\", \"0.02\",\n  \"--exclude\", \"bed1\", regions, \"--indep-pairwise\", \"200kb\", \"0.2\", \"--out\", guided_path(cfg, \"3.4\", \"prune\")))\n# 3. Check and print how many variants were selected.\npruned <- readLines(paste0(guided_path(cfg, \"3.4\", \"prune\"), \".prune.in\"))\nstopifnot(length(pruned) == 69539L)\ncat(length(pruned), \"variants kept by LD pruning\\n\")\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"3.4\", c(paste0(guided_path(cfg, \"3.4\", \"prune\"), c(\".prune.in\", \".prune.out\")), regions), parent = \"3.3\")",
       "run_by_default": true
     }
   ],
@@ -78,5 +78,51 @@
     ]
   },
   "figures": [],
-  "success_line": "The `.prune.in` file lists 69,539 sites."
+  "student_summary": "We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, otherwise the same genetic signal is counted many times.",
+  "student_plink_options": [
+    {
+      "label": "select less strongly linked variants",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."
+        },
+        {
+          "name": "--chr",
+          "explanation": "Uses only chromosomes 1 to 22, the autosomes."
+        },
+        {
+          "name": "--maf",
+          "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."
+        },
+        {
+          "name": "--geno",
+          "explanation": "Keeps variants with no more than 2% missing calls."
+        },
+        {
+          "name": "--exclude",
+          "explanation": "Leaves out variants within the listed DNA regions.",
+          "modifiers": [
+            {
+              "name": "bed1",
+              "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."
+            }
+          ]
+        },
+        {
+          "name": "--indep-pairwise",
+          "explanation": "Selects a less strongly linked set within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2."
+        },
+        {
+          "name": "--out",
+          "explanation": "Sets the shared beginning of the output file names."
+        }
+      ]
+    }
+  ],
+  "success_line": "The `.prune.in` file lists 69,539 sites.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same."
+  ],
+  "student_expected_result": "The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants."
 }

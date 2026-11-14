@@ -142,3 +142,32 @@ the eight actions in the course structure above. The guide routine and
 file is `GWAS_course.Rproj`; the approved rename is in its own commit. Folder
 names remain arbitrary, including the default clone folder `GWAS_training_session`.
 Schema 1.1 adds optional actions, command locations and exact success excerpts.
+
+## Student notebooks and agent workflow
+
+### Agent workflow
+
+- Claude is the coordinator. It plans, reviews diffs and reports, asks the author for decisions, and makes commits and pushes only after the author approves.
+- Long or mechanical work (repository analysis, generators, tests, audits) is delegated to Codex with `codex exec`. Check `codex exec --help` for the sandbox flags before each use.
+- Codex never commits or pushes.
+- One change at a time. Never run two agents on the same files at once.
+- Never create illustrations. Write prompts for Gemini in a file and leave a placeholder. The author generates the images.
+
+### Student notebooks
+
+- Notebooks are `.Rmd` files generated from `lessons/*.Rmd` through `scripts/student_notebooks.py` and `scripts/build_tutorial.py --export-notebooks`. They are never edited by hand.
+- `notebooks/` holds one complete notebook (modules 0 to 7) and one notebook per module. They are versioned in Git.
+- A check fails when the notebooks are out of date (`--check-notebooks`). Run it after any change to a lesson.
+- Notebooks ship in the project ZIP and are downloadable from each module page.
+
+### Structure of each step in a notebook
+
+- Heading: `Step X.Y · Title`.
+- One or two plain sentences (`student_summary`), then a link to the step page.
+- The R chunk, exactly as in the course.
+- A table "What each option does". It covers every PLINK option in simple words and does not refer to earlier steps.
+- The expected result and the PLINK terminal equivalent.
+- Reading-only steps carry the summary and the link, not the full text. Steps without code are marked explicitly.
+- Every module notebook starts with a check chunk.
+- Checkpoints are at 2.8, 3.8, 4.6, 5.7 and 6.8.
+- The comment in step 6.8 stays as a teaching explanation.

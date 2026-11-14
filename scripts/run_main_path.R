@@ -177,7 +177,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 57765ac9fe405142750ec4b2de42ce0db73002d18777edfec45f2761baa51611
+# SHA-256: ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181
 
 # Chunk: setup
 source("R/guided.R")
@@ -185,106 +185,154 @@ cfg <- guided_init()
 
 
 # Chunk: s3-1
+# 1. Choose the input files and the names for the saved files.
 input <- guided_path(cfg, "2.8")
 rough <- guided_path(cfg, "3.1", "samples")
+# 2. Remove samples with more than 10% of calls missing.
 run_plink(cfg, c("--pfile", input, "--mind", "0.10", "--make-pgen", "--out", rough))
+# 3. Remove variants with more than 10% of calls missing.
 run_plink(cfg, c("--pfile", rough, "--geno", "0.10", "--make-pgen", "--out", guided_path(cfg, "3.1")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.1", "2.8")
 guided_register(cfg, "3.1", "2.8", 2013, 296360, operations = ops)
 
 
 # Chunk: s3-2
+# 1. Remove samples with more than 2% of calls missing.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.1"), "--mind", "0.02", "--make-pgen", "--out", guided_path(cfg, "3.2")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.2", "3.1")
 guided_register(cfg, "3.2", "3.1", 1971, 296360, operations = ops)
 
 
 # Chunk: s3-3
+# 1. Choose names for the chromosome files and sex report.
 split <- guided_path(cfg, "3.3", "par")
 report <- guided_path(cfg, "3.3", "sexcheck")
+# 2. Label the regions shared by the X and Y chromosomes.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.2"), "--split-par", "b38", "--make-pgen", "--out", split))
+# 3. Compare recorded sex with the X and Y chromosome results.
 run_plink(cfg, c("--pfile", split, "--check-sex", "max-female-xf=0.2", "min-male-xf=0.8",
   "max-female-ycount=100", "min-male-ycount=1000", "--out", report))
+# 4. Read the report and list samples that need to be removed.
 sexcheck <- guided_table(paste0(report, ".sexcheck"))
 bad <- sexcheck$IID[sexcheck$STATUS != "OK"]
 remove_file <- guided_list(bad, guided_path(cfg, "3.3", "remove.txt"), TRUE)
+# 5. Save the dataset without the flagged samples.
 run_plink(cfg, c("--pfile", split, "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.3")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.3", "3.2", extra = data.frame(option = "--split-par", value = "b38"))
 guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 
 
 # Chunk: s3-4
+# 1. Write the list of regions where nearby variants are strongly linked.
 regions <- guided_high_ld(cfg)
+# 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+# 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
 cat(length(pruned), "variants kept by LD pruning\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 
 
 # Chunk: s3-5
+# 1. Choose the name for the report of matching DNA letters.
 report <- guided_path(cfg, "3.5", "het")
+# 2. Measure matching DNA letters using the selected variants.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"), "--het", "--out", report))
+# 3. Read the report and calculate the average and spread of F.
 het <- guided_table(paste0(report, ".het"))
 f <- as.numeric(het$F)
 mean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))
+# 4. Find samples with unusually low or high F values.
 low <- het$IID[f < mean_f - 3 * sd_f]
 high <- het$IID[f > mean_f + 3 * sd_f]
+# 5. Save the high F review list and the low F removal list.
 guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
+# 6. Save the dataset without the low F samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
+# 7. Print the average, spread and numbers of flagged samples.
 print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 
 
 # Chunk: s3-6
+# 1. Choose the name for the report comparing pairs of samples.
 report <- guided_path(cfg, "3.6", "king")
+# 2. Compare pairs using the selected variants.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"),
   "--make-king-table", "--king-table-filter", "0.0442", "--out", report))
+# 3. Read the pairs and put the closest matches first.
 kin <- guided_table(paste0(report, ".kin0"))
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+# 4. Read the sample details and start an empty removal list.
 metadata <- guided_metadata(cfg)
 remove <- character()
+# 5. Review each pair to decide which samples to remove.
 for (i in seq_len(nrow(kin))) {
   a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
+  # 6. Treat the closest matches as repeated samples.
   if (value > 0.354) {
+    # 7. Remove the labelled repeat when its name ends in _R2.
     if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
       remove <- union(remove, if (endsWith(a, "_R2")) a else b)
     } else {
+      # 8. Compare sex, age and disease status for unlabelled repeats.
       ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
+      # 9. Keep one matching record or remove both conflicting records.
       remove <- union(remove, if (same) max(a, b) else c(a, b))
     }
+  # 10. Keep one person from each remaining closely related pair.
   } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
 }
+# 11. Write the removal list.
 remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
+# 12. Save the dataset without the listed samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.6", "3.5")
 guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 
 
 # Chunk: s3-7
+# 1. Choose the name for the missing-call report.
 report <- guided_path(cfg, "3.7", "missing")
+# 2. Count missing calls for each sample.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--missing", "sample-only", "--out", report))
+# 3. Read the report and match each sample to its laboratory plate.
 missing <- guided_table(paste0(report, ".smiss"))
 metadata <- guided_metadata(cfg)
 plate <- metadata$Plate[match(missing$IID, metadata$IID)]
+# 4. Calculate and print the middle call rate for each plate.
 median_missing <- tapply(as.numeric(missing$F_MISS), plate, median)
 print(sort(1 - median_missing))
+# 5. Find the plate with the most missing calls and check its name.
 worst <- names(which.max(median_missing))
 stopifnot(worst == "P14")
+# 6. Write the list of samples from the faulty plate.
 remove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, "3.7", "remove.txt"), TRUE)
+# 7. Save the dataset without samples from that plate.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.7")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.7", "3.6")
 guided_register(cfg, "3.7", "3.6", 1844, 296360, operations = ops)
 
 
 # Chunk: s3-8
+# 1. Save a complete copy of the dataset after sample checks.
 guided_snapshot(cfg, "3.8", guided_path(cfg, "3.7"), 1844, 296360, parent = "3.7")
+# 2. Print the recorded sample and variant counts.
 print(read.delim(file.path(cfg$out, "step_counts.tsv")))
+# 3. Check that the saved files have the expected counts.
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd

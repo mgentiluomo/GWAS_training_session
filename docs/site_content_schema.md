@@ -260,3 +260,55 @@ rounded up. The count includes prose, tables, headings, answers and reference
 labels. It excludes the reading-time note, URLs, fenced code and hidden figure
 metadata. `reading_word_count()` in `scripts/course_exports.py` defines the rule.
 Exporting fails if a stated time disagrees with this count.
+
+
+## Module 3 student notebook fields
+
+The Module 3 pilot adds `student_summary`, `student_expected_result`,
+`verification_notes` and `student_plink_options` to its eight step records.
+The summary is a short paragraph. The student expected result omits the author
+verification note, which stays in `verification_notes` and in the site's expected
+result block. Other modules do not need these optional fields.
+
+`student_plink_options` is a list of command groups, in the same order as
+`plink.commands`. Each group has a short `label` and an `options` list. Each
+option has `name` and `explanation`, with an optional `modifiers` list containing
+objects with their own `name` and `explanation`. For example:
+
+```json
+[
+  {
+    "label": "measure missing calls by sample",
+    "options": [
+      {"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files with the given prefix."},
+      {"name": "--missing", "explanation": "Writes a report of missing genotype calls.",
+       "modifiers": [{"name": "sample-only", "explanation": "Writes one row per sample and skips the variant report."}]},
+      {"name": "--out", "explanation": "Sets the beginning of the output file names."}
+    ]
+  }
+]
+```
+
+The exporter validates the authored option order against each terminal command:
+input options, action options and output options. The per-command tables omit
+`--threads` and `--memory`. Every real PLINK command must include exactly
+`--threads 2` and `--memory 2048`, with performance options last. Missing,
+duplicate or different resource values fail validation. After all tables in a
+step, the notebook generates this line from the validated command values:
+"Every command also uses --threads 2 (PLINK runs at most two tasks at the same time) and --memory 2048 (PLINK uses at most about 2 GB of memory)."
+Steps without PLINK commands have no resource line.
+It rejects missing, duplicate, extra or reordered options and modifiers within a
+command. An option used by several commands must be explained in each group.
+Named modifiers such as `max-female-xf`, `bed1` and `sample-only` must appear under
+the option that uses them, in their command order. Explanations stand alone and
+must not refer readers to earlier steps. Coverage also includes flags in the R
+command chunks. The notebook shows a labelled table for each command when a
+step has several commands. It omits the group label for a single command and
+indents modifier rows beneath their parent. An R-only step uses an empty list.
+
+Module 3's `module_meta` lesson comment supplies the module record's
+`prerequisites`: `checkpoint`, `restart_step` and relative `files`, each with
+`base` (`data` or `output`) and `path`. Notebook export generates the small input
+table in `R/guided.R` from this comment. Notebook checking and a Python test fail
+if the table disagrees with the lesson. `guided_check_module(3)` uses that table
+and honours `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR`.

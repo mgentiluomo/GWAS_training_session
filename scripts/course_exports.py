@@ -18,6 +18,8 @@ RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
 SCREENSHOT = re.compile(r"<!-- screenshot:\s*(.*?)\s*-->", re.S)
 STEP_META = re.compile(r"<!-- step_meta:\s*(.*?)\s*-->", re.S)
+MODULE_META = re.compile(r"<!-- module_meta:\s*(.*?)\s*-->", re.S)
+VERIFICATION_NOTE = re.compile(r"<!-- verification_note:start -->(.*?)<!-- verification_note:end -->", re.S)
 SCHEMA_VERSION = "1.1"
 READING_NOTE = re.compile(r"^Reading, about (\d+) minutes\. You can come back to it later\.$", re.M)
 BLOCKS = [
@@ -172,11 +174,94 @@ def screenshot_figures(body: str, root: Path = ROOT) -> list[dict]:
 MARKDOWN_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 
 
+# Bare words with special PLINK meaning, rather than file paths or numeric values.
+PLINK_MODIFIERS = {"--exclude": {"bed1"}, "--missing": {"sample-only"}}
+
+
+def student_plink_resources(command: str) -> dict[str, int]:
+    """Validate resource options before using their values in student text."""
+    tokens = shlex.split(command)
+    values = {}
+    for name, required in (("--threads", "2"), ("--memory", "2048")):
+        if tokens.count(name) != 1:
+            raise ValueError(f"Every student PLINK command needs exactly one {name} {required}.")
+        index = tokens.index(name)
+        if index + 1 == len(tokens) or tokens[index + 1] != required:
+            raise ValueError(f"Student PLINK commands require {name} {required}.")
+        values[name] = int(tokens[index + 1])
+    return values
+
+
+def plink_option_order(command: str) -> list[tuple[str, list[str]]]:
+    """Read option order and attach modifiers to their parent in a terminal command."""
+    ordered = []
+    for token in shlex.split(command):
+        if token.startswith("--"):
+            ordered.append((token, []))
+        elif ordered:
+            name = token.split("=", 1)[0]
+            if re.match(r"^[a-z][a-z-]+=", token) or name in PLINK_MODIFIERS.get(ordered[-1][0], set()):
+                ordered[-1][1].append(name)
+    # Course terminal commands put performance options last; reject a different author order.
+    flags = [name for name, _ in ordered]
+    performance = [name for name in flags if name in {"--threads", "--memory"}]
+    if flags != [name for name in flags if name not in {"--threads", "--memory"}] + performance:
+        raise ValueError("PLINK performance options must come last.")
+    return ordered
+
+
+def validate_student_option(option: dict, step: str, parent: bool = False) -> None:
+    allowed = {"name", "explanation", "modifiers"} if parent else {"name", "explanation"}
+    if (not isinstance(option, dict) or set(option) - allowed
+            or not {"name", "explanation"} <= set(option)
+            or any(not isinstance(option[key], str) or not option[key].strip() for key in ("name", "explanation"))
+            or not isinstance(option.get("modifiers", []), list)):
+        raise ValueError(f"Student PLINK options need names and explanations in {step}.")
+    if re.search(r"earlier|given at|same as|previous step|step [0-7]\.", option["explanation"], re.I):
+        raise ValueError(f"Student PLINK explanations must be self-contained in {step}.")
+
+
 def step_metadata(metadata: dict, record: dict) -> dict:
     """Validate optional UI metadata authored beside its canonical step."""
-    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line"}:
+    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line", "student_summary", "student_plink_options"}:
         raise ValueError(f"Unknown step metadata in {record['id']}.")
     result = {}
+    if "student_summary" in metadata:
+        summary = metadata["student_summary"]
+        if not isinstance(summary, str) or not summary.strip() or "\n" in summary or "\u2014" in summary:
+            raise ValueError(f"A student summary must be a non-empty paragraph in {record['id']}.")
+        result["student_summary"] = summary
+    if "student_plink_options" in metadata:
+        groups = metadata["student_plink_options"]
+        commands = record["plink"]["commands"]
+        if not isinstance(groups, list) or len(groups) != len(commands):
+            raise ValueError(f"Incomplete student PLINK command groups in {record['id']}.")
+        covered = set()
+        for group, command in zip(groups, commands):
+            if (not isinstance(group, dict) or set(group) != {"label", "options"}
+                    or not isinstance(group["label"], str) or not group["label"].strip()
+                    or not isinstance(group["options"], list)):
+                raise ValueError(f"Student PLINK groups need a label and options in {record['id']}.")
+            resources = student_plink_resources(command)
+            expected = [(name, modifiers) for name, modifiers in plink_option_order(command)
+                        if name not in resources]
+            covered.update(resources)
+            actual = []
+            for option in group["options"]:
+                validate_student_option(option, record["id"], parent=True)
+                modifiers = option.get("modifiers", [])
+                for modifier in modifiers:
+                    validate_student_option(modifier, record["id"])
+                actual.append((option["name"], [m["name"] for m in modifiers]))
+                covered.add(option["name"])
+                covered.update(m["name"] for m in modifiers)
+            if actual != expected:
+                raise ValueError(f"Incomplete or wrongly ordered student PLINK options or modifiers in {record['id']}: expected {expected}")
+        required = {option["name"] for option in record["plink"]["options"]}
+        required.update(re.findall(r"--[A-Za-z][A-Za-z0-9-]*", "\n".join(c["code"] for c in record["r_commands"])))
+        if not required <= covered:
+            raise ValueError(f"Incomplete student PLINK options in {record['id']}: {sorted(required - covered)}")
+        result["student_plink_options"] = groups
     if "actions" in metadata:
         actions = metadata["actions"]
         if not isinstance(actions, list):
@@ -255,6 +340,8 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                            "run_by_default": not bool(re.search(r"eval\s*=\s*FALSE", m.group(2)))}
                           for m in CHUNK.finditer(blocks["command"])]
             expected_render_code = [m.group(3).strip() for m in CHUNK.finditer(blocks["expected_result"])]
+            verification_notes = VERIFICATION_NOTE.findall(blocks["expected_result"])
+            student_expected = VERIFICATION_NOTE.sub("", blocks["expected_result"]).strip()
             # Notebook rendering helpers are author metadata, not student-facing website text.
             blocks["expected_result"] = CHUNK.sub("", blocks["expected_result"]).strip()
             figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\s*-->|\n\n|$)", body, re.S)
@@ -290,6 +377,9 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                 raise ValueError(f"Duplicate step metadata in {record['id']}.")
             if metadata:
                 record.update(step_metadata(json.loads(metadata[0]), record))
+            if verification_notes:
+                record["verification_notes"] = verification_notes
+                record["student_expected_result"] = re.sub(r"<!--.*?-->", "", CHUNK.sub("", student_expected), flags=re.S).strip()
             interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
             if interactive:
                 record["interactive_data"] = json.loads(interactive.group(1))
@@ -320,7 +410,31 @@ def export_modules(root: Path = ROOT) -> list[dict]:
                         "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
                         "overview_markdown": normalise_links(re.sub(r"<!--.*?-->", "", section_text(text, overview), flags=re.S).strip()),
                         "recap_markdown": normalise_links(re.sub(r"<!--.*?-->", "", section_text(text, recap), flags=re.S).strip())})
+        metadata = MODULE_META.findall(text)
+        if len(metadata) > 1:
+            raise ValueError(f"Duplicate module metadata in {path.name}.")
+        if metadata:
+            records[-1]["prerequisites"] = module_prerequisites(json.loads(metadata[0]))
     return records
+
+
+def module_prerequisites(metadata: dict) -> dict:
+    """Read explicit module inputs without guessing a restart boundary."""
+    if not isinstance(metadata, dict) or set(metadata) != {"prerequisites"}:
+        raise ValueError("Module metadata must contain prerequisites.")
+    spec = metadata["prerequisites"]
+    if (not isinstance(spec, dict) or set(spec) != {"checkpoint", "restart_step", "files"}
+            or not all(isinstance(spec[key], str) and re.fullmatch(r"[0-7]\.\d+", spec[key])
+                       for key in ("checkpoint", "restart_step"))
+            or not isinstance(spec["files"], list) or not spec["files"]):
+        raise ValueError("Prerequisites need a checkpoint, restart step and input files.")
+    for entry in spec["files"]:
+        if (not isinstance(entry, dict) or set(entry) != {"base", "path"}
+                or entry["base"] not in {"data", "output"} or not isinstance(entry["path"], str)
+                or not entry["path"] or "\\" in entry["path"] or ":" in entry["path"]
+                or PurePosixPath(entry["path"]).is_absolute() or ".." in PurePosixPath(entry["path"]).parts):
+            raise ValueError("Prerequisite files must be safe paths relative to data or output.")
+    return spec
 
 
 def main_script(root: Path = ROOT) -> str:
@@ -345,7 +459,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--export-steps", type=Path)
     parser.add_argument("--export-main-script", type=Path)
+    parser.add_argument("--export-notebooks", type=Path, help="Export the module 3 student pilot to this folder.")
+    parser.add_argument("--check-notebooks", action="store_true", help="Fail if the student notebook is missing or out of date; write nothing.")
     args = parser.parse_args()
+    if args.check_notebooks and not args.export_notebooks:
+        parser.error("--check-notebooks requires --export-notebooks.")
+    if args.export_notebooks:
+        from student_notebooks import export_notebooks
+        export_notebooks(args.export_notebooks, check=args.check_notebooks)
     if args.export_steps:
         records = export_steps()
         args.export_steps.mkdir(parents=True, exist_ok=True)

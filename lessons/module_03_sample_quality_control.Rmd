@@ -24,6 +24,8 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+<!-- module_meta: {"prerequisites": {"checkpoint": "2.8", "restart_step": "3.1", "files": [{"base": "output", "path": "s2-8_state.pgen"}, {"base": "output", "path": "s2-8_state.pvar"}, {"base": "output", "path": "s2-8_state.psam"}, {"base": "data", "path": "lab_export/sample_sheet.csv"}, {"base": "data", "path": "phenotypes/sim2026_phenotypes.tsv"}]}} -->
+
 ## Module 3 at a glance {#module-3-overview}
 
 **What you will do.** You will check the quality of every sample in the data. A sample is the DNA of one person. You will remove samples that are poor, mislabelled, repeated, related to another sample or measured on a faulty plate. At the end you will save a clean set of 1,844 samples.
@@ -41,7 +43,7 @@ cfg <- guided_init()
 ## 3.1 Rough cleaning {#step-3-1}
 
 
-<!-- step_meta: {"success_line": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain."} -->
+<!-- step_meta: {"success_line": "Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.", "student_summary": "We remove samples and variants with very many missing calls. This first clean prevents the worst failures from distorting the checks that follow.", "student_plink_options": [{"label": "remove poor samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--mind", "explanation": "Removes samples with more than 10% missing calls."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove poor variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--geno", "explanation": "Removes variants with more than 10% missing calls in the input dataset."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 First we remove [wells](../docs/glossary.md#well) that were read very badly. A well is a small hole in a plate that holds the DNA of one sample. Then we remove [variants](../docs/glossary.md#variant) (also called sites) that were read very badly. A variant is a place in the DNA where people differ.
@@ -63,10 +65,14 @@ The full 2.8 checkpoint.
 ### Command
 
 ```{r s3-1}
+# 1. Choose the input files and the names for the saved files.
 input <- guided_path(cfg, "2.8")
 rough <- guided_path(cfg, "3.1", "samples")
+# 2. Remove samples with more than 10% of calls missing.
 run_plink(cfg, c("--pfile", input, "--mind", "0.10", "--make-pgen", "--out", rough))
+# 3. Remove variants with more than 10% of calls missing.
 run_plink(cfg, c("--pfile", rough, "--geno", "0.10", "--make-pgen", "--out", guided_path(cfg, "3.1")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.1", "2.8")
 guided_register(cfg, "3.1", "2.8", 2013, 296360, operations = ops)
 ```
@@ -86,8 +92,8 @@ There are two separate commands on purpose. The second command works on the samp
 
 Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -118,7 +124,7 @@ Poor wells can make good sites look bad.
 ## 3.2 Sample call rate {#step-3-2}
 
 
-<!-- step_meta: {"success_line": "42 more wells are removed. 1,971 samples and 296,360 variants remain."} -->
+<!-- step_meta: {"success_line": "42 more wells are removed. 1,971 samples and 296,360 variants remain.", "student_summary": "We remove samples with more than 2% of their genotype calls missing. This keeps samples with enough information for the later analysis.", "student_plink_options": [{"label": "remove samples with many missing calls", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--mind", "explanation": "Removes samples with more than 2% missing calls, keeping a call rate of at least 98%."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.
@@ -138,7 +144,9 @@ State 3.1 and the call-rate definition from step 2.4.
 ### Command
 
 ```{r s3-2}
+# 1. Remove samples with more than 2% of calls missing.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.1"), "--mind", "0.02", "--make-pgen", "--out", guided_path(cfg, "3.2")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.2", "3.1")
 guided_register(cfg, "3.2", "3.1", 1971, 296360, operations = ops)
 ```
@@ -246,8 +254,8 @@ bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out resul
   ]
 } -->
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -278,7 +286,7 @@ The call rate is 99%. The well passes the 98% call-rate rule.
 ## 3.3 Recorded and genetic sex {#step-3-3}
 
 
-<!-- step_meta: {"success_line": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2."} -->
+<!-- step_meta: {"success_line": "Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2.", "student_summary": "We compare recorded sex with patterns in the X and Y chromosome calls. We remove flagged wells from this teaching analysis because a mismatch needs review before the sample is used.", "student_plink_options": [{"label": "label the shared X and Y regions", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--split-par", "explanation": "Uses GRCh38 boundaries (b38) to label the shared regions of X and Y separately."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "compare recorded sex with DNA", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--check-sex", "explanation": "Compares recorded sex with X chromosome patterns and the number of observed Y calls.", "modifiers": [{"name": "max-female-xf", "explanation": "Sets 0.2 as the largest X coefficient accepted for a recorded female."}, {"name": "min-male-xf", "explanation": "Sets 0.8 as the smallest X coefficient accepted for a recorded male."}, {"name": "max-female-ycount", "explanation": "Accepts at most 100 observed Y calls for a recorded female."}, {"name": "min-male-ycount", "explanation": "Requires at least 1000 observed Y calls for a recorded male."}]}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove samples flagged by the sex check", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We move the [pseudo-autosomal regions](../docs/glossary.md#pseudoautosomal-region) (PARs) out of the rest of the X chromosome. We then compare the recorded sex of each person with the X and Y patterns in the DNA. Finally, we review the wells where the two do not agree.
@@ -300,15 +308,21 @@ State 3.2 and the recorded sex that we joined to the data at step 2.7.
 ### Command
 
 ```{r s3-3}
+# 1. Choose names for the chromosome files and sex report.
 split <- guided_path(cfg, "3.3", "par")
 report <- guided_path(cfg, "3.3", "sexcheck")
+# 2. Label the regions shared by the X and Y chromosomes.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.2"), "--split-par", "b38", "--make-pgen", "--out", split))
+# 3. Compare recorded sex with the X and Y chromosome results.
 run_plink(cfg, c("--pfile", split, "--check-sex", "max-female-xf=0.2", "min-male-xf=0.8",
   "max-female-ycount=100", "min-male-ycount=1000", "--out", report))
+# 4. Read the report and list samples that need to be removed.
 sexcheck <- guided_table(paste0(report, ".sexcheck"))
 bad <- sexcheck$IID[sexcheck$STATUS != "OK"]
 remove_file <- guided_list(bad, guided_path(cfg, "3.3", "remove.txt"), TRUE)
+# 5. Save the dataset without the flagged samples.
 run_plink(cfg, c("--pfile", split, "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.3")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.3", "3.2", extra = data.frame(option = "--split-par", value = "b38"))
 guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 ```
@@ -327,8 +341,8 @@ bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.t
 
 Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -359,7 +373,7 @@ The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_
 ## 3.4 LD pruning {#step-3-4}
 
 
-<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites."} -->
+<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, otherwise the same genetic signal is counted many times.", "student_plink_options": [{"label": "select less strongly linked variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed1", "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."}]}, {"name": "--indep-pairwise", "explanation": "Selects a less strongly linked set within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](../docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.
@@ -379,12 +393,16 @@ State 3.3.
 ### Command
 
 ```{r s3-4}
+# 1. Write the list of regions where nearby variants are strongly linked.
 regions <- guided_high_ld(cfg)
+# 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+# 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
 cat(length(pruned), "variants kept by LD pruning\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
@@ -400,8 +418,8 @@ bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 -
 
 The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -449,7 +467,7 @@ No. We use pruning only for specific checks and for the PCA. The association sca
 ## 3.5 Heterozygosity {#step-3-5}
 
 
-<!-- step_meta: {"success_line": "13 wells with low F are removed."} -->
+<!-- step_meta: {"success_line": "13 wells with low F are removed.", "student_summary": "We check whether each sample has unusually many or few genotypes with two different alleles. We remove the unusually high-heterozygosity samples and keep the low-heterozygosity samples flagged for review, because an unusual value alone does not prove an error.", "student_plink_options": [{"label": "measure matching DNA letters", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--extract", "explanation": "Uses only the variants named in the supplied variant list."}, {"name": "--het", "explanation": "Reports how often each sample has two matching alleles, compared with what the allele frequencies predict. R uses this report to calculate F and the review thresholds."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove samples with unusually few matching letters", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.
@@ -471,17 +489,25 @@ State 3.3 and the diagnostic subset (the pruned list) from step 3.4.
 ### Command
 
 ```{r s3-5}
+# 1. Choose the name for the report of matching DNA letters.
 report <- guided_path(cfg, "3.5", "het")
+# 2. Measure matching DNA letters using the selected variants.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"), "--het", "--out", report))
+# 3. Read the report and calculate the average and spread of F.
 het <- guided_table(paste0(report, ".het"))
 f <- as.numeric(het$F)
 mean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))
+# 4. Find samples with unusually low or high F values.
 low <- het$IID[f < mean_f - 3 * sd_f]
 high <- het$IID[f > mean_f + 3 * sd_f]
+# 5. Save the high F review list and the low F removal list.
 guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
+# 6. Save the dataset without the low F samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
+# 7. Print the average, spread and numbers of flagged samples.
 print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 ```
@@ -499,8 +525,8 @@ bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove
 
 13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -548,7 +574,7 @@ The `.het` report, the low-F removal list, the high-F review list and `s3-5_stat
 ## 3.6 Relatedness and duplicates {#step-3-6}
 
 
-<!-- step_meta: {"success_line": "There are 19 duplicate-class pairs and ten first-degree pairs."} -->
+<!-- step_meta: {"success_line": "There are 19 duplicate-class pairs and ten first-degree pairs.", "student_summary": "We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules so that repeated or closely related people do not distort the later association analysis.", "student_plink_options": [{"label": "compare pairs of samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--extract", "explanation": "Uses only the variants named in the supplied variant list."}, {"name": "--make-king-table", "explanation": "Estimates how closely related each pair of samples is and writes a table."}, {"name": "--king-table-filter", "explanation": "Writes only pairs with estimated kinship above 0.0442, an approximate screening boundary for third-degree relatives such as first cousins."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove repeated or closely related samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.
@@ -573,28 +599,41 @@ State 3.5, the pruning list from step 3.4 and the source metadata from step 2.7.
 ### Command
 
 ```{r s3-6}
+# 1. Choose the name for the report comparing pairs of samples.
 report <- guided_path(cfg, "3.6", "king")
+# 2. Compare pairs using the selected variants.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"),
   "--make-king-table", "--king-table-filter", "0.0442", "--out", report))
+# 3. Read the pairs and put the closest matches first.
 kin <- guided_table(paste0(report, ".kin0"))
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+# 4. Read the sample details and start an empty removal list.
 metadata <- guided_metadata(cfg)
 remove <- character()
+# 5. Review each pair to decide which samples to remove.
 for (i in seq_len(nrow(kin))) {
   a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
+  # 6. Treat the closest matches as repeated samples.
   if (value > 0.354) {
+    # 7. Remove the labelled repeat when its name ends in _R2.
     if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
       remove <- union(remove, if (endsWith(a, "_R2")) a else b)
     } else {
+      # 8. Compare sex, age and disease status for unlabelled repeats.
       ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
+      # 9. Keep one matching record or remove both conflicting records.
       remove <- union(remove, if (same) max(a, b) else c(a, b))
     }
+  # 10. Keep one person from each remaining closely related pair.
   } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
 }
+# 11. Write the removal list.
 remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
+# 12. Save the dataset without the listed samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.6", "3.5")
 guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 ```
@@ -612,8 +651,8 @@ bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove
 
 There are 19 duplicate-class pairs and ten first-degree pairs. In total, 30 records are removed. 1,920 samples remain. Pairs can overlap, because one person can be in more than one pair. For this reason, the pair counts are not counts of unique people.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -661,7 +700,7 @@ The `.kin0` report, the reviewed removal list and `s3-6_state.*`.
 ## 3.7 Batch effects {#step-3-7}
 
 
-<!-- step_meta: {"success_line": "Plate P14 has a median call rate of approximately 98.56%."} -->
+<!-- step_meta: {"success_line": "Plate P14 has a median call rate of approximately 98.56%.", "student_summary": "We compare the fraction of successful genotype calls across laboratory plates. We remove the faulty plate in these simulated data because samples processed together can share technical problems.", "student_plink_options": [{"label": "measure missing calls by sample", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--missing", "explanation": "Writes a report of missing genotype calls.", "modifiers": [{"name": "sample-only", "explanation": "Writes one row per sample and skips the report for variants."}]}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove samples from the faulty plate", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We compare the call rate of each plate. A plate is a tray of 96 wells. We remove the plate that is clearly faulty in the simulated data.
@@ -681,17 +720,25 @@ State 3.6 and the sample sheet from step 1.4. You also need the heterozygosity r
 ### Command
 
 ```{r s3-7}
+# 1. Choose the name for the missing-call report.
 report <- guided_path(cfg, "3.7", "missing")
+# 2. Count missing calls for each sample.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--missing", "sample-only", "--out", report))
+# 3. Read the report and match each sample to its laboratory plate.
 missing <- guided_table(paste0(report, ".smiss"))
 metadata <- guided_metadata(cfg)
 plate <- metadata$Plate[match(missing$IID, metadata$IID)]
+# 4. Calculate and print the middle call rate for each plate.
 median_missing <- tapply(as.numeric(missing$F_MISS), plate, median)
 print(sort(1 - median_missing))
+# 5. Find the plate with the most missing calls and check its name.
 worst <- names(which.max(median_missing))
 stopifnot(worst == "P14")
+# 6. Write the list of samples from the faulty plate.
 remove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, "3.7", "remove.txt"), TRUE)
+# 7. Save the dataset without samples from that plate.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.7")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.7", "3.6")
 guided_register(cfg, "3.7", "3.6", 1844, 296360, operations = ops)
 ```
@@ -709,8 +756,8 @@ bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove
 
 Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
@@ -741,7 +788,7 @@ The report of missingness for each sample, the plate-based removal list and `s3-
 ## 3.8 Sample QC summary and checkpoint {#step-3-8}
 
 
-<!-- step_meta: {"success_line": "Module 3 boundary: 1,844 samples and 296,360 variants."} -->
+<!-- step_meta: {"success_line": "Module 3 boundary: 1,844 samples and 296,360 variants.", "student_summary": "We save the complete dataset after sample quality control and review the recorded counts. This gives us a checked starting point for variant quality control in module 4.", "student_plink_options": []} -->
 ### What we do
 
 We save the complete fileset that remains after all sample QC. This saved fileset is a [checkpoint](../docs/glossary.md#checkpoint). Then we review how many samples each step removed.
@@ -759,8 +806,11 @@ State 3.7 and the recorded replay metadata of the steps in between.
 ### Command
 
 ```{r s3-8}
+# 1. Save a complete copy of the dataset after sample checks.
 guided_snapshot(cfg, "3.8", guided_path(cfg, "3.7"), 1844, 296360, parent = "3.7")
+# 2. Print the recorded sample and variant counts.
 print(read.delim(file.path(cfg$out, "step_counts.tsv")))
+# 3. Check that the saved files have the expected counts.
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
@@ -774,8 +824,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
 
 </details>
 
