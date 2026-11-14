@@ -219,6 +219,37 @@ test_guided_module_check <- function() {
   stopifnot(identical(capture.output(result <- guided_check_module(5)),
                       "Module 5 input files are present."), isTRUE(result))
   cat("Module 5 input checks passed: all three checkpoint files and all three reference files.\n")
+  # Module 6 needs the full structure checkpoint, component scores and age inputs.
+  module6 <- guided_module_inputs[["6"]]
+  stopifnot(identical(module6$checkpoint, "5.7"), identical(module6$restart_step, "6.1"),
+            identical(module6$data, c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv")),
+            identical(module6$output, c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s5-7_pca.eigenvec")))
+  module6_data <- file.path("data/course", module6$data)
+  module6_output <- file.path("results/guided", module6$output)
+  module6_fails <- function(missing, data = FALSE) {
+    message <- tryCatch({ guided_check_module(6); stop("Expected an error") }, error = conditionMessage)
+    expected <- if (data) paste0(
+      "Course metadata are missing. Complete step 0.7 before module 6. Missing: ", paste(missing, collapse = ", ")) else paste0(
+      "Some saved files from step 5.7 are missing: ", paste(missing, collapse = ", "),
+      '. Finish module 5 first. Or restart here with: restore_checkpoint("6.1") (use an empty folder).')
+    stopifnot(identical(message, expected))
+  }
+  touch(module6_data)
+  module6_fails(module6_output)
+  touch(module6_output)
+  for (path in module6_data) {
+    unlink(path)
+    module6_fails(path, data = TRUE)
+    touch(path)
+  }
+  for (path in module6_output) {
+    unlink(path)
+    module6_fails(path)
+    touch(path)
+  }
+  stopifnot(identical(capture.output(result <- guided_check_module(6)),
+                      "Module 6 input files are present."), isTRUE(result))
+  cat("Module 6 input checks passed: checkpoint, component scores and both metadata files.\n")
   guided_module_inputs[["0"]] <<- list(checkpoint = NULL, restart_step = NULL,
                                       data = character(0), output = character(0))
   stopifnot(isTRUE(guided_check_project_root()),

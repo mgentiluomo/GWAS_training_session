@@ -28,7 +28,11 @@ guided_module_inputs <- list(
 `5` = list(
   checkpoint = "4.6", restart_step = "5.1",
   data = c("pca_reference/ref1000g_grch38.pgen", "pca_reference/ref1000g_grch38.pvar", "pca_reference/ref1000g_grch38.psam"),
-  output = c("s4-6_state.pgen", "s4-6_state.pvar", "s4-6_state.psam"))
+  output = c("s4-6_state.pgen", "s4-6_state.pvar", "s4-6_state.psam")),
+`6` = list(
+  checkpoint = "5.7", restart_step = "6.1",
+  data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
+  output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s5-7_pca.eigenvec"))
 )
 guided_check_project_root <- function() {
   if (!file.exists("config.R") || !file.exists("R/guided.R")) {

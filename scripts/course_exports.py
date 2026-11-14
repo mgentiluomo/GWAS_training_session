@@ -176,6 +176,7 @@ MARKDOWN_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 
 # Bare words with special PLINK meaning, rather than file paths or numeric values.
 PLINK_MODIFIERS = {
+    "--glm": {"sex", "hide-covar", "firth", "firth-fallback", "no-firth"},
     "--pca": {"allele-wts"},
     "--score": {"header-read", "no-mean-imputation", "variance-standardize"},
     "--exclude": {"bed1"}, "--missing": {"sample-only"},
@@ -269,6 +270,20 @@ def step_metadata(metadata: dict, record: dict) -> dict:
             # Keep terminal order strict and accept only this explicit R pattern.
             if len(commands) == 1:
                 code = "\n".join(c["code"] for c in record["r_commands"])
+                # R may select one ID directly while the terminal reads the
+                # one-ID list saved by the same chunk. Document both forms
+                # together at the selection position, preserving command order.
+                selection = re.search(r'"--snp",\s*(\w+)', code)
+                if selection and '"--extract"' not in code:
+                    saved = re.search(
+                        r'guided_list\(\s*' + re.escape(selection[1]) +
+                        r',\s*guided_path\(cfg,\s*"([0-9]+\.[0-9]+)",\s*"([^"\n]+)"\)\)', code)
+                    if saved:
+                        filename = "s" + saved[1].replace(".", "-") + "_" + saved[2]
+                        terminal_list = re.search(r'--extract\s+(\S+)', command)
+                        if terminal_list and terminal_list[1].split("/")[-1] == filename:
+                            insertion = next(i for i, (name, _) in enumerate(expected) if name == "--extract")
+                            expected.insert(insertion + 1, ("--snp", []))
                 for conditional in re.finditer(
                         r'^\s*if\s*\([^\n]*\)\s+(\w+)\s*<-\s*c\(\1,\s*"(--[A-Za-z][A-Za-z0-9-]*)"[^\n]*$',
                         code, re.M):

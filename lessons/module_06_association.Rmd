@@ -24,6 +24,8 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+<!-- module_meta: {"prerequisites": {"checkpoint": "5.7", "restart_step": "6.1", "files": [{"base": "output", "path": "s5-7_state.pgen"}, {"base": "output", "path": "s5-7_state.pvar"}, {"base": "output", "path": "s5-7_state.psam"}, {"base": "output", "path": "s5-7_pca.eigenvec"}, {"base": "data", "path": "lab_export/sample_sheet.csv"}, {"base": "data", "path": "phenotypes/sim2026_phenotypes.tsv"}]}} -->
+
 ## Module 6 at a glance {#module-6-overview}
 
 **What you will do.** You will test one genetic variant by hand, then test all variants with a statistical model. You will read the output, check a rare variant and save the results in a standard file.
@@ -41,7 +43,7 @@ cfg <- guided_init()
 ## 6.1 One variant by hand {#step-6-1}
 
 
-<!-- step_meta: {"success_line": "A table of carriers and non-carriers in the retained cohort, and a finite odds ratio."} -->
+<!-- step_meta: {"success_line":"A table of carriers and non-carriers in the retained cohort, and a finite odds ratio.","student_summary":"We count cases and controls who carry at least one copy of a chosen DNA letter at one variant. We compare their odds of disease with those of non-carriers; odds are the number of cases divided by the number of controls.","student_plink_options":[{"label":"export one variant","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."},{"name":"--snp","explanation":"Selects only the variant named 9:96426973:A:G."},{"name":"--export","explanation":"Uses A format to write a .raw table with the number of copies of the named allele (DNA version) for each sample.","modifiers":[{"name":"A","explanation":"Writes one row per sample with allele copy counts of 0, 1 or 2, keeping missing values separate."}]},{"name":"--out","explanation":"Starts output file names with s6-1_example, including the s6-1_example.raw table."}]}]} -->
 ### What we do
 
 Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.
@@ -57,16 +59,20 @@ The full cohort from 5.7 and the retained variant 9:96426973:A:G.
 ### Command
 
 ```{r s6-1}
+# 1. Export the number of copies of one DNA letter at the chosen variant.
 report <- guided_path(cfg, "6.1", "example")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", "9:96426973:A:G", "--export", "A", "--out", report))
 x <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE)
+# 2. Match the exported samples to their case or control status.
 dose <- as.numeric(x[[7]])
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 case <- psam$Disease[match(x$IID, psam$IID)] == "2"
+# 3. Count carriers and non-carriers and compare their odds of disease.
 tab <- table(case = case, carrier = dose > 0)
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 ```
 
@@ -82,8 +88,10 @@ bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --o
 
 A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -110,7 +118,7 @@ No. Odds and probability are different things. An odds ratio is usually not the 
 ## 6.2 The additive logistic model {#step-6-2}
 
 
-<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value."} -->
+<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value.", "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. We calculate how each extra copy changes the odds of disease, the ratio of cases to controls.", "student_plink_options": []} -->
 ### What we do
 
 Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.
@@ -126,9 +134,11 @@ The one-variant export from 6.1 and the final PSAM file (the table of samples).
 ### Command
 
 ```{r s6-2}
+# 1. Read the exported variant and match each sample to its case or control status.
 x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
+# 2. Fit the model and show how each extra copy changes the odds of disease.
 fit <- glm(case ~ dosage, data = example, family = binomial())
 summary(fit)
 exp(coef(fit)["dosage"])
@@ -144,8 +154,10 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 An intercept and a dosage coefficient, each with a standard error and a [p-value](../docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -172,7 +184,7 @@ The example model exists only in R memory. The genotype export from 6.1 stays on
 ## 6.3 Prepare covariates {#step-6-3}
 
 
-<!-- step_meta: {"success_line": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10."} -->
+<!-- step_meta: {"success_line": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10.", "student_summary": "We prepare covariates, extra factors used to adjust the disease comparison: age and ten numbers describing patterns of genetic variation. We match them to sample IDs and check for missing values and columns that repeat information from other columns.", "student_plink_options": []} -->
 ### What we do
 
 Join age and ten principal components ([PCs](../docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).
@@ -188,19 +200,24 @@ The state saved at 5.7, the cohort eigenvectors (the PC values of each sample) f
 ### Command
 
 ```{r s6-3}
+# 1. Read sample details, genetic component scores and age records.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
 metadata <- guided_metadata(cfg)
+# 2. Match sample IDs and make a complete table of age and ten component scores.
 a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)
 stopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))
 covar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))
 for (name in paste0("PC", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])
 stopifnot(!anyNA(covar))
+# 3. Check that no model column repeats information from the other columns.
 design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
+# 4. Save the covariate table and print its number of rows.
 guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
 cat(nrow(covar), "complete covariate rows written\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 ```
 
@@ -214,8 +231,10 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -242,7 +261,7 @@ The rows must belong to the correct sample IDs. Each row must match its own samp
 ## 6.4 Run the association scan {#step-6-4}
 
 
-<!-- step_meta: {"success_line": "The frequency check in the final cohort removes another 1,698 variants."} -->
+<!-- step_meta: {"success_line": "The frequency check in the final cohort removes another 1,698 variants.", "student_summary": "We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.", "student_plink_options": [{"label": "test variants with the adjusted model", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the final study group."}, {"name": "--covar", "explanation": "Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs."}, {"name": "--covar-name", "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."}, {"name": "--covar-variance-standardize", "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls.", "modifiers": [{"name": "sex", "explanation": "Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."}, {"name": "hide-covar", "explanation": "Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s6-4_association, including s6-4_association.Disease.glm.logistic.hybrid."}]}]} -->
 ### What we do
 
 Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.
@@ -258,13 +277,17 @@ The final genotype files from 5.7 and the covariates from 6.3.
 ### Command
 
 ```{r s6-4}
+# 1. Test variants with the frequency rule and the chosen adjustment factors.
 out <- guided_path(cfg, "6.4", "association")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
+# 2. Check the number of valid tests and results below the course significance threshold.
 valid <- valid_p(results$P)
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+# 3. Save a table of the association results.
 guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
 ```
 
@@ -280,8 +303,10 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 
 The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -308,7 +333,7 @@ No. The p-value depends on the effect, the uncertainty and the sample size. Also
 ## 6.5 Read association output {#step-6-5}
 
 
-<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12."} -->
+<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12.", "student_summary": "We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, a measure of evidence against no effect, and save the first 20 with their tested DNA letters and sample counts.", "student_plink_options": []} -->
 ### What we do
 
 Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.
@@ -324,14 +349,19 @@ The full association output from 6.4.
 ### Command
 
 ```{r s6-5}
+# 1. Read the scan results and count the model status codes.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 print(table(results$ERRCODE, useNA = "ifany"))
+# 2. Keep valid tests and calculate intervals describing uncertainty in their effects.
 valid <- results[valid_p(results$P), ]
 valid$CI_LOW <- exp(log(valid$OR) - 1.96 * valid[["LOG(OR)_SE"]])
 valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
+# 3. Sort by p-value and print the first ten results with their tested DNA letters.
 top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
 print(head(top, 10))
+# 4. Save the first 20 results for later review.
 guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
 ```
 
@@ -345,8 +375,10 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 The leading regions are on chromosomes 9, 3 and 12. The table keeps the effect allele and the OBS_CT of each variant. Every p-value and odds ratio refers to the tested A1 allele, whatever the variant ID looks like.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -373,7 +405,7 @@ Read the reason for the failure. Keep the p-value as missing. Do not replace it 
 ## 6.6 Sparse genotypes and Firth correction {#step-6-6}
 
 
-<!-- step_meta: {"success_line": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele."} -->
+<!-- step_meta: {"success_line":"One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele.","student_summary":"We choose a tested variant with the lowest frequency of its less common DNA version and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.","student_plink_options":[{"label":"compare a forced Firth fit","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."},{"name":"--extract","explanation":"Selects the single variant listed in s6-6_variant.txt, chosen for the lowest frequency of its less common DNA version among valid autosomal tests."},{"name":"--snp","explanation":"In the R command, selects the chosen variant by its exact ID instead of reading s6-6_variant.txt with --extract."},{"name":"--covar","explanation":"Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs."},{"name":"--covar-name","explanation":"Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."},{"name":"--covar-variance-standardize","explanation":"Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."},{"name":"--glm","explanation":"Fits a logistic model at the selected variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls.","modifiers":[{"name":"firth","explanation":"Always uses Firth correction, which reduces bias with small groups, rather than waiting for the ordinary model calculation to fail."},{"name":"sex","explanation":"Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."},{"name":"hide-covar","explanation":"Reports the genetic test without separate rows for the effects of age, sex and genetic component scores."}]},{"name":"--out","explanation":"Starts output file names with s6-6_firth for the forced Firth result."}]}]} -->
 ### What we do
 
 Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.
@@ -389,13 +421,16 @@ The final cohort, the main results from 6.4 and the covariates from 6.3.
 ### Command
 
 ```{r s6-6}
+# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
 candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
 chosen <- results$ID[candidates[which.min(minor[candidates])]]
+# 2. Save the chosen variant ID and force the Firth model at that variant.
 guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
+# 3. Print both estimates and check that the Firth test gives one valid result.
 comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
 print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
 print(comparison[, c("ID", "A1", "OR", "P")])
@@ -414,8 +449,10 @@ The R command uses `--snp` with the chosen ID. The terminal command uses `--extr
 
 One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -459,7 +496,7 @@ The chosen variant ID, the forced Firth report and the log files.
 ## 6.7 First look and association checkpoint {#step-6-7}
 
 
-<!-- step_meta: {"success_line": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values."} -->
+<!-- step_meta: {"success_line": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values.", "student_summary": "We summarise the sample and variant counts, valid tests and results below the course significance threshold. We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.", "student_plink_options": []} -->
 ### What we do
 
 Summarise the valid tests. Save the key association files so that you can restart from here.
@@ -475,12 +512,15 @@ The association output from 6.4 and the table you reviewed at 6.5.
 ### Command
 
 ```{r s6-7}
+# 1. Read the results and summarise the study size and test values.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
   genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
   lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
+# 2. Save and print the summary table.
 guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
 print(summary)
+# Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
   guided_path(cfg, "6.3", "covariates.tsv"), guided_path(cfg, "6.5", "top20.tsv"), guided_path(cfg, "6.7", "summary.tsv"))
 guided_artifact_checkpoint(cfg, "6.7", files)
@@ -497,8 +537,10 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
@@ -525,7 +567,7 @@ No. Nearby variants can share one signal because of [LD](../docs/glossary.md#ld)
 ## 6.8 Create the summary statistics file {#step-6-8}
 
 
-<!-- step_meta: {"success_line": "The summary statistics file has 236,815 rows, one for each tested variant."} -->
+<!-- step_meta: {"success_line": "The summary statistics file has 236,815 rows, one for each tested variant.", "student_summary": "We save the scan results in a standard table with one row per tested variant and a separate file explaining its columns. We read the saved table back and check its values and counts so the next plots use a verified file.", "student_plink_options": []} -->
 ### What we do
 
 Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.
@@ -561,23 +603,29 @@ The association scan from 6.4 and the summary from 6.7.
 ### Command
 
 ```{r s6-8}
+# 1. Read the scan and arrange its results in the standard columns.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 stats <- guided_standardise_scan(results)
+# 2. Check the columns and values and choose the summary file name.
 guided_check_summary(stats, rows = nrow(results))
 stats_file <- guided_summary_path(cfg)
+# 3. Save the summary table and a file explaining each column.
 guided_write_summary(stats, stats_file)
 dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
 guided_write(guided_summary_dictionary(), dictionary_file)
 # Read the file back, as the plots will, and check that nothing was lost.
+# 4. Read the saved table and check that it matches the original results.
 saved <- guided_summary_stats(cfg)
 guided_check_summary(saved, rows = nrow(results))
 stopifnot(isTRUE(all.equal(saved, stats)))
+# 5. Compare test counts with the saved scan summary and print the checked results.
 first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
 finite <- valid_p(saved$p_value)
 stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
 print(head(saved, 5))
 print(c(rows = nrow(saved), finite_tests = sum(finite), missing_p_values = sum(is.na(saved$p_value)),
   genome_wide = sum(saved$p_value[finite] < 5e-8)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = "6.7")
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
@@ -594,8 +642,10 @@ The summary statistics file has 236,815 rows, one for each tested variant. It ha
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
+<!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.
+<!-- verification_note:end -->
 
 </details>
 
