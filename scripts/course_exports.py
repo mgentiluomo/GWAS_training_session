@@ -258,6 +258,24 @@ def step_metadata(metadata: dict, record: dict) -> dict:
             resources = student_plink_resources(command)
             expected = [(name, modifiers) for name, modifiers in plink_option_order(command)
                         if name not in resources]
+            # A single R command can append a conditional flag to an argument
+            # vector before appending its output options (the lift-over exercise).
+            # Keep terminal order strict and accept only this explicit R pattern.
+            if len(commands) == 1:
+                code = "\n".join(c["code"] for c in record["r_commands"])
+                for conditional in re.finditer(
+                        r'^\s*if\s*\([^\n]*\)\s+(\w+)\s*<-\s*c\(\1,\s*"(--[A-Za-z][A-Za-z0-9-]*)"[^\n]*$',
+                        code, re.M):
+                    variable, flag = conditional.groups()
+                    initial = re.search(r'^' + re.escape(variable) + r'\s*<-\s*c\(([^\n]*)\)$',
+                                        code[:conditional.start()], re.M)
+                    call = re.search(r'run_plink\(cfg,\s*c\(' + re.escape(variable) + r',\s*"(--[A-Za-z][A-Za-z0-9-]*)"',
+                                     code[conditional.end():])
+                    if initial and call and flag not in {name for name, _ in expected}:
+                        before = re.findall(r'"(--[A-Za-z][A-Za-z0-9-]*)"', initial[1])
+                        insertion = next((i for i, (name, _) in enumerate(expected) if name == call[1]), None)
+                        if insertion is not None and before == [name for name, _ in expected[:insertion]]:
+                            expected.insert(insertion, (flag, []))
             covered.update(resources)
             actual = []
             for option in group["options"]:

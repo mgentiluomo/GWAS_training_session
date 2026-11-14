@@ -13,6 +13,10 @@ guided_module_inputs <- list(
   checkpoint = NULL, restart_step = NULL,
   data = c("array/sim2026_array_annotation.tsv", "final_report/SIM26_0213_FinalReport_simulated.txt", "final_report/SIM26_0286_FinalReport_simulated.txt", "final_report/SIM26_1775_FinalReport_simulated.txt", "lab_export/sample_sheet.csv", "lab_export/sim2026_lab.bed", "lab_export/sim2026_lab.bim", "lab_export/sim2026_lab.fam"),
   output = character(0)),
+`2` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = c("lab_export/sim2026_lab.bed", "lab_export/sim2026_lab.bim", "lab_export/sim2026_lab.fam", "array/sim2026_array_annotation.tsv", "grch37_exercise/legacy_grch37.bed", "grch37_exercise/legacy_grch37.bim", "grch37_exercise/legacy_grch37.fam", "grch37_exercise/hg19ToHg38.over.chain.gz", "lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
+  output = character(0)),
 `3` = list(
   checkpoint = "2.8", restart_step = "3.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),

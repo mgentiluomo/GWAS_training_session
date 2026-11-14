@@ -6,13 +6,13 @@
   "anchor": "step-2-2",
   "title": "Convert to PLINK 2 native format",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
+  "source_sha256": "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We convert the matched BED, BIM and FAM files to PGEN, PVAR and PSAM files.",
     "why": "PGEN stores the genotypes. PVAR describes the variants (the sites). PSAM describes the samples. These three files are the [native format](docs/glossary.md#pgen-pvar-psam) of PLINK 2. The BED, BIM and FAM files stay useful for older programs. Neither format records the genome build. The conversion must keep the same samples and variants in the same order.",
     "you_need": "You need the original matched files that you checked at 2.1.",
-    "command": "```{r s2-2}\nout <- guided_path(cfg, \"2.2\")\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\nguided_source_checkpoint(cfg)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048\n```\n\n`--bfile` takes the shared file-name prefix of the BED, BIM and FAM files. `--make-pgen` writes a new set of native files. `--out` sets the prefix (the first part) of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB (about 2 GB). The R helper prints the exact command with your own safe paths.",
+    "command": "```{r s2-2}\n# 1. Choose the name for the converted files.\nout <- guided_path(cfg, \"2.2\")\n# 2. Convert the laboratory files to the native PLINK 2 format.\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\n# 3. Check that all 2,016 samples and 299,523 variants remain.\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_source_checkpoint(cfg)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048\n```\n\n`--bfile` takes the shared file-name prefix of the BED, BIM and FAM files. `--make-pgen` writes a new set of native files. `--out` sets the prefix (the first part) of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB (about 2 GB). The R helper prints the exact command with your own safe paths.",
     "expected_result": "The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](docs/glossary.md#reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
     "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Does converting BED to PGEN automatically convert GRCh37 coordinates to GRCh38?\n\n<details><summary>Show the answer</summary>\n\nNo. The storage format and the genome assembly are two separate properties.\n\n</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s2-2",
-      "code": "out <- guided_path(cfg, \"2.2\")\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\nguided_source_checkpoint(cfg)",
+      "code": "# 1. Choose the name for the converted files.\nout <- guided_path(cfg, \"2.2\")\n# 2. Convert the laboratory files to the native PLINK 2 format.\nrun_plink(cfg, c(\"--bfile\", cfg$input, \"--make-pgen\", \"--out\", out), paste0(out, c(\".pgen\", \".pvar\", \".psam\")))\n# 3. Check that all 2,016 samples and 299,523 variants remain.\nstopifnot(all(guided_counts(out) == c(2016, 299523)))\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_source_checkpoint(cfg)",
       "run_by_default": true
     }
   ],
@@ -56,5 +56,29 @@
     ]
   },
   "figures": [],
-  "success_line": "The 2,016 samples and 299,523 variants are all kept."
+  "student_summary": "We convert the laboratory files to the format that PLINK 2 uses for this course. We check that the conversion keeps every sample and variant, a place in the DNA where people can differ.",
+  "student_plink_options": [
+    {
+      "label": "convert the laboratory files",
+      "options": [
+        {
+          "name": "--bfile",
+          "explanation": "Reads the BED, BIM and FAM laboratory files named sim2026_lab in data/course/lab_export."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Writes the data as PGEN, PVAR and PSAM files, the native PLINK 2 format."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts the output file names with results/guided/s2-2_state."
+        }
+      ]
+    }
+  ],
+  "success_line": "The 2,016 samples and 299,523 variants are all kept.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows."
+  ],
+  "student_expected_result": "The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](docs/glossary.md#reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference."
 }

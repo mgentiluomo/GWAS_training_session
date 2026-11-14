@@ -82,6 +82,32 @@ class StudentNotebookTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Incomplete"):
             exports.step_metadata(metadata, copy.deepcopy(record))
 
+    def test_conditional_liftover_option_is_required_in_r_order(self):
+        record = next(r for r in exports.export_steps() if r["id"] == "2.6")
+        groups = copy.deepcopy(record["student_plink_options"])
+        exports.step_metadata({"student_plink_options": groups}, copy.deepcopy(record))
+        for alteration in ("omit", "reorder", "duplicate", "invent"):
+            changed = copy.deepcopy(groups)
+            options = changed[0]["options"]
+            index = next(i for i, option in enumerate(options) if option["name"] == "--flip")
+            if alteration == "omit":
+                options.pop(index)
+            elif alteration == "reorder":
+                options[index], options[index + 1] = options[index + 1], options[index]
+            elif alteration == "duplicate":
+                options.insert(index, copy.deepcopy(options[index]))
+            else:
+                options[index]["name"] = "--invented"
+            with self.subTest(alteration=alteration), self.assertRaisesRegex(ValueError, "Incomplete"):
+                exports.step_metadata({"student_plink_options": changed}, copy.deepcopy(record))
+        # An unconditional or unconsumed flag must not relax terminal coverage.
+        for replacement in ('unused <- c(args, "--flip"', 'args <- c(args, "--flip"'):
+            changed_record = copy.deepcopy(record)
+            changed_record["r_commands"][0]["code"] = changed_record["r_commands"][0]["code"].replace(
+                'if (length(reverse)) args <- c(args, "--flip"', replacement)
+            with self.subTest(replacement=replacement), self.assertRaisesRegex(ValueError, "Incomplete"):
+                exports.step_metadata({"student_plink_options": groups}, changed_record)
+
     def test_parser_requires_exact_resource_values_in_every_command(self):
         record = next(r for r in exports.export_steps() if r["id"] == "3.3")
         metadata = {"student_plink_options": record["student_plink_options"]}

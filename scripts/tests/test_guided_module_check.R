@@ -120,6 +120,37 @@ test_guided_module_check <- function() {
   succeeds()
   cat("Module 3 input checks passed: root, metadata, checkpoint files and folder overrides.\n")
   Sys.unsetenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR"))
+  # Module 2 checks only its real course inputs, with no saved output required.
+  module2 <- guided_module_inputs[["2"]]
+  stopifnot(is.null(module2$checkpoint), is.null(module2$restart_step),
+            length(module2$data) == 10L, length(module2$output) == 0L)
+  module2_message <- function(missing) paste0(
+    "Course metadata are missing. Complete step 0.7 before module 2. Missing: ",
+    paste(missing, collapse = ", "))
+  module2_fails <- function(missing) {
+    message <- tryCatch({ guided_check_module(2); stop("Expected an error") }, error = conditionMessage)
+    stopifnot(identical(message, module2_message(missing)))
+  }
+  module2_files <- file.path("data/course", module2$data)
+  touch(module2_files)
+  stopifnot(identical(capture.output(result <- guided_check_module(2)),
+                      "Module 2 input files are present."), isTRUE(result))
+  for (path in module2_files) {
+    unlink(path)
+    module2_fails(path)
+    touch(path)
+  }
+  module2_external <- file.path(folder, "module2 external data")
+  Sys.setenv(COURSE_DATA_DIR = module2_external)
+  module2_external_files <- file.path(module2_external, module2$data)
+  module2_fails(module2_external_files)
+  touch(module2_external_files)
+  stopifnot(identical(capture.output(result <- guided_check_module(2)),
+                      "Module 2 input files are present."), isTRUE(result))
+  unlink(module2_external_files[1])
+  module2_fails(module2_external_files[1])
+  Sys.unsetenv("COURSE_DATA_DIR")
+  cat("Module 2 input checks passed: every data input, no checkpoint and folder override.\n")
   guided_module_inputs[["1"]] <<- list(checkpoint = NULL, restart_step = NULL,
                                       data = "module1.tsv", output = character(0))
   message <- tryCatch(guided_check_module(1), error = conditionMessage)

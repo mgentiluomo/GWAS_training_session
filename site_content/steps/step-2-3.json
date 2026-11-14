@@ -6,13 +6,13 @@
   "anchor": "step-2-3",
   "title": "Sample and variant tables",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
+  "source_sha256": "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We read the sample table and the variant table. We do not change them.",
     "why": "FID and IID are text identifiers, not row numbers. Keep any leading zeros, such as in 007. Always join tables by these identifiers.\n\nThe variant table (PVAR) has columns for the chromosome, the position, the site ID and the alleles. An [rs identifier](docs/glossary.md#rs-identifier) can be shared by several resources, even when each resource uses a different genome assembly (a full reference sequence of the genome) for the coordinates. An Illumina name may name an array assay (one test on the chip) and not a unique place in the genome.",
     "you_need": "You need the native files from 2.2.",
-    "command": "```{r s2-3}\nsamples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\nhead(samples)\nhead(variants)\ncheck_ids(samples, \"Laboratory samples\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R code above is the complete command.\n\nR reads the files and shows the values. It does not change the genotype files.",
+    "command": "```{r s2-3}\n# 1. Read the sample and variant tables from the converted files.\nsamples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\n# 2. Show the first rows of both tables.\nhead(samples)\nhead(variants)\n# 3. Check that the sample identifiers are valid and unique.\ncheck_ids(samples, \"Laboratory samples\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R code above is the complete command.\n\nR reads the files and shows the values. It does not change the genotype files.",
     "expected_result": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
     "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Should you join two tables by row number when they have the same length?\n\n<details><summary>Show the answer</summary>\n\nNo. Match the FID/IID pair or the site identifier. Then check that every required record found its match.\n\n</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s2-3",
-      "code": "samples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\nhead(samples)\nhead(variants)\ncheck_ids(samples, \"Laboratory samples\")",
+      "code": "# 1. Read the sample and variant tables from the converted files.\nsamples <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".psam\"))\nvariants <- guided_table(paste0(guided_path(cfg, \"2.2\"), \".pvar\"))\n# 2. Show the first rows of both tables.\nhead(samples)\nhead(variants)\n# 3. Check that the sample identifiers are valid and unique.\ncheck_ids(samples, \"Laboratory samples\")",
       "run_by_default": true
     }
   ],
@@ -33,5 +33,11 @@
     "options": []
   },
   "figures": [],
-  "success_line": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows."
+  "student_summary": "We read the tables that describe the samples and the DNA sites. We inspect their first rows and check the sample identifiers so we can match information to the right sample.",
+  "student_plink_options": [],
+  "success_line": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows."
+  ],
+  "student_expected_result": "The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome."
 }

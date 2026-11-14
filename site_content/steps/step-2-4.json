@@ -6,13 +6,13 @@
   "anchor": "step-2-4",
   "title": "First overview",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370",
+  "source_sha256": "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We measure how much data is missing, before we decide which samples or sites to remove.",
     "why": "The [call rate](docs/glossary.md#call-rate) is the fraction of genotypes that were observed. Missingness is one minus the call rate. A missing genotype is also called a no-call.\n\nA sample report asks whether a well has many no-calls. A variant report asks whether a site fails in many wells. We look at both, because they point to different problems.",
     "you_need": "You need the native files from 2.2.",
-    "command": "```{r s2-4}\nout <- guided_path(cfg, \"2.4\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048\n```\n\n`--pfile` reads a set of native files by their shared prefix. `--missing` writes one report for samples and one for variants, and it removes nothing. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.",
+    "command": "```{r s2-4}\n# 1. Choose the names for the reports of missing results.\nout <- guided_path(cfg, \"2.4\", \"missing\")\n# 2. Measure missing results for each sample and each variant.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\n# 3. Read both reports into R.\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\n# 4. Summarise the share of missing results in each report.\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048\n```\n\n`--pfile` reads a set of native files by their shared prefix. `--missing` writes one report for samples and one for variants, and it removes nothing. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.",
     "expected_result": "You get a sample report and a variant report. Some values are much worse than the main group. No samples and no variants are removed at this step.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
     "troubleshooting": "Stop at the first error message. Check the input file named in the message. Check that the previous step finished. Keep the command and the console output (the text printed in R). Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "It can reveal a well that performed badly, probes (the DNA pieces on the chip that detect a variant) that failed, or groups of affected samples. A threshold is a rule for deciding. It does not tell you the cause of the problem.",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s2-4",
-      "code": "out <- guided_path(cfg, \"2.4\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))",
+      "code": "# 1. Choose the names for the reports of missing results.\nout <- guided_path(cfg, \"2.4\", \"missing\")\n# 2. Measure missing results for each sample and each variant.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"2.2\"), \"--missing\", \"--out\", out))\n# 3. Read both reports into R.\nsmiss <- guided_table(paste0(out, \".smiss\"))\nvmiss <- guided_table(paste0(out, \".vmiss\"))\n# 4. Summarise the share of missing results in each report.\nsummary(as.numeric(smiss$F_MISS))\nsummary(as.numeric(vmiss$F_MISS))",
       "run_by_default": true
     }
   ],
@@ -57,5 +57,29 @@
     ]
   },
   "figures": [],
-  "success_line": "You get a sample report and a variant report."
+  "student_summary": "We measure the share of missing DNA results for each sample and each site. These reports help us find possible problems before we choose what to remove.",
+  "student_plink_options": [
+    {
+      "label": "measure missing results",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s2-2_state."
+        },
+        {
+          "name": "--missing",
+          "explanation": "Writes separate reports of missing DNA results for samples and variants without removing any data."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts the report file names with results/guided/s2-4_missing."
+        }
+      ]
+    }
+  ],
+  "success_line": "You get a sample report and a variant report.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows."
+  ],
+  "student_expected_result": "You get a sample report and a variant report. Some values are much worse than the main group. No samples and no variants are removed at this step."
 }

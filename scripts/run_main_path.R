@@ -104,7 +104,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370
+# SHA-256: 42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e
 
 # Chunk: setup
 source("R/guided.R")
@@ -112,92 +112,130 @@ cfg <- guided_init()
 
 
 # Chunk: s2-1
+# 1. Check the three laboratory files and show their sizes.
 print(check_bed(cfg$input))
+# 2. Show the first rows of sample information.
 head(read_fam(cfg$input))
 
 
 # Chunk: s2-2
+# 1. Choose the name for the converted files.
 out <- guided_path(cfg, "2.2")
+# 2. Convert the laboratory files to the native PLINK 2 format.
 run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))
+# 3. Check that all 2,016 samples and 299,523 variants remain.
 stopifnot(all(guided_counts(out) == c(2016, 299523)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_source_checkpoint(cfg)
 
 
 # Chunk: s2-3
+# 1. Read the sample and variant tables from the converted files.
 samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
+# 2. Show the first rows of both tables.
 head(samples)
 head(variants)
+# 3. Check that the sample identifiers are valid and unique.
 check_ids(samples, "Laboratory samples")
 
 
 # Chunk: s2-4
+# 1. Choose the names for the reports of missing results.
 out <- guided_path(cfg, "2.4", "missing")
+# 2. Measure missing results for each sample and each variant.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))
+# 3. Read both reports into R.
 smiss <- guided_table(paste0(out, ".smiss"))
 vmiss <- guided_table(paste0(out, ".vmiss"))
+# 4. Summarise the share of missing results in each report.
 summary(as.numeric(smiss$F_MISS))
 summary(as.numeric(vmiss$F_MISS))
 
 
 # Chunk: s2-5
+# 1. Read the laboratory variant table and the reference DNA letters.
 bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+# 2. Match every laboratory site to the reference table by its identifier.
 k <- match(bim[[2]], ann$Name)
 stopifnot(!anyNA(k))
+# 3. Put each pair of DNA letters in a consistent order for comparison.
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
 observed <- pair(bim[[5]], bim[[6]])
 reference <- pair(ann$Ref_Plus[k], ann$Alt_Plus[k])
+# 4. Find the reference letter pairs as they would appear on the opposite strand.
 complement <- chartr("ACGT", "TGCA", reference)
 complement <- pair(substr(complement, 1, 1), substr(complement, 2, 2))
+# 5. Identify sites to correct and sites with ambiguous or incompatible letters.
 palindromic <- reference %in% c("AT", "CG")
 flip <- !palindromic & observed != reference & observed == complement
 exclude <- palindromic | (observed != reference & observed != complement)
+# 6. Save both lists and check their expected sizes.
 flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))
 exclude_file <- guided_list(bim[[2]][exclude], guided_path(cfg, "2.5", "exclude.txt"))
 stopifnot(sum(flip) == 400L, sum(exclude) == 3013L)
+# 7. Correct the listed sites and remove the excluded sites in a new copy.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,
   "--make-pgen", "--out", guided_path(cfg, "2.5")))
+# 8. Check that 2,016 samples and 296,510 variants remain.
 stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--flip", "--exclude"), value = c(flip_file, exclude_file))
 guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 
 
 # Chunk: s2-6
+# 1. Read the variant positions in the separate GRCh37 exercise.
 legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
+# 2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
 chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
 require_files(chain)
+# 3. Convert the positions and keep sites that stay on the same chromosome.
 lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
+# 4. Save the new positions and the list of sites to keep.
 map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])
 map_file <- guided_path(cfg, "2.6", "update_map.tsv")
 write.table(map, map_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 keep_file <- guided_list(map$ID, guided_path(cfg, "2.6", "mapped.txt"))
+# 5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
 args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)
 reverse <- bim37[[2]][keep & lifted$strand == "-"]
 if (length(reverse)) args <- c(args, "--flip", guided_list(reverse, guided_path(cfg, "2.6", "reverse.txt")))
+# 6. Save the converted exercise separately from the main dataset.
 run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))
+# 7. Check the new positions against matching sites in the supplied reference table.
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
 k <- match(map$ID, ann$Name)
 stopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))
+# 8. Show how many sites were read, kept and mapped to the opposite strand.
 print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))
 
 
 # Chunk: s2-7
+# 1. Match the sample sheet to each person's disease status, age and recorded sex.
 metadata <- guided_metadata(cfg)
+# 2. Select and name the columns for the sample information file.
 pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]
 names(pheno)[1] <- "#FID"
 pheno_file <- guided_path(cfg, "2.7", "phenotypes.tsv")
+# 3. Save the sample information table.
 guided_write(pheno, pheno_file)
+# 4. Add recorded sex and disease status to a new copy of the DNA files.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,
   "--pheno", pheno_file, "--pheno-name", "Disease", "--make-pgen", "--out", guided_path(cfg, "2.7")))
+# 5. Check that all 2,016 samples and 296,510 variants remain.
 stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--update-sex", "--pheno", "--pheno-name"), value = c(pheno_file, pheno_file, "Disease"))
 guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 
 
 # Chunk: s2-8
+# 1. Save the full starting point and check its files and counts.
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
