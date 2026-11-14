@@ -228,7 +228,7 @@ class StudentNotebookTests(unittest.TestCase):
                 record.pop("student_kind")
                 with self.assertRaises(ValueError):
                     exports.step_metadata({"student_summary": "Read it."}, record)
-            self.assertEqual(students.build_models(root)[0]["module"], 3)
+            self.assertIn(3, [model["module"] for model in students.build_models(root)])
 
     def test_kind_validation(self):
         record = {"id": "0.1", "r_commands": [], "plink": {"commands": [], "options": []}}

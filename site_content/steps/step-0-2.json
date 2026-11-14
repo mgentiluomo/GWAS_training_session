@@ -6,7 +6,7 @@
   "anchor": "step-0-2",
   "title": "Install RStudio",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "source_sha256": "99f0af82662326fd7fc60248c76086eb31dedbbf3f5bd36c6f11d22e29b512dc",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install [RStudio Desktop](https://docs.posit.co/ide/user/download.html) and open it. R must already be installed (step 0.1). Follow these actions:\n\n1. Open the download page. Go to \"RStudio Desktop\". Click the installer link for your operating system. Save the file.\n2. Open the installer. On Windows, accept the default choices and click \"Next\" until it ends. On macOS, drag the RStudio icon onto the Applications folder icon in the window that opens. On Linux, follow the instructions on the page.\n3. Start RStudio from the Start menu or the Applications folder.\n\nYou should see a window with several panes (areas). One pane is called \"Console\". It shows a `>` prompt.",
@@ -46,6 +46,9 @@
       "reviewed": false
     }
   ],
+  "student_summary": "We install RStudio, a program that makes R easier to use. We find the Console area where we will run commands.",
+  "student_kind": "outside_r",
+  "student_action": "Download RStudio Desktop for your system from the official Posit page and follow its installation instructions for Windows, macOS or Linux. Open RStudio and find the Console area with a `>` prompt.",
   "actions": [
     {
       "label": "Download RStudio Desktop",
@@ -53,5 +56,6 @@
       "kind": "page"
     }
   ],
-  "success_line": "RStudio opens and the Console pane shows a `>` prompt."
+  "success_line": "RStudio opens and the Console pane shows a `>` prompt.",
+  "student_expected_result": "RStudio opens and the Console pane shows a `>` prompt. No calculation is required yet."
 }

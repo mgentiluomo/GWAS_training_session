@@ -6,20 +6,29 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b
+# SHA-256: 99f0af82662326fd7fc60248c76086eb31dedbbf3f5bd36c6f11d22e29b512dc
 
 # Chunk: s0-4_project
+# 1. Show the folder where R looks for files.
 getwd()
+# 2. Check that the required project files exist.
 stopifnot(file.exists("config.R"), file.exists("R/course.R"))
+# 3. Show the computer's system and processor information.
 Sys.info()[c("sysname", "release", "machine")]
+# 4. Show the installed R version.
 R.version.string
+# 5. Add two numbers to check that R runs commands.
 2 + 3
 
 
 # Chunk: s0-8_preflight
+# 1. Create a separate place in R to hold the course settings.
 settings <- new.env(parent = baseenv())
+# 2. Read the course settings from config.R.
 sys.source("config.R", settings)
+# 3. Show the PLINK version used to test the course.
 settings$course_settings$tested_plink_version
+# 4. Run the setup checks, including the small PLINK test.
 source("scripts/preflight.R")
 
 

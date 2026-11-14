@@ -5,6 +5,10 @@ source("R/course.R")
 # Sources: module_meta in enabled lessons (module 0 needs only the project root).
 # Regenerate with --export-notebooks; do not edit this table.
 guided_module_inputs <- list(
+`0` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = character(0),
+  output = character(0)),
 `3` = list(
   checkpoint = "2.8", restart_step = "3.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
