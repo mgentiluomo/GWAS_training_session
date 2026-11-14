@@ -108,7 +108,7 @@ def sync_module_check(root: Path, check: bool) -> None:
     if check and match.group() != expected:
         raise ValueError("R/guided.R and module_meta disagree. Regenerate with --export-notebooks.")
     if not check and match.group() != expected:
-        path.write_text(text[:match.start()] + expected + text[match.end():], encoding="utf-8")
+        path.write_text(text[:match.start()] + expected + text[match.end():], encoding="utf-8", newline="\n")
 
 
 def export_notebooks(destination: Path, check: bool = False, root: Path = ROOT) -> None:
