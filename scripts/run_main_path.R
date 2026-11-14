@@ -801,7 +801,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816
+# SHA-256: 0b94626bcccf068601aa1d79be710620c9721972707e74fca6e3132c203601c9
 
 # Chunk: setup
 source("R/guided.R")
@@ -809,8 +809,11 @@ cfg <- guided_init()
 
 
 # Chunk: s7-1
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Select chromosomes 1 to 22 for the plot.
 autosomal <- stats$chromosome %in% as.character(1:22)
+# 3. Save the plot comparing observed p-values with values expected by chance.
 save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
 
 
@@ -821,19 +824,27 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-2
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Select p-values for chromosomes 1 to 22.
 p <- stats$p_value[stats$chromosome %in% as.character(1:22)]
+# 3. Calculate and check the overall size of the test results.
 lambda <- lambda_gc(p)
 print(lambda)
 stopifnot(abs(lambda - 1.016) < 0.001)
+# 4. Save lambda in a table.
 guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path(cfg, "7.2", "lambda.tsv"))
 
 
 # Chunk: s7-3
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Prepare the chromosome, position and p-value columns.
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
   POS = stats$base_pair_location, P = stats$p_value)
+# 3. Save the plot of results along the chromosomes.
 save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
+# 4. Check that eight variants have p-values below 0.00000005.
 stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 
 
@@ -844,40 +855,54 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-4
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Keep only valid p-values.
 p <- stats$p_value[valid_p(stats$p_value)]
+# 3. Compare three rules for deciding which results are strong enough.
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
 print(threshold)
+# 4. Save the threshold comparison table.
 guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))
 
 
 # Chunk: s7-5
+# 1. Choose the name for the grouped association results.
 report <- guided_path(cfg, "7.5", "clump")
+# 2. Group nearby correlated variants using the final cohort.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
+# 3. Read the groups and check that there are three.
 clumps <- guided_table(paste0(report, ".clumps"))
 print(clumps)
 stopifnot(nrow(clumps) == 3L)
 
 
 # Chunk: s7-6
+# 1. Choose the chromosome 9 variant and the output name.
 lead <- "9:96426973:A:G"
 report <- guided_path(cfg, "7.6", "ld")
+# 2. Measure correlations with the chosen variant within 500,000 DNA positions.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
   "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+# 3. Read the correlation table and select the regional association results.
 ld <- guided_table(paste0(report, ".vcor"))
 stats <- guided_summary_stats(cfg)
 region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
+# 4. Find and check the column holding squared correlations.
 r2_column <- grep("R2$", names(ld), value = TRUE)
 stopifnot(length(r2_column) == 1L)
+# 5. Match each regional variant to its correlation with the chosen variant.
 r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
 r2[region$variant_id == lead] <- 1
+# 6. Choose symbols and colours for the correlation ranges.
 bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
 colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
 shapes <- c(1, 2, 3, 4, 16)
+# 7. Draw and save the regional plot with a legend and significance line.
 png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
 plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
   pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
@@ -886,7 +911,9 @@ legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 t
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
+# 8. Check that four regional variants have p-values below 0.00000005.
 stopifnot(sum(region$p_value < 5e-8) == 4L)
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 
 
@@ -897,29 +924,38 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-7
+# 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
+# 2. Read the original sample information and save ages for all wells.
 metadata <- guided_metadata(cfg)
 all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
 all_file <- guided_path(cfg, "7.7", "all_ages.tsv"); guided_write(all_covar, all_file)
+# 3. Choose the output name and find the cohort saved before quality checks.
 no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")
 baseline <- guided_path(cfg, "2.8")
 if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
+# 4. Test the cohort before sample and variant quality checks using age and sex.
 run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
+# 5. Read the main results and put the comparison results into matching columns.
 main <- guided_summary_stats(cfg)
 a <- guided_standardise_scan(guided_association(no_pc))
 b <- guided_standardise_scan(guided_association(no_qc))
+# 6. Check that the main and cleaned comparison analyses use the same samples per variant.
 k <- match(main$variant_id, a$variant_id)
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
+# 7. Count valid tests and strong results and calculate lambda for each analysis.
 autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+# 8. Save the comparison table.
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
+# 9. Save three plots with the same scale to compare the analyses.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
   plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
@@ -937,14 +973,18 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-8
+# 1. Read the final sample counts, comparison table, variant groups and association results.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
+# 2. Select the strongest variant in each group and calculate its uncertainty interval.
 lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
+# 3. Save the table of the three strongest variants.
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
+# 4. Prepare the report describing the analysis, results and limitations.
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
@@ -959,7 +999,9 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
   "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",
   "No biological discovery or clinical recommendation follows from this simulation.")
+# 5. Save the report as a text file.
 writeLines(summary, guided_path(cfg, "7.8", "summary.md"), useBytes = TRUE)
+# Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads.tsv"),
   guided_path(cfg, "7.1", "qq.png"), guided_path(cfg, "7.3", "manhattan.png"),
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
@@ -967,4 +1009,5 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
 guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
+# 6. Print the final report.
 cat(paste(summary, collapse = "\n"), "\n")

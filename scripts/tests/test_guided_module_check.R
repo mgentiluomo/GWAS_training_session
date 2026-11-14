@@ -250,6 +250,39 @@ test_guided_module_check <- function() {
   stopifnot(identical(capture.output(result <- guided_check_module(6)),
                       "Module 6 input files are present."), isTRUE(result))
   cat("Module 6 input checks passed: checkpoint, component scores and both metadata files.\n")
+  # Module 7 reads the association outputs, final cohort and supplied pre-QC cohort.
+  module7 <- guided_module_inputs[["7"]]
+  stopifnot(identical(module7$checkpoint, "6.8"), identical(module7$restart_step, "7.1"),
+            identical(module7$data, c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv",
+              "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam")),
+            identical(module7$output, c("s6-4_association.Disease.glm.logistic.hybrid",
+              "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam",
+              "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv")))
+  module7_data <- file.path("data/course", module7$data)
+  module7_output <- file.path("results/guided", module7$output)
+  module7_fails <- function(missing, data = FALSE) {
+    message <- tryCatch({ guided_check_module(7); stop("Expected an error") }, error = conditionMessage)
+    expected <- if (data) paste0(
+      "Course metadata are missing. Complete step 0.7 before module 7. Missing: ", paste(missing, collapse = ", ")) else paste0(
+      "Some saved files from step 6.8 are missing: ", paste(missing, collapse = ", "),
+      '. Finish module 6 first. Or restart here with: restore_checkpoint("7.1") (use an empty folder).')
+    stopifnot(identical(message, expected))
+  }
+  touch(module7_data)
+  touch(module7_output)
+  for (path in module7_data) {
+    unlink(path)
+    module7_fails(path, data = TRUE)
+    touch(path)
+  }
+  for (path in module7_output) {
+    unlink(path)
+    module7_fails(path)
+    touch(path)
+  }
+  stopifnot(identical(capture.output(result <- guided_check_module(7)),
+                      "Module 7 input files are present."), isTRUE(result))
+  cat("Module 7 input checks passed: association outputs, cohort files, covariates and reporting records.\n")
   guided_module_inputs[["0"]] <<- list(checkpoint = NULL, restart_step = NULL,
                                       data = character(0), output = character(0))
   stopifnot(isTRUE(guided_check_project_root()),

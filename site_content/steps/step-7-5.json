@@ -6,13 +6,13 @@
   "anchor": "step-7-5",
   "title": "Clump correlated results",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816",
+  "source_sha256": "0b94626bcccf068601aa1d79be710620c9721972707e74fca6e3132c203601c9",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.",
     "why": "[Clumping](docs/glossary.md#clumping) starts with the variant that has the smallest p-value. This is the [lead variant](docs/glossary.md#lead-variant), also called the index variant. PLINK adds the nearby variants that are correlated with it. Then PLINK takes the next smallest p-value that is still free and repeats the process. The result is a list of regions that are approximately independent. The settings for the distance and the correlation decide what counts as a region.\n\nClumping is not [fine-mapping](docs/glossary.md#fine-mapping). It does not show causes, and it does not prove one causal effect in each clump. Measure the correlation in the cohort that you analysed, not in an external population that does not match.",
     "you_need": "The full genotype set from step 5.7 and the PLINK association report from step 6.4, unchanged. This step still reads the PLINK report and not the summary statistics file. The reason is that the `--clump` option of PLINK expects the format of its own report.",
-    "command": "```{r s7-5}\nreport <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` names the column that holds the variant ID. `--clump-p-field P` names the column that holds the p-value. `--clump-p1 5e-8` sets the p-value that a variant needs to be a lead variant. `--clump-p2 1e-5` sets the p-value that other variants need to be listed in a clump. `--clump-r2 0.1` sets the [r^2](docs/glossary.md#r-squared) threshold: a variant joins a clump only if its squared correlation with the lead is above 0.1. `--clump-kb 250` sets the distance limit in kilobases (250 kb on each side of the lead). `--clump-unphased` uses the squared correlation of the genotype dosages, so the definition of LD is clear. `--pfile` reads the genotype files in the PLINK 2 format. `--out` names the report. `--threads 2` limits the number of worker threads. `--memory 2048` sets the working memory in MiB.",
+    "command": "```{r s7-5}\n# 1. Choose the name for the grouped association results.\nreport <- guided_path(cfg, \"7.5\", \"clump\")\n# 2. Group nearby correlated variants using the final cohort.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\n# 3. Read the groups and check that there are three.\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048\n```\n\n`--clump` reads the association report. `--clump-id-field ID` names the column that holds the variant ID. `--clump-p-field P` names the column that holds the p-value. `--clump-p1 5e-8` sets the p-value that a variant needs to be a lead variant. `--clump-p2 1e-5` sets the p-value that other variants need to be listed in a clump. `--clump-r2 0.1` sets the [r^2](docs/glossary.md#r-squared) threshold: a variant joins a clump only if its squared correlation with the lead is above 0.1. `--clump-kb 250` sets the distance limit in kilobases (250 kb on each side of the lead). `--clump-unphased` uses the squared correlation of the genotype dosages, so the definition of LD is clear. `--pfile` reads the genotype files in the PLINK 2 format. `--out` names the report. `--threads 2` limits the number of worker threads. `--memory 2048` sets the working memory in MiB.",
     "expected_result": "There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.\n\nThe tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the input file that R names and the previous step. Keep the command and the messages from the console. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "If we change the LD threshold or the distance, can the clumps change even though the association scan stays the same?\n\n<details><summary>Show the answer</summary>\n\nYes. The clumps depend on these settings and on the samples used to measure LD.\n\n</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s7-5",
-      "code": "report <- guided_path(cfg, \"7.5\", \"clump\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)",
+      "code": "# 1. Choose the name for the grouped association results.\nreport <- guided_path(cfg, \"7.5\", \"clump\")\n# 2. Group nearby correlated variants using the final cohort.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--clump\", paste0(guided_path(cfg, \"6.4\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  \"--clump-id-field\", \"ID\", \"--clump-p-field\", \"P\", \"--clump-p1\", \"5e-8\", \"--clump-p2\", \"1e-5\",\n  \"--clump-r2\", \"0.1\", \"--clump-kb\", \"250\", \"--clump-unphased\", \"--out\", report))\n# 3. Read the groups and check that there are three.\nclumps <- guided_table(paste0(report, \".clumps\"))\nprint(clumps)\nstopifnot(nrow(clumps) == 3L)",
       "run_by_default": true
     }
   ],
@@ -84,5 +84,57 @@
     ]
   },
   "figures": [],
-  "success_line": "There are three clumps."
+  "student_summary": "We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.",
+  "student_plink_options": [
+    {
+      "label": "group correlated results",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."
+        },
+        {
+          "name": "--clump",
+          "explanation": "Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples."
+        },
+        {
+          "name": "--clump-id-field",
+          "explanation": "Uses the ID column of the association report to identify variants."
+        },
+        {
+          "name": "--clump-p-field",
+          "explanation": "Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect."
+        },
+        {
+          "name": "--clump-p1",
+          "explanation": "Allows a variant to lead a group when its p-value is at most 5e-8 (0.00000005)."
+        },
+        {
+          "name": "--clump-p2",
+          "explanation": "Lists other variants in a group when their p-values are at most 1e-5 (0.00001)."
+        },
+        {
+          "name": "--clump-r2",
+          "explanation": "Adds variants whose squared correlation with the group's strongest variant exceeds 0.1."
+        },
+        {
+          "name": "--clump-kb",
+          "explanation": "Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant."
+        },
+        {
+          "name": "--clump-unphased",
+          "explanation": "Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps."
+        }
+      ]
+    }
+  ],
+  "success_line": "There are three clumps.",
+  "verification_notes": [
+    "The tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows."
+  ],
+  "student_expected_result": "There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants."
 }
