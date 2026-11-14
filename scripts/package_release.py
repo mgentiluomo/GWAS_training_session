@@ -20,7 +20,8 @@ import zipfile
 
 REPO = Path(__file__).resolve().parents[1]
 SOURCE = Path(r"C:\WEB_site\data_sources\sim2026\student")
-WORK = Path(r"C:\WEB_site\data_sources\codex_work")
+# Author work folder outside the repository. Set COURSE_RELEASE_WORK to use another folder.
+WORK = Path(os.environ.get("COURSE_RELEASE_WORK") or r"C:\WEB_site\data_sources\codex_work")
 FORBIDDEN = ("instructor", "answer_key", "build_record", "truth")
 DIRECTORIES = {"array", "checkpoints", "final_report", "grch37_exercise",
                "imputation", "lab_export", "pca_reference", "phenotypes"}

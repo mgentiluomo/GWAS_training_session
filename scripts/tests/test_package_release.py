@@ -15,6 +15,9 @@ spec.loader.exec_module(release)
 class PackagingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if not release.WORK.is_dir():
+            raise unittest.SkipTest(f"Release work folder not found: {release.WORK}. "
+                                    "Create it or set COURSE_RELEASE_WORK to run the packaging tests.")
         cls.root = Path(tempfile.mkdtemp(prefix="package-tests-", dir=release.WORK))
         cls.source = cls.root / "student"
         (cls.source / "lab_export").mkdir(parents=True)
