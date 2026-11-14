@@ -159,6 +159,28 @@ test_guided_module_check <- function() {
   touch("data/course/module1.tsv")
   stopifnot(identical(capture.output(result <- guided_check_module(1)), "Module 1 input files are present."),
             isTRUE(result))
+  # Module 4 needs the complete sample checkpoint and no direct data inputs.
+  module4 <- guided_module_inputs[["4"]]
+  stopifnot(identical(module4$checkpoint, "3.8"), identical(module4$restart_step, "4.1"),
+            length(module4$data) == 0L,
+            identical(module4$output, c("s3-8_state.pgen", "s3-8_state.pvar", "s3-8_state.psam")))
+  module4_files <- file.path("results/guided", module4$output)
+  module4_fails <- function(missing) {
+    message <- tryCatch({ guided_check_module(4); stop("Expected an error") }, error = conditionMessage)
+    stopifnot(identical(message, paste0(
+      "Some saved files from step 3.8 are missing: ", paste(missing, collapse = ", "),
+      '. Finish module 3 first. Or restart here with: restore_checkpoint("4.1") (use an empty folder).')))
+  }
+  module4_fails(module4_files)
+  touch(module4_files)
+  for (path in module4_files) {
+    unlink(path)
+    module4_fails(path)
+    touch(path)
+  }
+  stopifnot(identical(capture.output(result <- guided_check_module(4)),
+                      "Module 4 input files are present."), isTRUE(result))
+  cat("Module 4 input checks passed: all three checkpoint files and no direct data inputs.\n")
   guided_module_inputs[["4"]] <<- list(checkpoint = "3.8", restart_step = "4.1",
                                       data = character(0), output = "s3-8_missing.pgen")
   message <- tryCatch(guided_check_module(4), error = conditionMessage)

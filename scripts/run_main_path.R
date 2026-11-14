@@ -399,7 +399,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c
+# SHA-256: 33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a
 
 # Chunk: setup
 source("R/guided.R")
@@ -407,71 +407,97 @@ cfg <- guided_init()
 
 
 # Chunk: s4-1
+# 1. Remove variants with more than 2% of their results missing.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.1", "3.8")
 guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 
 
 # Chunk: s4-2
+# 1. Compare missing results in people with and without the disease.
 report <- guided_path(cfg, "4.2", "missing")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--test-missing", "--out", report))
+# 2. Read the test results and list variants with p-values below 0.00001.
 x <- guided_table(paste0(report, ".missing"))
 p <- as.numeric(x$P)
 exclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, "4.2", "exclude.txt"))
+# 3. Remove the listed variants and save the remaining data.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.2", "4.1")
 guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 
 
 # Chunk: s4-3
+# 1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
 guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 
 
 # Chunk: s4-4
+# 1. Read the sample table and list people without the disease.
 psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))
 controls <- guided_list(psam$IID[psam$Disease == "1"], guided_path(cfg, "4.4", "controls.txt"), TRUE)
+# 2. Test expected DNA letter combinations on chromosomes 1 to 22.
 report <- guided_path(cfg, "4.4", "hardy")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--keep", controls, "--chr", "1-22", "--hardy", "midp", "--out", report))
+# 3. Calculate a cutoff for each variant from the number of people tested.
 hwe <- guided_table(paste0(report, ".hardy"))
 n_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)
 cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
+# 4. List variants with test p-values below their cutoff.
 p <- as.numeric(hwe$MIDP)
 exclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, "4.4", "exclude.txt"))
+# 5. Remove the listed variants from all people and save the remaining data.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))
+# 6. Check that the three named variants are absent from the saved data.
 retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID
 stopifnot(!any(c("rs4988235", "rs12913832", "rs1426654") %in% retained))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.4", "4.3")
 guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 
 
 # Chunk: s4-5
+# 1. Export X, Y and mitochondrial DNA results as a table.
 report <- guided_path(cfg, "4.5", "sexchr")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--chr", "X,Y,MT", "--export", "A", "--out", report))
+# 2. Read the column names and the exported results.
 header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]
 raw <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE, quote = "", comment.char = "",
   colClasses = c(rep("character", 6), rep("integer", length(header) - 6L)), na.strings = "NA")
+# 3. Arrange the DNA results by person and variant and identify each chromosome.
 genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L
 ids <- sub("_[^_]+$", "", names(raw)[-(1:6)])
 pvar <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))
 chromosome <- pvar$CHROM[match(ids, pvar$ID)]
+# 4. Calculate the share of unexpected results for each variant.
 wrong <- numeric(length(ids))
 wrong[chromosome == "X"] <- colMeans(genotypes[raw$SEX == "1", chromosome == "X", drop = FALSE] == 1L)
 wrong[chromosome == "Y"] <- colMeans(genotypes[raw$SEX == "2", chromosome == "Y", drop = FALSE] >= 0L)
 wrong[chromosome == "MT"] <- colMeans(genotypes[, chromosome == "MT", drop = FALSE] == 1L)
+# 5. List variants with unexpected results in more than 1% of people checked.
 exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))
+# 6. Remove the listed variants and check the remaining counts.
 sex_state <- guided_path(cfg, "4.5", "sex_state")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--exclude", exclude, "--make-pgen", "--out", sex_state))
 stopifnot(all(guided_counts(sex_state) == c(1844, 238819)))
+# 7. Rename variants by location and DNA letters and remove duplicate entries.
 run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",
   "--make-pgen", "--out", guided_path(cfg, "4.5")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--exclude", "--set-all-var-ids", "--rm-dup"), value = c(exclude, "@:#:$r:$a", "exclude-mismatch"))
 guided_register(cfg, "4.5", "4.4", 1844, 238513, operations = ops)
+# 8. Free the computer memory used by the large tables.
 rm(raw, genotypes); invisible(gc())
 
 
 # Chunk: s4-6
+# 1. Save the complete dataset and check the saved files and counts.
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 

@@ -182,7 +182,7 @@ class StudentNotebookTests(unittest.TestCase):
         self.assertEqual(command_chunks(previous), command_chunks(current))
 
     def test_parser_rejects_wrong_order_and_misplaced_modifiers(self):
-        for step in ("3.1", "3.3", "3.4", "3.7"):
+        for step in ("3.1", "3.3", "3.4", "3.7", "4.4", "4.5"):
             record = next(r for r in exports.export_steps() if r["id"] == step)
             groups = copy.deepcopy(record["student_plink_options"])
             groups[0]["options"][0:2] = reversed(groups[0]["options"][0:2])
@@ -199,7 +199,7 @@ class StudentNotebookTests(unittest.TestCase):
                         break
 
     def test_parser_rejects_missing_bare_modifiers(self):
-        for step in ("3.4", "3.7"):
+        for step in ("3.4", "3.7", "4.4", "4.5"):
             record = next(r for r in exports.export_steps() if r["id"] == step)
             groups = copy.deepcopy(record["student_plink_options"])
             for group in groups:

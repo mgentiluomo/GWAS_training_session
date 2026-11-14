@@ -6,14 +6,14 @@
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c",
+  "source_sha256": "33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We test whether missing calls differ between cases and controls.",
     "why": "A variant can have a high overall call rate and still have unequal missingness in the two groups. Cases are people with the disease. Controls are people without it. Together they form the [phenotype](docs/glossary.md#phenotype) groups. If failed calls depend on the genotype, this can create a false association.\n\nThe test gives a [p-value](docs/glossary.md#p-value). The p-value tells us how unlikely the observed difference would be if both groups had the same amount of missing data. It is not the probability that the variant is an error.\n\nWith many variants, some small p-values appear by chance. So we use a screening cutoff that we fixed before the analysis. The cutoff is 0.00001.",
     "you_need": "The dataset from step 4.1, which we call state 4.1. You also need the Disease column, which you joined in step 2.7.",
-    "command": "```{r s4-2}\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048\n```\n\nThe first command runs the test. R then makes a list of the variant IDs with p below 0.00001. The second command removes the variants on that list.\n\n`--test-missing` compares the missing calls of cases and controls.\n\n`--exclude` removes the variants named in the list file. This list is called an [exclusion list](docs/glossary.md#exclusion-list).\n\n`--pfile` selects the PLINK 2 input files.\n\n`--make-pgen` writes a new copy of the data in PLINK 2 format.\n\n`--out` sets the start of the names of the new files.\n\n`--threads 2` limits PLINK to two worker threads.\n\n`--memory 2048` sets the memory PLINK may use, in MiB.",
-    "expected_result": "120 variants are excluded. 295,439 variants and 1,844 samples remain.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
+    "command": "```{r s4-2}\n# 1. Compare missing results in people with and without the disease.\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\n# 2. Read the test results and list variants with p-values below 0.00001.\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\n# 3. Remove the listed variants and save the remaining data.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided/s4-2_missing --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048\n```\n\nThe first command runs the test. R then makes a list of the variant IDs with p below 0.00001. The second command removes the variants on that list.\n\n`--test-missing` compares the missing calls of cases and controls.\n\n`--exclude` removes the variants named in the list file. This list is called an [exclusion list](docs/glossary.md#exclusion-list).\n\n`--pfile` selects the PLINK 2 input files.\n\n`--make-pgen` writes a new copy of the data in PLINK 2 format.\n\n`--out` sets the start of the names of the new files.\n\n`--threads 2` limits PLINK to two worker threads.\n\n`--memory 2048` sets the memory PLINK may use, in MiB.",
+    "expected_result": "120 variants are excluded. 295,439 variants and 1,844 samples remain.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the input file named in the error message, and check the previous step. Keep your command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "It can reveal calling that depends on case or control status, differences in how the groups were processed, and some missingness that depends on the genotype. A significant result does not tell you the cause in the laboratory.",
     "quick_check": "Can a variant pass the overall 98% call-rate rule and still fail this check?\n\n<details><summary>Show the answer</summary>\n\nYes. Its few missing calls can all fall in one group, for example only in the cases.\n\n</details>",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s4-2",
-      "code": "report <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)",
+      "code": "# 1. Compare missing results in people with and without the disease.\nreport <- guided_path(cfg, \"4.2\", \"missing\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--test-missing\", \"--out\", report))\n# 2. Read the test results and list variants with p-values below 0.00001.\nx <- guided_table(paste0(report, \".missing\"))\np <- as.numeric(x$P)\nexclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, \"4.2\", \"exclude.txt\"))\n# 3. Remove the listed variants and save the remaining data.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"4.1\"), \"--exclude\", exclude, \"--make-pgen\", \"--out\", guided_path(cfg, \"4.2\")))\n# Course bookkeeping: records the counts for the next step. Do not change.\nops <- guided_replay_lists(cfg, \"4.2\", \"4.1\")\nguided_register(cfg, \"4.2\", \"4.1\", 1844, 295439, operations = ops)",
       "run_by_default": true
     }
   ],
@@ -66,5 +66,50 @@
     ]
   },
   "figures": [],
-  "success_line": "120 variants are excluded. 295,439 variants and 1,844 samples remain."
+  "student_summary": "We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 0.00001, which indicate differences that are very unlikely if missing results occur equally in both groups.",
+  "student_plink_options": [
+    {
+      "label": "compare missing results",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-1_state."
+        },
+        {
+          "name": "--test-missing",
+          "explanation": "Tests whether missing genotype calls differ between people with and without the disease."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts the test report file names with results/guided/s4-2_missing."
+        }
+      ]
+    },
+    {
+      "label": "remove variants with unequal missing results",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-1_state."
+        },
+        {
+          "name": "--exclude",
+          "explanation": "Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 0.00001."
+        },
+        {
+          "name": "--make-pgen",
+          "explanation": "Saves the remaining data as PGEN, PVAR and PSAM files."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts the output file names with results/guided/s4-2_state."
+        }
+      ]
+    }
+  ],
+  "success_line": "120 variants are excluded. 295,439 variants and 1,844 samples remain.",
+  "verification_notes": [
+    "\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.\n"
+  ],
+  "student_expected_result": "120 variants are excluded. 295,439 variants and 1,844 samples remain."
 }
