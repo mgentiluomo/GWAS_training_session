@@ -1,5 +1,6 @@
 """Check student delivery, option coverage and the tracked notebook freshness."""
 import copy
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -7,6 +8,7 @@ import re
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -130,7 +132,8 @@ class StudentNotebookTests(unittest.TestCase):
             source = (ROOT / "R/guided.R").read_text(encoding="utf-8")
             (root / "R/guided.R").write_text(source.replace("s2-8_state.pgen", "wrong.pgen"), encoding="utf-8")
             from unittest.mock import patch
-            with patch.object(students, "export_modules", return_value=exports.export_modules()):
+            with patch.object(students, "export_modules", return_value=exports.export_modules()), patch.object(
+                    students, "build_models", return_value=students.build_models()):
                 with self.assertRaisesRegex(ValueError, "module_meta disagree"):
                     students.sync_module_check(root, check=True)
 
@@ -193,6 +196,167 @@ class StudentNotebookTests(unittest.TestCase):
                                      "files": [{"base": "output", "path": "../elsewhere"}]}}
         with self.assertRaises(ValueError):
             exports.module_prerequisites(metadata)
+
+    def test_module_three_bytes_match_tracked_head(self):
+        previous = subprocess.run(["git", "show", "HEAD:notebooks/module_03_sample_quality_control.Rmd"],
+                                  cwd=ROOT, check=True, capture_output=True).stdout
+        self.assertEqual(students.module_three()[1].encode("utf-8"), previous)
+        before = (ROOT / "notebooks/module_03_sample_quality_control.Rmd").read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            target = destination / "module_03_sample_quality_control.Rmd"
+            target.write_bytes(before)
+            students.export_notebooks(destination)
+            self.assertEqual(target.read_bytes(), before)
+
+    def test_new_kinds_in_temporary_lesson_copies(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            shutil.copytree(ROOT / "lessons", root / "lessons")
+            path = next((root / "lessons").glob("module_01_*.Rmd"))
+            original = path.read_text(encoding="utf-8")
+            heading = next(m for m in exports.STEP.finditer(original) if m.group(2) == "8")
+            for kind in ("reading", "outside_r"):
+                metadata = {"student_summary": "Read the explanation.", "student_kind": kind}
+                if kind == "outside_r":
+                    metadata["student_action"] = "Download the file. Open it in RStudio."
+                text = original[:heading.end()] + '\n<!-- step_meta: ' + json.dumps(metadata) + ' -->\n' + original[heading.end():]
+                path.write_text(text, encoding="utf-8")
+                record = next(r for r in exports.export_steps(root) if r["id"] == "1.8")
+                self.assertEqual(record["student_kind"], kind)
+                self.assertEqual(record["r_commands"], [])
+                record.pop("student_kind")
+                with self.assertRaises(ValueError):
+                    exports.step_metadata({"student_summary": "Read it."}, record)
+            self.assertEqual(students.build_models(root)[0]["module"], 3)
+
+    def test_kind_validation(self):
+        record = {"id": "0.1", "r_commands": [], "plink": {"commands": [], "options": []}}
+        for metadata in (
+                {"student_kind": "outside_r"}, {"student_kind": "unknown"},
+                {"student_kind": "reading", "student_action": "Click it."},
+                {"student_kind": "reading", "student_plink_options": []},
+                {"student_kind": "reading", "student_summary": "Two\nparagraphs"},
+                {"student_kind": "outside_r", "student_action": "\u2014"}):
+            with self.subTest(metadata=metadata), self.assertRaises(ValueError):
+                exports.step_metadata(metadata, copy.deepcopy(record))
+        record["r_commands"] = [{"code": "x <- 1", "label": "s0-1"}]
+        with self.assertRaises(ValueError):
+            exports.step_metadata({"student_kind": "reading"}, record)
+
+    def fake_models(self):
+        models = []
+        for number in range(8):
+            models.append({"module": number, "title": f"Topic {number}",
+                           "source": f"lessons/module_0{number}_topic.Rmd", "source_sha256": "hash",
+                           "prerequisites": {"checkpoint": None, "restart_step": None, "files": []},
+                           "setup_code": 'source("R/guided.R")\ncfg <- guided_init()' if number else "",
+                           "steps": [{"id": f"{number}.1", "title": "Read", "anchor": f"step-{number}-1",
+                                      "summary": "Read the idea.", "kind": "reading", "action": None,
+                                      "chunks": [], "option_groups": [], "terminal_commands": [], "expected_result": ""}]})
+        models[0]["steps"][0].update(kind="outside_r", action="Install R.")
+        return models
+
+    def test_complete_notebook_and_format_registry(self):
+        models = self.fake_models()
+        outputs = students.notebook_outputs(models)
+        self.assertEqual(len(outputs), 9)
+        complete = outputs["gwas_course_complete.Rmd"]
+        self.assertEqual(complete.count('title: "GWAS course: modules 0 to 7"'), 1)
+        self.assertEqual(complete.count("---\n"), 2)
+        self.assertEqual(complete.count("Open `GWAS_course.Rproj`"), 1)
+        self.assertEqual(complete.count("cfg <- guided_init()"), 1)
+        self.assertLess(complete.index("# Module 0:"), complete.index("# Module 1:"))
+        for number in range(8):
+            self.assertIn(f"# Module {number}: Topic {number}", complete)
+            self.assertIn(f"module{number}_check", complete)
+            self.assertIn(f"module-{number}/step-{number}-1", complete)
+        self.assertNotIn('source("R/guided.R")', complete.split("# Module 1:")[0])
+        self.assertIn('setwd("..")', complete)
+        self.assertIn("What you do: Install R.", complete)
+        self.assertIn("This step is reading only. There is no code to run.", complete)
+        self.assertNotIn("### Expected result", complete)
+        self.assertNotIn("### What each option does", complete)
+        self.assertNotIn("### PLINK terminal equivalent", complete)
+        self.assertNotIn("gwas_course_complete.Rmd", students.notebook_outputs(models[:4]))
+        with patch.dict(students.RENDERERS, {"test": lambda models, complete=False: "rendered"}):
+            self.assertEqual(set(students.notebook_outputs(models[:2], "test").values()), {"rendered"})
+
+    def test_models_enable_arbitrary_subsets_and_keep_literal_chunks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "lessons").mkdir()
+            modules, records = [], []
+            for number in range(8):
+                source = f"lessons/module_0{number}_test.Rmd"
+                literal = f'```{{r s{number}-1, eval=FALSE}}\nx <- {number}\n```'
+                (root / source).write_text(literal + '\n', encoding="utf-8")
+                modules.append({"module": number, "source": source, "title": f"Test {number}",
+                                "source_sha256": "hash"})
+                if number:
+                    modules[-1]["prerequisites"] = {"checkpoint": None, "restart_step": None,
+                                                   "files": [{"base": "data", "path": "input.tsv"}]}
+                records.append({"id": f"{number}.1", "module": number, "title": "Test", "anchor": f"step-{number}-1",
+                                "student_summary": "Run the code.", "student_plink_options": [],
+                                "student_expected_result": "A value.", "setup_code": "",
+                                "r_commands": [{"label": f"s{number}-1", "code": f"x <- {number}"}],
+                                "plink": {"commands": [], "options": []}})
+            with patch.object(students, "export_modules", return_value=modules), patch.object(
+                    students, "export_steps", return_value=records):
+                models = students.build_models(root)
+                self.assertEqual([m["module"] for m in models], list(range(8)))
+                for number, model in enumerate(models):
+                    self.assertEqual(model["steps"][0]["chunks"],
+                                     [(root / model["source"]).read_text(encoding="utf-8").rstrip()])
+                self.assertEqual(len(students.notebook_outputs(models)), 9)
+                for number in (0, 2, 4, 5, 7):
+                    records[number].pop("student_summary")
+                models = students.build_models(root)
+                self.assertEqual([m["module"] for m in models], [1, 3, 6])
+                self.assertEqual(len(students.notebook_outputs(models)), 3)
+                table = students.module_check_table(root, models)
+                for number in range(8):
+                    self.assertEqual(f'`{number}` = list(' in table, number in (1, 3, 6))
+                records.append({**records[1], "id": "1.2"})
+                records[-1].pop("student_summary")
+                self.assertEqual([m["module"] for m in students.build_models(root)], [3, 6])
+                modules[6].pop("prerequisites")
+                with self.assertRaisesRegex(ValueError, "module_meta prerequisites"):
+                    students.build_models(root)
+
+    def test_multiple_file_freshness_is_read_only(self):
+        models = self.fake_models()
+        with tempfile.TemporaryDirectory() as directory, patch.object(students, "build_models", return_value=models):
+            root = Path(directory)
+            (root / "R").mkdir()
+            guided = root / "R/guided.R"
+            guided.write_text("# BEGIN GENERATED MODULE INPUTS\n# END GENERATED MODULE INPUTS\n", encoding="utf-8")
+            destination = root / "notebooks"
+            students.export_notebooks(destination, root=root)
+            students.export_notebooks(destination, check=True, root=root)
+            self.assertEqual(len(list(destination.glob("*.Rmd"))), 9)
+            (destination / "module_01_topic.Rmd").unlink()
+            (destination / "module_02_topic.Rmd").write_text("stale", encoding="utf-8")
+            (destination / "module_04_old.Rmd").write_text("old", encoding="utf-8")
+            before = {p.name: p.read_bytes() for p in destination.iterdir()}
+            with self.assertRaises(SystemExit) as error:
+                students.export_notebooks(destination, check=True, root=root)
+            for name in ("module_01_topic.Rmd", "module_02_topic.Rmd", "module_04_old.Rmd"):
+                self.assertIn(name, str(error.exception))
+            self.assertEqual(before, {p.name: p.read_bytes() for p in destination.iterdir()})
+            with patch.object(students, "build_models", return_value=models[:2]):
+                with self.assertRaises(ValueError):
+                    students.export_notebooks(destination, check=True, root=root)
+                students.export_notebooks(destination, root=root)
+                with self.assertRaises(SystemExit):
+                    students.export_notebooks(destination, check=True, root=root)
+
+    def test_data_only_prerequisites(self):
+        spec = {"checkpoint": None, "restart_step": None, "files": [{"base": "data", "path": "input.tsv"}]}
+        self.assertEqual(exports.module_prerequisites({"prerequisites": spec}), spec)
+        for change in ({"restart_step": "1.1"}, {"files": [{"base": "output", "path": "state.pgen"}]}):
+            with self.assertRaises(ValueError):
+                exports.module_prerequisites({"prerequisites": {**spec, **change}})
 
 
 if __name__ == "__main__":

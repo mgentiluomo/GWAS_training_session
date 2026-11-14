@@ -223,14 +223,27 @@ def validate_student_option(option: dict, step: str, parent: bool = False) -> No
 
 def step_metadata(metadata: dict, record: dict) -> dict:
     """Validate optional UI metadata authored beside its canonical step."""
-    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line", "student_summary", "student_plink_options"}:
+    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line", "student_summary", "student_plink_options", "student_kind", "student_action"}:
         raise ValueError(f"Unknown step metadata in {record['id']}.")
     result = {}
-    if "student_summary" in metadata:
-        summary = metadata["student_summary"]
-        if not isinstance(summary, str) or not summary.strip() or "\n" in summary or "\u2014" in summary:
-            raise ValueError(f"A student summary must be a non-empty paragraph in {record['id']}.")
-        result["student_summary"] = summary
+    for field in ("student_summary", "student_kind", "student_action"):
+        if field in metadata:
+            value = metadata[field]
+            if not isinstance(value, str) or not value.strip() or any(c in value for c in ("\n", "\r", "\u2014")):
+                raise ValueError(f"{field} must be a non-empty paragraph in {record['id']}.")
+            result[field] = value
+    if any(key.startswith("student_") for key in metadata):
+        kind = metadata.get("student_kind", "code" if record["r_commands"] else None)
+        if kind not in {"code", "reading", "outside_r"}:
+            raise ValueError(f"A step without R chunks needs student_kind in {record['id']}.")
+        if bool(record["r_commands"]) != (kind == "code"):
+            raise ValueError(f"student_kind disagrees with R chunks in {record['id']}.")
+        if kind == "outside_r" and "student_action" not in result:
+            raise ValueError(f"outside_r needs student_action in {record['id']}.")
+        if kind != "outside_r" and "student_action" in result:
+            raise ValueError(f"student_action requires outside_r in {record['id']}.")
+        if kind != "code" and "student_plink_options" in metadata:
+            raise ValueError(f"Non-code steps have no student option tables in {record['id']}.")
     if "student_plink_options" in metadata:
         groups = metadata["student_plink_options"]
         commands = record["plink"]["commands"]
@@ -379,6 +392,7 @@ def export_steps(root: Path = ROOT) -> list[dict]:
                 record.update(step_metadata(json.loads(metadata[0]), record))
             if verification_notes:
                 record["verification_notes"] = verification_notes
+            if verification_notes or "student_summary" in record:
                 record["student_expected_result"] = re.sub(r"<!--.*?-->", "", CHUNK.sub("", student_expected), flags=re.S).strip()
             interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
             if interactive:
@@ -424,9 +438,11 @@ def module_prerequisites(metadata: dict) -> dict:
         raise ValueError("Module metadata must contain prerequisites.")
     spec = metadata["prerequisites"]
     if (not isinstance(spec, dict) or set(spec) != {"checkpoint", "restart_step", "files"}
-            or not all(isinstance(spec[key], str) and re.fullmatch(r"[0-7]\.\d+", spec[key])
+            or not all(spec[key] is None or isinstance(spec[key], str) and re.fullmatch(r"[0-7]\.\d+", spec[key])
                        for key in ("checkpoint", "restart_step"))
-            or not isinstance(spec["files"], list) or not spec["files"]):
+            or (spec["checkpoint"] is None) != (spec["restart_step"] is None)
+            or not isinstance(spec["files"], list)
+            or (spec["checkpoint"] is not None and not spec["files"])):
         raise ValueError("Prerequisites need a checkpoint, restart step and input files.")
     for entry in spec["files"]:
         if (not isinstance(entry, dict) or set(entry) != {"base", "path"}
@@ -434,6 +450,8 @@ def module_prerequisites(metadata: dict) -> dict:
                 or not entry["path"] or "\\" in entry["path"] or ":" in entry["path"]
                 or PurePosixPath(entry["path"]).is_absolute() or ".." in PurePosixPath(entry["path"]).parts):
             raise ValueError("Prerequisite files must be safe paths relative to data or output.")
+    if spec["checkpoint"] is None and any(entry["base"] != "data" for entry in spec["files"]):
+        raise ValueError("Prerequisites without a checkpoint may contain only data files.")
     return spec
 
 
@@ -459,8 +477,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--export-steps", type=Path)
     parser.add_argument("--export-main-script", type=Path)
-    parser.add_argument("--export-notebooks", type=Path, help="Export the module 3 student pilot to this folder.")
-    parser.add_argument("--check-notebooks", action="store_true", help="Fail if the student notebook is missing or out of date; write nothing.")
+    parser.add_argument("--export-notebooks", type=Path, help="Export enabled student modules and, when all eight are enabled, the complete notebook.")
+    parser.add_argument("--check-notebooks", action="store_true", help="Fail for missing, stale or unexpected student notebooks; write nothing.")
     args = parser.parse_args()
     if args.check_notebooks and not args.export_notebooks:
         parser.error("--check-notebooks requires --export-notebooks.")

@@ -1,8 +1,7 @@
-"""Generate the module 3 student notebook from the canonical lesson.
+"""Build student notebook models and render enabled main-path modules.
 
 Generate: python -B scripts/build_tutorial.py --export-notebooks notebooks
 Check: python -B scripts/build_tutorial.py --export-notebooks notebooks --check-notebooks
-The pilot deliberately exports no other module or complete-course notebook.
 """
 from __future__ import annotations
 
@@ -18,41 +17,120 @@ def notebook_links(text: str) -> str:
     return re.sub(r"(\]\()((?:docs|examples|lessons)/[^)\s]+)(\))", r"\1../\2\3", text)
 
 
-def module_three(root: Path = ROOT) -> tuple[str, str]:
-    module = next(item for item in export_modules(root) if item["module"] == 3)
-    records = [item for item in export_steps(root) if item["module"] == 3]
-    source = root / module["source"]
-    source_text = source.read_text(encoding="utf-8")
+def build_models(root: Path = ROOT) -> list[dict]:
+    """Return plain structured models, independent of the output format.
+
+    Incomplete modules stay disabled while authors add fields step by step.
+    Module 0 has no inputs beyond the project root.
+    """
+    records = export_steps(root)
+    models = []
+    for module in sorted(export_modules(root), key=lambda m: m["module"]):
+        steps = [r for r in records if r["module"] == module["module"]]
+        def ready(record):
+            kind = record.get("student_kind", "code" if record["r_commands"] else None)
+            return ("student_summary" in record and kind in {"code", "reading", "outside_r"}
+                    and (kind != "code" or all(k in record for k in ("student_plink_options", "student_expected_result")))
+                    and (kind != "outside_r" or "student_action" in record))
+        if not steps or not all(ready(r) for r in steps):
+            continue
+        number = module["module"]
+        spec = module.get("prerequisites")
+        if number == 0:
+            spec = spec or {"checkpoint": None, "restart_step": None, "files": []}
+            if spec != {"checkpoint": None, "restart_step": None, "files": []}:
+                raise ValueError("Module 0 needs only the project root.")
+        elif spec is None:
+            raise ValueError(f"Enabled module {number} needs module_meta prerequisites.")
+        chunks = {m.group(1): m.group().rstrip() for m in CHUNK.finditer(
+            (root / module["source"]).read_text(encoding="utf-8"))}
+        model_steps = []
+        for record in steps:
+            # Validate even when callers supply exported fixtures directly.
+            from course_exports import step_metadata
+            step_metadata({k: v for k, v in record.items() if k in {
+                "student_summary", "student_kind", "student_action", "student_plink_options"}}, record)
+            model_steps.append({
+                "id": record["id"], "title": record["title"], "anchor": record["anchor"],
+                "summary": record["student_summary"], "kind": record.get("student_kind", "code"),
+                "action": record.get("student_action"),
+                "chunks": [chunks[c["label"]] for c in record["r_commands"]],
+                "option_groups": record.get("student_plink_options", []),
+                "expected_result": record.get("student_expected_result", ""),
+                "terminal_commands": record["plink"]["commands"],
+            })
+        models.append({"module": number, "title": module["title"], "prerequisites": spec,
+                       "source": module["source"], "source_sha256": module["source_sha256"],
+                       "setup_code": next((r["setup_code"] for r in steps if r["setup_code"]), ""),
+                       "steps": model_steps})
+    return models
+
+
+ROOT_CHECK = [
+    'if (!file.exists("config.R") || !file.exists("R/guided.R")) {',
+    '  stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)',
+    '}',
+    'if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))',
+]
+
+
+def check_chunk(model: dict) -> list[str]:
+    number = model["module"]
+    return [f"```{{r module{number}_check}}",
+            'if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")',
+            *(ROOT_CHECK if number == 0 else [f'source("R/guided.R"); guided_check_module({number})']),
+            "```", ""]
+
+
+def render_rmd(models: list[dict], complete: bool = False) -> str:
+    module = models[0]
+    number = module["module"]
+    title = "GWAS course: modules 0 to 7" if complete else f'Module {number}: {module["title"]}'
     lines = [
-        "---", 'title: "Module 3: Sample quality control"', "output: html_notebook",
-        f'course_source_sha256: "{module["source_sha256"]}"', "---", "",
+        "---", f'title: {json.dumps(title, ensure_ascii=False)}', "output: html_notebook",
+        *([] if complete else [f'course_source_sha256: "{module["source_sha256"]}"']), "---", "",
         "Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.",
         "All data are simulated. Read each summary, run its chunk and compare your result with the expected result.",
         "The linked step pages explain the ideas and provide troubleshooting.", "",
-        "You need the full [checkpoint at step 2.8](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-8) before you start.", "",
-        "```{r module3_check}",
-        'if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")',
-        'source("R/guided.R"); guided_check_module(3)', "```", "",
-        "```{r module3_setup}", records[0]["setup_code"], "```", "",
     ]
-    chunks = {m.group(1): m for m in CHUNK.finditer(source_text)}
+    setup_written = False
+    for model in models:
+        number = model["module"]
+        if complete:
+            lines.extend([f'# Module {number}: {model["title"]}', ""])
+        elif model["prerequisites"]["checkpoint"] is not None:
+            checkpoint = model["prerequisites"]["checkpoint"]
+            previous = checkpoint.split(".")[0]
+            anchor = checkpoint.replace(".", "-")
+            lines.extend([f"You need the full [checkpoint at step {checkpoint}](https://www.manuelgentiluomo.it/teaching/gwas/module-{previous}/step-{anchor}) before you start.", ""])
+        lines.extend(check_chunk(model))
+        if model["setup_code"] and not setup_written:
+            lines.extend([f"```{{r module{number}_setup}}", model["setup_code"], "```", ""])
+            setup_written = True
+        lines.extend(render_steps_rmd(model))
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def render_steps_rmd(model: dict) -> list[str]:
+    lines = []
+    records = model["steps"]
     for record in records:
-        if "student_summary" not in record or "student_plink_options" not in record or "student_expected_result" not in record:
-            raise ValueError(f"Missing student fields in step {record['id']}.")
         lines.extend([
-            f'## Step {record["id"]} · {record["title"]}', "", record["student_summary"], "",
-            f'[Read step {record["id"]} on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/{record["anchor"]}).', "",
+            f'## Step {record["id"]} · {record["title"]}', "", record["summary"], "",
+            f'[Read step {record["id"]} on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-{model["module"]}/{record["anchor"]}).', "",
         ])
-        if record["r_commands"]:
-            for command in record["r_commands"]:
-                # Preserve the complete original fence, chunk options and literal code.
-                lines.extend([chunks[command["label"]].group().rstrip(), ""])
-        else:
-            lines.extend(["No code to run in this step", ""])
+        if record["kind"] != "code":
+            if record["kind"] == "reading":
+                lines.extend(["This step is reading only. There is no code to run.", ""])
+            else:
+                lines.extend(["No code to run in this step.", "", f'What you do: {record["action"]}', ""])
+            continue
+        for chunk in record["chunks"]:
+            lines.extend([chunk, ""])
         lines.extend(["### What each option does", ""])
-        if record["student_plink_options"]:
-            for index, group in enumerate(record["student_plink_options"], 1):
-                if len(record["student_plink_options"]) > 1:
+        if record["option_groups"]:
+            for index, group in enumerate(record["option_groups"], 1):
+                if len(record["option_groups"]) > 1:
                     lines.extend([f'**Command {index}: {group["label"]}**', ""])
                 lines.extend(["| Option or modifier | What it does |", "| --- | --- |"])
                 for option in group["options"]:
@@ -62,7 +140,7 @@ def module_three(root: Path = ROOT) -> tuple[str, str]:
                         explanation = modifier["explanation"].replace("|", "\\|")
                         lines.append(f'| &nbsp;&nbsp;&rarr; `{modifier["name"]}` | {explanation} |')
                 lines.append("")
-            resources = [student_plink_resources(command) for command in record["plink"]["commands"]]
+            resources = [student_plink_resources(command) for command in record["terminal_commands"]]
             threads = resources[0]["--threads"]
             memory = resources[0]["--memory"]
             threads_word = {2: "two"}[threads]
@@ -71,38 +149,63 @@ def module_three(root: Path = ROOT) -> tuple[str, str]:
                 f"and `--memory {memory}` (PLINK uses at most about {memory // 1024} GB of memory).", ""])
         else:
             lines.extend(["No PLINK options are used in this step.", ""])
-        lines.extend(["### Expected result", "", notebook_links(record["student_expected_result"]), "",
+        lines.extend(["### Expected result", "", notebook_links(record["expected_result"]), "",
                       "### PLINK terminal equivalent", ""])
-        if record["plink"]["commands"]:
+        if record["terminal_commands"]:
             lines.extend(["These commands are shown for reference. Run the R chunk above to follow the course.",
                           "R creates any lists needed between PLINK commands. On Windows, use `bin\\plink2.exe`.",
-                          "", "```sh", *record["plink"]["commands"], "```", ""])
+                          "", "```sh", *record["terminal_commands"], "```", ""])
         else:
             lines.extend(["No PLINK equivalent", ""])
-    return source.name, "\n".join(lines).rstrip() + "\n"
+    return lines
 
 
-def module_check_table(root: Path = ROOT) -> str:
+RENDERERS = {"rmd": render_rmd}
+
+
+def notebook_outputs(models: list[dict], format: str = "rmd") -> dict[str, str]:
+    renderer = RENDERERS[format]
+    suffix = ".Rmd" if format == "rmd" else "." + format
+    outputs = {Path(m["source"]).with_suffix(suffix).name: renderer([m]) for m in models}
+    if {m["module"] for m in models} == set(range(8)):
+        outputs["gwas_course_complete" + suffix] = renderer(sorted(models, key=lambda m: m["module"]), complete=True)
+    return outputs
+
+
+def module_three(root: Path = ROOT) -> tuple[str, str]:
+    """Compatibility entry point for the original pilot checks."""
+    model = next(m for m in build_models(root) if m["module"] == 3)
+    return Path(model["source"]).name, render_rmd([model])
+
+
+def module_check_table(root: Path = ROOT, models: list[dict] | None = None) -> str:
     """Generate the small R prerequisite table from the lesson's module_meta."""
-    module = next(item for item in export_modules(root) if item["module"] == 3)
-    spec = module["prerequisites"]
-    quote = lambda value: json.dumps(value, ensure_ascii=False)
-    rows = ["# BEGIN GENERATED MODULE 3 INPUTS", "# Source: module_meta in lessons/module_03_sample_quality_control.Rmd.",
+    models = build_models(root) if models is None else models
+    quote = lambda value: "NULL" if value is None else json.dumps(value, ensure_ascii=False)
+    rows = ["# BEGIN GENERATED MODULE INPUTS", "# Sources: module_meta in enabled lessons (module 0 needs only the project root).",
             "# Regenerate with --export-notebooks; do not edit this table.",
-            "guided_module_inputs <- list(`3` = list(",
-            f'  checkpoint = {quote(spec["checkpoint"])}, restart_step = {quote(spec["restart_step"])},']
-    for base in ("data", "output"):
-        values = ", ".join(quote(entry["path"]) for entry in spec["files"] if entry["base"] == base)
-        rows.append(f'  {base} = c({values})' + ("," if base == "data" else "))"))
-    return "\n".join(rows + ["# END GENERATED MODULE 3 INPUTS"])
+            "guided_module_inputs <- list("]
+    for index, module in enumerate(models):
+        spec = module["prerequisites"]
+        rows.extend([f'`{module["module"]}` = list(',
+                     f'  checkpoint = {quote(spec["checkpoint"])}, restart_step = {quote(spec["restart_step"])},'])
+        for base in ("data", "output"):
+            values = ", ".join(quote(entry["path"]) for entry in spec["files"] if entry["base"] == base)
+            vector = f"c({values})" if values else "character(0)"
+            rows.append(f'  {base} = {vector}' + ("," if base == "data" else ")" + ("," if index < len(models) - 1 else "")))
+    rows.append(")")
+    # The inline module 0 check and guided_check_module share this generated definition.
+    rows.extend(["guided_check_project_root <- function() {", *["  " + line for line in ROOT_CHECK],
+                 "  invisible(TRUE)", "}"])
+    return "\n".join(rows + ["# END GENERATED MODULE INPUTS"])
 
 
-def sync_module_check(root: Path, check: bool) -> None:
+def sync_module_check(root: Path, check: bool, models: list[dict] | None = None) -> None:
     path = root / "R/guided.R"
     text = path.read_text(encoding="utf-8")
-    pattern = r"# BEGIN GENERATED MODULE 3 INPUTS.*?# END GENERATED MODULE 3 INPUTS"
+    pattern = r"# BEGIN GENERATED MODULE(?: 3)? INPUTS.*?# END GENERATED MODULE(?: 3)? INPUTS"
     match = re.search(pattern, text, re.S)
-    expected = module_check_table(root)
+    expected = module_check_table(root, models)
     if not match:
         raise ValueError("R/guided.R needs the generated module input table.")
     if check and match.group() != expected:
@@ -112,16 +215,26 @@ def sync_module_check(root: Path, check: bool) -> None:
 
 
 def export_notebooks(destination: Path, check: bool = False, root: Path = ROOT) -> None:
-    sync_module_check(root, check)
-    name, content = module_three(root)
-    path = destination / name
-    expected = content.encode("utf-8")
+    models = build_models(root)
+    outputs = notebook_outputs(models)
+    sync_module_check(root, check, models)
+    generated_name = re.compile(r"(?:module_0[0-7]_.+|gwas_course_complete)\.Rmd$")
+    unexpected = sorted(p.name for p in destination.glob("*.Rmd")
+                        if generated_name.fullmatch(p.name) and p.name not in outputs)
     if check:
         # Git may check out CRLF on Windows. Only line endings may differ.
-        if not path.is_file() or path.read_text(encoding="utf-8") != content:
-            raise SystemExit(f"Student notebook is missing or out of date: {path}. Regenerate with --export-notebooks {destination}.")
-        print(f"Student notebook is up to date: {path}")
+        stale = [name for name, content in outputs.items() if not (destination / name).is_file()
+                 or (destination / name).read_text(encoding="utf-8") != content]
+        if stale or unexpected:
+            raise SystemExit(f"Student notebooks missing or out of date: {stale}; unexpected: {unexpected}. Regenerate with --export-notebooks {destination}.")
+        print(f"Student notebooks are up to date: {len(outputs)} files in {destination}")
         return
     destination.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(expected)
-    print(f"Exported student pilot: {path}")
+    for name, content in outputs.items():
+        path = destination / name
+        # Avoid changing existing bytes solely because of Windows checkout newlines.
+        if not path.is_file() or path.read_text(encoding="utf-8") != content:
+            path.write_bytes(content.encode("utf-8"))
+        print(f"Exported student notebook: {path}")
+    if unexpected:
+        print(f"Unexpected notebooks retained for author review: {unexpected}")

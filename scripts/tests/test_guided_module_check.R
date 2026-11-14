@@ -6,6 +6,7 @@ test_guided_module_check <- function() {
   original_dir <- getwd()
   original_env <- Sys.getenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR"), unset = NA_character_)
   original_knit_root <- if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$get("root.dir") else NULL
+  original_inputs <- guided_module_inputs
   folder <- tempfile("module3-check-")
   dir.create(folder)
   on.exit({
@@ -14,6 +15,7 @@ test_guided_module_check <- function() {
       if (is.na(original_env[[key]])) Sys.unsetenv(key) else do.call(Sys.setenv, setNames(list(original_env[[key]]), key))
     }
     if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = original_knit_root)
+    guided_module_inputs <<- original_inputs
     unlink(folder, recursive = TRUE)
   }, add = TRUE)
   Sys.unsetenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR"))
@@ -117,6 +119,28 @@ test_guided_module_check <- function() {
   Sys.unsetenv("COURSE_OUTPUT_DIR")
   succeeds()
   cat("Module 3 input checks passed: root, metadata, checkpoint files and folder overrides.\n")
+  Sys.unsetenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR"))
+  guided_module_inputs[["1"]] <<- list(checkpoint = NULL, restart_step = NULL,
+                                      data = "module1.tsv", output = character(0))
+  message <- tryCatch(guided_check_module(1), error = conditionMessage)
+  stopifnot(identical(message,
+    "Course metadata are missing. Complete step 0.7 before module 1. Missing: data/course/module1.tsv"))
+  touch("data/course/module1.tsv")
+  stopifnot(identical(capture.output(result <- guided_check_module(1)), "Module 1 input files are present."),
+            isTRUE(result))
+  guided_module_inputs[["4"]] <<- list(checkpoint = "3.8", restart_step = "4.1",
+                                      data = character(0), output = "s3-8_missing.pgen")
+  message <- tryCatch(guided_check_module(4), error = conditionMessage)
+  stopifnot(identical(message, paste0(
+    "Some saved files from step 3.8 are missing: results/guided/s3-8_missing.pgen",
+    '. Finish module 3 first. Or restart here with: restore_checkpoint("4.1") (use an empty folder).')))
+  guided_module_inputs[["0"]] <<- list(checkpoint = NULL, restart_step = NULL,
+                                      data = character(0), output = character(0))
+  stopifnot(isTRUE(guided_check_project_root()),
+            identical(capture.output(guided_check_module(0)), "Module 0 input files are present."))
+  message <- tryCatch(guided_check_module(99), error = conditionMessage)
+  stopifnot(identical(message, "No input check is defined for module 99."))
+  cat("General module checks passed: data-only, checkpoint, root-only and unknown modules.\n")
 }
 
 test_guided_module_check()
