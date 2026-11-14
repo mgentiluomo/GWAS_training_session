@@ -216,6 +216,11 @@ class StudentNotebookTests(unittest.TestCase):
             path = next((root / "lessons").glob("module_01_*.Rmd"))
             original = path.read_text(encoding="utf-8")
             heading = next(m for m in exports.STEP.finditer(original) if m.group(2) == "8")
+            # The lesson now carries its own metadata for this step. Remove it from the copy.
+            following = next(m.start() for m in exports.HEADING.finditer(original) if m.start() > heading.end())
+            section = exports.STEP_META.sub("", original[heading.end():following])
+            original = original[:heading.end()] + section + original[following:]
+            heading = next(m for m in exports.STEP.finditer(original) if m.group(2) == "8")
             for kind in ("reading", "outside_r"):
                 metadata = {"student_summary": "Read the explanation.", "student_kind": kind}
                 if kind == "outside_r":

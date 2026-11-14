@@ -6,13 +6,13 @@
   "anchor": "step-1-7",
   "title": "The export",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c",
+  "source_sha256": "c3d3f29c71322ca29327711459065876a677ac5a5b49be07e5663dfe63387d55",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Understand how the reports relate to the genotype files used for the analysis.",
     "why": "The report excerpts show how calls are labelled. The complete genotype table for the course is stored in a matching [BED/BIM/FAM set](docs/glossary.md#bed-bim-fam). The BED file stores the genotypes in a compact binary form. The BIM file describes the variants. The FAM file describes the samples and their order.\n\nThese three files belong together as one set. In module 2 we convert them to the native PLINK 2 format, called PGEN/PVAR/PSAM. We check the sample identity and order during the conversion.",
     "you_need": "The matched laboratory export from step 0.5, and the ideas from steps 1.1 to 1.6.",
-    "command": "```{r s1-7}\ninitial <- check_bed(cfg$input)\nprint(initial)\nstopifnot(initial$samples == 2016L, initial$variants == 299523L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "command": "```{r s1-7}\n# 1. Check the matching genotype files and count their samples and DNA sites.\ninitial <- check_bed(cfg$input)\n# 2. Display the counts and check the expected starting totals.\nprint(initial)\nstopifnot(initial$samples == 2016L, initial$variants == 299523L)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
     "expected_result": "2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Can you combine a BED from one release with a FAM from another if their sample counts match?\n\n<details><summary>Show the answer</summary>\n\nNo. Equal counts do not prove that the sample identity, the order or the genotypes match.\n\n</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s1-7",
-      "code": "initial <- check_bed(cfg$input)\nprint(initial)\nstopifnot(initial$samples == 2016L, initial$variants == 299523L)",
+      "code": "# 1. Check the matching genotype files and count their samples and DNA sites.\ninitial <- check_bed(cfg$input)\n# 2. Display the counts and check the expected starting totals.\nprint(initial)\nstopifnot(initial$samples == 2016L, initial$variants == 299523L)",
       "run_by_default": true
     }
   ],
@@ -33,5 +33,11 @@
     "options": []
   },
   "figures": [],
-  "success_line": "2,016 sample wells and 299,523 variants."
+  "student_summary": "We check that the three genotype files belong together and display their sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.",
+  "student_plink_options": [],
+  "success_line": "2,016 sample wells and 299,523 variants.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset."
+  ],
+  "student_expected_result": "2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype."
 }

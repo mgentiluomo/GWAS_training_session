@@ -38,7 +38,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c
+# SHA-256: c3d3f29c71322ca29327711459065876a677ac5a5b49be07e5663dfe63387d55
 
 # Chunk: setup
 source("R/guided.R")
@@ -46,44 +46,60 @@ cfg <- guided_init()
 
 
 # Chunk: s1-1
+# 1. Read the table describing the DNA sites on the array.
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+# 2. Count the rows and show the first site descriptions.
 cat(nrow(ann), "rows in the annotation\n")
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 
 
 # Chunk: s1-2
+# 1. Find the laboratory reports and check that there are three files.
 reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)
 stopifnot(length(reports) == 3L)
+# 2. Show the first 12 lines of the first report.
 readLines(reports[1], n = 12L)
 
 
 # Chunk: s1-3
+# 1. Count the array entries on each chromosome.
 table(ann$Chr)
+# 2. Check the total number of rows and look for repeated site names.
 stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
 
 
 # Chunk: s1-4
+# 1. Read the sample sheet as text to preserve sample labels.
 sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")
+# 2. Count measurements on each plate and labelled repeat measurements.
 table(sheet$Plate)
 sum(nzchar(sheet$Replicate_of))
+# 3. Check that the sheet contains 2,016 measurements.
 stopifnot(nrow(sheet) == 2016L)
 
 
 # Chunk: s1-5
+# 1. Read the report and find where its data section begins.
 lines <- readLines(reports[1], warn = FALSE)
 start <- match("[Data]", lines)
+# 2. Read the data as a table with semicolons separating its columns.
 example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")
+# 3. Show the first rows and summarise the quality scores as numbers.
 head(example)
 summary(as.numeric(example[["GC Score"]]))
 
 
 # Chunk: s1-6
+# 1. Check that the sheet contains the required laboratory labels.
 stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))
+# 2. Show the first rows to inspect the laboratory labels.
 head(sheet)
 
 
 # Chunk: s1-7
+# 1. Check the matching genotype files and count their samples and DNA sites.
 initial <- check_bed(cfg$input)
+# 2. Display the counts and check the expected starting totals.
 print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 

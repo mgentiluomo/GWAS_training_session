@@ -9,6 +9,10 @@ guided_module_inputs <- list(
   checkpoint = NULL, restart_step = NULL,
   data = character(0),
   output = character(0)),
+`1` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = c("array/sim2026_array_annotation.tsv", "final_report/SIM26_0213_FinalReport_simulated.txt", "final_report/SIM26_0286_FinalReport_simulated.txt", "final_report/SIM26_1775_FinalReport_simulated.txt", "lab_export/sample_sheet.csv", "lab_export/sim2026_lab.bed", "lab_export/sim2026_lab.bim", "lab_export/sim2026_lab.fam"),
+  output = character(0)),
 `3` = list(
   checkpoint = "2.8", restart_step = "3.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),

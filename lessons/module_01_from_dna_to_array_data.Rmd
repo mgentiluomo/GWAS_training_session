@@ -24,6 +24,8 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
+<!-- module_meta: {"prerequisites": {"checkpoint": null, "restart_step": null, "files": [{"base": "data", "path": "array/sim2026_array_annotation.tsv"}, {"base": "data", "path": "final_report/SIM26_0213_FinalReport_simulated.txt"}, {"base": "data", "path": "final_report/SIM26_0286_FinalReport_simulated.txt"}, {"base": "data", "path": "final_report/SIM26_1775_FinalReport_simulated.txt"}, {"base": "data", "path": "lab_export/sample_sheet.csv"}, {"base": "data", "path": "lab_export/sim2026_lab.bed"}, {"base": "data", "path": "lab_export/sim2026_lab.bim"}, {"base": "data", "path": "lab_export/sim2026_lab.fam"}]}} -->
+
 ## Module 1 at a glance {#module-1-overview}
 
 **What you will do.** You will look at the files that come out of a genotyping laboratory. You will read a table of array sites, a laboratory report and a sample sheet. You will then check the size of the genotype files that the rest of the course uses.
@@ -43,7 +45,7 @@ cfg <- guided_init()
 ## 1.1 SNPs and genotypes {#step-1-1}
 
 
-<!-- step_meta: {"success_line": "The annotation contains 299,523 rows."} -->
+<!-- step_meta: {"success_line": "The annotation contains 299,523 rows.", "student_summary": "We read a table describing the DNA sites measured by the array. We count its rows and look at site names, chromosome positions and possible DNA letters to understand what the array measures.", "student_plink_options": []} -->
 ### What we do
 
 Learn the difference between a DNA site, an allele and a genotype.
@@ -61,7 +63,9 @@ The checked array annotation file from step 0.5. An [annotation](../docs/glossar
 ### Command
 
 ```{r s1-1}
+# 1. Read the table describing the DNA sites on the array.
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+# 2. Count the rows and show the first site descriptions.
 cat(nrow(ann), "rows in the annotation\n")
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 ```
@@ -76,8 +80,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 A table with the site name, the chromosome, the [GRCh38](../docs/glossary.md#grch38) position and the two alleles on the [plus strand](../docs/glossary.md#plus-strand). GRCh38 is the version of the human reference genome that gives the positions. The annotation contains 299,523 rows. Array site names are not always rs identifiers.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -104,7 +108,7 @@ None.
 ## 1.2 How an array measures DNA {#step-1-2}
 
 
-<!-- step_meta: {"success_line": "The top of a simulated Final Report: first the header, then the start of the data section."} -->
+<!-- step_meta: {"success_line": "The top of a simulated Final Report: first the header, then the start of the data section.", "student_summary": "We find the three laboratory report files and read the first 12 lines of the first report. This shows how the laboratory organises information before we read the recorded DNA results.", "student_plink_options": []} -->
 ### What we do
 
 Learn why a fluorescence measurement is not the same as a genotype call.
@@ -124,8 +128,10 @@ The array annotation from step 1.1. You also need the example final reports supp
 ### Command
 
 ```{r s1-2}
+# 1. Find the laboratory reports and check that there are three files.
 reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)
 stopifnot(length(reports) == 3L)
+# 2. Show the first 12 lines of the first report.
 readLines(reports[1], n = 12L)
 ```
 
@@ -139,8 +145,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 The top of a simulated Final Report: first the header, then the start of the data section. The supplied reports contain genotype calls and GC scores. They do not contain raw intensity data, so you cannot redraw cluster plots in this exercise.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -169,7 +175,7 @@ None.
 ## 1.3 The Global Screening Array {#step-1-3}
 
 
-<!-- step_meta: {"success_line": "Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA)."} -->
+<!-- step_meta: {"success_line": "Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA).", "student_summary": "We count the array entries on each chromosome. We also check that the table has 299,523 rows and no repeated site names, so we can recognise the expected starting data.", "student_plink_options": []} -->
 ### What we do
 
 Learn what the array measures and what it leaves unmeasured.
@@ -187,7 +193,9 @@ The annotation that you inspected at step 1.1.
 ### Command
 
 ```{r s1-3}
+# 1. Count the array entries on each chromosome.
 table(ann$Chr)
+# 2. Check the total number of rows and look for repeated site names.
 stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
 ```
 
@@ -201,8 +209,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA). There are 299,523 array entries at the start. The same genomic site can appear under two different names. We review this at step 4.5.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -229,7 +237,7 @@ None.
 ## 1.4 From sample to scanned chip {#step-1-4}
 
 
-<!-- step_meta: {"success_line": "Twenty-one plates, each with 96 wells, give 2,016 measurements."} -->
+<!-- step_meta: {"success_line": "Twenty-one plates, each with 96 wells, give 2,016 measurements.", "student_summary": "We read the sample sheet and count measurements on each laboratory plate. We count labelled repeat measurements and check that the sheet has 2,016 rows, because one person can have more than one measurement.", "student_plink_options": []} -->
 ### What we do
 
 Follow the identity of a sample through a plate and a laboratory well.
@@ -249,9 +257,12 @@ The sample sheet from step 0.5. The [sample sheet](../docs/glossary.md#sample-sh
 ### Command
 
 ```{r s1-4}
+# 1. Read the sample sheet as text to preserve sample labels.
 sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")
+# 2. Count measurements on each plate and labelled repeat measurements.
 table(sheet$Plate)
 sum(nzchar(sheet$Replicate_of))
+# 3. Check that the sheet contains 2,016 measurements.
 stopifnot(nrow(sheet) == 2016L)
 ```
 
@@ -265,8 +276,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 Twenty-one plates, each with 96 wells, give 2,016 measurements. Sixteen wells are labelled as technical replicates. The simulation started from 2,000 people.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -293,7 +304,7 @@ None.
 ## 1.5 Calling genotypes {#step-1-5}
 
 
-<!-- step_meta: {"success_line": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus."} -->
+<!-- step_meta: {"success_line": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus.", "student_summary": "We read the data section of a laboratory report and display its first rows. We summarise the GC scores, which describe the quality of recorded DNA results, to see what information the report provides.", "student_plink_options": []} -->
 ### What we do
 
 Read the call and score columns, and do not treat the score as certainty.
@@ -313,9 +324,12 @@ The example final reports from step 1.2.
 ### Command
 
 ```{r s1-5}
+# 1. Read the report and find where its data section begins.
 lines <- readLines(reports[1], warn = FALSE)
 start <- match("[Data]", lines)
+# 2. Read the data as a table with semicolons separating its columns.
 example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")
+# 3. Show the first rows and summarise the quality scores as numbers.
 head(example)
 summary(as.numeric(example[["GC Score"]]))
 ```
@@ -330,8 +344,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -358,7 +372,7 @@ None.
 ## 1.6 Problems born in the laboratory {#step-1-6}
 
 
-<!-- step_meta: {"success_line": "The table has the information that you need to study batch membership and labelled replicates."} -->
+<!-- step_meta: {"success_line": "The table has the information that you need to study batch membership and labelled replicates.", "student_summary": "We check that the sample sheet includes plate, well, sample and repeat-measurement labels, then display its first rows. These labels help us investigate laboratory problems during later checks.", "student_plink_options": []} -->
 ### What we do
 
 Link laboratory problems to the quality-control checks of later modules.
@@ -378,7 +392,9 @@ The sample sheet and the score examples from steps 1.4 and 1.5.
 ### Command
 
 ```{r s1-6}
+# 1. Check that the sheet contains the required laboratory labels.
 stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))
+# 2. Show the first rows to inspect the laboratory labels.
 head(sheet)
 ```
 
@@ -392,8 +408,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 The table has the information that you need to study batch membership and labelled replicates. No person is removed in module 1.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -420,7 +436,7 @@ None.
 ## 1.7 The export {#step-1-7}
 
 
-<!-- step_meta: {"success_line": "2,016 sample wells and 299,523 variants."} -->
+<!-- step_meta: {"success_line": "2,016 sample wells and 299,523 variants.", "student_summary": "We check that the three genotype files belong together and display their sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.", "student_plink_options": []} -->
 ### What we do
 
 Understand how the reports relate to the genotype files used for the analysis.
@@ -438,7 +454,9 @@ The matched laboratory export from step 0.5, and the ideas from steps 1.1 to 1.6
 ### Command
 
 ```{r s1-7}
+# 1. Check the matching genotype files and count their samples and DNA sites.
 initial <- check_bed(cfg$input)
+# 2. Display the counts and check the expected starting totals.
 print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 ```
@@ -453,8 +471,8 @@ R reads or calculates the displayed values without changing the genotype files.
 
 2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype.
 
-The tested PLINK version is defined in `config.R` and recorded in
-`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.
+<!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
+`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.<!-- verification_note:end -->
 
 </details>
 
@@ -481,6 +499,8 @@ None.
 ## 1.8 Where genetic data come from {#step-1-8}
 
 Reading, about 5 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We compare arrays, sequencing and predicted genotypes, which estimate unmeasured DNA results using a reference group. We read what each source measures and misses so we can understand which questions its data can answer.", "student_kind": "reading"} -->
 
 ### What we do
 
@@ -553,6 +573,8 @@ None.
 ## 1.9 A map of genetic file formats {#step-1-9}
 
 Reading, about 6 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We follow genetic files from laboratory measurements to analysis results. We compare what the formats store and the checks they need so we can choose suitable files and avoid mixing incompatible information.", "student_kind": "reading"} -->
 
 ### What we do
 
@@ -675,6 +697,8 @@ None.
 ## 1.10 The formats you will meet most often {#step-1-10}
 
 Reading, about 9 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We read small invented examples to learn what common genetic file fields mean. We examine example conversion commands without running them, so we can understand what conversions preserve and what they may lose.", "student_kind": "reading"} -->
 
 ### What we do
 
@@ -987,6 +1011,8 @@ None. The supplied examples are separate reading aids.
 ## 1.11 How large projects share genetic data {#step-1-11}
 
 Reading, about 3 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We read how large research projects provide genetic data in several formats. We compare the information each format retains and the work it supports to understand why one study may supply several kinds of files.", "student_kind": "reading"} -->
 
 ### What we do
 
