@@ -504,12 +504,14 @@ def main() -> None:
     parser.add_argument("--export-main-script", type=Path)
     parser.add_argument("--export-notebooks", type=Path, help="Export enabled student modules and, when all eight are enabled, the complete notebook.")
     parser.add_argument("--check-notebooks", action="store_true", help="Fail for missing, stale or unexpected student notebooks; write nothing.")
+    parser.add_argument("--notebook-format", choices=("rmd", "qmd"), default=None, help="Output format for student notebooks (default: the generator default, rmd).")
     args = parser.parse_args()
     if args.check_notebooks and not args.export_notebooks:
         parser.error("--check-notebooks requires --export-notebooks.")
     if args.export_notebooks:
         from student_notebooks import export_notebooks
-        export_notebooks(args.export_notebooks, check=args.check_notebooks)
+        export_notebooks(args.export_notebooks, check=args.check_notebooks,
+                         **({} if args.notebook_format is None else {"format": args.notebook_format}))
     if args.export_steps:
         records = export_steps()
         args.export_steps.mkdir(parents=True, exist_ok=True)

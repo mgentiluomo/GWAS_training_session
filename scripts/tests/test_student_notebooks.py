@@ -408,5 +408,80 @@ class StudentNotebookTests(unittest.TestCase):
                 exports.module_prerequisites({"prerequisites": {**spec, **change}})
 
 
+class QuartoRendererTests(unittest.TestCase):
+    """The qmd renderer is optional output. It must not change the default or the Rmd files."""
+
+    CHUNK = "\n".join([
+        "```{r s9-9}",
+        "# 1. Choose the input.",
+        'input <- guided_path(cfg, "2.8")',
+        "# 2. Remove poor samples.",
+        "run_plink(cfg, c(",
+        '  "--pfile", input))',
+        "# Course bookkeeping: records the counts for the next step. Do not change.",
+        'guided_register(cfg, "9.9", "2.8", 1, 2)',
+        "```"])
+
+    def test_default_format_stays_rmd(self):
+        self.assertEqual(students.DEFAULT_FORMAT, "rmd")
+        self.assertEqual(set(students.RENDERERS), {"rmd", "qmd"})
+
+    def test_numbered_comments_become_code_annotations(self):
+        lines = students.qmd_chunk(self.CHUNK)
+        self.assertEqual(lines[:3], ["```{r}", "#| label: s9-9", 'input <- guided_path(cfg, "2.8")  # <1>'])
+        self.assertIn("run_plink(cfg, c(  # <2>", lines)
+        self.assertIn("# Course bookkeeping: records the counts for the next step. Do not change.", lines)
+        self.assertNotIn("# 1. Choose the input.", lines)
+        self.assertEqual(lines[-3:], ["1. Choose the input.", "2. Remove poor samples.", ""])
+
+    def test_chunk_without_numbered_comments_has_no_list(self):
+        lines = students.qmd_chunk("```{r setup}\nx <- 1\n```")
+        self.assertEqual(lines, ["```{r}", "#| label: setup", "x <- 1", "```", ""])
+
+    def test_eval_false_option_is_kept_and_other_options_fail(self):
+        lines = students.qmd_chunk("```{r a, eval=FALSE}\ninstall.packages('x')\n```")
+        self.assertEqual(lines[:3], ["```{r}", "#| label: a", "#| eval: false"])
+        with self.assertRaises(ValueError):
+            students.qmd_chunk("```{r a, echo=FALSE}\nx\n```")
+
+    def test_bad_numbering_fails(self):
+        for body in ("# 2. Starts at two.\nx <- 1",
+                     "# 1. First.\n# 2. Second without code.\nx <- 1",
+                     "x <- 1\n# 1. Trailing comment without code."):
+            with self.subTest(body=body), self.assertRaises(ValueError):
+                students.qmd_chunk("```{r a}\n" + body + "\n```")
+
+    def test_every_module_renders_with_callouts_and_no_rmd_front_matter(self):
+        models = students.build_models()
+        outputs = students.notebook_outputs(models, "qmd")
+        rmd = students.notebook_outputs(models, "rmd")
+        self.assertEqual({n.replace(".qmd", "") for n in outputs}, {n.replace(".Rmd", "") for n in rmd})
+        for name, text in outputs.items():
+            twin = rmd[name.replace(".qmd", ".Rmd")]
+            with self.subTest(name=name):
+                self.assertTrue(text.startswith("---\ntitle:"))
+                self.assertIn("editor: visual", text)
+                self.assertNotIn("html_notebook", text)
+                self.assertNotIn("execute:", text)
+                self.assertEqual(text.count("```{r}"), text.count("#| label:"))
+                self.assertEqual(text.count("### What each option does"), twin.count("### What each option does"))
+                self.assertEqual(text.count('{.callout-tip title="Expected result" collapse="true"}'),
+                                 twin.count("### Expected result"))
+                self.assertEqual(text.count('{.callout-note title="PLINK terminal equivalent"}'),
+                                 twin.count("### PLINK terminal equivalent"))
+                self.assertNotIn("—", text)
+
+    def test_qmd_export_and_check_use_their_own_suffix(self):
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            students.export_notebooks(destination, format="qmd")
+            self.assertEqual(len(list(destination.glob("*.qmd"))), 9)
+            self.assertEqual(list(destination.glob("*.Rmd")), [])
+            students.export_notebooks(destination, check=True, format="qmd")
+            (destination / "module_03_sample_quality_control.qmd").write_text("stale", encoding="utf-8")
+            with self.assertRaises(SystemExit):
+                students.export_notebooks(destination, check=True, format="qmd")
+
+
 if __name__ == "__main__":
     unittest.main()
