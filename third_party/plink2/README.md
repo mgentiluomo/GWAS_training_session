@@ -6,6 +6,8 @@ This folder holds the pins and licence texts for the PLINK 2 programs that the c
 
 The pins in `releases.tsv` are a **first pin, to be verified by the author against the official page**. They were measured on 15 November 2026 from the files that the official download address served on that day. A hash taken at the first download detects later changes. It does not prove that the first file was genuine. Compare each value with the publisher's own checksum or signature, if one exists, before the first release.
 
+On 15 November 2026 the four archive hashes were confirmed by a second, independent download of the same files with a web browser. The values matched. This rules out a corrupted first download. It still does not replace a comparison with a publisher checksum.
+
 The Windows x86_64 program was run with `--version` on Windows and printed `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`. The other three programs were not run, because they need their own operating systems.
 
 ## Files

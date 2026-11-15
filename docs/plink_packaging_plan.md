@@ -66,7 +66,7 @@ Test the provisioning and the preflight also on Intel macOS and on Linux before 
 - A tracked manifest, `third_party/plink2/releases.tsv`, lists platform, version, date, official URL, archive hash and size, executable hash, source tag and commit.
 - `scripts/package_project.py` downloads outside Git, checks the archive hash before extraction, rejects unsafe archive paths, extracts only the allowed executables and notices, checks the executable hashes, and adds executables, licence and a README to the ZIP. It keeps executable permissions in the ZIP.
 - Binaries never enter Git history. A check rejects tracked binaries and archives.
-- The first pins come from an author download checked against the official page. A hash taken at the first download detects later changes but does not prove that the first file was genuine. Look for publisher checksums or signatures, and ask for an independent review.
+- The first pins come from an author download checked against the official page. A hash taken at the first download detects later changes but does not prove that the first file was genuine. Look for publisher checksums or signatures, and ask for an independent review. On 15 November 2026 the four archive hashes were confirmed by a second, independent browser download (all four matched). A publisher checksum or signature has still not been compared.
 - Manifest changes need review. The packager never regenerates or accepts new hashes by itself.
 - The generated student notebooks must be added to the project ZIP allowlist (`notebooks/` is not included today).
 
