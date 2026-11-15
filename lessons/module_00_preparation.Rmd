@@ -556,7 +556,7 @@ The guided starting data have 2,016 sample wells and 299,523 variants, represent
 
 <details><summary>If something goes wrong</summary>
 
-Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need.
+Stop at the first error. Do not run later analysis steps until the setup check succeeds. The setup check explains which package is unavailable or whether the PLINK program is missing. On Windows, the script clears locale requests that R cannot use. This change lasts for the current session only, and your Windows language stays unchanged. Startup warnings can appear before the script has a chance to run. On Linux, the package preparation chooses matching ready-made Posit packages where they exist. If a package must be built from source code, the script explains which development libraries you need. If the course data are missing (step 0.7 is not done), the setup check prints a warning, skips the data check and ends with `Preflight passed with a warning: course data are missing.` Finish step 0.7 and run it again.
 
 </details>
 
