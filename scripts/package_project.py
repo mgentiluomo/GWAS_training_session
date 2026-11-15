@@ -198,8 +198,8 @@ def url_status(url: str, planned: str) -> dict:
         return {"url": url, "status": "unverified", "reason": str(error)}
 
 
-def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Path, dict]:
-    if not re.fullmatch(r"2026\.1(?:\.[1-9][0-9]*)?", version):
+def build(output: Path, version: str = "2026.2", root: Path = ROOT) -> tuple[Path, dict]:
+    if not re.fullmatch(r"2026\.[1-9][0-9]*(?:\.[1-9][0-9]*)?", version):
         raise ValueError("Use an explicit project release version, never latest.")
     output = external_folder(output, root)
     if output.exists():
@@ -235,7 +235,7 @@ def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Pat
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--version", default="2026.1")
+    parser.add_argument("--version", default="2026.2")
     parser.add_argument("--fresh-check", action="store_true")
     parser.add_argument("--check-urls", action="store_true")
     parser.add_argument("--rscript", type=Path)

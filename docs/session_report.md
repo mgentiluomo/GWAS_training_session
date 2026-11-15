@@ -379,3 +379,12 @@ it preserves the reference cutoff at this course size. No new GitHub data releas
 or website was created. Website design still starts with an approved mockup.
 See `docs/open_issues.md` for precise limits. Modules A/B and post-GWAS work
 were not started.
+
+## Project release 2026.2 (15 November 2026)
+
+The student notebooks are now Quarto files (`notebooks/*.qmd`). Every step has a short
+summary, option tables and a "What you do" box. The review corrections are in. PLINK 2 is
+not in the package: the Windows non-AVX2 build was not compared on this machine, because
+the course data and the reference results are not here. Students still put PLINK 2 in
+`bin/` at step 0.6. The comparison at the office decides release 2026.3. See
+`docs/plink_office_comparison_checklist.md`. The data release stays `data-2026.1`.
