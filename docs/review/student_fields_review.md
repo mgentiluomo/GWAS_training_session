@@ -1,5 +1,70 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 15 November, home PLINK comparison and release 2026.3
+
+Written for the author, Manuel Gentiluomo. Status: published. History was not rewritten.
+
+### Result in one table
+
+| Item | Value |
+| --- | --- |
+| Comparison | Passes. Details in `docs/review/plink_home_comparison.md`. |
+| Project release | `project-2026.3`, not a pre-release: https://github.com/mgentiluomo/GWAS_training_session/releases/tag/project-2026.3 |
+| Tag | annotated `project-2026.3` on `8302da1` (merge commit of `course/2026-guided-training`) |
+| Asset | `GWAS_course-2026.3.zip`, 21,519,234 bytes, 75 files |
+| SHA-256 | `9b0e9a7d8160d1c15fee52f4860f39c6669088a0a49866a1c274c4c8dcb264cd` |
+| Download check | The public URL gave the same SHA-256 and size. |
+| Other assets | `GWAS_course-2026.3.zip.sha256`, `plink-ng-v2.0.0-b.1.4-source.zip` (SHA-256 `012cf4f54285b31b75a6cf3ab695770a2f93d8864f7f237570c7d3ec0e44da6d`) |
+| PLINK 2 in the package | Yes: four non-AVX2 builds (Windows x86_64, macOS arm64, macOS x86_64, Linux x86_64), mode 0755, with GPL 3 text and notices |
+| Data | `data-2026.1`, unchanged |
+| Website | `main` at `9ee3088`, published |
+
+### Phase 1. Comparison (non-AVX2 against AVX2)
+
+- Data in `C:\GWAS_cmp\noavx2`: 108 files, sizes and SHA-256 all match `course.MANIFEST.tsv`. The second clone `C:\GWAS_cmp\avx2` is at the same commit (`9ea6070`) with a copy of the data.
+- Non-AVX2 `plink2.exe`: `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`, SHA-256 `b57537f1...bd9` equal to `releases.tsv`. AVX2 `plink2.exe` from `plink2_win_avx2_20261107.zip`: `PLINK v2.0.0-b.1.4 AVX2 (7 Nov 2026)`, SHA-256 `05255a19...fa00`. `VALIDATION.md` has no hash of the validation build.
+- `check_course.R` and `run_main_path.R` ran one after the other in new output folders, with the same R 4.5.0, packages, threads and memory. Both builds finished with exit code 0.
+- **Result: identical.** All 22 step counts, the final cohort (1,811 samples, 238,513 variants, 236,815 tests), lambda 1.016, the three clumps with their eight hits, every p-value, the principal components and the plot inputs. 235 of 318 files are byte for byte equal. The other 83 differ only in time stamps, folder names and the version banner. See the comparison file.
+- About the preflight: it passed in the non-AVX2 clone once the data were there. The stop on `data/demo/DB_demo.*` appears only when the course data are missing (item 2f below).
+
+### Phase 2. Version 2026.3
+
+| Item | Before | After |
+| --- | --- | --- |
+| Step 0.3 | "from release `project-2026.1`" | "from release `project-2026.3`". All links point to `GWAS_course-2026.3.zip`. |
+| Step 0.6 | A manual download from the official page, with a table of builds. No R command. | Short steps: the package already holds PLINK 2 Beta 1.4 for Windows, macOS (Apple Silicon and Intel) and Linux. R copies the right build with `prepare_course_plink()` and checks it. The official page, <https://www.cog-genomics.org/plink/2.0/>, stays as the manual route. Notes: `xattr -d com.apple.quarantine bin/plink2` on macOS, glibc 2.31 or newer on Linux. New student summary, a code chunk with `eval=FALSE` (like step 0.5, so the main-path script is unchanged) and an expected result. |
+| `docs/setup.md`, `bin/README.md` | Download PLINK yourself | R prepares PLINK in step 0.6 |
+| Licences | Course licence only | `LICENSE-CONTENT.md` says PLINK stays under GPL 3 and the course licence does not apply. `third_party/plink2/README.md` links the source tag and states the comparison result. |
+| `download_course_data()` | R stopped each download after 60 seconds | The limit is 3,600 seconds for the download only and is restored. A stopped download says: "The download stopped before the end. This can happen on a slow or unstable connection. Run the same command again. If it keeps failing, ask the instructor." A partial file is removed. Test added in `test_course_setup.R`. |
+| `scripts/preflight.R` | Stopped when the old demo files were missing | Without course data it prints a warning, skips the genotype check and the probe, and ends with "Preflight passed with a warning: course data are missing." The PLINK check still runs. Test added (`test_preflight_no_data.R`). The step 0.8 text mentions it. |
+| Changelog | | Entry 2026.3 in `docs/CHANGELOG.md` |
+
+- The comment-only proof **cannot pass for module 0 on purpose**: step 0.6 has a new code chunk. It reports only `lessons/module_00_preparation.Rmd` and `site_content/steps/step-0-6.json`. Nothing else changed in the R code. The only change in `run_main_path.R` is the source hash line.
+- The export test and `docs/screenshot_list.md` were updated for step 0.6.
+- Tests: `test_student_notebooks` 35, `test_project_package` 17, `test_plink_pins` 3, `test_course_exports` 22, `test_prove_comment_only` 3, `--check-notebooks`, `test_guided_module_check.R`, `check_course.R`, `test_plink_setup.R`, `test_course_setup.R` all passed. The nine `.qmd` rendered without warnings.
+- Merges: `course/2026-guided-training` `8302da1`; `plink/bundle` `92c470e` (aligned, pushed).
+
+### Phase 3. Package and student test
+
+Built with `scripts/package_project.py --version 2026.3 --plink-cache C:\PLINK_downloads`, outside the repository. It holds the four builds with mode 0755, the GPL 3 text and the notices, the nine `.qmd` notebooks and no data, no HTML, no `.Rmd` notebook and no render folder. Extracted to `C:\Temp\gwas_release_test_3\GWAS_course`:
+
+- Folders and files as expected. `check_course.R` passed. The first chunk of module 0 ran.
+- `prepare_course_plink()` chose `windows-x86_64`, took the program **from the package** without downloading, and `plink2.exe --version` printed `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`.
+- Preflight without data: warning and end. Preflight with the data copied in: `Preflight passed.`
+- The complete main path ran from the extracted project (2 min 54 s). `step_counts.tsv`, the association file, the clumps, the eigenvectors and the lambda file are byte for byte equal to the phase 1 results. `guided_check_module(3)` and `(4)` passed.
+
+### Phase 4. Website
+
+- Branch `course/notebook-style` synced to `8302da1`. Step 0.3 links `GWAS_course-2026.3.zip`.
+- axe on steps 0.3, 0.6, 0.7 and 3.3 at 390 px and 1280 px, light and dark, showed one new finding on step 0.6: `target-size`. The code note markers on two adjacent lines were 20 px. I made them 24 px (no overlap). After the fix only the old logo finding remains. No page scroll on any of the 64 steps.
+- `tsc` clean, `lint` 0 errors, normal build and `GWAS_REVIEW_BUILD=1` build passed. Merged into `main` (`9ee3088`) with `--no-ff`, build and lint on `main` passed, pushed.
+- On https://www.manuelgentiluomo.it: steps 0.3 and 0.6 answer 200. Step 0.3 has three links to the 2026.3 ZIP and none to 2026.2. Step 0.6 shows `prepare_course_plink`, the macOS `xattr` note and the glibc note. The ZIP link answers 200.
+
+### Skipped, and open
+
+- macOS and Linux builds: checked only by their SHA-256 values. Not run.
+- Analysis in R on the Mac, notebook execution, the comparison against `instructor/answer_key.json` (see `docs/plink_office_comparison_checklist.md`).
+
 ## Session of 15 November, release 2026.2
 
 Written for the author, Manuel Gentiluomo. Status: published. History was not rewritten.
