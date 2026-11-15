@@ -6,7 +6,7 @@
   "anchor": "step-6-4",
   "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "501ba0639a4e377944727cdefd5646d66c49e97bb7bec02f5a0db40fae1c0c43",
+  "source_sha256": "26b1f7a69396e6f0d34c018b1eb4b88e941b29876b9607ebb9614a3b9eb0a31d",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",
@@ -99,7 +99,7 @@
         },
         {
           "name": "--glm",
-          "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls.",
+          "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.",
           "modifiers": [
             {
               "name": "sex",

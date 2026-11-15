@@ -6,7 +6,7 @@
   "anchor": "step-7-4",
   "title": "Multiple-testing thresholds",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5",
+  "source_sha256": "06fdeafc05caa2970c1a82cd44bda2870224a2d255ee882c7e10e41e94cd857b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare three ways to decide which p-values are small enough to call a result: the usual GWAS threshold, a Bonferroni threshold for this scan and a false-discovery-rate adjustment.",
