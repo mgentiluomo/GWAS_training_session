@@ -155,8 +155,9 @@ Schema 1.1 adds optional actions, command locations and exact success excerpts.
 
 ### Student notebooks
 
-- Notebooks are `.Rmd` files generated from `lessons/*.Rmd` through `scripts/student_notebooks.py` and `scripts/build_tutorial.py --export-notebooks`. They are never edited by hand.
-- `notebooks/` holds one complete notebook (modules 0 to 7) and one notebook per module. They are versioned in Git.
+- Notebooks are Quarto `.qmd` files generated from `lessons/*.Rmd` through `scripts/student_notebooks.py` and `scripts/build_tutorial.py --export-notebooks`. They are never edited by hand. Lessons stay `.Rmd`. The R Markdown renderer stays in the registry (`--notebook-format rmd`) for possible later use, but no `.Rmd` notebook is kept in `notebooks/`.
+- `notebooks/` holds one complete notebook (modules 0 to 7) and one notebook per module, all `.qmd`. They are versioned in Git. Rendered HTML, experiments and render checks are never tracked.
+- Each notebook has a floating table of contents, a box "In this module" (time, what to have, steps, checkpoint), previous and next module links, code annotations from the numbered comments, and a glossary appendix so that term links work offline. The complete notebook starts with a course map.
 - A check fails when the notebooks are out of date (`--check-notebooks`). Run it after any change to a lesson.
 - Notebooks ship in the project ZIP and are downloadable from each module page.
 

@@ -45,7 +45,7 @@ class StudentNotebookTests(unittest.TestCase):
                 students.export_notebooks(folder, check=True)
             self.assertEqual(list(folder.iterdir()), [])
             students.export_notebooks(folder)
-            path = folder / "module_03_sample_quality_control.Rmd"
+            path = folder / "module_03_sample_quality_control.qmd"
             path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
             students.export_notebooks(folder, check=True)
             path.write_bytes(path.read_bytes() + b"Outdated copy\n")
@@ -241,17 +241,11 @@ class StudentNotebookTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             exports.module_prerequisites(metadata)
 
-    def test_module_three_bytes_match_tracked_head(self):
-        previous = subprocess.run(["git", "show", "HEAD:notebooks/module_03_sample_quality_control.Rmd"],
-                                  cwd=ROOT, check=True, capture_output=True).stdout
-        self.assertEqual(students.module_three()[1].encode("utf-8"), previous)
-        before = (ROOT / "notebooks/module_03_sample_quality_control.Rmd").read_bytes()
-        with tempfile.TemporaryDirectory() as directory:
-            destination = Path(directory)
-            target = destination / "module_03_sample_quality_control.Rmd"
-            target.write_bytes(before)
-            students.export_notebooks(destination)
-            self.assertEqual(target.read_bytes(), before)
+    def test_module_three_rmd_entry_point_still_renders(self):
+        name, text = students.module_three()
+        self.assertEqual(name, "module_03_sample_quality_control.Rmd")
+        self.assertTrue(text.startswith("---" + chr(10) + "title:"))
+        self.assertIn("output: html_notebook", text)
 
     def test_new_kinds_in_temporary_lesson_copies(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -308,7 +302,7 @@ class StudentNotebookTests(unittest.TestCase):
 
     def test_complete_notebook_and_format_registry(self):
         models = self.fake_models()
-        outputs = students.notebook_outputs(models)
+        outputs = students.notebook_outputs(models, "rmd")
         self.assertEqual(len(outputs), 9)
         complete = outputs["gwas_course_complete.Rmd"]
         self.assertEqual(complete.count('title: "GWAS course: modules 0 to 7"'), 1)
@@ -327,7 +321,7 @@ class StudentNotebookTests(unittest.TestCase):
         self.assertNotIn("### Expected result", complete)
         self.assertNotIn("### What each option does", complete)
         self.assertNotIn("### PLINK terminal equivalent", complete)
-        self.assertNotIn("gwas_course_complete.Rmd", students.notebook_outputs(models[:4]))
+        self.assertNotIn("gwas_course_complete.Rmd", students.notebook_outputs(models[:4], "rmd"))
         with patch.dict(students.RENDERERS, {"test": lambda models, complete=False: "rendered"}):
             self.assertEqual(set(students.notebook_outputs(models[:2], "test").values()), {"rendered"})
 
@@ -381,24 +375,24 @@ class StudentNotebookTests(unittest.TestCase):
             guided = root / "R/guided.R"
             guided.write_text("# BEGIN GENERATED MODULE INPUTS\n# END GENERATED MODULE INPUTS\n", encoding="utf-8")
             destination = root / "notebooks"
-            students.export_notebooks(destination, root=root)
-            students.export_notebooks(destination, check=True, root=root)
+            students.export_notebooks(destination, root=root, format="rmd")
+            students.export_notebooks(destination, check=True, root=root, format="rmd")
             self.assertEqual(len(list(destination.glob("*.Rmd"))), 9)
             (destination / "module_01_topic.Rmd").unlink()
             (destination / "module_02_topic.Rmd").write_text("stale", encoding="utf-8")
             (destination / "module_04_old.Rmd").write_text("old", encoding="utf-8")
             before = {p.name: p.read_bytes() for p in destination.iterdir()}
             with self.assertRaises(SystemExit) as error:
-                students.export_notebooks(destination, check=True, root=root)
+                students.export_notebooks(destination, check=True, root=root, format="rmd")
             for name in ("module_01_topic.Rmd", "module_02_topic.Rmd", "module_04_old.Rmd"):
                 self.assertIn(name, str(error.exception))
             self.assertEqual(before, {p.name: p.read_bytes() for p in destination.iterdir()})
             with patch.object(students, "build_models", return_value=models[:2]):
                 with self.assertRaises(ValueError):
-                    students.export_notebooks(destination, check=True, root=root)
-                students.export_notebooks(destination, root=root)
+                    students.export_notebooks(destination, check=True, root=root, format="rmd")
+                students.export_notebooks(destination, root=root, format="rmd")
                 with self.assertRaises(SystemExit):
-                    students.export_notebooks(destination, check=True, root=root)
+                    students.export_notebooks(destination, check=True, root=root, format="rmd")
 
     def test_data_only_prerequisites(self):
         spec = {"checkpoint": None, "restart_step": None, "files": [{"base": "data", "path": "input.tsv"}]}
@@ -409,7 +403,7 @@ class StudentNotebookTests(unittest.TestCase):
 
 
 class QuartoRendererTests(unittest.TestCase):
-    """The qmd renderer is optional output. It must not change the default or the Rmd files."""
+    """Students receive Quarto notebooks. The Rmd renderer stays available for later use."""
 
     CHUNK = "\n".join([
         "```{r s9-9}",
@@ -422,8 +416,18 @@ class QuartoRendererTests(unittest.TestCase):
         'guided_register(cfg, "9.9", "2.8", 1, 2)',
         "```"])
 
-    def test_default_format_stays_rmd(self):
-        self.assertEqual(students.DEFAULT_FORMAT, "rmd")
+    def test_command_titles_are_not_repeated(self):
+        group = lambda label: {"label": label, "options": [{"name": "--glm", "explanation": "Fits a model."}]}
+        record = {"option_groups": [group("Command 1: first job"), group("second job")], "terminal_commands": ["bin/plink2 --glm --threads 2 --memory 2048"]}
+        text = chr(10).join(students.option_table_lines(record))
+        self.assertIn("**Command 1: first job**", text)
+        self.assertIn("**Command 2: second job**", text)
+        self.assertNotIn("Command 1: Command", text)
+        for path in (ROOT / "lessons").glob("module_0*.Rmd"):
+            self.assertNotRegex(path.read_text(encoding="utf-8"), r'"label": "Command \d')
+
+    def test_default_format_is_quarto(self):
+        self.assertEqual(students.DEFAULT_FORMAT, "qmd")
         self.assertEqual(set(students.RENDERERS), {"rmd", "qmd"})
 
     def test_numbered_comments_become_code_annotations(self):
@@ -470,6 +474,53 @@ class QuartoRendererTests(unittest.TestCase):
                 self.assertEqual(text.count('{.callout-note title="PLINK terminal equivalent"}'),
                                  twin.count("### PLINK terminal equivalent"))
                 self.assertNotIn("—", text)
+
+    def test_navigation_boxes_course_map_and_glossary_appendix(self):
+        models = students.build_models()
+        outputs = students.notebook_outputs(models, "qmd")
+        for name, text in outputs.items():
+            with self.subTest(name=name):
+                self.assertNotIn("glossary.md", text)
+                self.assertIn("toc-location: left", text)
+                self.assertIn("code-copy: true", text)
+                self.assertIn("code-fold: false", text)
+                ids = re.findall(r"\{#([^} ]+)", text)
+                self.assertEqual(len(ids), len(set(ids)), "duplicate heading ids")
+                for target in re.findall(r"\]\(#([^)]+)\)", text):
+                    self.assertIn(target, ids)
+        module = outputs["module_03_sample_quality_control.qmd"]
+        self.assertIn('::: {.callout-note title="In this module"}', module)
+        self.assertIn("**Time.** About 70 minutes.", module)
+        self.assertIn("[3.1 Rough cleaning](#step-3-1)", module)
+        self.assertIn("The checkpoint at step 3.8.", module)
+        self.assertIn("- Previous: [Module 2: Files and formats](module_02_files_and_formats.qmd)", module)
+        self.assertIn("- Next: [Module 4: Variant quality control](module_04_variant_quality_control.qmd)", module)
+        self.assertIn("/teaching/gwas/module-3)", module)
+        first, last = outputs["module_00_preparation.qmd"], outputs["module_07_plots_and_reporting.qmd"]
+        self.assertNotIn("- Previous:", first)
+        self.assertIn("this is the last module of the main path", last)
+        complete = outputs["gwas_course_complete.qmd"]
+        self.assertLess(complete.index("# Course map {#course-map}"), complete.index("# Module 0:"))
+        self.assertIn("- Next: [Module 4: Variant quality control](#module-4)", complete)
+        self.assertEqual(complete.count("# Glossary terms used in this notebook"), 1)
+        self.assertIn("{#glossary-fid-iid .unlisted}", complete)
+        self.assertIn("(#glossary-fid-iid)", complete)
+
+    def test_reading_and_outside_r_steps_use_a_what_you_do_box(self):
+        outputs = students.notebook_outputs(students.build_models(), "qmd")
+        text = outputs["module_01_from_dna_to_array_data.qmd"]
+        self.assertGreaterEqual(text.count('{.callout-note title="What you do"}'), 4)
+        self.assertNotIn("What you do: ", text)
+        self.assertIn("There is no code to run.", text)
+
+    def test_leftover_rmd_notebooks_are_flagged_after_the_switch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            destination = Path(directory)
+            students.export_notebooks(destination)
+            (destination / "module_03_sample_quality_control.Rmd").write_text("old", encoding="utf-8")
+            with self.assertRaises(SystemExit) as error:
+                students.export_notebooks(destination, check=True)
+            self.assertIn("module_03_sample_quality_control.Rmd", str(error.exception))
 
     def test_qmd_export_and_check_use_their_own_suffix(self):
         with tempfile.TemporaryDirectory() as directory:

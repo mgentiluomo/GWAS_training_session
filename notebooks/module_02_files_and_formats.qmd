@@ -1,6 +1,24 @@
 ---
 title: "Module 2: Files and formats"
-output: html_notebook
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
 course_source_sha256: "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e"
 ---
 
@@ -8,57 +26,88 @@ Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order
 All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
 The linked step pages explain the ideas and provide troubleshooting.
 
-```{r module2_check}
+::: {.callout-note title="In this module"}
+
+**Time.** About 60 minutes.
+
+**Before you start.** You need the course data from step 0.7. The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [2.1 The starting files](#step-2-1)
+- [2.2 Convert to PLINK 2 native format](#step-2-2)
+- [2.3 Sample and variant tables](#step-2-3)
+- [2.4 First overview](#step-2-4)
+- [2.5 Alleles and strand](#step-2-5)
+- [2.6 Genome builds and lift-over](#step-2-6)
+- [2.7 Add phenotype and covariates](#step-2-7)
+- [2.8 Module 2 checkpoint](#step-2-8)
+
+**Where the module ends.** The checkpoint at step 2.8.
+
+:::
+
+```{r}
+#| label: module2_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(2)
 ```
 
-```{r module2_setup}
+```{r}
+#| label: module2_setup
 source("R/guided.R")
 cfg <- guided_init()
 ```
 
-## Step 2.1 · The starting files
+## Step 2.1 · The starting files {#step-2-1}
 
 We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.
 
 [Read step 2.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-1).
 
-```{r s2-1}
-# 1. Check the three laboratory files and show their sizes.
-print(check_bed(cfg$input))
-# 2. Show the first rows of sample information.
-head(read_fam(cfg$input))
+```{r}
+#| label: s2-1
+print(check_bed(cfg$input))  # <1>
+head(read_fam(cfg$input))  # <2>
 ```
+
+1. Check the three laboratory files and show their sizes.
+2. Show the first rows of sample information.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 2.2 · Convert to PLINK 2 native format
+:::
+
+## Step 2.2 · Convert to PLINK 2 native format {#step-2-2}
 
 We convert the laboratory files to the format that PLINK 2 uses for this course. We check that the conversion keeps every sample and variant, a place in the DNA where people can differ.
 
 [Read step 2.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-2).
 
-```{r s2-2}
-# 1. Choose the name for the converted files.
-out <- guided_path(cfg, "2.2")
-# 2. Convert the laboratory files to the native PLINK 2 format.
-run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))
-# 3. Check that all 2,016 samples and 299,523 variants remain.
-stopifnot(all(guided_counts(out) == c(2016, 299523)))
+```{r}
+#| label: s2-2
+out <- guided_path(cfg, "2.2")  # <1>
+run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))  # <2>
+stopifnot(all(guided_counts(out) == c(2016, 299523)))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_source_checkpoint(cfg)
 ```
+
+1. Choose the name for the converted files.
+2. Convert the laboratory files to the native PLINK 2 format.
+3. Check that all 2,016 samples and 299,523 variants remain.
 
 ### What each option does
 
@@ -70,11 +119,13 @@ guided_source_checkpoint(cfg)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](../docs/glossary.md#reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.
+The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](#glossary-reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -83,53 +134,63 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048
 ```
 
-## Step 2.3 · Sample and variant tables
+:::
+
+## Step 2.3 · Sample and variant tables {#step-2-3}
 
 We read the tables that describe the samples and the DNA sites. We inspect their first rows and check the sample identifiers so we can match information to the right sample.
 
 [Read step 2.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-3).
 
-```{r s2-3}
-# 1. Read the sample and variant tables from the converted files.
-samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))
+```{r}
+#| label: s2-3
+samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))  # <1>
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
-# 2. Show the first rows of both tables.
-head(samples)
+head(samples)  # <2>
 head(variants)
-# 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples")  # <3>
 ```
+
+1. Read the sample and variant tables from the converted files.
+2. Show the first rows of both tables.
+3. Check that the sample identifiers are valid and unique.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 2.4 · First overview
+:::
+
+## Step 2.4 · First overview {#step-2-4}
 
 We measure the share of missing DNA results for each sample and each site. These reports help us find possible problems before we choose what to remove.
 
 [Read step 2.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-4).
 
-```{r s2-4}
-# 1. Choose the names for the reports of missing results.
-out <- guided_path(cfg, "2.4", "missing")
-# 2. Measure missing results for each sample and each variant.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))
-# 3. Read both reports into R.
-smiss <- guided_table(paste0(out, ".smiss"))
+```{r}
+#| label: s2-4
+out <- guided_path(cfg, "2.4", "missing")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))  # <2>
+smiss <- guided_table(paste0(out, ".smiss"))  # <3>
 vmiss <- guided_table(paste0(out, ".vmiss"))
-# 4. Summarise the share of missing results in each report.
-summary(as.numeric(smiss$F_MISS))
+summary(as.numeric(smiss$F_MISS))  # <4>
 summary(as.numeric(vmiss$F_MISS))
 ```
+
+1. Choose the names for the reports of missing results.
+2. Measure missing results for each sample and each variant.
+3. Read both reports into R.
+4. Summarise the share of missing results in each report.
 
 ### What each option does
 
@@ -141,11 +202,13 @@ summary(as.numeric(vmiss$F_MISS))
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 You get a sample report and a variant report. Some values are much worse than the main group. No samples and no variants are removed at this step.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -154,43 +217,47 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048
 ```
 
-## Step 2.5 · Alleles and strand
+:::
+
+## Step 2.5 · Alleles and strand {#step-2-5}
 
 We compare the DNA letters at each site with the supplied reference table. We correct 400 sites read from the opposite DNA strand and remove 3,013 sites whose letters cannot establish a clear match.
 
 [Read step 2.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-5).
 
-```{r s2-5}
-# 1. Read the laboratory variant table and the reference DNA letters.
-bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)
+```{r}
+#| label: s2-5
+bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)  # <1>
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
-# 2. Match every laboratory site to the reference table by its identifier.
-k <- match(bim[[2]], ann$Name)
+k <- match(bim[[2]], ann$Name)  # <2>
 stopifnot(!anyNA(k))
-# 3. Put each pair of DNA letters in a consistent order for comparison.
-pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))  # <3>
 observed <- pair(bim[[5]], bim[[6]])
 reference <- pair(ann$Ref_Plus[k], ann$Alt_Plus[k])
-# 4. Find the reference letter pairs as they would appear on the opposite strand.
-complement <- chartr("ACGT", "TGCA", reference)
+complement <- chartr("ACGT", "TGCA", reference)  # <4>
 complement <- pair(substr(complement, 1, 1), substr(complement, 2, 2))
-# 5. Identify sites to correct and sites with ambiguous or incompatible letters.
-palindromic <- reference %in% c("AT", "CG")
+palindromic <- reference %in% c("AT", "CG")  # <5>
 flip <- !palindromic & observed != reference & observed == complement
 exclude <- palindromic | (observed != reference & observed != complement)
-# 6. Save both lists and check their expected sizes.
-flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))
+flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))  # <6>
 exclude_file <- guided_list(bim[[2]][exclude], guided_path(cfg, "2.5", "exclude.txt"))
 stopifnot(sum(flip) == 400L, sum(exclude) == 3013L)
-# 7. Correct the listed sites and remove the excluded sites in a new copy.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,  # <7>
   "--make-pgen", "--out", guided_path(cfg, "2.5")))
-# 8. Check that 2,016 samples and 296,510 variants remain.
-stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))
+stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))  # <8>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--flip", "--exclude"), value = c(flip_file, exclude_file))
 guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 ```
+
+1. Read the laboratory variant table and the reference DNA letters.
+2. Match every laboratory site to the reference table by its identifier.
+3. Put each pair of DNA letters in a consistent order for comparison.
+4. Find the reference letter pairs as they would appear on the opposite strand.
+5. Identify sites to correct and sites with ambiguous or incompatible letters.
+6. Save both lists and check their expected sizes.
+7. Correct the listed sites and remove the excluded sites in a new copy.
+8. Check that 2,016 samples and 296,510 variants remain.
 
 ### What each option does
 
@@ -204,11 +271,13 @@ guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 400 sites are flipped and 3,013 sites are excluded. 2,016 samples and 296,510 variants remain. The planted problem categories overlap, so do not simply add their nominal counts.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -217,40 +286,44 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-2_state --flip results/guided/s2-5_flip.txt --exclude results/guided/s2-5_exclude.txt --make-pgen --out results/guided/s2-5_state --threads 2 --memory 2048
 ```
 
-## Step 2.6 · Genome builds and lift-over
+:::
+
+## Step 2.6 · Genome builds and lift-over {#step-2-6}
 
 We convert the DNA positions in a separate exercise from the GRCh37 genome reference to GRCh38. We keep sites that map to the same chromosome, correct opposite-strand letters and check the new positions without changing the main dataset.
 
 [Read step 2.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-6).
 
-```{r s2-6}
-# 1. Read the variant positions in the separate GRCh37 exercise.
-legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
+```{r}
+#| label: s2-6
+legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")  # <1>
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
-# 2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
-chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
+chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")  # <2>
 require_files(chain)
-# 3. Convert the positions and keep sites that stay on the same chromosome.
-lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
+lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)  # <3>
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
-# 4. Save the new positions and the list of sites to keep.
-map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])
+map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])  # <4>
 map_file <- guided_path(cfg, "2.6", "update_map.tsv")
 write.table(map, map_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 keep_file <- guided_list(map$ID, guided_path(cfg, "2.6", "mapped.txt"))
-# 5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
-args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)
+args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)  # <5>
 reverse <- bim37[[2]][keep & lifted$strand == "-"]
 if (length(reverse)) args <- c(args, "--flip", guided_list(reverse, guided_path(cfg, "2.6", "reverse.txt")))
-# 6. Save the converted exercise separately from the main dataset.
-run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))
-# 7. Check the new positions against matching sites in the supplied reference table.
-ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))  # <6>
+ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))  # <7>
 k <- match(map$ID, ann$Name)
 stopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))
-# 8. Show how many sites were read, kept and mapped to the opposite strand.
-print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))
+print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))  # <8>
 ```
+
+1. Read the variant positions in the separate GRCh37 exercise.
+2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
+3. Convert the positions and keep sites that stay on the same chromosome.
+4. Save the new positions and the list of sites to keep.
+5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
+6. Save the converted exercise separately from the main dataset.
+7. Check the new positions against matching sites in the supplied reference table.
+8. Show how many sites were read, kept and mapped to the opposite strand.
 
 ### What each option does
 
@@ -265,11 +338,13 @@ print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_s
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. PLINK prints a warning that the base-pair positions are now unsorted. This warning is expected: the new GRCh38 positions are not in the old order. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -278,30 +353,34 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-## Step 2.7 · Add phenotype and covariates
+:::
+
+## Step 2.7 · Add phenotype and covariates {#step-2-7}
 
 We match disease status, age and recorded sex to each laboratory well by its identifiers. We save the information table and add disease status and sex to the DNA files so later checks use the right person's information.
 
 [Read step 2.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-7).
 
-```{r s2-7}
-# 1. Match the sample sheet to each person's disease status, age and recorded sex.
-metadata <- guided_metadata(cfg)
-# 2. Select and name the columns for the sample information file.
-pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]
+```{r}
+#| label: s2-7
+metadata <- guided_metadata(cfg)  # <1>
+pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]  # <2>
 names(pheno)[1] <- "#FID"
 pheno_file <- guided_path(cfg, "2.7", "phenotypes.tsv")
-# 3. Save the sample information table.
-guided_write(pheno, pheno_file)
-# 4. Add recorded sex and disease status to a new copy of the DNA files.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,
+guided_write(pheno, pheno_file)  # <3>
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,  # <4>
   "--pheno", pheno_file, "--pheno-name", "Disease", "--make-pgen", "--out", guided_path(cfg, "2.7")))
-# 5. Check that all 2,016 samples and 296,510 variants remain.
-stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))
+stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))  # <5>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--update-sex", "--pheno", "--pheno-name"), value = c(pheno_file, pheno_file, "Disease"))
 guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 ```
+
+1. Match the sample sheet to each person's disease status, age and recorded sex.
+2. Select and name the columns for the sample information file.
+3. Save the sample information table.
+4. Add recorded sex and disease status to a new copy of the DNA files.
+5. Check that all 2,016 samples and 296,510 variants remain.
 
 ### What each option does
 
@@ -316,11 +395,13 @@ guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 All 2,016 wells are matched, and 296,510 variants remain. There are 2,000 people before we remove low-quality wells, relatives and ancestry outliers.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -329,27 +410,57 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048
 ```
 
-## Step 2.8 · Module 2 checkpoint
+:::
+
+## Step 2.8 · Module 2 checkpoint {#step-2-8}
 
 We save a complete checked starting point for module 3, with 2,016 samples and 296,510 variants. This saved copy lets us restart the analysis without repeating module 2.
 
 [Read step 2.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-8).
 
-```{r s2-8}
-# 1. Save the full starting point and check its files and counts.
+```{r}
+#| label: s2-8
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
+guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)  # <1>
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
+
+1. Save the full starting point and check its files and counts.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches the counts and the [SHA-256](../docs/glossary.md#sha-256) checks of its checkpoint. A SHA-256 check compares a short fingerprint of a file, to prove that the file has not changed.
+You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches the counts and the [SHA-256](#glossary-sha-256) checks of its checkpoint. A SHA-256 check compares a short fingerprint of a file, to prove that the file has not changed.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
+
+:::
+
+## Glossary terms used in this notebook {#glossary}
+
+These entries repeat the course glossary so that every link in this notebook works offline.
+
+### FID / IID {#glossary-fid-iid .unlisted}
+
+The identifier pair used to match samples between files.
+
+### Reference allele {#glossary-reference-allele .unlisted}
+
+The allele that matches the reference genome at a site. It is often written REF. The other allele is often written ALT.
+
+### SHA-256 {#glossary-sha-256 .unlisted}
+
+A short code calculated from the content of a file. If the file changes, the code changes, so it shows whether a file is intact.
+
+## Where next {#where-next}
+
+- Previous: [Module 1: From DNA to array data](module_01_from_dna_to_array_data.qmd)
+- Next: [Module 3: Sample quality control](module_03_sample_quality_control.qmd)
+- This module on the course website: [Module 2](https://www.manuelgentiluomo.it/teaching/gwas/module-2)

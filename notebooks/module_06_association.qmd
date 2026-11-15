@@ -1,48 +1,89 @@
 ---
 title: "Module 6: Association"
-output: html_notebook
-course_source_sha256: "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
 All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
 The linked step pages explain the ideas and provide troubleshooting.
 
-You need the full [checkpoint at step 5.7](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7) before you start.
+::: {.callout-note title="In this module"}
 
-```{r module6_check}
+**Time.** About 60 minutes.
+
+**Before you start.** You need the full [checkpoint at step 5.7](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [6.1 One variant by hand](#step-6-1)
+- [6.2 The additive logistic model](#step-6-2)
+- [6.3 Prepare covariates](#step-6-3)
+- [6.4 Run the association scan](#step-6-4)
+- [6.5 Read association output](#step-6-5)
+- [6.6 Sparse genotypes and Firth correction](#step-6-6)
+- [6.7 First look and association checkpoint](#step-6-7)
+- [6.8 Create the summary statistics file](#step-6-8)
+
+**Where the module ends.** The checkpoint at step 6.8.
+
+:::
+
+```{r}
+#| label: module6_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(6)
 ```
 
-```{r module6_setup}
+```{r}
+#| label: module6_setup
 source("R/guided.R")
 cfg <- guided_init()
 ```
 
-## Step 6.1 · One variant by hand
+## Step 6.1 · One variant by hand {#step-6-1}
 
 We count cases and controls who carry at least one copy of a chosen DNA letter at one variant. We compare their odds of disease with those of non-carriers; odds are the number of cases divided by the number of controls.
 
 [Read step 6.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-1).
 
-```{r s6-1}
-# 1. Export the number of copies of one DNA letter at the chosen variant.
-report <- guided_path(cfg, "6.1", "example")
+```{r}
+#| label: s6-1
+report <- guided_path(cfg, "6.1", "example")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", "9:96426973:A:G", "--export", "A", "--out", report))
 x <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE)
-# 2. Match the exported samples to their case or control status.
-dose <- as.numeric(x[[7]])
+dose <- as.numeric(x[[7]])  # <2>
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 case <- psam$Disease[match(x$IID, psam$IID)] == "2"
-# 3. Count carriers and non-carriers and compare their odds of disease.
-tab <- table(case = case, carrier = dose > 0)
+tab <- table(case = case, carrier = dose > 0)  # <3>
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 ```
+
+1. Export the number of copies of one DNA letter at the chosen variant.
+2. Match the exported samples to their case or control status.
+3. Count carriers and non-carriers and compare their odds of disease.
 
 ### What each option does
 
@@ -56,11 +97,13 @@ guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -69,95 +112,111 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
 ```
 
-## Step 6.2 · The additive logistic model
+:::
 
-We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. We calculate how each extra copy changes the odds of disease, the ratio of cases to controls.
+## Step 6.2 · The additive logistic model {#step-6-2}
+
+We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.
 
 [Read step 6.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2).
 
-```{r s6-2}
-# 1. Read the exported variant and match each sample to its case or control status.
-x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
+```{r}
+#| label: s6-2
+x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)  # <1>
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
-# 2. Fit the model and show how each extra copy changes the odds of disease.
-fit <- glm(case ~ dosage, data = example, family = binomial())
+fit <- glm(case ~ dosage, data = example, family = binomial())  # <2>
 summary(fit)
 exp(coef(fit)["dosage"])
 ```
+
+1. Read the exported variant and match each sample to its case or control status.
+2. Fit the model and show how each extra copy changes the odds of disease.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-An intercept and a dosage coefficient, each with a standard error and a [p-value](../docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
+An intercept and a dosage coefficient, each with a standard error and a [p-value](#glossary-p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.3 · Prepare covariates
+:::
+
+## Step 6.3 · Prepare covariates {#step-6-3}
 
 We prepare covariates, extra factors used to adjust the disease comparison: age and ten numbers describing patterns of genetic variation. We match them to sample IDs and check for missing values and columns that repeat information from other columns.
 
 [Read step 6.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-3).
 
-```{r s6-3}
-# 1. Read sample details, genetic component scores and age records.
-psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+```{r}
+#| label: s6-3
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))  # <1>
 pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
 metadata <- guided_metadata(cfg)
-# 2. Match sample IDs and make a complete table of age and ten component scores.
-a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)
+a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)  # <2>
 stopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))
 covar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))
 for (name in paste0("PC", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])
 stopifnot(!anyNA(covar))
-# 3. Check that no model column repeats information from the other columns.
-design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))
+design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))  # <3>
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
-# 4. Save the covariate table and print its number of rows.
-guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))  # <4>
 cat(nrow(covar), "complete covariate rows written\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 ```
 
+1. Read sample details, genetic component scores and age records.
+2. Match sample IDs and make a complete table of age and ten component scores.
+3. Check that no model column repeats information from the other columns.
+4. Save the covariate table and print its number of rows.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.4 · Run the association scan
+:::
+
+## Step 6.4 · Run the association scan {#step-6-4}
 
 We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.
 
 [Read step 6.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-4).
 
-```{r s6-4}
-# 1. Test variants with the frequency rule and the chosen adjustment factors.
-out <- guided_path(cfg, "6.4", "association")
+```{r}
+#| label: s6-4
+out <- guided_path(cfg, "6.4", "association")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
-# 2. Check the number of valid tests and results below the course significance threshold.
-valid <- valid_p(results$P)
+valid <- valid_p(results$P)  # <2>
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
-# 3. Save a table of the association results.
-guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+guided_write(results, guided_path(cfg, "6.4", "results.tsv"))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
 ```
+
+1. Test variants with the frequency rule and the chosen adjustment factors.
+2. Check the number of valid tests and results below the course significance threshold.
+3. Save a table of the association results.
 
 ### What each option does
 
@@ -171,16 +230,18 @@ guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybr
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores. |
-| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
 | `--out` | Starts output file names with s6-4_association, including s6-4_association.Disease.glm.logistic.hybrid. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -189,63 +250,73 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
 ```
 
-## Step 6.5 · Read association output
+:::
 
-We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, a measure of evidence against no effect, and save the first 20 with their tested DNA letters and sample counts.
+## Step 6.5 · Read association output {#step-6-5}
+
+We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
 
 [Read step 6.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-5).
 
-```{r s6-5}
-# 1. Read the scan results and count the model status codes.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-5
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 print(table(results$ERRCODE, useNA = "ifany"))
-# 2. Keep valid tests and calculate intervals describing uncertainty in their effects.
-valid <- results[valid_p(results$P), ]
+valid <- results[valid_p(results$P), ]  # <2>
 valid$CI_LOW <- exp(log(valid$OR) - 1.96 * valid[["LOG(OR)_SE"]])
 valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
-# 3. Sort by p-value and print the first ten results with their tested DNA letters.
-top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
+top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]  # <3>
 print(head(top, 10))
-# 4. Save the first 20 results for later review.
-guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))  # <4>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
 ```
+
+1. Read the scan results and count the model status codes.
+2. Keep valid tests and calculate intervals describing uncertainty in their effects.
+3. Sort by p-value and print the first ten results with their tested DNA letters.
+4. Save the first 20 results for later review.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The leading regions are on chromosomes 9, 3 and 12. The table keeps the effect allele and the OBS_CT of each variant. Every p-value and odds ratio refers to the tested A1 allele, whatever the variant ID looks like.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.6 · Sparse genotypes and Firth correction
+:::
 
-We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
+## Step 6.6 · Sparse genotypes and Firth correction {#step-6-6}
+
+We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
-```{r s6-6}
-# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-6
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
 candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
 chosen <- results$ID[candidates[which.min(minor[candidates])]]
-# 2. Save the chosen variant ID and force the Firth model at that variant.
-guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
+guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))  # <2>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
-# 3. Print both estimates and check that the Firth test gives one valid result.
-comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
+comparison <- guided_association(guided_path(cfg, "6.6", "firth"))  # <3>
 print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
 print(comparison[, c("ID", "A1", "OR", "P")])
 stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 ```
+
+1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
+2. Save the chosen variant ID and force the Firth model at that variant.
+3. Print both estimates and check that the Firth test gives one valid result.
 
 ### What each option does
 
@@ -257,18 +328,20 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
 | `--glm` | Fits a logistic model at the selected variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
-| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which reduces bias with small groups, rather than waiting for the ordinary model calculation to fail. |
+| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which gives usable estimates when very few people carry the allele, rather than waiting for the ordinary model calculation to fail. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic test without separate rows for the effects of age, sex and genetic component scores. |
 | `--out` | Starts output file names with s6-6_firth for the forced Firth result. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -277,20 +350,21 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
 ```
 
-## Step 6.7 · First look and association checkpoint
+:::
 
-We summarise the sample and variant counts, valid tests and results below the course significance threshold. We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
+## Step 6.7 · First look and association checkpoint {#step-6-7}
+
+We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
 
 [Read step 6.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-7).
 
-```{r s6-7}
-# 1. Read the results and summarise the study size and test values.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-7
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
   genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
   lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
-# 2. Save and print the summary table.
-guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
+guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))  # <2>
 print(summary)
 # Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
@@ -299,42 +373,45 @@ guided_artifact_checkpoint(cfg, "6.7", files)
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
+1. Read the results and summarise the study size and test values.
+2. Save and print the summary table.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
+1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.8 · Create the summary statistics file
+:::
+
+## Step 6.8 · Create the summary statistics file {#step-6-8}
 
 We save the scan results in a standard table with one row per tested variant and a separate file explaining its columns. We read the saved table back and check its values and counts so the next plots use a verified file.
 
 [Read step 6.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-8).
 
-```{r s6-8}
-# 1. Read the scan and arrange its results in the standard columns.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-8
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 stats <- guided_standardise_scan(results)
-# 2. Check the columns and values and choose the summary file name.
-guided_check_summary(stats, rows = nrow(results))
+guided_check_summary(stats, rows = nrow(results))  # <2>
 stats_file <- guided_summary_path(cfg)
-# 3. Save the summary table and a file explaining each column.
-guided_write_summary(stats, stats_file)
+guided_write_summary(stats, stats_file)  # <3>
 dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
 guided_write(guided_summary_dictionary(), dictionary_file)
 # Read the file back, as the plots will, and check that nothing was lost.
-# 4. Read the saved table and check that it matches the original results.
-saved <- guided_summary_stats(cfg)
+saved <- guided_summary_stats(cfg)  # <4>
 guided_check_summary(saved, rows = nrow(results))
 stopifnot(isTRUE(all.equal(saved, stats)))
-# 5. Compare test counts with the saved scan summary and print the checked results.
-first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
+first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))  # <5>
 finite <- valid_p(saved$p_value)
 stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
 print(head(saved, 5))
@@ -345,16 +422,48 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
+1. Read the scan and arrange its results in the standard columns.
+2. Check the columns and values and choose the summary file name.
+3. Save the summary table and a file explaining each column.
+4. Read the saved table and check that it matches the original results.
+5. Compare test counts with the saved scan summary and print the checked results.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.7. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.8 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
+
+:::
+
+## Glossary terms used in this notebook {#glossary}
+
+These entries repeat the course glossary so that every link in this notebook works offline.
+
+### Lambda GC {#glossary-lambda-gc .unlisted}
+
+Summary of test-statistic inflation/deflation, not proof of a valid model.
+
+### p-value {#glossary-p-value .unlisted}
+
+Under the null model, probability of a statistic at least as extreme as observed.
+
+### SHA-256 {#glossary-sha-256 .unlisted}
+
+A short code calculated from the content of a file. If the file changes, the code changes, so it shows whether a file is intact.
+
+## Where next {#where-next}
+
+- Previous: [Module 5: Population structure](module_05_population_structure.qmd)
+- Next: [Module 7: Plots and reporting](module_07_plots_and_reporting.qmd)
+- This module on the course website: [Module 6](https://www.manuelgentiluomo.it/teaching/gwas/module-6)

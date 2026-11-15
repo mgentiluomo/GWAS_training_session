@@ -1,38 +1,77 @@
 ---
 title: "Module 4: Variant quality control"
-output: html_notebook
-course_source_sha256: "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
 All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
 The linked step pages explain the ideas and provide troubleshooting.
 
-You need the full [checkpoint at step 3.8](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-8) before you start.
+::: {.callout-note title="In this module"}
 
-```{r module4_check}
+**Time.** About 45 minutes.
+
+**Before you start.** You need the full [checkpoint at step 3.8](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-8). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [4.1 Variant call rate](#step-4-1)
+- [4.2 Differential missingness](#step-4-2)
+- [4.3 Allele frequency](#step-4-3)
+- [4.4 Hardy-Weinberg and sample size](#step-4-4)
+- [4.5 Sex chromosomes, MT and duplicated sites](#step-4-5)
+- [4.6 Variant QC summary and checkpoint](#step-4-6)
+
+**Where the module ends.** The checkpoint at step 4.6.
+
+:::
+
+```{r}
+#| label: module4_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(4)
 ```
 
-```{r module4_setup}
+```{r}
+#| label: module4_setup
 source("R/guided.R")
 cfg <- guided_init()
 ```
 
-## Step 4.1 · Variant call rate
+## Step 4.1 · Variant call rate {#step-4-1}
 
 We remove variants with more than 2% of their results missing. This keeps sites in the DNA with results for at least 98% of the remaining people.
 
 [Read step 4.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-1).
 
-```{r s4-1}
-# 1. Remove variants with more than 2% of their results missing.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
+```{r}
+#| label: s4-1
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.1", "3.8")
 guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 ```
+
+1. Remove variants with more than 2% of their results missing.
 
 ### What each option does
 
@@ -45,11 +84,13 @@ guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 801 variants are removed. This is not exactly the 800 planted low-call variants. 1,844 samples and 295,559 variants remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -58,26 +99,30 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048
 ```
 
-## Step 4.2 · Differential missingness
+:::
 
-We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 0.00001, which indicate differences that are very unlikely if missing results occur equally in both groups.
+## Step 4.2 · Differential missingness {#step-4-2}
+
+We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 
-```{r s4-2}
-# 1. Compare missing results in people with and without the disease.
-report <- guided_path(cfg, "4.2", "missing")
+```{r}
+#| label: s4-2
+report <- guided_path(cfg, "4.2", "missing")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--test-missing", "--out", report))
-# 2. Read the test results and list variants with p-values below 0.00001.
-x <- guided_table(paste0(report, ".missing"))
+x <- guided_table(paste0(report, ".missing"))  # <2>
 p <- as.numeric(x$P)
 exclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, "4.2", "exclude.txt"))
-# 3. Remove the listed variants and save the remaining data.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.2", "4.1")
 guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 ```
+
+1. Compare missing results in people with and without the disease.
+2. Read the test results and list variants with p-values below 0.00001.
+3. Remove the listed variants and save the remaining data.
 
 ### What each option does
 
@@ -94,17 +139,19 @@ guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-1_state. |
-| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 0.00001. |
+| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 1 × 10⁻⁵ (0.00001). |
 | `--make-pgen` | Saves the remaining data as PGEN, PVAR and PSAM files. |
 | `--out` | Starts the output file names with results/guided/s4-2_state. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 120 variants are excluded. 295,439 variants and 1,844 samples remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -114,19 +161,23 @@ bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided
 bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048
 ```
 
-## Step 4.3 · Allele frequency
+:::
+
+## Step 4.3 · Allele frequency {#step-4-3}
 
 We keep variants whose less common DNA version appears in at least 1% of the chromosome copies. This removes variants with too little information for the main disease analysis.
 
 [Read step 4.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-3).
 
-```{r s4-3}
-# 1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
+```{r}
+#| label: s4-3
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
 guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 ```
+
+1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
 
 ### What each option does
 
@@ -139,11 +190,13 @@ guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -152,35 +205,39 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048
 ```
 
-## Step 4.4 · Hardy-Weinberg and sample size
+:::
+
+## Step 4.4 · Hardy-Weinberg and sample size {#step-4-4}
 
 We test whether DNA letter combinations on chromosomes 1 to 22 follow expected proportions in people without the disease. We remove variants that fail a rule based on the number of people tested, to reduce possible measurement errors.
 
 [Read step 4.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-4).
 
-```{r s4-4}
-# 1. Read the sample table and list people without the disease.
-psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))
+```{r}
+#| label: s4-4
+psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))  # <1>
 controls <- guided_list(psam$IID[psam$Disease == "1"], guided_path(cfg, "4.4", "controls.txt"), TRUE)
-# 2. Test expected DNA letter combinations on chromosomes 1 to 22.
-report <- guided_path(cfg, "4.4", "hardy")
+report <- guided_path(cfg, "4.4", "hardy")  # <2>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--keep", controls, "--chr", "1-22", "--hardy", "midp", "--out", report))
-# 3. Calculate a cutoff for each variant from the number of people tested.
-hwe <- guided_table(paste0(report, ".hardy"))
+hwe <- guided_table(paste0(report, ".hardy"))  # <3>
 n_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)
 cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
-# 4. List variants with test p-values below their cutoff.
-p <- as.numeric(hwe$MIDP)
+p <- as.numeric(hwe$MIDP)  # <4>
 exclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, "4.4", "exclude.txt"))
-# 5. Remove the listed variants from all people and save the remaining data.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))
-# 6. Check that the three named variants are absent from the saved data.
-retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))  # <5>
+retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID  # <6>
 stopifnot(!any(c("rs4988235", "rs12913832", "rs1426654") %in% retained))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.4", "4.3")
 guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 ```
+
+1. Read the sample table and list people without the disease.
+2. Test expected DNA letter combinations on chromosomes 1 to 22.
+3. Calculate a cutoff for each variant from the number of people tested.
+4. List variants with test p-values below their cutoff.
+5. Remove the listed variants from all people and save the remaining data.
+6. Check that the three named variants are absent from the saved data.
 
 ### What each option does
 
@@ -206,11 +263,13 @@ guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -220,45 +279,49 @@ bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls
 bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
 ```
 
-## Step 4.5 · Sex chromosomes, MT and duplicated sites
+:::
+
+## Step 4.5 · Sex chromosomes, MT and duplicated sites {#step-4-5}
 
 We remove variants on X, Y and mitochondrial DNA with unexpected results in more than 1% of people checked. We then rename variants by their DNA location and letters, keep one copy of matching duplicates and remove copies that disagree.
 
 [Read step 4.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-5).
 
-```{r s4-5}
-# 1. Export X, Y and mitochondrial DNA results as a table.
-report <- guided_path(cfg, "4.5", "sexchr")
+```{r}
+#| label: s4-5
+report <- guided_path(cfg, "4.5", "sexchr")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--chr", "X,Y,MT", "--export", "A", "--out", report))
-# 2. Read the column names and the exported results.
-header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]
+header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]  # <2>
 raw <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE, quote = "", comment.char = "",
   colClasses = c(rep("character", 6), rep("integer", length(header) - 6L)), na.strings = "NA")
-# 3. Arrange the DNA results by person and variant and identify each chromosome.
-genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L
+genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L  # <3>
 ids <- sub("_[^_]+$", "", names(raw)[-(1:6)])
 pvar <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))
 chromosome <- pvar$CHROM[match(ids, pvar$ID)]
-# 4. Calculate the share of unexpected results for each variant.
-wrong <- numeric(length(ids))
+wrong <- numeric(length(ids))  # <4>
 wrong[chromosome == "X"] <- colMeans(genotypes[raw$SEX == "1", chromosome == "X", drop = FALSE] == 1L)
 wrong[chromosome == "Y"] <- colMeans(genotypes[raw$SEX == "2", chromosome == "Y", drop = FALSE] >= 0L)
 wrong[chromosome == "MT"] <- colMeans(genotypes[, chromosome == "MT", drop = FALSE] == 1L)
-# 5. List variants with unexpected results in more than 1% of people checked.
-exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))
-# 6. Remove the listed variants and check the remaining counts.
-sex_state <- guided_path(cfg, "4.5", "sex_state")
+exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))  # <5>
+sex_state <- guided_path(cfg, "4.5", "sex_state")  # <6>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--exclude", exclude, "--make-pgen", "--out", sex_state))
 stopifnot(all(guided_counts(sex_state) == c(1844, 238819)))
-# 7. Rename variants by location and DNA letters and remove duplicate entries.
-run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",
+run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",  # <7>
   "--make-pgen", "--out", guided_path(cfg, "4.5")))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--exclude", "--set-all-var-ids", "--rm-dup"), value = c(exclude, "@:#:$r:$a", "exclude-mismatch"))
 guided_register(cfg, "4.5", "4.4", 1844, 238513, operations = ops)
-# 8. Free the computer memory used by the large tables.
-rm(raw, genotypes); invisible(gc())
+rm(raw, genotypes); invisible(gc())  # <8>
 ```
+
+1. Export X, Y and mitochondrial DNA results as a table.
+2. Read the column names and the exported results.
+3. Arrange the DNA results by person and variant and identify each chromosome.
+4. Calculate the share of unexpected results for each variant.
+5. List variants with unexpected results in more than 1% of people checked.
+6. Remove the listed variants and check the remaining counts.
+7. Rename variants by location and DNA letters and remove duplicate entries.
+8. Free the computer memory used by the large tables.
 
 ### What each option does
 
@@ -269,7 +332,7 @@ rm(raw, genotypes); invisible(gc())
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-4_state. |
 | `--chr` | Selects only X, Y and MT, the mitochondrial chromosome. |
 | `--export` | Writes genotype data in a text format for R to read. |
-| &nbsp;&nbsp;&rarr; `A` | Writes a table of allele counts, recorded as 0, 1 or 2 copies of a DNA version for each person and variant. |
+| &nbsp;&nbsp;&rarr; `A` | Writes a table with one row per person and values of 0, 1 or 2 for each variant. For chromosomes present in one copy, such as X in males, PLINK writes 0 or 2, so 2 does not mean two physical copies. |
 | `--out` | Starts the export file names with results/guided/s4-5_sexchr. |
 
 **Command 2: remove variants with unexpected chromosome results**
@@ -295,11 +358,13 @@ rm(raw, genotypes); invisible(gc())
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 33 variants with impossible calls on the sex chromosomes or MT are removed. The duplicate review removes 306 entries. It keeps one of each of the 280 matching pairs, and it removes both members of the 13 pairs that disagree. The final number of variants is 238,513.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -310,27 +375,41 @@ bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclu
 bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048
 ```
 
-## Step 4.6 · Variant QC summary and checkpoint
+:::
+
+## Step 4.6 · Variant QC summary and checkpoint {#step-4-6}
 
 We save a complete checked starting point for module 5. We check the saved files and counts so we can restart from the same data later.
 
 [Read step 4.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-6).
 
-```{r s4-6}
-# 1. Save the complete dataset and check the saved files and counts.
+```{r}
+#| label: s4-6
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")
+guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")  # <1>
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 ```
+
+1. Save the complete dataset and check the saved files and counts.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
+
+:::
+
+## Where next {#where-next}
+
+- Previous: [Module 3: Sample quality control](module_03_sample_quality_control.qmd)
+- Next: [Module 5: Population structure](module_05_population_structure.qmd)
+- This module on the course website: [Module 4](https://www.manuelgentiluomo.it/teaching/gwas/module-4)

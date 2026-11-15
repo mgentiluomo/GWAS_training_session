@@ -6,7 +6,7 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "aa090b42561899a8a4965dc590c206814316b3369b3cac0012b0862a4935e7dc",
+  "source_sha256": "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "label": "remove samples with unusually few matching letters",
+      "label": "remove samples with unusually high heterozygosity",
       "options": [
         {
           "name": "--pfile",

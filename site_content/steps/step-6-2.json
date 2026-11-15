@@ -6,7 +6,7 @@
   "anchor": "step-6-2",
   "title": "The additive logistic model",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5",
+  "source_sha256": "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit a [logistic regression](docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.",
@@ -33,7 +33,7 @@
     "options": []
   },
   "figures": [],
-  "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. We calculate how each extra copy changes the odds of disease, the ratio of cases to controls.",
+  "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.",
   "student_plink_options": [],
   "success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value.",
   "verification_notes": [

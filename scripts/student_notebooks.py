@@ -42,8 +42,9 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 raise ValueError("Module 0 needs only the project root.")
         elif spec is None:
             raise ValueError(f"Enabled module {number} needs module_meta prerequisites.")
-        chunks = {m.group(1): m.group().rstrip() for m in CHUNK.finditer(
-            (root / module["source"]).read_text(encoding="utf-8"))}
+        lesson_text = (root / module["source"]).read_text(encoding="utf-8")
+        chunks = {m.group(1): m.group().rstrip() for m in CHUNK.finditer(lesson_text)}
+        time_line = re.search(r"^\*\*How long it takes\.\*\* (.+?)$", lesson_text, re.M)
         model_steps = []
         for record in steps:
             # Validate even when callers supply exported fixtures directly.
@@ -60,9 +61,16 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 "terminal_commands": record["plink"]["commands"],
             })
         models.append({"module": number, "title": module["title"], "prerequisites": spec,
+                       "time": re.match(r"[^.]*\.", time_line[1])[0] if time_line else "",
                        "source": module["source"], "source_sha256": module["source_sha256"],
                        "setup_code": next((r["setup_code"] for r in steps if r["setup_code"]), ""),
                        "steps": model_steps})
+    for index, model in enumerate(models):
+        following = models[index + 1] if index + 1 < len(models) else None
+        link = lambda m: {"module": m["module"], "title": m["title"], "file": Path(m["source"]).with_suffix(".qmd").name}
+        model["previous"] = link(models[index - 1]) if index else None
+        model["next"] = link(following) if following else None
+        model["end_checkpoint"] = following["prerequisites"]["checkpoint"] if following else None
     return models
 
 
@@ -118,7 +126,8 @@ def option_table_lines(record: dict) -> list[str]:
     if record["option_groups"]:
         for index, group in enumerate(record["option_groups"], 1):
             if len(record["option_groups"]) > 1:
-                lines.extend([f'**Command {index}: {group["label"]}**', ""])
+                title = re.sub(r"^Command \d+: ", "", group["label"])
+                lines.extend([f"**Command {index}: {title}**", ""])
             lines.extend(["| Option or modifier | What it does |", "| --- | --- |"])
             for option in group["options"]:
                 explanation = option["explanation"].replace("|", "\\|")
@@ -209,69 +218,193 @@ def qmd_chunk(chunk: str) -> list[str]:
     return out + (explanations + [""] if explanations else [])
 
 
+SITE = "https://www.manuelgentiluomo.it/teaching/gwas"
+GLOSSARY_LINK = re.compile(r"\]\((?:\.\./)?docs/glossary\.md#([^)\s]+)\)")
+GLOSSARY_ENTRY = re.compile(r"^### (.+?) \{#([^}\s]+)\}\s*$", re.M)
+
+
+def glossary_entries(root: Path = ROOT) -> dict[str, tuple[str, str]]:
+    """Map each glossary anchor to its term and definition text."""
+    text = (root / "docs/glossary.md").read_text(encoding="utf-8").replace("\r\n", "\n")
+    matches = list(GLOSSARY_ENTRY.finditer(text))
+    entries = {}
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        entries[match[2]] = (match[1], text[match.end():end].strip())
+    return entries
+
+
+def qmd_links(text: str, used: set[str]) -> str:
+    """Glossary links point to an appendix in the same notebook, so they work offline,
+    in RStudio and in the rendered HTML. The terms they name are recorded in `used`."""
+    def swap(match: re.Match) -> str:
+        used.add(match[1])
+        return f"](#glossary-{match[1]})"
+    return notebook_links(GLOSSARY_LINK.sub(swap, text))
+
+
+def glossary_section(used: set[str], level: int, root: Path = ROOT) -> list[str]:
+    if not used:
+        return []
+    entries = glossary_entries(root)
+    missing = sorted(used - set(entries))
+    if missing:
+        raise ValueError(f"Glossary terms not found for the notebook appendix: {missing}")
+    hashes = "#" * level
+    lines = [f"{hashes} Glossary terms used in this notebook {{#glossary}}", "",
+             "These entries repeat the course glossary so that every link in this notebook works offline.", ""]
+    for key in sorted(used, key=lambda k: entries[k][0].lower()):
+        term, body = entries[key]
+        lines.extend([f"{hashes}# {term} {{#glossary-{key} .unlisted}}", "", body, ""])
+    return lines
+
+
+def module_file(model: dict) -> str:
+    return Path(model["source"]).with_suffix(".qmd").name
+
+
+def step_anchor(record: dict) -> str:
+    return record["anchor"]
+
+
+def in_this_module(model: dict, models: list[dict], complete: bool) -> list[str]:
+    number = model["module"]
+    spec = model["prerequisites"]
+    lines = ['::: {.callout-note title="In this module"}', ""]
+    if model.get("time"):
+        lines.extend([f'**Time.** {model["time"]}', ""])
+    if spec["checkpoint"] is not None:
+        checkpoint = spec["checkpoint"]
+        lines.extend([f'**Before you start.** You need the full [checkpoint at step {checkpoint}]'
+                      f'({SITE}/module-{checkpoint.split(".")[0]}/step-{checkpoint.replace(".", "-")}). '
+                      "The first code chunk checks the files that this module needs.", ""])
+    elif number == 0:
+        lines.extend(["**Before you start.** Nothing except the project folder. The first code chunk checks it.", ""])
+    else:
+        lines.extend(["**Before you start.** You need the course data from step 0.7. "
+                      "The first code chunk checks the files that this module needs.", ""])
+    lines.extend(["**Steps.**", ""])
+    lines.extend(f'- [{record["id"]} {record["title"]}](#{step_anchor(record)})' for record in model["steps"])
+    lines.append("")
+    end = model.get("end_checkpoint")
+    lines.extend([f'**Where the module ends.** The checkpoint at step {end}.' if end else
+                  "**Where the module ends.** This module has no checkpoint.", "", ":::", ""])
+    return lines
+
+
+def where_next(model: dict, complete: bool) -> list[str]:
+    previous, following = model.get("previous"), model.get("next")
+    def target(info: dict) -> str:
+        return f'#module-{info["module"]}' if complete else info["file"]
+    lines = []
+    if previous:
+        lines.append(f'- Previous: [Module {previous["module"]}: {previous["title"]}]({target(previous)})')
+    if following:
+        lines.append(f'- Next: [Module {following["module"]}: {following["title"]}]({target(following)})')
+    else:
+        lines.append("- Next: this is the last module of the main path.")
+    if not complete:
+        lines.append(f'- This module on the course website: [Module {model["module"]}]({SITE}/module-{model["module"]})')
+    return lines
+
+
+def course_map(models: list[dict]) -> list[str]:
+    lines = ["# Course map {#course-map}", "",
+             "Every module and step of the main path. Select a name to jump to it.", ""]
+    for model in models:
+        lines.append(f'- [Module {model["module"]}: {model["title"]}](#module-{model["module"]})')
+        lines.extend(f'  - [{record["id"]} {record["title"]}](#{step_anchor(record)})' for record in model["steps"])
+    return lines + [""]
+
+
+# In the editor, a link to another notebook opens the .qmd file. In the rendered HTML page the
+# same link must open the neighbouring .html page, because Quarto does not rewrite it outside a website.
+LINK_SCRIPT = [
+    "        <script>",
+    "        document.querySelectorAll('a[href$=\".qmd\"]').forEach(function (a) {",
+    "          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));",
+    "        });",
+    "        </script>",
+]
+
+
 def render_qmd(models: list[dict], complete: bool = False) -> str:
     module = models[0]
     title = "GWAS course: modules 0 to 7" if complete else f'Module {module["module"]}: {module["title"]}'
     lines = ["---", f"title: {json.dumps(title, ensure_ascii=False)}", "format:", "  html:", "    toc: true",
-             "    embed-resources: true", "editor: visual",
+             "    toc-depth: 2", '    toc-title: "Contents"', "    toc-location: left", "    toc-expand: true",
+             "    anchor-sections: true", "    code-copy: true", "    code-fold: false",
+             "    embed-resources: true", "    include-after-body:", "      text: |", *LINK_SCRIPT, "editor: visual",
              *([] if complete else [f'course_source_sha256: "{module["source_sha256"]}"']), "---", "",
              "Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.",
              "All data are simulated. Read each summary, run its chunk and compare your result with the expected result.",
              "The linked step pages explain the ideas and provide troubleshooting.", ""]
+    used: set[str] = set()
+    if complete:
+        lines.extend(course_map(models))
     setup_written = False
     for model in models:
         number = model["module"]
         if complete:
-            lines.extend([f'# Module {number}: {model["title"]}', ""])
-        elif model["prerequisites"]["checkpoint"] is not None:
-            checkpoint = model["prerequisites"]["checkpoint"]
-            previous = checkpoint.split(".")[0]
-            anchor = checkpoint.replace(".", "-")
-            lines.extend([f"You need the full [checkpoint at step {checkpoint}](https://www.manuelgentiluomo.it/teaching/gwas/module-{previous}/step-{anchor}) before you start.", ""])
+            lines.extend([f'# Module {number}: {model["title"]} {{#module-{number}}}', ""])
+        lines.extend(in_this_module(model, models, complete))
         lines.extend(qmd_chunk("\n".join(check_chunk(model)).rstrip("\n")))
         if model["setup_code"] and not setup_written:
             lines.extend(qmd_chunk("\n".join([f"```{{r module{number}_setup}}", model["setup_code"], "```"])))
             setup_written = True
-        lines.extend(render_steps_qmd(model))
+        lines.extend(render_steps_qmd(model, used))
+        if complete:
+            lines.extend([f"## Previous and next {{#previous-next-{number} .unlisted}}", "", *where_next(model, True), ""])
+    lines.extend(glossary_section(used, 1 if complete else 2))
+    if not complete:
+        lines.extend(["## Where next {#where-next}", "", *where_next(module, False), ""])
     return "\n".join(lines).rstrip() + "\n"
 
 
-def render_steps_qmd(model: dict) -> list[str]:
+def what_you_do(text: str) -> list[str]:
+    return ['::: {.callout-note title="What you do"}', "", text, "", ":::", ""]
+
+
+def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
+    used = set() if used is None else used
     lines = []
     for record in model["steps"]:
+        url = f'{SITE}/module-{model["module"]}/{record["anchor"]}'
         lines.extend([
-            f'## Step {record["id"]} · {record["title"]}', "", record["summary"], "",
-            f'[Read step {record["id"]} on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-{model["module"]}/{record["anchor"]}).', "",
+            f'## Step {record["id"]} · {record["title"]} {{#{record["anchor"]}}}', "", record["summary"], "",
+            f'[Read step {record["id"]} on the course website]({url}).', "",
         ])
         if record["kind"] != "code":
             if record["kind"] == "reading":
-                lines.extend(["This step is reading only. There is no code to run.", ""])
+                lines.extend(what_you_do(f"Read this step on the [course website]({url}). There is no code to run."))
             else:
-                lines.extend(["No code to run in this step.", "", f'What you do: {record["action"]}', ""])
+                lines.extend(what_you_do("No R code runs in this step. " + qmd_links(record["action"], used)))
             continue
         for chunk in record["chunks"]:
             lines.extend(qmd_chunk(chunk))
         lines.extend(option_table_lines(record))
         lines.extend(['::: {.callout-tip title="Expected result" collapse="true"}', "",
-                      notebook_links(record["expected_result"]), ":::", ""])
+                      qmd_links(record["expected_result"], used), "", ":::", ""])
         if record["terminal_commands"]:
             lines.extend(['::: {.callout-note title="PLINK terminal equivalent"}', "",
                           "These commands are shown for reference. Run the R chunk above to follow the course.",
                           "R creates any lists needed between PLINK commands. On Windows, use `bin\\plink2.exe`.",
-                          "", "```sh", *record["terminal_commands"], "```", ":::", ""])
+                          "", "```sh", *record["terminal_commands"], "```", "", ":::", ""])
         else:
-            lines.extend(['::: {.callout-note title="PLINK terminal equivalent"}', "", "No PLINK equivalent", ":::", ""])
+            lines.extend(['::: {.callout-note title="PLINK terminal equivalent"}', "", "No PLINK equivalent", "", ":::", ""])
     return lines
 
 
-# Quarto output is available with --notebook-format qmd. To make it the default, change DEFAULT_FORMAT.
+# Students receive Quarto notebooks. The R Markdown renderer stays in the registry for later use
+# (--notebook-format rmd). To change the student format, change DEFAULT_FORMAT.
 RENDERERS = {"rmd": render_rmd, "qmd": render_qmd}
-DEFAULT_FORMAT = "rmd"
+DEFAULT_FORMAT = "qmd"
+SUFFIXES = {"rmd": ".Rmd", "qmd": ".qmd"}
 
 
 def notebook_outputs(models: list[dict], format: str = DEFAULT_FORMAT) -> dict[str, str]:
     renderer = RENDERERS[format]
-    suffix = ".Rmd" if format == "rmd" else "." + format
+    suffix = SUFFIXES.get(format, "." + format)
     outputs = {Path(m["source"]).with_suffix(suffix).name: renderer([m]) for m in models}
     if {m["module"] for m in models} == set(range(8)):
         outputs["gwas_course_complete" + suffix] = renderer(sorted(models, key=lambda m: m["module"]), complete=True)
@@ -323,11 +456,12 @@ def sync_module_check(root: Path, check: bool, models: list[dict] | None = None)
 def export_notebooks(destination: Path, check: bool = False, root: Path = ROOT, format: str = DEFAULT_FORMAT) -> None:
     models = build_models(root)
     outputs = notebook_outputs(models, format)
-    suffix = ".Rmd" if format == "rmd" else "." + format
     sync_module_check(root, check, models)
-    generated_name = re.compile(r"(?:module_0[0-7]_.+|gwas_course_complete)" + re.escape(suffix) + "$")
-    unexpected = sorted(p.name for p in destination.glob("*" + suffix)
-                        if generated_name.fullmatch(p.name) and p.name not in outputs)
+    # Generated notebooks of any known format that are not in the current output are unexpected,
+    # for example R Markdown files that remain after the student format changed to Quarto.
+    generated_name = re.compile(r"(?:module_0[0-7]_.+|gwas_course_complete)(?:" + "|".join(re.escape(s) for s in SUFFIXES.values()) + ")")
+    unexpected = sorted(p.name for p in (destination.iterdir() if destination.is_dir() else [])
+                        if p.is_file() and generated_name.fullmatch(p.name) and p.name not in outputs)
     if check:
         # Git may check out CRLF on Windows. Only line endings may differ.
         stale = [name for name, content in outputs.items() if not (destination / name).is_file()
