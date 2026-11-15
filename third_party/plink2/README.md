@@ -8,6 +8,8 @@ The pins in `releases.tsv` are a **first pin, to be verified by the author again
 
 On 15 November 2026 the four archive hashes were confirmed by a second, independent download of the same files with a web browser. The values matched. This rules out a corrupted first download. It still does not replace a comparison with a publisher checksum.
 
+On 15 November 2026 the Windows x86_64 non-AVX2 build and the AVX2 build used for the validation ran the complete main path on the same data. All counts, the lambda value, the hits, the clumps, the p-values and the principal components were identical. See `docs/review/plink_home_comparison.md`. The macOS and Linux builds were checked by their hashes only.
+
 The Windows x86_64 program was run with `--version` on Windows and printed `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`. The other three programs were not run, because they need their own operating systems.
 
 ## Files
@@ -25,6 +27,10 @@ Four builds, all without AVX2 and without 32-bit support: Windows x86_64, macOS 
 ## Licence
 
 PLINK 2 is free software under the GNU General Public License version 3 or later. Anyone who receives the program may also receive the source. The course licence (CC BY-NC-SA 4.0 for text, MIT for code) does not apply to PLINK 2. Release notes must link the exact source tag and attach its source.
+
+## Source
+
+The source of the programs is the tag `v2.0.0-b.1.4` (commit `760ee7329e8914de52f75a4e470cecabccbde0d9`) of the PLINK 2 source repository: <https://github.com/chrchang/plink-ng/tree/v2.0.0-b.1.4>. The project release attaches the source archive of that tag as `plink-ng-v2.0.0-b.1.4-source.zip` (SHA-256 `012cf4f54285b31b75a6cf3ab695770a2f93d8864f7f237570c7d3ec0e44da6d`). The licence texts of the programs and of their parts are in `COPYING` and `notices/`.
 
 ## Changing a pin
 

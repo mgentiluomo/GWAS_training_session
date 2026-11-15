@@ -14,7 +14,7 @@ assumed. The guided steps explain the commands, files and statistical terms.
 
 The course follows modules 0 to 7. No programming experience is assumed.
 Start with module 0, which prepares your computer (see [setup](docs/setup.md)).
-Download [GWAS_course-2026.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.2/GWAS_course-2026.2.zip)
+Download [GWAS_course-2026.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3/GWAS_course-2026.3.zip)
 from the versioned project release and extract the complete project. The default branch is `course/2026-guided-training`.
 No branch selection is needed. If you already use Git, `git clone https://github.com/mgentiluomo/GWAS_training_session.git`
 gets the same 2026 course. Its default folder name `GWAS_training_session` also works.
