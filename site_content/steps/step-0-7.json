@@ -6,7 +6,7 @@
   "anchor": "step-0-7",
   "title": "Request the password and download the data",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "213c4a5c0b03d185cac436b0f400e211e2e496095701f6f665bd13d0d2a772a0",
+  "source_sha256": "2cb47ed1be28667bff1f5f9866d3585859023b490ac71c9762489760aefcdc84",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Request the course password, then download the matching encrypted data with `download_course_data()`. The data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",

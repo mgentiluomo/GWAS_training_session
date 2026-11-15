@@ -6,20 +6,27 @@
   "anchor": "step-0-6",
   "title": "Put PLINK 2 in bin/",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "213c4a5c0b03d185cac436b0f400e211e2e496095701f6f665bd13d0d2a772a0",
+  "source_sha256": "2cb47ed1be28667bff1f5f9866d3585859023b490ac71c9762489760aefcdc84",
   "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Get the latest matching build from the [official PLINK 2 page](https://www.cog-genomics.org/plink/2.0/). A build is a version of the program made for one system and processor. Follow these actions:\n\n1. Open the page. It lists several downloads. Choose the build whose name matches your system and processor from step 0.1. The names on the page can change.\n2. Save the ZIP file. A ZIP file is one compressed file that holds other files.\n3. Extract the ZIP file. On Windows, right-click it, choose \"Extract All\", then click \"Extract\". On macOS, double-click it.\n4. Inside you find the program. It is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](docs/glossary.md#executable), the file your computer can run.\n5. Copy the executable into the `bin/` folder of the course project. The project was created at step 0.3. The ZIP file may hold other programs too. Copy only `plink2.exe` (or `plink2`).\n\nThe ZIP file is not the executable, so extract it first. When you finish, you should see `plink2.exe` or `plink2` inside the `bin` folder.\n\nChoose a build from the official download table:\n\n| System and processor | Build |\n| --- | --- |\n| Windows x64, AVX2 support confirmed | Windows AVX2 |\n| Windows x64, AVX2 unknown or unavailable | Windows 64-bit |\n| Windows 32-bit | Windows 32-bit |\n| macOS Apple Silicon, including M1 and later | macOS M1 |\n| macOS Intel, AVX2 support confirmed | macOS AVX2 |\n| macOS Intel, AVX2 unknown or unavailable | macOS 64-bit |\n| Linux x86_64, AVX2 support confirmed | Linux AVX2 Intel or AMD, matching the processor vendor |\n| Linux x86_64, AVX2 unknown or unavailable | Linux 64-bit Intel |\n| Linux 32-bit x86 | Linux 32-bit |\n\nAVX2 is a processor instruction set. If you are unsure, choose the matching 64-bit build without AVX2. The official page does not list a native Windows ARM or Linux ARM download; ask support for a compatible build. Do not use a macOS M1 build on another system.",
-    "why": "PLINK 2 reads the genotype file formats. It computes [quality control](docs/glossary.md#quality-control) (QC) and association statistics. QC means checks that find samples or data that cannot be trusted. PLINK 1.9 is a different program, so it does not replace PLINK 2. The tested version is stored in one place, the settings file `config.R`. The setup check reports your version and warns you if it differs.",
-    "you_need": "Your system and processor from step 0.1, and the extracted project from step 0.3. You may download the executable first and copy it after you extract the project.",
-    "command": "No R code to run. Check that you extracted the ZIP and found `plink2.exe` on Windows, or `plink2` on macOS or Linux. Copy it into the project's `bin` folder after step 0.3. The setup check at step 0.8 reports the tested and installed versions.",
-    "expected_result": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux. At step 0.8 your executable must identify itself as PLINK v2. A different build gives a warning. A different version number alone does not make the check fail.",
-    "troubleshooting": "On macOS or Linux, the extracted file may lack permission to run. Open a terminal in the project folder (the project root). Type `chmod u+x bin/plink2`. This command gives your user permission to run that file. If your institution's security blocks it, ask support. Do not switch off computer security controls.\n\nOn macOS, Gatekeeper may block the official downloaded executable. After the blocked attempt, open System Settings, then Privacy & Security. Find the message for `plink2` and click \"Open Anyway\", then confirm \"Open\". Follow [Apple's instructions](https://support.apple.com/en-us/102445). Retry step 0.8.\n\nOn Windows, SmartScreen may show \"Windows protected your PC\" for a downloaded executable. For the file you obtained from the official PLINK page, review \"More info\" and use \"Run anyway\" if your institution permits it. If that option is unavailable, ask support. See [Microsoft's SmartScreen guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation).",
-    "quick_check": "Can a file named `plink2.zip` be used as the executable?\n\n<details><summary>Show the answer</summary>No. Extract the matching executable from it.</details>",
+    "what_we_do": "The project package already contains PLINK 2 Beta 1.4 for Windows, macOS (Apple Silicon and Intel) and Linux. A build is a version of the program made for one system and processor. R finds your system, copies the matching build into the `bin/` folder and checks that it is the right file. You do not download anything. Follow these actions:\n\n1. Keep the project from step 0.4 open in RStudio.\n2. Run the command below in the console.\n3. Read the last line it prints. It should say that PLINK 2 is ready in `bin/`.\n\nThe program is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](docs/glossary.md#executable), the file your computer can run. The builds are in `third_party/plink2/programs/`. R never changes a different PLINK 2 file that you put in `bin/` yourself. It tells you instead. If you cloned the project with Git, the builds are not in the clone. R then downloads the pinned build and checks it in the same way.\n\nYou can still get PLINK 2 from the official page, <https://www.cog-genomics.org/plink/2.0/>. Use it only if R cannot prepare the program, or if your lecturer asks for a different version. Choose the build whose name matches your system and processor from step 0.1. Extract the ZIP file and copy only `plink2.exe` (or `plink2`) into `bin/`. If you are not sure that your processor supports AVX2 (an instruction set of the processor), choose the 64-bit build without AVX2.",
+    "why": "PLINK 2 reads the genotype file formats. It computes [quality control](docs/glossary.md#quality-control) (QC) and association statistics. QC means checks that find samples or data that cannot be trusted. PLINK 1.9 is a different program, so it does not replace PLINK 2. The course checks the file against a stored SHA-256 value, a fingerprint of the file. This shows that you have the exact program that the course was tested with. The tested version is stored in one place, the settings file `config.R`. The setup check at step 0.8 reports your version and warns you if it differs.",
+    "you_need": "The extracted project from step 0.3 and the R session from step 0.5. Windows 10 or 11 (64-bit Intel or AMD), macOS, or Linux x86_64 with glibc 2.31 or newer. For Windows ARM or Linux ARM, ask support for a compatible version.",
+    "command": "```{r s0-6_plink, eval=FALSE}\n# 1. Load the helper that prepares PLINK 2.\nsource(\"R/plink_setup.R\")\n# 2. Copy the PLINK 2 build for your computer into the bin folder and check it.\nprepare_course_plink()\n```\n\nRun this command yourself; the whole-path script omits it. It finishes in a few seconds.",
+    "expected_result": "R prints one line. On the first run it is `PLINK 2 2.0.0-b.1.4 is ready in bin/ (windows-x86_64, from the package).` The system name in brackets matches your computer. If the file is already there, R prints `The course PLINK 2 program is already in bin/ and has the expected version.` The folder `bin` now holds `plink2.exe` on Windows, or `plink2` on macOS or Linux.",
+    "troubleshooting": "If R says that your computer cannot use the programs of the course, download PLINK 2 yourself from the official page, as described above. For Windows ARM or Linux ARM, ask support.\n\nOn macOS, Gatekeeper may block the program. Open a terminal in the project folder and type `xattr -d com.apple.quarantine bin/plink2`. This command removes the quarantine mark that macOS adds to downloaded files. You can also open System Settings, then Privacy & Security, find the message for `plink2` and click \"Open Anyway\". Follow [Apple's instructions](https://support.apple.com/en-us/102445). Then run step 0.6 again.\n\nOn Linux, PLINK 2 needs glibc 2.31 or newer. If you see the message \"Kernel too old\" or a glibc error, your system is too old for this build. Ask support. If the file lacks permission to run, type `chmod u+x bin/plink2` in the project folder.\n\nOn Windows, SmartScreen may show \"Windows protected your PC\". Review \"More info\" and use \"Run anyway\" if your institution permits it. If that option is unavailable, ask support. See [Microsoft's SmartScreen guidance](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation).\n\nIf R says that a SHA-256 value does not match, do not use the file. Download the project package again, or ask the instructor.",
+    "quick_check": "Does the command at step 0.6 download PLINK 2 from the internet?\n\n<details><summary>Show the answer</summary>No. It copies the build that is already in the project package. Only if the package has no build for your system does it download the pinned build, and it checks the SHA-256 value first.</details>",
     "files_created": "`bin/plink2.exe` or `bin/plink2`. It stays outside [Git](docs/glossary.md#git), the tool that records versions of the project files."
   },
   "setup_code": "",
-  "r_commands": [],
+  "r_commands": [
+    {
+      "label": "s0-6_plink",
+      "code": "# 1. Load the helper that prepares PLINK 2.\nsource(\"R/plink_setup.R\")\n# 2. Copy the PLINK 2 build for your computer into the bin folder and check it.\nprepare_course_plink()",
+      "run_by_default": false,
+      "where": "console"
+    }
+  ],
   "notebook_only_expected_code": [],
   "plink": {
     "applicable": false,
@@ -32,7 +39,7 @@
       "asset_path": "Figures/screenshots/s0-6_plink_executable_windows.png",
       "platform": "windows",
       "placement": "expected_result",
-      "alt_text": "Windows File Explorer showing plink2.exe extracted into the course bin folder.",
+      "alt_text": "Windows File Explorer showing plink2.exe in the course bin folder.",
       "asset": null,
       "reviewed": false
     },
@@ -41,21 +48,20 @@
       "asset_path": "Figures/screenshots/s0-6_plink_executable_macos.png",
       "platform": "macos",
       "placement": "expected_result",
-      "alt_text": "macOS Finder showing plink2 extracted into the course bin folder.",
+      "alt_text": "macOS Finder showing plink2 in the course bin folder.",
       "asset": null,
       "reviewed": false
     }
   ],
-  "student_summary": "We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.",
-  "student_kind": "outside_r",
-  "student_action": "Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.",
+  "student_summary": "We prepare PLINK 2, the program that analyses the DNA data. The project already contains it, so R copies the right version for your computer into the bin folder and checks it.",
+  "student_plink_options": [],
   "actions": [
     {
-      "label": "Download PLINK 2",
+      "label": "Official PLINK 2 download page",
       "url": "https://www.cog-genomics.org/plink/2.0/",
       "kind": "page"
     }
   ],
-  "success_line": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux.",
-  "student_expected_result": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux. At step 0.8 your executable must identify itself as PLINK v2. A different build gives a warning. A different version number alone does not make the check fail."
+  "success_line": "PLINK 2 2.0.0-b.1.4 is ready in bin/",
+  "student_expected_result": "R prints one line. On the first run it is `PLINK 2 2.0.0-b.1.4 is ready in bin/ (windows-x86_64, from the package).` The system name in brackets matches your computer. If the file is already there, R prints `The course PLINK 2 program is already in bin/ and has the expected version.` The folder `bin` now holds `plink2.exe` on Windows, or `plink2` on macOS or Linux."
 }

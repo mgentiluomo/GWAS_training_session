@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Install the R packages",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "213c4a5c0b03d185cac436b0f400e211e2e496095701f6f665bd13d0d2a772a0",
+  "source_sha256": "2cb47ed1be28667bff1f5f9866d3585859023b490ac71c9762489760aefcdc84",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install the R packages used by the course. A package is an add-on that gives R more functions. Keep the project from step 0.4 open.",
