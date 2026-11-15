@@ -6,14 +6,14 @@
   "anchor": "step-6-2",
   "title": "The additive logistic model",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "e1dd9b8bd283d42d872fe3566f8aab06a2825dd778366f9c3f8cbc8e29b7ea0f",
+  "source_sha256": "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit a [logistic regression](docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.",
     "why": "Logistic regression suits an outcome with two values, here case or control. It models log(p/(1-p)) = intercept + beta * dosage. Here p is the probability of being a case, and beta is the effect of each extra copy of the allele. An [additive model](docs/glossary.md#additive-model) assumes that each extra copy changes the log odds by the same amount. exp(beta) is the odds ratio per copy of the allele. It differs from the carrier odds ratio at 6.1. The [standard error](docs/glossary.md#standard-error) shows how uncertain the estimate of the log odds ratio is. This example uses one variant and no adjustment. It is not the final association result.",
     "you_need": "The one-variant export from 6.1 and the final PSAM file (the table of samples).",
-    "command": "```{r s6-2}\nx <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable. This step needs no PLINK operation. The R chunk is the complete command.\n\nR reads or calculates the values it shows. It does not change the genotype files.",
-    "expected_result": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "command": "```{r s6-2}\n# 1. Read the exported variant and match each sample to its case or control status.\nx <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\n# 2. Fit the model and show how each extra copy changes the odds of disease.\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable. This step needs no PLINK operation. The R chunk is the complete command.\n\nR reads or calculates the values it shows. It does not change the genotype files.",
+    "expected_result": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "What does beta = 0 imply for the per-allele odds ratio?\n\n<details><summary>Show the answer</summary>\n\nexp(0) = 1. The estimate shows no change in the odds for each extra copy of the allele.\n\n</details>",
     "files_created": "The example model exists only in R memory. The genotype export from 6.1 stays on disk."
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s6-2",
-      "code": "x <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])",
+      "code": "# 1. Read the exported variant and match each sample to its case or control status.\nx <- read.table(paste0(guided_path(cfg, \"6.1\", \"example\"), \".raw\"), header = TRUE, check.names = FALSE)\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\nexample <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == \"2\"), dosage = as.numeric(x[[7]]))\n# 2. Fit the model and show how each extra copy changes the odds of disease.\nfit <- glm(case ~ dosage, data = example, family = binomial())\nsummary(fit)\nexp(coef(fit)[\"dosage\"])",
       "run_by_default": true
     }
   ],
@@ -33,5 +33,11 @@
     "options": []
   },
   "figures": [],
-  "success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value."
+  "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.",
+  "student_plink_options": [],
+  "success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value.",
+  "verification_notes": [
+    "\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.\n"
+  ],
+  "student_expected_result": "An intercept and a dosage coefficient, each with a standard error and a [p-value](docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal."
 }

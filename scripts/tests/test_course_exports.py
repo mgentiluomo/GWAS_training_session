@@ -312,7 +312,8 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_data_download_has_one_main_command_and_a_file_chooser_fallback(self):
         record = next(r for r in self.records if r["id"] == "0.7")
-        self.assertEqual([c["code"] for c in record["r_commands"]], ["download_course_data()"])
+        code = [line for c in record["r_commands"] for line in c["code"].splitlines() if not line.lstrip().startswith("#")]
+        self.assertEqual(code, ["download_course_data()"])
         self.assertNotIn("zip_path", record["blocks"]["command"])
         self.assertNotIn("yourname", json.dumps(record))
         self.assertIn("download_course_data(zip_path = file.choose())", record["blocks"]["troubleshooting"])

@@ -1,0 +1,447 @@
+---
+title: "Module 5: Population structure"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3"
+---
+
+Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
+All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
+The linked step pages explain the ideas and provide troubleshooting.
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 60 minutes.
+
+**Before you start.** You need the full [checkpoint at step 4.6](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-6). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [5.1 Why ancestry matters](#step-5-1)
+- [5.2 Prepare variants for reference PCA](#step-5-2)
+- [5.3 Match build, position and alleles](#step-5-3)
+- [5.4 Reference PCA and study projection](#step-5-4)
+- [5.5 Plot the reference and projected study](#step-5-5)
+- [5.6 Define an ancestry-matched cohort](#step-5-6)
+- [5.7 Cohort PCs and how many to include](#step-5-7)
+
+**Where the module ends.** The checkpoint at step 5.7.
+
+:::
+
+```{r}
+#| label: module5_check
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+source("R/guided.R"); guided_check_module(5)
+```
+
+```{r}
+#| label: module5_setup
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## Step 5.1 · Why ancestry matters {#step-5-1}
+
+We count the reference samples in each labelled group. These groups help us compare inherited genetic backgrounds and understand how differences between cases and controls can create false disease associations.
+
+[Read step 5.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-1).
+
+```{r}
+#| label: s5-1
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
+reference_samples <- guided_table(paste0(reference, ".psam"))
+table(reference_samples$SuperPop)  # <2>
+```
+
+1. Read the reference sample table.
+2. Count the samples in each reference group.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS. The labels describe where the reference samples were collected. The table shows only the groups present in this subset, not every possible 1000 Genomes group.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 5.2 · Prepare variants for reference PCA {#step-5-2}
+
+We find and save the 48,614 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
+
+[Read step 5.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-2).
+
+```{r}
+#| label: s5-2
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
+study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
+reference_sites <- guided_table(paste0(reference, ".pvar"))
+common <- sort(intersect(study_sites$ID, reference_sites$ID))  # <2>
+guided_list(common, guided_path(cfg, "5.2", "common.txt"))  # <3>
+stopifnot(length(common) == 48614L)
+cat(length(common), "shared autosomal sites kept\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
+guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
+```
+
+1. Read the study and reference site tables.
+2. Find the site names that occur in both tables.
+3. Save the shared site names and check their number.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+48,614 shared sites are kept for the reference PCA and the projection.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 5.3 · Match build, position and alleles {#step-5-3}
+
+We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.
+
+[Read step 5.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-3).
+
+```{r}
+#| label: s5-3
+common <- readLines(guided_path(cfg, "5.2", "common.txt"))  # <1>
+study <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+ref <- guided_table(paste0(reference, ".pvar"))
+a <- match(common, study$ID); b <- match(common, ref$ID)  # <2>
+pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),  # <3>
+  all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
+cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
+```
+
+1. Read the shared site names and both site tables.
+2. Match site names and compare allele pairs in either order.
+3. Check chromosomes, positions and alleles and print the matched count.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 5.4 · Reference PCA and study projection {#step-5-4}
+
+We calculate ten principal components in the reference, each a number summarising one pattern of genetic variation. We then project both groups onto these fixed reference axes, meaning we place them on the same scale so we can compare them.
+
+[Read step 5.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-4).
+
+```{r}
+#| label: s5-4
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
+common <- guided_path(cfg, "5.2", "common.txt")
+fit <- guided_path(cfg, "5.4", "reference")
+run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))  # <2>
+weights <- guided_table(paste0(fit, ".eigenvec.allele"))  # <3>
+id_column <- match("ID", names(weights)); allele_column <- match("A1", names(weights))
+first_pc <- match("PC1", names(weights))
+score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),  # <4>
+  id_column, allele_column, "header-read", "no-mean-imputation", "variance-standardize",
+  "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
+run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))  # <5>
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))  # <6>
+# Course bookkeeping: records the counts for the next step. Do not change.
+guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".eigenval", ".eigenvec.allele")), paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"), paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore")), parent = "5.2")
+```
+
+1. Set the reference input, shared site list and output names.
+2. Calculate ten reference components and save their allele contributions.
+3. Find the columns containing site names, alleles and component contributions.
+4. Prepare the same reference frequencies and scoring rules for both groups.
+5. Place the reference samples on the fixed reference axes.
+6. Place the study samples on the same reference axes.
+
+### What each option does
+
+**Command 1: calculate reference components and allele weights**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
+| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--freq` | Saves how common each allele is in the reference to s5-4_reference.afreq. |
+| `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation. |
+| &nbsp;&nbsp;&rarr; `allele-wts` | Saves how much each allele contributes to each component in s5-4_reference.eigenvec.allele. |
+| `--out` | Starts the reference output file names with s5-4_reference. |
+
+**Command 2: place reference samples on the fixed axes**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
+| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
+| `--score` | Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5. |
+| &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
+| &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
+| `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
+| `--out` | Starts the reference score output file names with s5-4_ref_scores. |
+
+**Command 3: place study samples on the fixed axes**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder. |
+| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
+| `--score` | Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5. |
+| &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
+| &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
+| `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
+| `--out` | Starts the study score output file names with s5-4_study_scores. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Reference eigenvectors and eigenvalues, allele weights, and two `.sscore` files (score tables) with the columns PC1_AVG to PC10_AVG. The study projection contains 1,844 samples.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --freq --pca 10 allele-wts --out results/guided/s5-4_reference --threads 2 --memory 2048
+bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_ref_scores --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048
+```
+
+:::
+
+## Step 5.5 · Plot the reference and projected study {#step-5-5}
+
+We plot the first two principal components, each a number summarising one pattern of genetic variation. We show reference groups with labels and symbols and add the study samples to see how their genetic backgrounds compare.
+
+[Read step 5.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-5).
+
+```{r}
+#| label: s5-5
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))  # <1>
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]  # <2>
+levels <- sort(unique(group)); code <- match(group, levels)
+colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
+png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)  # <3>
+plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
+  xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
+points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")  # <4>
+legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+invisible(dev.off())  # <5>
+cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
+```
+
+1. Read both score tables and the reference group labels.
+2. Match the reference labels to samples and choose group symbols and colours.
+3. Open a picture file and plot the first two reference components.
+4. Add the study samples and a key for the groups.
+5. Finish saving the picture and print its location.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 5.6 · Define an ancestry-matched cohort {#step-5-6}
+
+We compare each study sample with a European reference group on the first four principal components, numbers that summarise patterns of genetic variation. We remove a sample if any of them lies more than six standard deviations (a measure of spread) from the reference mean; this rule defines the group for our teaching analysis.
+
+[Read step 5.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-6).
+
+```{r}
+#| label: s5-6
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))  # <1>
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"  # <2>
+columns <- paste0("PC", 1:4, "_AVG")
+r <- sapply(ref[eur, columns, drop = FALSE], as.numeric)
+s <- sapply(study[columns], as.numeric)
+centre <- colMeans(r)  # <3>
+spread <- sqrt(colMeans(sweep(r, 2, centre, "-")^2))
+z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
+bad <- study$IID[apply(abs(z), 1, max) > 6]  # <4>
+remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))  # <5>
+# Course bookkeeping: records the counts for the next step. Do not change.
+ops <- guided_replay_lists(cfg, "5.6", "4.6")
+guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
+```
+
+1. Read the reference and study scores and reference group labels.
+2. Select the European reference samples and the first four component scores.
+3. Measure each study score's distance from the reference mean using its spread.
+4. List samples more than six standard deviations away on any selected component.
+5. Remove the listed samples and save the retained study group.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder. |
+| `--remove` | Removes the samples listed in s5-6_remove.txt because at least one of their first four component scores is more than six standard deviations from the European reference mean. |
+| `--make-pgen` | Saves the retained 1,811 samples and 238,513 variants as PGEN, PVAR and PSAM files. |
+| `--out` | Starts the retained study output file names with s5-6_state. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+33 remaining outlier records are excluded. 1,811 samples and 238,513 variants remain. Some of the simulated outliers were already removed in earlier QC steps. So 33 is not the total number of outliers in the original data.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
+```
+
+:::
+
+## Step 5.7 · Cohort PCs and how many to include {#step-5-7}
+
+We select common sites with weaker links and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
+
+[Read step 5.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7).
+
+```{r}
+#| label: s5-7
+regions <- guided_high_ld(cfg)  # <1>
+prune <- guided_path(cfg, "5.7", "prune")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,  # <2>
+  "--indep-pairwise", "200kb", "0.2", "--out", prune))
+report <- guided_path(cfg, "5.7", "pca")  # <3>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
+eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)  # <4>
+png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
+plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
+invisible(dev.off())  # <5>
+cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
+# Course bookkeeping: records the counts for the next step. Do not change.
+guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
+file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
+check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
+```
+
+1. Prepare the regions to exclude and the site selection output name.
+2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+3. Calculate ten components within the retained study group using the selected sites.
+4. Read how much variation each component explains and plot these values.
+5. Finish saving the picture and print its location.
+
+### What each option does
+
+**Command 1: select common sites with weaker links**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
+| `--chr` | Uses only chromosomes 1 to 22, the autosomes. |
+| `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
+| `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
+| &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
+| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
+| `--out` | Starts the site selection output file names with s5-7_prune. |
+
+**Command 2: calculate components within the retained study group**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
+| `--extract` | Uses only the sites listed in s5-7_prune.prune.in, selected to have weaker links to each other. |
+| `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation in the retained study group. |
+| `--out` | Starts the component output file names with s5-7_pca. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants. The first cohort eigenvalue is about 14. The signs of the eigenvectors can differ on your computer. This does not change how the PCs adjust the association. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
+```
+
+:::
+
+## Where next {#where-next}
+
+- Previous: [Module 4: Variant quality control](module_04_variant_quality_control.qmd)
+- Next: [Module 6: Association](module_06_association.qmd)
+- This module on the course website: [Module 5](https://www.manuelgentiluomo.it/teaching/gwas/module-5)

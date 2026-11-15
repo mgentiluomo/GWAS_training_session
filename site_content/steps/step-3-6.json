@@ -6,7 +6,7 @@
   "anchor": "step-3-6",
   "title": "Relatedness and duplicates",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
+  "source_sha256": "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.",
@@ -100,7 +100,7 @@
         },
         {
           "name": "--king-table-filter",
-          "explanation": "Writes only pairs with estimated kinship above 0.0442, an approximate screening boundary for third-degree relatives such as first cousins."
+          "explanation": "Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins."
         },
         {
           "name": "--out",

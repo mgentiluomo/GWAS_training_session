@@ -6,7 +6,7 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
+  "source_sha256": "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",

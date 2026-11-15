@@ -6,20 +6,29 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b
+# SHA-256: d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325
 
 # Chunk: s0-4_project
+# 1. Show the folder where R looks for files.
 getwd()
+# 2. Check that the required project files exist.
 stopifnot(file.exists("config.R"), file.exists("R/course.R"))
+# 3. Show the computer's system and processor information.
 Sys.info()[c("sysname", "release", "machine")]
+# 4. Show the installed R version.
 R.version.string
+# 5. Add two numbers to check that R runs commands.
 2 + 3
 
 
 # Chunk: s0-8_preflight
+# 1. Create a separate place in R to hold the course settings.
 settings <- new.env(parent = baseenv())
+# 2. Read the course settings from config.R.
 sys.source("config.R", settings)
+# 3. Show the PLINK version used to test the course.
 settings$course_settings$tested_plink_version
+# 4. Run the setup checks, including the small PLINK test.
 source("scripts/preflight.R")
 
 
@@ -29,7 +38,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c
+# SHA-256: fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b
 
 # Chunk: setup
 source("R/guided.R")
@@ -37,49 +46,65 @@ cfg <- guided_init()
 
 
 # Chunk: s1-1
+# 1. Read the table describing the DNA sites on the array.
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+# 2. Count the rows and show the first site descriptions.
 cat(nrow(ann), "rows in the annotation\n")
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 
 
 # Chunk: s1-2
+# 1. Find the laboratory reports and check that there are three files.
 reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)
 stopifnot(length(reports) == 3L)
+# 2. Show the first 12 lines of the first report.
 readLines(reports[1], n = 12L)
 
 
 # Chunk: s1-3
+# 1. Count the array entries on each chromosome.
 table(ann$Chr)
+# 2. Check the total number of rows and look for repeated site names.
 stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
 
 
 # Chunk: s1-4
+# 1. Read the sample sheet as text to preserve sample labels.
 sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")
+# 2. Count measurements on each plate and labelled repeat measurements.
 table(sheet$Plate)
 sum(nzchar(sheet$Replicate_of))
+# 3. Check that the sheet contains 2,016 measurements.
 stopifnot(nrow(sheet) == 2016L)
 
 
 # Chunk: s1-5
+# 1. Read the report and find where its data section begins.
 lines <- readLines(reports[1], warn = FALSE)
 start <- match("[Data]", lines)
+# 2. Read the data as a table with semicolons separating its columns.
 example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")
+# 3. Show the first rows and summarise the quality scores as numbers.
 head(example)
 summary(as.numeric(example[["GC Score"]]))
 
 
 # Chunk: s1-6
+# 1. Check that the sheet contains the required laboratory labels.
 stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))
+# 2. Show the first rows to inspect the laboratory labels.
 head(sheet)
 
 
 # Chunk: s1-7
+# 1. Check the matching genotype files and count their samples and DNA sites.
 initial <- check_bed(cfg$input)
+# 2. Display the counts and check the expected starting totals.
 print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: a32f066a13c0f53e9b75c1f2ff2b5e5b3e0821a035beb66aadf891d379a9a370
+# SHA-256: 42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e
 
 # Chunk: setup
 source("R/guided.R")
@@ -87,97 +112,135 @@ cfg <- guided_init()
 
 
 # Chunk: s2-1
+# 1. Check the three laboratory files and show their sizes.
 print(check_bed(cfg$input))
+# 2. Show the first rows of sample information.
 head(read_fam(cfg$input))
 
 
 # Chunk: s2-2
+# 1. Choose the name for the converted files.
 out <- guided_path(cfg, "2.2")
+# 2. Convert the laboratory files to the native PLINK 2 format.
 run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))
+# 3. Check that all 2,016 samples and 299,523 variants remain.
 stopifnot(all(guided_counts(out) == c(2016, 299523)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_source_checkpoint(cfg)
 
 
 # Chunk: s2-3
+# 1. Read the sample and variant tables from the converted files.
 samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
+# 2. Show the first rows of both tables.
 head(samples)
 head(variants)
+# 3. Check that the sample identifiers are valid and unique.
 check_ids(samples, "Laboratory samples")
 
 
 # Chunk: s2-4
+# 1. Choose the names for the reports of missing results.
 out <- guided_path(cfg, "2.4", "missing")
+# 2. Measure missing results for each sample and each variant.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))
+# 3. Read both reports into R.
 smiss <- guided_table(paste0(out, ".smiss"))
 vmiss <- guided_table(paste0(out, ".vmiss"))
+# 4. Summarise the share of missing results in each report.
 summary(as.numeric(smiss$F_MISS))
 summary(as.numeric(vmiss$F_MISS))
 
 
 # Chunk: s2-5
+# 1. Read the laboratory variant table and the reference DNA letters.
 bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+# 2. Match every laboratory site to the reference table by its identifier.
 k <- match(bim[[2]], ann$Name)
 stopifnot(!anyNA(k))
+# 3. Put each pair of DNA letters in a consistent order for comparison.
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
 observed <- pair(bim[[5]], bim[[6]])
 reference <- pair(ann$Ref_Plus[k], ann$Alt_Plus[k])
+# 4. Find the reference letter pairs as they would appear on the opposite strand.
 complement <- chartr("ACGT", "TGCA", reference)
 complement <- pair(substr(complement, 1, 1), substr(complement, 2, 2))
+# 5. Identify sites to correct and sites with ambiguous or incompatible letters.
 palindromic <- reference %in% c("AT", "CG")
 flip <- !palindromic & observed != reference & observed == complement
 exclude <- palindromic | (observed != reference & observed != complement)
+# 6. Save both lists and check their expected sizes.
 flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))
 exclude_file <- guided_list(bim[[2]][exclude], guided_path(cfg, "2.5", "exclude.txt"))
 stopifnot(sum(flip) == 400L, sum(exclude) == 3013L)
+# 7. Correct the listed sites and remove the excluded sites in a new copy.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,
   "--make-pgen", "--out", guided_path(cfg, "2.5")))
+# 8. Check that 2,016 samples and 296,510 variants remain.
 stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--flip", "--exclude"), value = c(flip_file, exclude_file))
 guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 
 
 # Chunk: s2-6
+# 1. Read the variant positions in the separate GRCh37 exercise.
 legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
+# 2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
 chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
 require_files(chain)
+# 3. Convert the positions and keep sites that stay on the same chromosome.
 lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
+# 4. Save the new positions and the list of sites to keep.
 map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])
 map_file <- guided_path(cfg, "2.6", "update_map.tsv")
 write.table(map, map_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 keep_file <- guided_list(map$ID, guided_path(cfg, "2.6", "mapped.txt"))
+# 5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
 args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)
 reverse <- bim37[[2]][keep & lifted$strand == "-"]
 if (length(reverse)) args <- c(args, "--flip", guided_list(reverse, guided_path(cfg, "2.6", "reverse.txt")))
+# 6. Save the converted exercise separately from the main dataset.
 run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))
+# 7. Check the new positions against matching sites in the supplied reference table.
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
 k <- match(map$ID, ann$Name)
 stopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))
+# 8. Show how many sites were read, kept and mapped to the opposite strand.
 print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))
 
 
 # Chunk: s2-7
+# 1. Match the sample sheet to each person's disease status, age and recorded sex.
 metadata <- guided_metadata(cfg)
+# 2. Select and name the columns for the sample information file.
 pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]
 names(pheno)[1] <- "#FID"
 pheno_file <- guided_path(cfg, "2.7", "phenotypes.tsv")
+# 3. Save the sample information table.
 guided_write(pheno, pheno_file)
+# 4. Add recorded sex and disease status to a new copy of the DNA files.
 run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,
   "--pheno", pheno_file, "--pheno-name", "Disease", "--make-pgen", "--out", guided_path(cfg, "2.7")))
+# 5. Check that all 2,016 samples and 296,510 variants remain.
 stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--update-sex", "--pheno", "--pheno-name"), value = c(pheno_file, pheno_file, "Disease"))
 guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 
 
 # Chunk: s2-8
+# 1. Save the full starting point and check its files and counts.
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181
+# SHA-256: 319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311
 
 # Chunk: setup
 source("R/guided.R")
@@ -336,7 +399,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 230039936f99fffb4bdfa06cddc133fb56b0e67d510f933118f8ccaee11dfa1c
+# SHA-256: 1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe
 
 # Chunk: setup
 source("R/guided.R")
@@ -344,76 +407,102 @@ cfg <- guided_init()
 
 
 # Chunk: s4-1
+# 1. Remove variants with more than 2% of their results missing.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.1", "3.8")
 guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 
 
 # Chunk: s4-2
+# 1. Compare missing results in people with and without the disease.
 report <- guided_path(cfg, "4.2", "missing")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--test-missing", "--out", report))
+# 2. Read the test results and list variants with p-values below 0.00001.
 x <- guided_table(paste0(report, ".missing"))
 p <- as.numeric(x$P)
 exclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, "4.2", "exclude.txt"))
+# 3. Remove the listed variants and save the remaining data.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.2", "4.1")
 guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 
 
 # Chunk: s4-3
+# 1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
 guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 
 
 # Chunk: s4-4
+# 1. Read the sample table and list people without the disease.
 psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))
 controls <- guided_list(psam$IID[psam$Disease == "1"], guided_path(cfg, "4.4", "controls.txt"), TRUE)
+# 2. Test expected DNA letter combinations on chromosomes 1 to 22.
 report <- guided_path(cfg, "4.4", "hardy")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--keep", controls, "--chr", "1-22", "--hardy", "midp", "--out", report))
+# 3. Calculate a cutoff for each variant from the number of people tested.
 hwe <- guided_table(paste0(report, ".hardy"))
 n_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)
 cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
+# 4. List variants with test p-values below their cutoff.
 p <- as.numeric(hwe$MIDP)
 exclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, "4.4", "exclude.txt"))
+# 5. Remove the listed variants from all people and save the remaining data.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))
+# 6. Check that the three named variants are absent from the saved data.
 retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID
 stopifnot(!any(c("rs4988235", "rs12913832", "rs1426654") %in% retained))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.4", "4.3")
 guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 
 
 # Chunk: s4-5
+# 1. Export X, Y and mitochondrial DNA results as a table.
 report <- guided_path(cfg, "4.5", "sexchr")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--chr", "X,Y,MT", "--export", "A", "--out", report))
+# 2. Read the column names and the exported results.
 header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]
 raw <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE, quote = "", comment.char = "",
   colClasses = c(rep("character", 6), rep("integer", length(header) - 6L)), na.strings = "NA")
+# 3. Arrange the DNA results by person and variant and identify each chromosome.
 genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L
 ids <- sub("_[^_]+$", "", names(raw)[-(1:6)])
 pvar <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))
 chromosome <- pvar$CHROM[match(ids, pvar$ID)]
+# 4. Calculate the share of unexpected results for each variant.
 wrong <- numeric(length(ids))
 wrong[chromosome == "X"] <- colMeans(genotypes[raw$SEX == "1", chromosome == "X", drop = FALSE] == 1L)
 wrong[chromosome == "Y"] <- colMeans(genotypes[raw$SEX == "2", chromosome == "Y", drop = FALSE] >= 0L)
 wrong[chromosome == "MT"] <- colMeans(genotypes[, chromosome == "MT", drop = FALSE] == 1L)
+# 5. List variants with unexpected results in more than 1% of people checked.
 exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))
+# 6. Remove the listed variants and check the remaining counts.
 sex_state <- guided_path(cfg, "4.5", "sex_state")
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--exclude", exclude, "--make-pgen", "--out", sex_state))
 stopifnot(all(guided_counts(sex_state) == c(1844, 238819)))
+# 7. Rename variants by location and DNA letters and remove duplicate entries.
 run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",
   "--make-pgen", "--out", guided_path(cfg, "4.5")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--exclude", "--set-all-var-ids", "--rm-dup"), value = c(exclude, "@:#:$r:$a", "exclude-mismatch"))
 guided_register(cfg, "4.5", "4.4", 1844, 238513, operations = ops)
+# 8. Free the computer memory used by the large tables.
 rm(raw, genotypes); invisible(gc())
 
 
 # Chunk: s4-6
+# 1. Save the complete dataset and check the saved files and counts.
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 4ac8eeed377620aeb782c76f09d6704a29923c9e6b44d13bd1ee6388a2c45aca
+# SHA-256: aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3
 
 # Chunk: setup
 source("R/guided.R")
@@ -421,62 +510,83 @@ cfg <- guided_init()
 
 
 # Chunk: s5-1
+# 1. Read the reference sample table.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 reference_samples <- guided_table(paste0(reference, ".psam"))
+# 2. Count the samples in each reference group.
 table(reference_samples$SuperPop)
 
 
 # Chunk: s5-2
+# 1. Read the study and reference site tables.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference_sites <- guided_table(paste0(reference, ".pvar"))
+# 2. Find the site names that occur in both tables.
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
+# 3. Save the shared site names and check their number.
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
 stopifnot(length(common) == 48614L)
 cat(length(common), "shared autosomal sites kept\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 
 
 # Chunk: s5-3
+# 1. Read the shared site names and both site tables.
 common <- readLines(guided_path(cfg, "5.2", "common.txt"))
 study <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 ref <- guided_table(paste0(reference, ".pvar"))
+# 2. Match site names and compare allele pairs in either order.
 a <- match(common, study$ID); b <- match(common, ref$ID)
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+# 3. Check chromosomes, positions and alleles and print the matched count.
 stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
   all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
 cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
 
 
 # Chunk: s5-4
+# 1. Set the reference input, shared site list and output names.
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 common <- guided_path(cfg, "5.2", "common.txt")
 fit <- guided_path(cfg, "5.4", "reference")
+# 2. Calculate ten reference components and save their allele contributions.
 run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))
+# 3. Find the columns containing site names, alleles and component contributions.
 weights <- guided_table(paste0(fit, ".eigenvec.allele"))
 id_column <- match("ID", names(weights)); allele_column <- match("A1", names(weights))
 first_pc <- match("PC1", names(weights))
+# 4. Prepare the same reference frequencies and scoring rules for both groups.
 score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),
   id_column, allele_column, "header-read", "no-mean-imputation", "variance-standardize",
   "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
+# 5. Place the reference samples on the fixed reference axes.
 run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))
+# 6. Place the study samples on the same reference axes.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".eigenval", ".eigenvec.allele")), paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"), paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore")), parent = "5.2")
 
 
 # Chunk: s5-5
+# 1. Read both score tables and the reference group labels.
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+# 2. Match the reference labels to samples and choose group symbols and colours.
 group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
+# 3. Open a picture file and plot the first two reference components.
 png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
 plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
   xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
+# 4. Add the study samples and a key for the groups.
 points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
 legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+# 5. Finish saving the picture and print its location.
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
 
@@ -488,35 +598,47 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s5-6
+# 1. Read the reference and study scores and reference group labels.
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+# 2. Select the European reference samples and the first four component scores.
 eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"
 columns <- paste0("PC", 1:4, "_AVG")
 r <- sapply(ref[eur, columns, drop = FALSE], as.numeric)
 s <- sapply(study[columns], as.numeric)
+# 3. Measure each study score's distance from the reference mean using its spread.
 centre <- colMeans(r)
 spread <- sqrt(colMeans(sweep(r, 2, centre, "-")^2))
 z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
+# 4. List samples more than six standard deviations away on any selected component.
 bad <- study$IID[apply(abs(z), 1, max) > 6]
 remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
+# 5. Remove the listed samples and save the retained study group.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))
+# Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "5.6", "4.6")
 guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 
 
 # Chunk: s5-7
+# 1. Prepare the regions to exclude and the site selection output name.
 regions <- guided_high_ld(cfg)
 prune <- guided_path(cfg, "5.7", "prune")
+# 2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
+# 3. Calculate ten components within the retained study group using the selected sites.
 report <- guided_path(cfg, "5.7", "pca")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
+# 4. Read how much variation each component explains and plot these values.
 eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
 png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
 plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
+# 5. Finish saving the picture and print its location.
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
 file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
 check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
@@ -528,7 +650,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: e1dd9b8bd283d42d872fe3566f8aab06a2825dd778366f9c3f8cbc8e29b7ea0f
+# SHA-256: 46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c
 
 # Chunk: setup
 source("R/guided.R")
@@ -536,76 +658,99 @@ cfg <- guided_init()
 
 
 # Chunk: s6-1
+# 1. Export the number of copies of one DNA letter at the chosen variant.
 report <- guided_path(cfg, "6.1", "example")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", "9:96426973:A:G", "--export", "A", "--out", report))
 x <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE)
+# 2. Match the exported samples to their case or control status.
 dose <- as.numeric(x[[7]])
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 case <- psam$Disease[match(x$IID, psam$IID)] == "2"
+# 3. Count carriers and non-carriers and compare their odds of disease.
 tab <- table(case = case, carrier = dose > 0)
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 
 
 # Chunk: s6-2
+# 1. Read the exported variant and match each sample to its case or control status.
 x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
+# 2. Fit the model and show how each extra copy changes the odds of disease.
 fit <- glm(case ~ dosage, data = example, family = binomial())
 summary(fit)
 exp(coef(fit)["dosage"])
 
 
 # Chunk: s6-3
+# 1. Read sample details, genetic component scores and age records.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
 metadata <- guided_metadata(cfg)
+# 2. Match sample IDs and make a complete table of age and ten component scores.
 a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)
 stopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))
 covar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))
 for (name in paste0("PC", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])
 stopifnot(!anyNA(covar))
+# 3. Check that no model column repeats information from the other columns.
 design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
+# 4. Save the covariate table and print its number of rows.
 guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
 cat(nrow(covar), "complete covariate rows written\n")
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 
 
 # Chunk: s6-4
+# 1. Test variants with the frequency rule and the chosen adjustment factors.
 out <- guided_path(cfg, "6.4", "association")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
+# 2. Check the number of valid tests and results below the course significance threshold.
 valid <- valid_p(results$P)
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+# 3. Save a table of the association results.
 guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
 
 
 # Chunk: s6-5
+# 1. Read the scan results and count the model status codes.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 print(table(results$ERRCODE, useNA = "ifany"))
+# 2. Keep valid tests and calculate intervals describing uncertainty in their effects.
 valid <- results[valid_p(results$P), ]
 valid$CI_LOW <- exp(log(valid$OR) - 1.96 * valid[["LOG(OR)_SE"]])
 valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
+# 3. Sort by p-value and print the first ten results with their tested DNA letters.
 top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
 print(head(top, 10))
+# 4. Save the first 20 results for later review.
 guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
 
 
 # Chunk: s6-6
+# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
 candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
 chosen <- results$ID[candidates[which.min(minor[candidates])]]
+# 2. Save the chosen variant ID and force the Firth model at that variant.
 guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
+# 3. Print both estimates and check that the Firth test gives one valid result.
 comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
 print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
 print(comparison[, c("ID", "A1", "OR", "P")])
@@ -613,12 +758,15 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 
 
 # Chunk: s6-7
+# 1. Read the results and summarise the study size and test values.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
   genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
   lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
+# 2. Save and print the summary table.
 guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
 print(summary)
+# Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
   guided_path(cfg, "6.3", "covariates.tsv"), guided_path(cfg, "6.5", "top20.tsv"), guided_path(cfg, "6.7", "summary.tsv"))
 guided_artifact_checkpoint(cfg, "6.7", files)
@@ -626,28 +774,34 @@ check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 
 # Chunk: s6-8
+# 1. Read the scan and arrange its results in the standard columns.
 results <- guided_association(guided_path(cfg, "6.4", "association"))
 stats <- guided_standardise_scan(results)
+# 2. Check the columns and values and choose the summary file name.
 guided_check_summary(stats, rows = nrow(results))
 stats_file <- guided_summary_path(cfg)
+# 3. Save the summary table and a file explaining each column.
 guided_write_summary(stats, stats_file)
 dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
 guided_write(guided_summary_dictionary(), dictionary_file)
 # Read the file back, as the plots will, and check that nothing was lost.
+# 4. Read the saved table and check that it matches the original results.
 saved <- guided_summary_stats(cfg)
 guided_check_summary(saved, rows = nrow(results))
 stopifnot(isTRUE(all.equal(saved, stats)))
+# 5. Compare test counts with the saved scan summary and print the checked results.
 first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
 finite <- valid_p(saved$p_value)
 stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
 print(head(saved, 5))
 print(c(rows = nrow(saved), finite_tests = sum(finite), missing_p_values = sum(is.na(saved$p_value)),
   genome_wide = sum(saved$p_value[finite] < 5e-8)))
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = "6.7")
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: ee0f023af23de99022692b1bf03e2fdcb4b4abd91d9a44d8435cfc901271d816
+# SHA-256: cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5
 
 # Chunk: setup
 source("R/guided.R")
@@ -655,8 +809,11 @@ cfg <- guided_init()
 
 
 # Chunk: s7-1
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Select chromosomes 1 to 22 for the plot.
 autosomal <- stats$chromosome %in% as.character(1:22)
+# 3. Save the plot comparing observed p-values with values expected by chance.
 save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
 
 
@@ -667,19 +824,27 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-2
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Select p-values for chromosomes 1 to 22.
 p <- stats$p_value[stats$chromosome %in% as.character(1:22)]
+# 3. Calculate and check the overall size of the test results.
 lambda <- lambda_gc(p)
 print(lambda)
 stopifnot(abs(lambda - 1.016) < 0.001)
+# 4. Save lambda in a table.
 guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path(cfg, "7.2", "lambda.tsv"))
 
 
 # Chunk: s7-3
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Prepare the chromosome, position and p-value columns.
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
   POS = stats$base_pair_location, P = stats$p_value)
+# 3. Save the plot of results along the chromosomes.
 save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
+# 4. Check that eight variants have p-values below 0.00000005.
 stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 
 
@@ -690,40 +855,54 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-4
+# 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
+# 2. Keep only valid p-values.
 p <- stats$p_value[valid_p(stats$p_value)]
+# 3. Compare three rules for deciding which results are strong enough.
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
 print(threshold)
+# 4. Save the threshold comparison table.
 guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))
 
 
 # Chunk: s7-5
+# 1. Choose the name for the grouped association results.
 report <- guided_path(cfg, "7.5", "clump")
+# 2. Group nearby correlated variants using the final cohort.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
+# 3. Read the groups and check that there are three.
 clumps <- guided_table(paste0(report, ".clumps"))
 print(clumps)
 stopifnot(nrow(clumps) == 3L)
 
 
 # Chunk: s7-6
+# 1. Choose the chromosome 9 variant and the output name.
 lead <- "9:96426973:A:G"
 report <- guided_path(cfg, "7.6", "ld")
+# 2. Measure correlations with the chosen variant within 500,000 DNA positions.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
   "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+# 3. Read the correlation table and select the regional association results.
 ld <- guided_table(paste0(report, ".vcor"))
 stats <- guided_summary_stats(cfg)
 region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
+# 4. Find and check the column holding squared correlations.
 r2_column <- grep("R2$", names(ld), value = TRUE)
 stopifnot(length(r2_column) == 1L)
+# 5. Match each regional variant to its correlation with the chosen variant.
 r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
 r2[region$variant_id == lead] <- 1
+# 6. Choose symbols and colours for the correlation ranges.
 bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
 colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
 shapes <- c(1, 2, 3, 4, 16)
+# 7. Draw and save the regional plot with a legend and significance line.
 png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
 plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
   pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
@@ -732,7 +911,9 @@ legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 t
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
+# 8. Check that four regional variants have p-values below 0.00000005.
 stopifnot(sum(region$p_value < 5e-8) == 4L)
+# Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 
 
@@ -743,29 +924,38 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-7
+# 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
+# 2. Read the original sample information and save ages for all wells.
 metadata <- guided_metadata(cfg)
 all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
 all_file <- guided_path(cfg, "7.7", "all_ages.tsv"); guided_write(all_covar, all_file)
+# 3. Choose the output name and find the cohort saved before quality checks.
 no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")
 baseline <- guided_path(cfg, "2.8")
 if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
+# 4. Test the cohort before sample and variant quality checks using age and sex.
 run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
+# 5. Read the main results and put the comparison results into matching columns.
 main <- guided_summary_stats(cfg)
 a <- guided_standardise_scan(guided_association(no_pc))
 b <- guided_standardise_scan(guided_association(no_qc))
+# 6. Check that the main and cleaned comparison analyses use the same samples per variant.
 k <- match(main$variant_id, a$variant_id)
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
+# 7. Count valid tests and strong results and calculate lambda for each analysis.
 autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+# 8. Save the comparison table.
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
+# 9. Save three plots with the same scale to compare the analyses.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
   plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
@@ -783,14 +973,18 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-8
+# 1. Read the final sample counts, comparison table, variant groups and association results.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
+# 2. Select the strongest variant in each group and calculate its uncertainty interval.
 lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
+# 3. Save the table of the three strongest variants.
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
+# 4. Prepare the report describing the analysis, results and limitations.
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
@@ -805,7 +999,9 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
   "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",
   "No biological discovery or clinical recommendation follows from this simulation.")
+# 5. Save the report as a text file.
 writeLines(summary, guided_path(cfg, "7.8", "summary.md"), useBytes = TRUE)
+# Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads.tsv"),
   guided_path(cfg, "7.1", "qq.png"), guided_path(cfg, "7.3", "manhattan.png"),
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
@@ -813,4 +1009,5 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
 guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
+# 6. Print the final report.
 cat(paste(summary, collapse = "\n"), "\n")

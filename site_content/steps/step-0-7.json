@@ -6,13 +6,13 @@
   "anchor": "step-0-7",
   "title": "Request the password and download the data",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "source_sha256": "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Request the course password, then download the matching encrypted data with `download_course_data()`. The data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",
     "why": "The source project contains code and text. The encrypted package contains the data. A [checksum](docs/glossary.md#checksum) is a short code calculated from a file. If the file changes, the code changes. Checksums detect changed or damaged downloads. The password decrypts the archive. A correct password does not replace the checksum check.",
     "you_need": "The complete project folder, R and an internet connection. The command below downloads `course-data-2026.1.zip` and its small manifest file, `MANIFEST.tsv`, for you.\n\nRequest the password with your university email through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access). In class, you can scan the QR code to open the same form. The form accepts University of Pisa email addresses at `unipi.it` and all its subdomains. Examples include `studenti.unipi.it`, `phd.unipi.it` and `biologia.unipi.it`. It sends the password automatically to these addresses. Other users should write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). The password changes every academic year. Do not share it. It never appears in the repository or on the site.\n\nThe packages from step 0.5 and the executable from step 0.6. Keep the project from step 0.4 open.",
-    "command": "Run this command in the RStudio console. It does not run automatically when the\nnotebook is rendered:\n\n```{r s0-7_data, eval=FALSE}\ndownload_course_data()\n```\n\nThe function uses `getPass` to ask for a masked password. Type it and press\nEnter. You will not see the letters appear. Do not write the password in this\nnotebook, a shared script or your command history. You do not need 7-Zip.",
+    "command": "Run this command in the RStudio console. It does not run automatically when the\nnotebook is rendered:\n\n```{r s0-7_data, eval=FALSE}\n# 1. Download the course data and check that the files are complete and unchanged.\ndownload_course_data()\n```\n\nThe function uses `getPass` to ask for a masked password. Type it and press\nEnter. You will not see the letters appear. Do not write the password in this\nnotebook, a shared script or your command history. You do not need 7-Zip.",
     "expected_result": "On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.",
     "troubleshooting": "If the download fails, check your internet connection. As a local fallback,\nopen the release page linked above. Save `course-data-2026.1.zip` and\n`MANIFEST.tsv` together in one folder. Then run:\n\n```r\ndownload_course_data(zip_path = file.choose())\n```\n\nA file selection window opens. Choose the published ZIP file. Do not choose\nthe manifest or the project ZIP. The helper checks the same SHA-256 values.\n\nIf the data folder exists but cannot be verified, R reports what it found.\nThis includes a missing manifest, missing files or changed files. For the\nstandard folder, run the exact recovery command:\n\n```r\ndownload_course_data(overwrite = TRUE)\n```\n\nThe helper verifies a fresh copy first. It then moves the old folder and its\nmanifest to a dated backup before replacing them. It prints the backup path.\nIt never silently deletes the old data. Use that backup if you need earlier work.\n\nOlder installations did not keep the verification manifest. They need this\nbackup and reinstall once. Later runs verify the saved manifest and all data\nfiles without a download or a password prompt.\n\nIf R says that the release is not configured, download the current course\nproject again. If the password is wrong, check your typing and contact the\ninstructor if needed. Never bypass a checksum failure. See\n[troubleshooting](docs/troubleshooting.md).",
     "quick_check": "If the checksum differs but the password is accepted, should you use that download?\n\n<details><summary>Show the answer</summary>No. Obtain the approved matching package before continuing.</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s0-7_data",
-      "code": "download_course_data()",
+      "code": "# 1. Download the course data and check that the files are complete and unchanged.\ndownload_course_data()",
       "run_by_default": false,
       "where": "console"
     }
@@ -71,6 +71,8 @@
       "reviewed": false
     }
   ],
+  "student_summary": "University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.",
+  "student_plink_options": [],
   "actions": [
     {
       "label": "Request the course password",
@@ -83,5 +85,6 @@
       "kind": "page"
     }
   ],
-  "success_line": "Course data are ready: 108 files verified."
+  "success_line": "Course data are ready: 108 files verified.",
+  "student_expected_result": "On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file."
 }

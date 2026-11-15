@@ -1,20 +1,54 @@
 # Shared mechanics for guided notebooks. Analytical commands stay in their chunks.
 source("R/course.R")
 
-# BEGIN GENERATED MODULE 3 INPUTS
-# Source: module_meta in lessons/module_03_sample_quality_control.Rmd.
+# BEGIN GENERATED MODULE INPUTS
+# Sources: module_meta in enabled lessons (module 0 needs only the project root).
 # Regenerate with --export-notebooks; do not edit this table.
-guided_module_inputs <- list(`3` = list(
+guided_module_inputs <- list(
+`0` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = character(0),
+  output = character(0)),
+`1` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = c("array/sim2026_array_annotation.tsv", "final_report/SIM26_0213_FinalReport_simulated.txt", "final_report/SIM26_0286_FinalReport_simulated.txt", "final_report/SIM26_1775_FinalReport_simulated.txt", "lab_export/sample_sheet.csv", "lab_export/sim2026_lab.bed", "lab_export/sim2026_lab.bim", "lab_export/sim2026_lab.fam"),
+  output = character(0)),
+`2` = list(
+  checkpoint = NULL, restart_step = NULL,
+  data = c("lab_export/sim2026_lab.bed", "lab_export/sim2026_lab.bim", "lab_export/sim2026_lab.fam", "array/sim2026_array_annotation.tsv", "grch37_exercise/legacy_grch37.bed", "grch37_exercise/legacy_grch37.bim", "grch37_exercise/legacy_grch37.fam", "grch37_exercise/hg19ToHg38.over.chain.gz", "lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
+  output = character(0)),
+`3` = list(
   checkpoint = "2.8", restart_step = "3.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
-  output = c("s2-8_state.pgen", "s2-8_state.pvar", "s2-8_state.psam")))
-# END GENERATED MODULE 3 INPUTS
-
-guided_check_module <- function(module) {
+  output = c("s2-8_state.pgen", "s2-8_state.pvar", "s2-8_state.psam")),
+`4` = list(
+  checkpoint = "3.8", restart_step = "4.1",
+  data = character(0),
+  output = c("s3-8_state.pgen", "s3-8_state.pvar", "s3-8_state.psam")),
+`5` = list(
+  checkpoint = "4.6", restart_step = "5.1",
+  data = c("pca_reference/ref1000g_grch38.pgen", "pca_reference/ref1000g_grch38.pvar", "pca_reference/ref1000g_grch38.psam"),
+  output = c("s4-6_state.pgen", "s4-6_state.pvar", "s4-6_state.psam")),
+`6` = list(
+  checkpoint = "5.7", restart_step = "6.1",
+  data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
+  output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s5-7_pca.eigenvec")),
+`7` = list(
+  checkpoint = "6.8", restart_step = "6.1",
+  data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv", "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam"),
+  output = c("s6-4_association.Disease.glm.logistic.hybrid", "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv"))
+)
+guided_check_project_root <- function() {
   if (!file.exists("config.R") || !file.exists("R/guided.R")) {
     stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)
   }
   if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))
+  invisible(TRUE)
+}
+# END GENERATED MODULE INPUTS
+
+guided_check_module <- function(module) {
+  guided_check_project_root()
   spec <- guided_module_inputs[[as.character(module)]]
   if (is.null(spec)) stop("No input check is defined for module ", module, ".", call. = FALSE)
   data_dir <- Sys.getenv("COURSE_DATA_DIR", unset = "data/course")
@@ -22,20 +56,26 @@ guided_check_module <- function(module) {
   data_files <- file.path(data_dir, spec$data)
   output_files <- file.path(output_dir, spec$output)
   if (any(!file.exists(data_files))) {
-    stop("Course metadata are missing. Complete step 0.7 before module 3. Missing: ",
+    stop("Course metadata are missing. Complete step 0.7 before module ", module, ". Missing: ",
          paste(data_files[!file.exists(data_files)], collapse = ", "), call. = FALSE)
   }
-  if (any(!file.exists(output_files))) {
+  if (!is.null(spec$checkpoint) && any(!file.exists(output_files))) {
     arguments <- encodeString(spec$restart_step, quote = '"')
     if (data_dir != "data/course") arguments <- c(arguments, paste0("data_dir = ", encodeString(data_dir, quote = '"')))
     if (output_dir != "results/guided") arguments <- c(arguments, paste0("work_dir = ", encodeString(output_dir, quote = '"')))
     restart <- paste0("restore_checkpoint(", paste(arguments, collapse = ", "), ")")
+    finished <- sub("\\..*$", "", spec$checkpoint)
+    # When the restart step belongs to the module that makes the files, the student must run that module again.
+    advice <- if (sub("\\..*$", "", spec$restart_step) == finished) {
+      paste0(". Finish module ", finished, " first. Or restart with: ", restart,
+             " and run module ", finished, " again (use an empty folder).")
+    } else {
+      paste0(". Finish module ", finished, " first. Or restart here with: ", restart, " (use an empty folder).")
+    }
     stop("Some saved files from step ", spec$checkpoint, " are missing: ",
-         paste(output_files[!file.exists(output_files)], collapse = ", "),
-         ". Finish module 2 first. Or restart here with: ", restart,
-         " (use an empty folder).", call. = FALSE)
+         paste(output_files[!file.exists(output_files)], collapse = ", "), advice, call. = FALSE)
   }
-  cat("Module 3 input files are present.\n")
+  cat("Module ", module, " input files are present.\n", sep = "")
   invisible(TRUE)
 }
 

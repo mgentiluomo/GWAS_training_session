@@ -6,14 +6,14 @@
   "anchor": "step-6-6",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "e1dd9b8bd283d42d872fe3566f8aab06a2825dd778366f9c3f8cbc8e29b7ea0f",
+  "source_sha256": "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",
     "why": "A rare genotype can have very few cases or controls. The ordinary logistic fit uses [maximum likelihood](docs/glossary.md#maximum-likelihood). It chooses the coefficients that make the observed outcomes most likely under the model. Sometimes one genotype group contains only cases or only controls. This is separation, and the coefficient can then grow without limit. [Firth correction](docs/glossary.md#firth-regression) reduces the bias of small samples and can give finite estimates. It does not add information. It does not fix confounding, wrong genotype calls or a poor study design. The main scan of this dataset did not need the Firth fallback. We force Firth here so that you can compare the two results at one variant. Variants below the 1% frequency filter do not come back.",
     "you_need": "The final cohort, the main results from 6.4 and the covariates from 6.3.",
-    "command": "```{r s6-6}\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048\n```\n\nThe R command uses `--snp` with the chosen ID. The terminal command uses `--extract` with a file that holds this one ID. `--glm firth` asks for Firth correction at this variant, without waiting for the fallback. The covariate options and the resource options are the same as at 6.4. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
-    "expected_result": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "command": "```{r s6-6}\n# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\n# 2. Save the chosen variant ID and force the Firth model at that variant.\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\n# 3. Print both estimates and check that the Firth test gives one valid result.\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048\n```\n\n`--snp` selects the one variant that R chose. In a terminal, replace `VARIANT_ID` with the ID that R saved in `results/guided/s6-6_variant.txt`. `--glm firth` asks for Firth correction at this variant, without waiting for the fallback. The covariate options and the resource options are the same as at 6.4. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
+    "expected_result": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Does Firth correction make an association precise when it rests on very few carriers?\n\n<details><summary>Show the answer</summary>\n\nNo. It makes the fit more stable, but the uncertainty can stay large.\n\n</details>",
     "files_created": "The chosen variant ID, the forced Firth report and the log files.",
@@ -23,7 +23,7 @@
   "r_commands": [
     {
       "label": "s6-6",
-      "code": "results <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))",
+      "code": "# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.\nresults <- guided_association(guided_path(cfg, \"6.4\", \"association\"))\nminor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)\ncandidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)\nchosen <- results$ID[candidates[which.min(minor[candidates])]]\n# 2. Save the chosen variant ID and force the Firth model at that variant.\nguided_list(chosen, guided_path(cfg, \"6.6\", \"variant.txt\"))\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--snp\", chosen, \"--covar\", guided_path(cfg, \"6.3\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"firth\", \"sex\", \"hide-covar\", \"--out\", guided_path(cfg, \"6.6\", \"firth\")))\n# 3. Print both estimates and check that the Firth test gives one valid result.\ncomparison <- guided_association(guided_path(cfg, \"6.6\", \"firth\"))\nprint(results[results$ID == chosen, c(\"ID\", \"A1\", \"OR\", \"P\")])\nprint(comparison[, c(\"ID\", \"A1\", \"OR\", \"P\")])\nstopifnot(nrow(comparison) == 1L, valid_p(comparison$P))",
       "run_by_default": true
     }
   ],
@@ -31,7 +31,7 @@
   "plink": {
     "applicable": true,
     "commands": [
-      "bin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048"
+      "bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048"
     ],
     "options": [
       {
@@ -50,10 +50,6 @@
         "explained_at": "6.4"
       },
       {
-        "name": "--extract",
-        "explanation_markdown": "The terminal command uses `--extract` with a file that holds this one ID."
-      },
-      {
         "name": "--glm",
         "explanation_markdown": "`--glm firth` asks for Firth correction at this variant, without waiting for the fallback."
       },
@@ -70,11 +66,69 @@
         "explanation_markdown": "`--pfile` reads the final genotype files."
       },
       {
+        "name": "--snp",
+        "explanation_markdown": "`--snp` selects the one variant that R chose."
+      },
+      {
         "name": "--threads",
         "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
       }
     ]
   },
   "figures": [],
-  "success_line": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele."
+  "student_summary": "We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.",
+  "student_plink_options": [
+    {
+      "label": "compare a forced Firth fit",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."
+        },
+        {
+          "name": "--snp",
+          "explanation": "Selects the one variant that R chose from the valid tests on chromosomes 1 to 22: the variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID."
+        },
+        {
+          "name": "--covar",
+          "explanation": "Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs."
+        },
+        {
+          "name": "--covar-name",
+          "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."
+        },
+        {
+          "name": "--covar-variance-standardize",
+          "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."
+        },
+        {
+          "name": "--glm",
+          "explanation": "Fits a logistic model at the selected variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls.",
+          "modifiers": [
+            {
+              "name": "firth",
+              "explanation": "Always uses Firth correction, which gives usable estimates when very few people carry the allele, rather than waiting for the ordinary model calculation to fail."
+            },
+            {
+              "name": "sex",
+              "explanation": "Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."
+            },
+            {
+              "name": "hide-covar",
+              "explanation": "Reports the genetic test without separate rows for the effects of age, sex and genetic component scores."
+            }
+          ]
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with s6-6_firth for the forced Firth result."
+        }
+      ]
+    }
+  ],
+  "success_line": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele.",
+  "verification_notes": [
+    "\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.\n"
+  ],
+  "student_expected_result": "One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome."
 }

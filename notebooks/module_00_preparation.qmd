@@ -1,0 +1,268 @@
+---
+title: "Module 0: Prepare your computer"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325"
+---
+
+Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
+All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
+The linked step pages explain the ideas and provide troubleshooting.
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 90 minutes.
+
+**Before you start.** Nothing except the project folder. The first code chunk checks it.
+
+**Steps.**
+
+- [0.1 Install R](#step-0-1)
+- [0.2 Install RStudio](#step-0-2)
+- [0.3 Download and extract the project](#step-0-3)
+- [0.4 Open the project and check R](#step-0-4)
+- [0.5 Install the R packages](#step-0-5)
+- [0.6 Put PLINK 2 in bin/](#step-0-6)
+- [0.7 Request the password and download the data](#step-0-7)
+- [0.8 Run the setup check](#step-0-8)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module0_check
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+if (!file.exists("config.R") || !file.exists("R/guided.R")) {
+  stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)
+}
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))
+```
+
+## Step 0.1 · Install R {#step-0-1}
+
+We install R, the program that runs the course commands. We choose the version that matches the computer's system and processor.
+
+[Read step 0.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-1).
+
+::: {.callout-note title="What you do"}
+
+No R code runs in this step. Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears.
+
+:::
+
+## Step 0.2 · Install RStudio {#step-0-2}
+
+We install RStudio, a program that makes R easier to use. We find the Console area where we will run commands.
+
+[Read step 0.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-2).
+
+::: {.callout-note title="What you do"}
+
+No R code runs in this step. Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt.
+
+:::
+
+## Step 0.3 · Download and extract the project {#step-0-3}
+
+We download and extract the complete course project. Keeping its files together lets the commands find the files they need.
+
+[Read step 0.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-3).
+
+::: {.callout-note title="What you do"}
+
+No R code runs in this step. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
+
+:::
+
+## Step 0.4 · Open the project and check R {#step-0-4}
+
+We open the course project and check that R can find its files. We display the system and R version, then try a small calculation to check that commands run.
+
+[Read step 0.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-4).
+
+```{r}
+#| label: s0-4_project
+getwd()  # <1>
+stopifnot(file.exists("config.R"), file.exists("R/course.R"))  # <2>
+Sys.info()[c("sysname", "release", "machine")]  # <3>
+R.version.string  # <4>
+2 + 3  # <5>
+```
+
+1. Show the folder where R looks for files.
+2. Check that the required project files exist.
+3. Show the computer's system and processor information.
+4. Show the installed R version.
+5. Add two numbers to check that R runs commands.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.
+
+R prints your system information, its version and the result `[1] 5` from the small calculation. The R version may differ from the validation environment.
+
+`[1] 5`
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 0.5 · Install the R packages {#step-0-5}
+
+We install the R packages, which add functions needed by the course. These prepare R to ask for a hidden password and check the downloaded files.
+
+[Read step 0.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-5).
+
+```{r}
+#| label: s0-5_packages
+#| eval: false
+source("R/package_setup.R")  # <1>
+install_course_packages()  # <2>
+source("R/course.R")  # <3>
+```
+
+1. Load the helper that prepares the course packages.
+2. Install any required packages that are missing.
+3. Load the course functions into R.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+The `>` prompt returns. If packages were installed, R also prints `Course packages are ready.` Already installed packages need no download.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 0.6 · Put PLINK 2 in bin/ {#step-0-6}
+
+We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.
+
+[Read step 0.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-6).
+
+::: {.callout-note title="What you do"}
+
+No R code runs in this step. Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
+
+:::
+
+## Step 0.7 · Request the password and download the data {#step-0-7}
+
+University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.
+
+[Read step 0.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-7).
+
+```{r}
+#| label: s0-7_data
+#| eval: false
+download_course_data()  # <1>
+```
+
+1. Download the course data and check that the files are complete and unchanged.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 0.8 · Run the setup check {#step-0-8}
+
+We run the setup check to test the R packages, data files and PLINK 2. PLINK reads 20 DNA positions and writes a report, including a test in a folder whose name contains spaces and non-English letters.
+
+[Read step 0.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-8).
+
+```{r}
+#| label: s0-8_preflight
+settings <- new.env(parent = baseenv())  # <1>
+sys.source("config.R", settings)  # <2>
+settings$course_settings$tested_plink_version  # <3>
+source("scripts/preflight.R")  # <4>
+```
+
+1. Create a separate place in R to hold the course settings.
+2. Read the course settings from config.R.
+3. Show the PLINK version used to test the course.
+4. Run the setup checks, including the small PLINK test.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--bfile` | Reads the BED, BIM and FAM input files named sim2026_lab in data/course/lab_export/. |
+| `--autosome` | Keeps only DNA positions on chromosomes 1 to 22. |
+| `--thin-count` | Selects 20 DNA positions at random for this small test. |
+| `--seed` | Uses 20261111 as the starting number for the random selection so it can be repeated. |
+| `--freq` | Writes a report showing how common each version of a DNA letter is at the selected positions. |
+| `--out` | Starts the report file names with results/guided/s0-8_probe in the standard project layout; the helper also tests a folder name with spaces and non-English letters. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+The setup check prints one short line per check, with `PASS` or the problem. It keeps the full PLINK output in `results/guided/preflight.txt` (or the folder selected by `COURSE_OUTPUT_DIR`). The tested PLINK version is printed before the checks.
+
+`Preflight passed.`
+
+The guided starting data have 2,016 sample wells and 299,523 variants, representing 2,000 simulated people. PLINK finishes the frequency test on 20 variants. The report can show sex as "ambiguous". This is normal at this stage: the starting FAM has no recorded sex. The probe reads autosomal variants and does not perform the sex check from step 3.3. A path such as `PATHCH~1` in the report is the safe form of a folder with non-English letters.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-8_probe --threads 2 --memory 2048
+```
+
+:::
+
+## Where next {#where-next}
+
+- Next: [Module 1: From DNA to array data](module_01_from_dna_to_array_data.qmd)
+- This module on the course website: [Module 0](https://www.manuelgentiluomo.it/teaching/gwas/module-0)

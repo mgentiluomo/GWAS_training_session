@@ -6,13 +6,13 @@
   "anchor": "step-0-5",
   "title": "Install the R packages",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "source_sha256": "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install the R packages used by the course. A package is an add-on that gives R more functions. Keep the project from step 0.4 open.",
     "why": "The course needs `archive`, `digest`, `getPass`, `knitr` and `rmarkdown`. Installing them now prepares the masked password prompt and the data checks.",
     "you_need": "A working project from step 0.4 and an internet connection.",
-    "command": "```{r s0-5_packages, eval=FALSE}\nsource(\"R/package_setup.R\")\ninstall_course_packages()\nsource(\"R/course.R\")\n```\n\nThe first run can take several minutes. Wait until the `>` prompt returns. Run this installation command yourself; the whole-path script omits it.",
+    "command": "```{r s0-5_packages, eval=FALSE}\n# 1. Load the helper that prepares the course packages.\nsource(\"R/package_setup.R\")\n# 2. Install any required packages that are missing.\ninstall_course_packages()\n# 3. Load the course functions into R.\nsource(\"R/course.R\")\n```\n\nThe first run can take several minutes. Wait until the `>` prompt returns. Run this installation command yourself; the whole-path script omits it.",
     "expected_result": "The `>` prompt returns. If packages were installed, R also prints `Course packages are ready.` Already installed packages need no download.",
     "troubleshooting": "Stop at the first error. Check your internet connection. On Linux, the helper chooses matching ready-made Posit packages where they exist. If source installation is needed, it explains which development libraries you need. Ask the instructor or your institution's support team for help.",
     "quick_check": "Do these R packages replace the PLINK executable?\n\n<details><summary>Show the answer</summary>No. Put PLINK 2 in `bin/` at step 0.6.</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s0-5_packages",
-      "code": "source(\"R/package_setup.R\")\ninstall_course_packages()\nsource(\"R/course.R\")",
+      "code": "# 1. Load the helper that prepares the course packages.\nsource(\"R/package_setup.R\")\n# 2. Install any required packages that are missing.\ninstall_course_packages()\n# 3. Load the course functions into R.\nsource(\"R/course.R\")",
       "run_by_default": false,
       "where": "console"
     }
@@ -34,6 +34,9 @@
     "options": []
   },
   "figures": [],
+  "student_summary": "We install the R packages, which add functions needed by the course. These prepare R to ask for a hidden password and check the downloaded files.",
+  "student_plink_options": [],
   "actions": [],
-  "success_line": "The `>` prompt returns."
+  "success_line": "The `>` prompt returns.",
+  "student_expected_result": "The `>` prompt returns. If packages were installed, R also prints `Course packages are ready.` Already installed packages need no download."
 }

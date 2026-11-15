@@ -6,7 +6,7 @@
   "anchor": "step-1-9",
   "title": "A map of genetic file formats",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c",
+  "source_sha256": "fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 6 minutes. You can come back to it later.\n\nFollow the files from an instrument to an association result.",
@@ -34,5 +34,8 @@
       "alt_text": "Three data journeys connect array signals, sequencing reads and imputed probabilities to analysis files and association summary statistics; reference sequences support alignment and calling.",
       "reviewed": false
     }
-  ]
+  ],
+  "student_summary": "We follow genetic files from laboratory measurements to analysis results. We compare what the formats store and the checks they need so we can choose suitable files and avoid mixing incompatible information.",
+  "student_kind": "reading",
+  "student_expected_result": "You can place a file before or after calling. You can name its companion metadata files and check its coordinate convention."
 }

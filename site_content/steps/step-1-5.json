@@ -6,13 +6,13 @@
   "anchor": "step-1-5",
   "title": "Calling genotypes",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "140813ce49e5c9a65712d219bbfa47533b9478f84dd8c9e65cacd9e42d5a4f9c",
+  "source_sha256": "fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Read the call and score columns, and do not treat the score as certainty.",
     "why": "The calling algorithm compares the measured intensities with the expected clusters. The [GC score](docs/glossary.md#gc-score) measures the quality of one call. It is not the probability that an association is true. It is not a [p-value](docs/glossary.md#p-value) either.\n\nA [no-call](docs/glossary.md#no-call) is a site where the algorithm gave no genotype. It can come from a weak signal or from unclear clusters.\n\nThe example files use semicolons between columns and decimal points in numbers. This is on purpose. A character that separates columns is called a [delimiter](docs/glossary.md#delimiter). Check the delimiter in the file. Do not change the language of your computer.",
     "you_need": "The example final reports from step 1.2.",
-    "command": "```{r s1-5}\nlines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
+    "command": "```{r s1-5}\n# 1. Read the report and find where its data section begins.\nlines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\n# 2. Read the data as a table with semicolons separating its columns.\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\n# 3. Show the first rows and summarise the quality scores as numbers.\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
     "expected_result": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person.\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset.",
     "troubleshooting": "Stop at the first error. Check the named input and the previous step. Keep the command and console logs; do not substitute files from a different dataset version. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Does GC Score = 0.9 mean a variant has a 90% chance of causing disease?\n\n<details><summary>Show the answer</summary>\n\nNo. The score describes the quality of the genotype call. It says nothing about disease or association.\n\n</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s1-5",
-      "code": "lines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))",
+      "code": "# 1. Read the report and find where its data section begins.\nlines <- readLines(reports[1], warn = FALSE)\nstart <- match(\"[Data]\", lines)\n# 2. Read the data as a table with semicolons separating its columns.\nexample <- read.table(text = lines[(start + 1L):length(lines)], sep = \";\", header = TRUE, quote = \"\", check.names = FALSE, colClasses = \"character\")\n# 3. Show the first rows and summarise the quality scores as numbers.\nhead(example)\nsummary(as.numeric(example[[\"GC Score\"]]))",
       "run_by_default": true
     }
   ],
@@ -33,5 +33,11 @@
     "options": []
   },
   "figures": [],
-  "success_line": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus."
+  "student_summary": "We read the data section of a laboratory report and display its first rows. We summarise the GC scores, which describe the quality of recorded DNA results, to see what information the report provides.",
+  "student_plink_options": [],
+  "success_line": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus.",
+  "verification_notes": [
+    "The tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows with the supplied simulated dataset."
+  ],
+  "student_expected_result": "The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person."
 }

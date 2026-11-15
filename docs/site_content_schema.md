@@ -262,13 +262,40 @@ metadata. `reading_word_count()` in `scripts/course_exports.py` defines the rule
 Exporting fails if a stated time disagrees with this count.
 
 
-## Module 3 student notebook fields
+## Student notebook fields
 
-The Module 3 pilot adds `student_summary`, `student_expected_result`,
-`verification_notes` and `student_plink_options` to its eight step records.
+Modules can add `student_summary`, `student_expected_result`,
+`verification_notes` and `student_plink_options` to their step records.
 The summary is a short paragraph. The student expected result omits the author
 verification note, which stays in `verification_notes` and in the site's expected
-result block. Other modules do not need these optional fields.
+result block. Without a verification note, the student expected result is taken
+from the expected-result block when a student summary is present.
+
+Optional `student_kind` is `code`, `reading` or `outside_r`. It defaults to
+`code` when R command chunks exist. A step with student metadata and no R
+chunks must declare its kind. Code steps require R chunks; the other kinds
+forbid them. Reading steps show the summary, the step link and an explicit
+reading-only notice. Outside-R steps also require `student_action`, one or two
+plain sentences describing what to do. Only outside-R steps accept that field.
+Both new fields, like the summary, must be non-empty strings in one paragraph,
+without an em dash. Non-code steps have no student option tables, expected-result
+section or terminal-equivalent section. They must omit `student_plink_options`.
+
+A module is enabled only when every step has a summary and all fields required
+by its kind. Code steps need `student_plink_options` (possibly empty) and a
+student expected result. Incomplete modules produce no notebook. The plain
+models in `scripts/student_notebooks.py` preserve literal lesson chunk fences,
+including options, separately from rendering. `RENDERERS["rmd"]` renders these
+models. Another format can register its own renderer later.
+
+`--export-notebooks DIR` writes one `.Rmd` per enabled module using its lesson
+stem. Only when all eight modules are enabled does it also write
+`gwas_course_complete.Rmd`, with one header and introduction, ordered module
+headings and checks, and one shared setup at the first module that needs it.
+`--check-notebooks` writes nothing and rejects missing, stale or unexpected
+files matching `module_0[0-7]_*.Rmd` or `gwas_course_complete.Rmd`. CRLF checkout
+line endings are accepted. Export retains unexpected files for author review;
+checking continues to fail until they are resolved. Currently only module 3 is enabled.
 
 `student_plink_options` is a list of command groups, in the same order as
 `plink.commands`. Each group has a short `label` and an `options` list. Each
@@ -306,9 +333,26 @@ command chunks. The notebook shows a labelled table for each command when a
 step has several commands. It omits the group label for a single command and
 indents modifier rows beneath their parent. An R-only step uses an empty list.
 
-Module 3's `module_meta` lesson comment supplies the module record's
+Each enabled module's `module_meta` lesson comment supplies the module record's
 `prerequisites`: `checkpoint`, `restart_step` and relative `files`, each with
 `base` (`data` or `output`) and `path`. Notebook export generates the small input
 table in `R/guided.R` from this comment. Notebook checking and a Python test fail
-if the table disagrees with the lesson. `guided_check_module(3)` uses that table
-and honours `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR`.
+if the table disagrees with the lessons. `guided_check_module(N)` uses that table
+and honours `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR`. The generated region uses
+`BEGIN GENERATED MODULE INPUTS` and `END GENERATED MODULE INPUTS` markers and LF
+line endings. Data-only prerequisites set both `checkpoint` and `restart_step`
+to null and list only `data` files. They check the course data without checking
+a checkpoint and direct missing-data errors to step 0.7.
+
+Module 0 has empty prerequisites and needs only the project root. It may omit
+`module_meta`. Its inline base R check shares its generated source with the
+root-check helper in `R/guided.R`, but does not source course helpers or need
+installed packages. All notebook checks retain the `setwd("..")` root fallback.
+If knitr is available, the root check also sets its working directory for later
+chunks. Absence of knitr does not block the check.
+
+Authors can run `python -B scripts/author/prove_comment_only.py --base REV` to
+compare all lesson R chunks, the main-path script and exported `r_commands`
+against a Git revision. It permits added comment-only lines and changed source
+hash comments, rejects executable changes and removed or changed existing
+comments, and reports the first differences without writing files.

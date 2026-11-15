@@ -6,13 +6,13 @@
   "anchor": "step-0-4",
   "title": "Open the project and check R",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "fa1ebffc70619cfd014da1f167adea974b1fcfc03f65084c1c5222070a8c816b",
+  "source_sha256": "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the folder you extracted or cloned at step 0.3, double-click `GWAS_course.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_course` at the top right.\n2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.\n3. Run commands in the console. Always work from the [project root](docs/glossary.md#working-directory), which is the main folder of the project.",
     "why": "A [relative path](docs/glossary.md#relative-path) gives the place of a file starting from the working directory. The working directory is the folder where R looks first. One project root means you never copy your personal full paths into commands.",
     "you_need": "The complete extracted or cloned 2026 project from step 0.3, not one downloaded notebook. No branch change is needed.",
-    "command": "```{r s0-4_project}\ngetwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3\n```\n\nRun these commands in the RStudio Console. The function `stopifnot` stops with an error when a required condition is false. If the file checks pass, they print nothing.",
+    "command": "```{r s0-4_project}\n# 1. Show the folder where R looks for files.\ngetwd()\n# 2. Check that the required project files exist.\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\n# 3. Show the computer's system and processor information.\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\n# 4. Show the installed R version.\nR.version.string\n# 5. Add two numbers to check that R runs commands.\n2 + 3\n```\n\nRun these commands in the RStudio Console. The function `stopifnot` stops with an error when a required condition is false. If the file checks pass, they print nothing.",
     "expected_result": "R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.\n\nR prints your system information, its version and the result `[1] 5` from the small calculation. The R version may differ from the validation environment.\n\n`[1] 5`\n\nVerification: the project, version and calculation commands passed on Windows before this reordering.",
     "troubleshooting": "If `config.R` is missing, close RStudio and open the project again from the extracted source folder. Do not create an empty replacement file. Do not rename a downloaded HTML page to `.R`.",
     "quick_check": "Does a relative path starting `R/` refer to a folder on every computer's C drive?\n\n<details><summary>Show the answer</summary>No. It refers to the R folder under the current project root.</details>",
@@ -22,7 +22,7 @@
   "r_commands": [
     {
       "label": "s0-4_project",
-      "code": "getwd()\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\nR.version.string\n2 + 3",
+      "code": "# 1. Show the folder where R looks for files.\ngetwd()\n# 2. Check that the required project files exist.\nstopifnot(file.exists(\"config.R\"), file.exists(\"R/course.R\"))\n# 3. Show the computer's system and processor information.\nSys.info()[c(\"sysname\", \"release\", \"machine\")]\n# 4. Show the installed R version.\nR.version.string\n# 5. Add two numbers to check that R runs commands.\n2 + 3",
       "run_by_default": true,
       "where": "console"
     }
@@ -53,6 +53,12 @@
       "reviewed": false
     }
   ],
+  "student_summary": "We open the course project and check that R can find its files. We display the system and R version, then try a small calculation to check that commands run.",
+  "student_plink_options": [],
   "actions": [],
-  "success_line": "[1] 5"
+  "success_line": "[1] 5",
+  "verification_notes": [
+    "Verification: the project, version and calculation commands passed on Windows before this reordering."
+  ],
+  "student_expected_result": "R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.\n\nR prints your system information, its version and the result `[1] 5` from the small calculation. The R version may differ from the validation environment.\n\n`[1] 5`"
 }

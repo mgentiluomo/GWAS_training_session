@@ -6,7 +6,7 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
+  "source_sha256": "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
@@ -76,7 +76,7 @@
     ]
   },
   "figures": [],
-  "student_summary": "We check whether each sample has unusually many or few genotypes with two different alleles. We remove the unusually high-heterozygosity samples and keep the low-heterozygosity samples flagged for review, because an unusual value alone does not prove an error.",
+  "student_summary": "We check whether each sample has unusually many or few sites with two different DNA letters. We remove samples with unusually many such sites and flag those with unusually few for review, because an unusual value alone does not prove an error.",
   "student_plink_options": [
     {
       "label": "measure matching DNA letters",
@@ -91,7 +91,7 @@
         },
         {
           "name": "--het",
-          "explanation": "Reports how often each sample has two matching alleles, compared with what the allele frequencies predict. R uses this report to calculate F and the review thresholds."
+          "explanation": "Reports, for each sample, the observed and expected numbers of genotypes with two matching DNA letters, and calculates F from them. R reads the F values and calculates the review thresholds."
         },
         {
           "name": "--out",
@@ -100,7 +100,7 @@
       ]
     },
     {
-      "label": "remove samples with unusually few matching letters",
+      "label": "remove samples with unusually high heterozygosity",
       "options": [
         {
           "name": "--pfile",

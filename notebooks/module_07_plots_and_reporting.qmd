@@ -1,0 +1,510 @@
+---
+title: "Module 7: Plots and reporting"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5"
+---
+
+Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
+All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
+The linked step pages explain the ideas and provide troubleshooting.
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 75 minutes.
+
+**Before you start.** You need the full [checkpoint at step 6.8](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-8). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [7.1 QQ plot](#step-7-1)
+- [7.2 Genomic inflation factor](#step-7-2)
+- [7.3 Manhattan plot](#step-7-3)
+- [7.4 Multiple-testing thresholds](#step-7-4)
+- [7.5 Clump correlated results](#step-7-5)
+- [7.6 Regional plot](#step-7-6)
+- [7.7 Compare without PCs and without QC](#step-7-7)
+- [7.8 Final summary and reporting](#step-7-8)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module7_check
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+source("R/guided.R"); guided_check_module(7)
+```
+
+```{r}
+#| label: module7_setup
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## Step 7.1 · QQ plot {#step-7-1}
+
+We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.
+
+[Read step 7.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-1).
+
+```{r}
+#| label: s7-1
+stats <- guided_summary_stats(cfg)  # <1>
+autosomal <- stats$chromosome %in% as.character(1:22)  # <2>
+save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))  # <3>
+```
+
+1. Read the saved association summary table.
+2. Select chromosomes 1 to 22 for the plot.
+3. Save the plot comparing observed p-values with values expected by chance.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 7.2 · Genomic inflation factor {#step-7-2}
+
+We calculate lambda, a number that compares the middle of the test results with what chance predicts. We check that it is close to 1.016 and save it to help assess the results alongside the QQ plot.
+
+[Read step 7.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-2).
+
+```{r}
+#| label: s7-2
+stats <- guided_summary_stats(cfg)  # <1>
+p <- stats$p_value[stats$chromosome %in% as.character(1:22)]  # <2>
+lambda <- lambda_gc(p)  # <3>
+print(lambda)
+stopifnot(abs(lambda - 1.016) < 0.001)
+guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path(cfg, "7.2", "lambda.tsv"))  # <4>
+```
+
+1. Read the saved association summary table.
+2. Select p-values for chromosomes 1 to 22.
+3. Calculate and check the overall size of the test results.
+4. Save lambda in a table.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Lambda is approximately 1.016. R calculates it from the valid autosomal tests.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 7.3 · Manhattan plot {#step-7-3}
+
+We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.
+
+[Read step 7.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-3).
+
+```{r}
+#| label: s7-3
+stats <- guided_summary_stats(cfg)  # <1>
+plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),  # <2>
+  POS = stats$base_pair_location, P = stats$p_value)
+save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))  # <3>
+stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)  # <4>
+```
+
+1. Read the saved association summary table.
+2. Prepare the chromosome, position and p-value columns.
+3. Save the plot of results along the chromosomes.
+4. Check that eight variants have p-values below 0.00000005.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 7.4 · Multiple-testing thresholds {#step-7-4}
+
+We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 5 × 10⁻⁸ (0.00000005), p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
+
+[Read step 7.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-4).
+
+```{r}
+#| label: s7-4
+stats <- guided_summary_stats(cfg)  # <1>
+p <- stats$p_value[valid_p(stats$p_value)]  # <2>
+threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),  # <3>
+  threshold = c(5e-8, 0.05 / length(p), 0.05),
+  discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
+print(threshold)
+guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))  # <4>
+```
+
+1. Read the saved association summary table.
+2. Keep only valid p-values.
+3. Compare three rules for deciding which results are strong enough.
+4. Save the threshold comparison table.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 7.5 · Clump correlated results {#step-7-5}
+
+We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.
+
+[Read step 7.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-5).
+
+```{r}
+#| label: s7-5
+report <- guided_path(cfg, "7.5", "clump")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),  # <2>
+  "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
+  "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
+clumps <- guided_table(paste0(report, ".clumps"))  # <3>
+print(clumps)
+stopifnot(nrow(clumps) == 3L)
+```
+
+1. Choose the name for the grouped association results.
+2. Group nearby correlated variants using the final cohort.
+3. Read the groups and check that there are three.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
+| `--clump` | Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples. |
+| `--clump-id-field` | Uses the ID column of the association report to identify variants. |
+| `--clump-p-field` | Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect. |
+| `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005). |
+| `--clump-p2` | Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001). |
+| `--clump-r2` | Adds variants whose squared correlation with the group's strongest variant exceeds 0.1. |
+| `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant. |
+| `--clump-unphased` | Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes. |
+| `--out` | Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
+```
+
+:::
+
+## Step 7.6 · Regional plot {#step-7-6}
+
+We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.
+
+[Read step 7.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-6).
+
+```{r}
+#| label: s7-6
+lead <- "9:96426973:A:G"  # <1>
+report <- guided_path(cfg, "7.6", "ld")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",  # <2>
+  "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+ld <- guided_table(paste0(report, ".vcor"))  # <3>
+stats <- guided_summary_stats(cfg)
+region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
+r2_column <- grep("R2$", names(ld), value = TRUE)  # <4>
+stopifnot(length(r2_column) == 1L)
+r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])  # <5>
+r2[region$variant_id == lead] <- 1
+bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)  # <6>
+colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
+shapes <- c(1, 2, 3, 4, 16)
+png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)  # <7>
+plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
+  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
+abline(h = -log10(5e-8), lty = 2)
+legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
+  pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
+invisible(dev.off())
+cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
+stopifnot(sum(region$p_value < 5e-8) == 4L)  # <8>
+# Course bookkeeping: records the counts for the next step. Do not change.
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+```
+
+1. Choose the chromosome 9 variant and the output name.
+2. Measure correlations with the chosen variant within 500,000 DNA positions.
+3. Read the correlation table and select the regional association results.
+4. Find and check the column holding squared correlations.
+5. Match each regional variant to its correlation with the chosen variant.
+6. Choose symbols and colours for the correlation ranges.
+7. Draw and save the regional plot with a legend and significance line.
+8. Check that four regional variants have p-values below 0.00000005.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
+| `--chr` | Selects chromosome 9 for the regional comparison. |
+| `--from-bp` | Starts the selected GRCh38 interval at DNA position 95926973. |
+| `--to-bp` | Ends the selected GRCh38 interval at DNA position 96926973. |
+| `--r2-unphased` | Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes. |
+| `--ld-snp` | Pairs variant 9:96426973:A:G with the other selected variants to measure their correlation with it. |
+| `--ld-window-kb` | Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 9:96426973:A:G. |
+| `--ld-window-r2` | Sets the minimum reported squared correlation to 0 so weak correlations remain in the report. |
+| `--out` | Starts output file names with s7-6_ld, including the correlation table s7-6_ld.vcor. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
+```
+
+:::
+
+## Step 7.7 · Compare without PCs and without QC {#step-7-7}
+
+We repeat the association tests without genetic components, the numbers that summarise ancestry, and then without sample and variant quality checks as well. We compare counts and plots to see how these choices change the results.
+
+[Read step 7.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-7).
+
+```{r}
+#| label: s7-7
+no_pc <- guided_path(cfg, "7.7", "no_pcs")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+  "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
+metadata <- guided_metadata(cfg)  # <2>
+all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
+all_file <- guided_path(cfg, "7.7", "all_ages.tsv"); guided_write(all_covar, all_file)
+no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")  # <3>
+baseline <- guided_path(cfg, "2.8")
+if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
+run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,  # <4>
+  "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
+main <- guided_summary_stats(cfg)  # <5>
+a <- guided_standardise_scan(guided_association(no_pc))
+b <- guided_standardise_scan(guided_association(no_qc))
+k <- match(main$variant_id, a$variant_id)  # <6>
+stopifnot(!anyNA(k), all(main$n == a$n[k]))
+autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]  # <7>
+summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
+  lambda = lambda_gc(autosomal_p(x)))
+comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
+print(comparison)
+stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))  # <8>
+save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
+  par(mfrow = c(1, 3))
+  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
+  limits <- c(0, max(-log10(unlist(plotted))))
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
+}, width = 2100, height = 750)
+```
+
+1. Repeat the final cohort analysis using age and sex without genetic components.
+2. Read the original sample information and save ages for all wells.
+3. Choose the output name and find the cohort saved before quality checks.
+4. Test the cohort before sample and variant quality checks using age and sex.
+5. Read the main results and put the comparison results into matching columns.
+6. Check that the main and cleaned comparison analyses use the same samples per variant.
+7. Count valid tests and strong results and calculate lambda for each analysis.
+8. Save the comparison table.
+9. Save three plots with the same scale to compare the analyses.
+
+### What each option does
+
+**Command 1: test the final cohort without genetic components**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
+| `--maf` | Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort. |
+| `--covar` | Reads s6-3_covariates.tsv and matches adjustment values to samples by their identifiers. |
+| `--covar-name` | Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry. |
+| `--covar-variance-standardize` | Rescales age to have a mean of zero and a variance of one so the model calculation remains stable. |
+| `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
+| &nbsp;&nbsp;&rarr; `sex` | Adds recorded sex from the input sample file as an adjustment factor. |
+| &nbsp;&nbsp;&rarr; `hide-covar` | Reports genetic tests without separate rows for the effects of age and sex. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
+| `--out` | Starts output file names with s7-7_no_pcs, including s7-7_no_pcs.Disease.glm.logistic.hybrid. |
+
+**Command 2: test the cohort before sample and variant quality checks**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the cohort before sample and variant quality checks from s2-8_state.pgen, s2-8_state.pvar and s2-8_state.psam. If the local PGEN file is absent, R uses checkpoints/2.8/state in the course data folder. |
+| `--maf` | Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort. |
+| `--covar` | Reads s7-7_all_ages.tsv, which holds ages for all measured wells, and matches them to samples by their identifiers. |
+| `--covar-name` | Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry. |
+| `--covar-variance-standardize` | Rescales age to have a mean of zero and a variance of one so the model calculation remains stable. |
+| `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
+| &nbsp;&nbsp;&rarr; `sex` | Adds recorded sex from the input sample file as an adjustment factor. |
+| &nbsp;&nbsp;&rarr; `hide-covar` | Reports genetic tests without separate rows for the effects of age and sex. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
+| `--out` | Starts output file names with s7-7_no_qc_no_pcs, including s7-7_no_qc_no_pcs.Disease.glm.logistic.hybrid. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_pcs --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s7-7_all_ages.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_qc_no_pcs --threads 2 --memory 2048
+```
+
+:::
+
+## Step 7.8 · Final summary and reporting {#step-7-8}
+
+We save a final report and a table of the strongest variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
+
+[Read step 7.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-8).
+
+```{r}
+#| label: s7-8
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))  # <1>
+comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
+clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
+stats <- guided_summary_stats(cfg)
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]  # <2>
+lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
+lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
+guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))  # <3>
+summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",  # <4>
+  paste("Software:", paste(cfg$version, collapse = "; ")),
+  "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
+  paste("Final cohort:", nrow(psam), "samples; cases:", sum(psam$Disease == "2"), "; controls:", sum(psam$Disease == "1")),
+  "After QC: 238,513 variants; 236,815 finite additive association tests.",
+  "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
+  "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
+  "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
+  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
+  "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
+  "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
+  "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",
+  "No biological discovery or clinical recommendation follows from this simulation.")
+writeLines(summary, guided_path(cfg, "7.8", "summary.md"), useBytes = TRUE)  # <5>
+# Course bookkeeping: records the counts for the next step. Do not change.
+files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads.tsv"),
+  guided_path(cfg, "7.1", "qq.png"), guided_path(cfg, "7.3", "manhattan.png"),
+  guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
+  guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
+  file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
+check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
+cat(paste(summary, collapse = "\n"), "\n")  # <6>
+```
+
+1. Read the final sample counts, comparison table, variant groups and association results.
+2. Select the strongest variant in each group and calculate its uncertainty interval.
+3. Save the table of the three strongest variants.
+4. Prepare the report describing the analysis, results and limitations.
+5. Save the report as a text file.
+6. Print the final report.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures. The 7.8 checkpoint manifest protects these files. The main path ends here. Imputation, mixed models and the analysis after a GWAS are not part of it.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Where next {#where-next}
+
+- Previous: [Module 6: Association](module_06_association.qmd)
+- Next: this is the last module of the main path.
+- This module on the course website: [Module 7](https://www.manuelgentiluomo.it/teaching/gwas/module-7)
