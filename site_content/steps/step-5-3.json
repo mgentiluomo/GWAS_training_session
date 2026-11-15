@@ -6,7 +6,7 @@
   "anchor": "step-5-3",
   "title": "Match build, position and alleles",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9",
+  "source_sha256": "aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Check that the shared variants are really the same variants in both files, before the projection.",
@@ -33,7 +33,7 @@
     "options": []
   },
   "figures": [],
-  "student_summary": "We check that each shared site has the same chromosome, DNA position and pair of alleles, the alternative DNA letters, in both files. This prevents us from comparing different sites that happen to share a name.",
+  "student_summary": "We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.",
   "student_plink_options": [],
   "success_line": "All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair.",
   "verification_notes": [

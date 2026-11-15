@@ -6,7 +6,7 @@
   "anchor": "step-7-4",
   "title": "Multiple-testing thresholds",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "734de855afb8ae1b1a3b3e222dfc23b066094d803b2e4808d1797ece6ff4fbe7",
+  "source_sha256": "cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare three ways to decide which p-values are small enough to call a result: the usual GWAS threshold, a Bonferroni threshold for this scan and a false-discovery-rate adjustment.",
@@ -33,7 +33,7 @@
     "options": []
   },
   "figures": [],
-  "student_summary": "We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 0.00000005, p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.",
+  "student_summary": "We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 5 × 10⁻⁸ (0.00000005), p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.",
   "student_plink_options": [],
   "success_line": "There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7.",
   "verification_notes": [

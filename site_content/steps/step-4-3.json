@@ -6,7 +6,7 @@
   "anchor": "step-4-3",
   "title": "Allele frequency",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0",
+  "source_sha256": "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep variants with a minor allele frequency of at least 1%. We use this rule for the main array scan.",

@@ -1,7 +1,7 @@
 ---
 title: "Module 6: Association"
 output: html_notebook
-course_source_sha256: "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5"
+course_source_sha256: "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -71,7 +71,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --o
 
 ## Step 6.2 · The additive logistic model
 
-We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. We calculate how each extra copy changes the odds of disease, the ratio of cases to controls.
+We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.
 
 [Read step 6.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2).
 
@@ -171,7 +171,7 @@ guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybr
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores. |
-| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
 | `--out` | Starts output file names with s6-4_association, including s6-4_association.Disease.glm.logistic.hybrid. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
@@ -191,7 +191,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 
 ## Step 6.5 · Read association output
 
-We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, a measure of evidence against no effect, and save the first 20 with their tested DNA letters and sample counts.
+We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
 
 [Read step 6.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-5).
 
@@ -226,7 +226,7 @@ No PLINK equivalent
 
 ## Step 6.6 · Sparse genotypes and Firth correction
 
-We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
+We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
@@ -257,7 +257,7 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
 | `--glm` | Fits a logistic model at the selected variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
-| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which reduces bias with small groups, rather than waiting for the ordinary model calculation to fail. |
+| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which gives usable estimates when very few people carry the allele, rather than waiting for the ordinary model calculation to fail. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic test without separate rows for the effects of age, sex and genetic component scores. |
 | `--out` | Starts output file names with s6-6_firth for the forced Firth result. |
@@ -279,7 +279,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/gu
 
 ## Step 6.7 · First look and association checkpoint
 
-We summarise the sample and variant counts, valid tests and results below the course significance threshold. We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
+We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
 
 [Read step 6.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-7).
 

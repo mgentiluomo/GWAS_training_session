@@ -6,7 +6,7 @@
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0",
+  "source_sha256": "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We test whether missing calls differ between cases and controls.",
@@ -66,7 +66,7 @@
     ]
   },
   "figures": [],
-  "student_summary": "We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 0.00001, which indicate differences that are very unlikely if missing results occur equally in both groups.",
+  "student_summary": "We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.",
   "student_plink_options": [
     {
       "label": "compare missing results",
@@ -94,7 +94,7 @@
         },
         {
           "name": "--exclude",
-          "explanation": "Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 0.00001."
+          "explanation": "Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 1 × 10⁻⁵ (0.00001)."
         },
         {
           "name": "--make-pgen",

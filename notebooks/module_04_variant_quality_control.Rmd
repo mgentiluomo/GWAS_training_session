@@ -1,7 +1,7 @@
 ---
 title: "Module 4: Variant quality control"
 output: html_notebook
-course_source_sha256: "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0"
+course_source_sha256: "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -60,7 +60,7 @@ bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out resul
 
 ## Step 4.2 · Differential missingness
 
-We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 0.00001, which indicate differences that are very unlikely if missing results occur equally in both groups.
+We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 
@@ -94,7 +94,7 @@ guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-1_state. |
-| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 0.00001. |
+| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 1 × 10⁻⁵ (0.00001). |
 | `--make-pgen` | Saves the remaining data as PGEN, PVAR and PSAM files. |
 | `--out` | Starts the output file names with results/guided/s4-2_state. |
 
@@ -269,7 +269,7 @@ rm(raw, genotypes); invisible(gc())
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-4_state. |
 | `--chr` | Selects only X, Y and MT, the mitochondrial chromosome. |
 | `--export` | Writes genotype data in a text format for R to read. |
-| &nbsp;&nbsp;&rarr; `A` | Writes a table of allele counts, recorded as 0, 1 or 2 copies of a DNA version for each person and variant. |
+| &nbsp;&nbsp;&rarr; `A` | Writes a table with one row per person and values of 0, 1 or 2 for each variant. For chromosomes present in one copy, such as X in males, PLINK writes 0 or 2, so 2 does not mean two physical copies. |
 | `--out` | Starts the export file names with results/guided/s4-5_sexchr. |
 
 **Command 2: remove variants with unexpected chromosome results**

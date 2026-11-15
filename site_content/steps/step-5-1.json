@@ -6,7 +6,7 @@
   "anchor": "step-5-1",
   "title": "Why ancestry matters",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9",
+  "source_sha256": "aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn how [population structure](docs/glossary.md#population-stratification) can mislead an association study. Then look at the reference samples we will use.",

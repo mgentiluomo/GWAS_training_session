@@ -6,7 +6,7 @@
   "anchor": "step-7-8",
   "title": "Final summary and reporting",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "734de855afb8ae1b1a3b3e222dfc23b066094d803b2e4808d1797ece6ff4fbe7",
+  "source_sha256": "cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Write a clear summary of the whole simulated main path. Save the final results and figures so that others can check them.",

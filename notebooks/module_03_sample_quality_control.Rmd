@@ -1,7 +1,7 @@
 ---
 title: "Module 3: Sample quality control"
 output: html_notebook
-course_source_sha256: "aa090b42561899a8a4965dc590c206814316b3369b3cac0012b0862a4935e7dc"
+course_source_sha256: "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -157,7 +157,7 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--check-sex` | Compares recorded sex with X chromosome patterns and the number of observed Y calls. |
 | &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest accepted X chromosome F value for a recorded female. F measures how homozygous the X chromosome looks, meaning how often the two copies carry the same DNA letter. |
-| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. |
+| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. Values near 1 are expected when there is only one X chromosome, as in males. |
 | &nbsp;&nbsp;&rarr; `max-female-ycount` | Accepts at most 100 observed Y calls for a recorded female. |
 | &nbsp;&nbsp;&rarr; `min-male-ycount` | Requires at least 1000 observed Y calls for a recorded male. |
 | `--out` | Sets the shared beginning of the output file names. |
@@ -190,7 +190,7 @@ bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.t
 
 ## Step 3.4 · LD pruning
 
-We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, otherwise the same genetic signal is counted many times.
+We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.
 
 [Read step 3.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-4).
 
@@ -277,7 +277,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 | `--het` | Reports, for each sample, the observed and expected numbers of genotypes with two matching DNA letters, and calculates F from them. R reads the F values and calculates the review thresholds. |
 | `--out` | Sets the shared beginning of the output file names. |
 
-**Command 2: remove samples with unusually few matching letters**
+**Command 2: remove samples with unusually high heterozygosity**
 
 | Option or modifier | What it does |
 | --- | --- |

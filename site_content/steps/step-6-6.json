@@ -6,7 +6,7 @@
   "anchor": "step-6-6",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5",
+  "source_sha256": "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",
@@ -76,7 +76,7 @@
     ]
   },
   "figures": [],
-  "student_summary": "We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.",
+  "student_summary": "We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.",
   "student_plink_options": [
     {
       "label": "compare a forced Firth fit",
@@ -107,7 +107,7 @@
           "modifiers": [
             {
               "name": "firth",
-              "explanation": "Always uses Firth correction, which reduces bias with small groups, rather than waiting for the ordinary model calculation to fail."
+              "explanation": "Always uses Firth correction, which gives usable estimates when very few people carry the allele, rather than waiting for the ordinary model calculation to fail."
             },
             {
               "name": "sex",

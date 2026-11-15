@@ -6,7 +6,7 @@
   "anchor": "step-5-4",
   "title": "Reference PCA and study projection",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9",
+  "source_sha256": "aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.",
@@ -137,7 +137,7 @@
             },
             {
               "name": "no-mean-imputation",
-              "explanation": "Leaves missing genotype calls out of each average instead of replacing them with an average genotype."
+              "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."
             },
             {
               "name": "variance-standardize",
@@ -180,7 +180,7 @@
             },
             {
               "name": "no-mean-imputation",
-              "explanation": "Leaves missing genotype calls out of each average instead of replacing them with an average genotype."
+              "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."
             },
             {
               "name": "variance-standardize",

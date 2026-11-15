@@ -1,7 +1,7 @@
 ---
 title: "Module 5: Population structure"
 output: html_notebook
-course_source_sha256: "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9"
+course_source_sha256: "aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -81,7 +81,7 @@ No PLINK equivalent
 
 ## Step 5.3 · Match build, position and alleles
 
-We check that each shared site has the same chromosome, DNA position and pair of alleles, the alternative DNA letters, in both files. This prevents us from comparing different sites that happen to share a name.
+We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.
 
 [Read step 5.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-3).
 
@@ -163,7 +163,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
-| &nbsp;&nbsp;&rarr; `no-mean-imputation` | Leaves missing genotype calls out of each average instead of replacing them with an average genotype. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
 | &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
 | `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
 | `--out` | Starts the reference score output file names with s5-4_ref_scores. |
@@ -177,7 +177,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
-| &nbsp;&nbsp;&rarr; `no-mean-imputation` | Leaves missing genotype calls out of each average instead of replacing them with an average genotype. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
 | &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
 | `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
 | `--out` | Starts the study score output file names with s5-4_study_scores. |

@@ -6,7 +6,7 @@
   "anchor": "step-7-7",
   "title": "Compare without PCs and without QC",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "734de855afb8ae1b1a3b3e222dfc23b066094d803b2e4808d1797ece6ff4fbe7",
+  "source_sha256": "cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.",
@@ -88,7 +88,7 @@
   "student_summary": "We repeat the association tests without genetic components, the numbers that summarise ancestry, and then without sample and variant quality checks as well. We compare counts and plots to see how these choices change the results.",
   "student_plink_options": [
     {
-      "label": "Command 1: test the final cohort without genetic components",
+      "label": "test the final cohort without genetic components",
       "options": [
         {
           "name": "--pfile",
@@ -124,7 +124,7 @@
             },
             {
               "name": "firth-fallback",
-              "explanation": "Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails."
+              "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."
             }
           ]
         },
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "label": "Command 2: test the cohort before sample and variant quality checks",
+      "label": "test the cohort before sample and variant quality checks",
       "options": [
         {
           "name": "--pfile",
@@ -171,7 +171,7 @@
             },
             {
               "name": "firth-fallback",
-              "explanation": "Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails."
+              "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."
             }
           ]
         },

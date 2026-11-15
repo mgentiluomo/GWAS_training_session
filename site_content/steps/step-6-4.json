@@ -6,7 +6,7 @@
   "anchor": "step-6-4",
   "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5",
+  "source_sha256": "46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",
@@ -111,7 +111,7 @@
             },
             {
               "name": "firth-fallback",
-              "explanation": "Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails."
+              "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."
             }
           ]
         },

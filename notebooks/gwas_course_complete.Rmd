@@ -905,7 +905,7 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--check-sex` | Compares recorded sex with X chromosome patterns and the number of observed Y calls. |
 | &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest accepted X chromosome F value for a recorded female. F measures how homozygous the X chromosome looks, meaning how often the two copies carry the same DNA letter. |
-| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. |
+| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. Values near 1 are expected when there is only one X chromosome, as in males. |
 | &nbsp;&nbsp;&rarr; `max-female-ycount` | Accepts at most 100 observed Y calls for a recorded female. |
 | &nbsp;&nbsp;&rarr; `min-male-ycount` | Requires at least 1000 observed Y calls for a recorded male. |
 | `--out` | Sets the shared beginning of the output file names. |
@@ -938,7 +938,7 @@ bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.t
 
 ## Step 3.4 · LD pruning
 
-We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, otherwise the same genetic signal is counted many times.
+We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.
 
 [Read step 3.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-4).
 
@@ -1025,7 +1025,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 | `--het` | Reports, for each sample, the observed and expected numbers of genotypes with two matching DNA letters, and calculates F from them. R reads the F values and calculates the review thresholds. |
 | `--out` | Sets the shared beginning of the output file names. |
 
-**Command 2: remove samples with unusually few matching letters**
+**Command 2: remove samples with unusually high heterozygosity**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -1273,7 +1273,7 @@ bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out resul
 
 ## Step 4.2 · Differential missingness
 
-We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 0.00001, which indicate differences that are very unlikely if missing results occur equally in both groups.
+We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 
@@ -1307,7 +1307,7 @@ guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-1_state. |
-| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 0.00001. |
+| `--exclude` | Removes variants listed in results/guided/s4-2_exclude.txt because their missingness test p-value is below 1 × 10⁻⁵ (0.00001). |
 | `--make-pgen` | Saves the remaining data as PGEN, PVAR and PSAM files. |
 | `--out` | Starts the output file names with results/guided/s4-2_state. |
 
@@ -1482,7 +1482,7 @@ rm(raw, genotypes); invisible(gc())
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-4_state. |
 | `--chr` | Selects only X, Y and MT, the mitochondrial chromosome. |
 | `--export` | Writes genotype data in a text format for R to read. |
-| &nbsp;&nbsp;&rarr; `A` | Writes a table of allele counts, recorded as 0, 1 or 2 copies of a DNA version for each person and variant. |
+| &nbsp;&nbsp;&rarr; `A` | Writes a table with one row per person and values of 0, 1 or 2 for each variant. For chromosomes present in one copy, such as X in males, PLINK writes 0 or 2, so 2 does not mean two physical copies. |
 | `--out` | Starts the export file names with results/guided/s4-5_sexchr. |
 
 **Command 2: remove variants with unexpected chromosome results**
@@ -1616,7 +1616,7 @@ No PLINK equivalent
 
 ## Step 5.3 · Match build, position and alleles
 
-We check that each shared site has the same chromosome, DNA position and pair of alleles, the alternative DNA letters, in both files. This prevents us from comparing different sites that happen to share a name.
+We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.
 
 [Read step 5.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-3).
 
@@ -1698,7 +1698,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
-| &nbsp;&nbsp;&rarr; `no-mean-imputation` | Leaves missing genotype calls out of each average instead of replacing them with an average genotype. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
 | &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
 | `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
 | `--out` | Starts the reference score output file names with s5-4_ref_scores. |
@@ -1712,7 +1712,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
-| &nbsp;&nbsp;&rarr; `no-mean-imputation` | Leaves missing genotype calls out of each average instead of replacing them with an average genotype. |
+| &nbsp;&nbsp;&rarr; `no-mean-imputation` | A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency. |
 | &nbsp;&nbsp;&rarr; `variance-standardize` | Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale. |
 | `--score-col-nums` | Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10. |
 | `--out` | Starts the study score output file names with s5-4_study_scores. |
@@ -1953,7 +1953,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --o
 
 ## Step 6.2 · The additive logistic model
 
-We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. We calculate how each extra copy changes the odds of disease, the ratio of cases to controls.
+We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.
 
 [Read step 6.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2).
 
@@ -2053,7 +2053,7 @@ guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybr
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores. |
-| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
 | `--out` | Starts output file names with s6-4_association, including s6-4_association.Disease.glm.logistic.hybrid. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
@@ -2073,7 +2073,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 
 ## Step 6.5 · Read association output
 
-We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, a measure of evidence against no effect, and save the first 20 with their tested DNA letters and sample counts.
+We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
 
 [Read step 6.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-5).
 
@@ -2108,7 +2108,7 @@ No PLINK equivalent
 
 ## Step 6.6 · Sparse genotypes and Firth correction
 
-We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
+We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
@@ -2139,7 +2139,7 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
 | `--glm` | Fits a logistic model at the selected variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
-| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which reduces bias with small groups, rather than waiting for the ordinary model calculation to fail. |
+| &nbsp;&nbsp;&rarr; `firth` | Always uses Firth correction, which gives usable estimates when very few people carry the allele, rather than waiting for the ordinary model calculation to fail. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic test without separate rows for the effects of age, sex and genetic component scores. |
 | `--out` | Starts output file names with s6-6_firth for the forced Firth result. |
@@ -2161,7 +2161,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/gu
 
 ## Step 6.7 · First look and association checkpoint
 
-We summarise the sample and variant counts, valid tests and results below the course significance threshold. We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
+We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
 
 [Read step 6.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-7).
 
@@ -2308,7 +2308,7 @@ No PLINK equivalent
 
 ## Step 7.3 · Manhattan plot
 
-We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 0.00000005 to confirm the count of strong results.
+We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.
 
 [Read step 7.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-3).
 
@@ -2338,7 +2338,7 @@ No PLINK equivalent
 
 ## Step 7.4 · Multiple-testing thresholds
 
-We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 0.00000005, p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
+We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 5 × 10⁻⁸ (0.00000005), p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
 
 [Read step 7.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-4).
 
@@ -2395,8 +2395,8 @@ stopifnot(nrow(clumps) == 3L)
 | `--clump` | Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples. |
 | `--clump-id-field` | Uses the ID column of the association report to identify variants. |
 | `--clump-p-field` | Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect. |
-| `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5e-8 (0.00000005). |
-| `--clump-p2` | Lists other variants in a group when their p-values are at most 1e-5 (0.00001). |
+| `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005). |
+| `--clump-p2` | Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001). |
 | `--clump-r2` | Adds variants whose squared correlation with the group's strongest variant exceeds 0.1. |
 | `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant. |
 | `--clump-unphased` | Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes. |
@@ -2539,7 +2539,7 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
 
 ### What each option does
 
-**Command 1: Command 1: test the final cohort without genetic components**
+**Command 1: test the final cohort without genetic components**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -2551,10 +2551,10 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds recorded sex from the input sample file as an adjustment factor. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports genetic tests without separate rows for the effects of age and sex. |
-| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
 | `--out` | Starts output file names with s7-7_no_pcs, including s7-7_no_pcs.Disease.glm.logistic.hybrid. |
 
-**Command 2: Command 2: test the cohort before sample and variant quality checks**
+**Command 2: test the cohort before sample and variant quality checks**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -2566,7 +2566,7 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease, the ratio of cases to controls. |
 | &nbsp;&nbsp;&rarr; `sex` | Adds recorded sex from the input sample file as an adjustment factor. |
 | &nbsp;&nbsp;&rarr; `hide-covar` | Reports genetic tests without separate rows for the effects of age and sex. |
-| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which reduces bias with small groups, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
 | `--out` | Starts output file names with s7-7_no_qc_no_pcs, including s7-7_no_qc_no_pcs.Disease.glm.logistic.hybrid. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
