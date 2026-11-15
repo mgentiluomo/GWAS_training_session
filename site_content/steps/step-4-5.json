@@ -6,7 +6,7 @@
   "anchor": "step-4-5",
   "title": "Sex chromosomes, MT and duplicated sites",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a",
+  "source_sha256": "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We review calls that are impossible for the [sex chromosomes](docs/glossary.md#sex-chromosomes) X and Y and for mitochondrial DNA (MT). We also merge duplicated entries that describe the same variant.",

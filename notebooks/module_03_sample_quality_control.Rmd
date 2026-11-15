@@ -1,7 +1,7 @@
 ---
 title: "Module 3: Sample quality control"
 output: html_notebook
-course_source_sha256: "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181"
+course_source_sha256: "aa090b42561899a8a4965dc590c206814316b3369b3cac0012b0862a4935e7dc"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -156,8 +156,8 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--check-sex` | Compares recorded sex with X chromosome patterns and the number of observed Y calls. |
-| &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest X coefficient accepted for a recorded female. |
-| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest X coefficient accepted for a recorded male. |
+| &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest accepted X chromosome F value for a recorded female. F measures how homozygous the X chromosome looks, meaning how often the two copies carry the same DNA letter. |
+| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. |
 | &nbsp;&nbsp;&rarr; `max-female-ycount` | Accepts at most 100 observed Y calls for a recorded female. |
 | &nbsp;&nbsp;&rarr; `min-male-ycount` | Requires at least 1000 observed Y calls for a recorded male. |
 | `--out` | Sets the shared beginning of the output file names. |
@@ -218,7 +218,7 @@ guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune")
 | `--geno` | Keeps variants with no more than 2% missing calls. |
 | `--exclude` | Leaves out variants within the listed DNA regions. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads DNA regions with positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects a less strongly linked set within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2. |
+| `--indep-pairwise` | Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
@@ -238,7 +238,7 @@ bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 -
 
 ## Step 3.5 · Heterozygosity
 
-We check whether each sample has unusually many or few genotypes with two different alleles. We remove the unusually high-heterozygosity samples and keep the low-heterozygosity samples flagged for review, because an unusual value alone does not prove an error.
+We check whether each sample has unusually many or few sites with two different DNA letters. We remove samples with unusually many such sites and flag those with unusually few for review, because an unusual value alone does not prove an error.
 
 [Read step 3.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-5).
 
@@ -274,7 +274,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--extract` | Uses only the variants named in the supplied variant list. |
-| `--het` | Reports how often each sample has two matching alleles, compared with what the allele frequencies predict. R uses this report to calculate F and the review thresholds. |
+| `--het` | Reports, for each sample, the observed and expected numbers of genotypes with two matching DNA letters, and calculates F from them. R reads the F values and calculates the review thresholds. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 **Command 2: remove samples with unusually few matching letters**
@@ -357,7 +357,7 @@ guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--extract` | Uses only the variants named in the supplied variant list. |
 | `--make-king-table` | Estimates how closely related each pair of samples is and writes a table. |
-| `--king-table-filter` | Writes only pairs with estimated kinship above 0.0442, an approximate screening boundary for third-degree relatives such as first cousins. |
+| `--king-table-filter` | Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 **Command 2: remove repeated or closely related samples**

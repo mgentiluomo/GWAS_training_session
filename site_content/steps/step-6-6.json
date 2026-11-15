@@ -6,7 +6,7 @@
   "anchor": "step-6-6",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c",
+  "source_sha256": "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",
@@ -76,7 +76,7 @@
     ]
   },
   "figures": [],
-  "student_summary": "We choose a tested variant with the lowest frequency of its less common DNA version and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.",
+  "student_summary": "We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.",
   "student_plink_options": [
     {
       "label": "compare a forced Firth fit",
@@ -87,7 +87,7 @@
         },
         {
           "name": "--snp",
-          "explanation": "Selects the one variant that R chose, the tested variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID."
+          "explanation": "Selects the one variant that R chose from the valid tests on chromosomes 1 to 22: the variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID."
         },
         {
           "name": "--covar",

@@ -6,7 +6,7 @@
   "anchor": "step-5-7",
   "title": "Cohort PCs and how many to include",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "e3c104a02a37ae7e55c2d3a52d243f52727b139f299811843e57b40c09277828",
+  "source_sha256": "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate new PCs in the retained study cohort, look at the eigenvalues and save the full state.",
@@ -116,7 +116,7 @@
         },
         {
           "name": "--indep-pairwise",
-          "explanation": "Selects sites with weaker links within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2."
+          "explanation": "Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely."
         },
         {
           "name": "--out",

@@ -436,7 +436,7 @@ None.
 ## 1.7 The export {#step-1-7}
 
 
-<!-- step_meta: {"success_line": "2,016 sample wells and 299,523 variants.", "student_summary": "We check that the three genotype files belong together and display their sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "2,016 sample wells and 299,523 variants.", "student_summary": "We check that the three genotype files are present and that their sizes agree with the sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.", "student_plink_options": []} -->
 ### What we do
 
 Understand how the reports relate to the genotype files used for the analysis.

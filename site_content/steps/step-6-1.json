@@ -6,7 +6,7 @@
   "anchor": "step-6-1",
   "title": "One variant by hand",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c",
+  "source_sha256": "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate a simple carrier odds ratio for one variant on an [autosome](docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control.",

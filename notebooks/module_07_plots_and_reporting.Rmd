@@ -1,7 +1,7 @@
 ---
 title: "Module 7: Plots and reporting"
 output: html_notebook
-course_source_sha256: "abaf72020d5346d9aa4e6460e2e4beb10238d9106bfd533b0556413de7d559b8"
+course_source_sha256: "734de855afb8ae1b1a3b3e222dfc23b066094d803b2e4808d1797ece6ff4fbe7"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -110,7 +110,7 @@ No PLINK equivalent
 
 ## Step 7.4 · Multiple-testing thresholds
 
-We compare rules for multiple testing, which means allowing for the many chances to obtain a false result. We count results below 0.00000005, below 0.05 divided by the number of valid tests, and below 0.05 after an adjustment for false discoveries.
+We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 0.00000005, p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
 
 [Read step 7.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-4).
 

@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 99f0af82662326fd7fc60248c76086eb31dedbbf3f5bd36c6f11d22e29b512dc
+# SHA-256: d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -38,7 +38,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: c3d3f29c71322ca29327711459065876a677ac5a5b49be07e5663dfe63387d55
+# SHA-256: fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b
 
 # Chunk: setup
 source("R/guided.R")
@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181
+# SHA-256: aa090b42561899a8a4965dc590c206814316b3369b3cac0012b0862a4935e7dc
 
 # Chunk: setup
 source("R/guided.R")
@@ -399,7 +399,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a
+# SHA-256: 09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0
 
 # Chunk: setup
 source("R/guided.R")
@@ -502,7 +502,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: e3c104a02a37ae7e55c2d3a52d243f52727b139f299811843e57b40c09277828
+# SHA-256: 347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9
 
 # Chunk: setup
 source("R/guided.R")
@@ -650,7 +650,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c
+# SHA-256: 6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5
 
 # Chunk: setup
 source("R/guided.R")
@@ -801,7 +801,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: abaf72020d5346d9aa4e6460e2e4beb10238d9106bfd533b0556413de7d559b8
+# SHA-256: 734de855afb8ae1b1a3b3e222dfc23b066094d803b2e4808d1797ece6ff4fbe7
 
 # Chunk: setup
 source("R/guided.R")

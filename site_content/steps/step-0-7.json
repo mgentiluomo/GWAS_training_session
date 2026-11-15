@@ -6,7 +6,7 @@
   "anchor": "step-0-7",
   "title": "Request the password and download the data",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "99f0af82662326fd7fc60248c76086eb31dedbbf3f5bd36c6f11d22e29b512dc",
+  "source_sha256": "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Request the course password, then download the matching encrypted data with `download_course_data()`. The data are published in [GitHub Release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1). The download URLs and SHA-256 checksums are set in `config.R`. The package contains 108 files.",
@@ -71,7 +71,7 @@
       "reviewed": false
     }
   ],
-  "student_summary": "We request the password, then download and check the course data. We enter the password only in a prompt that hides the letters; we never type it into a file.",
+  "student_summary": "University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.",
   "student_plink_options": [],
   "actions": [
     {

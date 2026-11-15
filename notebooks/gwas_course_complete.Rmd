@@ -25,7 +25,7 @@ We install R, the program that runs the course commands. We choose the version t
 
 No code to run in this step.
 
-What you do: Check your system and processor in the computer's settings, then open the official CRAN page and follow the installation instructions for Windows, macOS or your Linux distribution. Open R and check that its window appears.
+What you do: Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears.
 
 ## Step 0.2 · Install RStudio
 
@@ -35,7 +35,7 @@ We install RStudio, a program that makes R easier to use. We find the Console ar
 
 No code to run in this step.
 
-What you do: Download RStudio Desktop for your system from the official Posit page and follow its installation instructions for Windows, macOS or Linux. Open RStudio and find the Console area with a `>` prompt.
+What you do: Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt.
 
 ## Step 0.3 · Download and extract the project
 
@@ -45,7 +45,7 @@ We download and extract the complete course project. Keeping its files together 
 
 No code to run in this step.
 
-What you do: Download GWAS_course-2026.1.zip and extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
+What you do: Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
 
 ## Step 0.4 · Open the project and check R
 
@@ -117,11 +117,11 @@ We download PLINK 2, the program that analyses the DNA data. We put its program 
 
 No code to run in this step.
 
-What you do: Download the latest PLINK 2 build that matches your system and processor from the official page, then extract the ZIP file. Copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
+What you do: Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
 
 ## Step 0.7 · Request the password and download the data
 
-We request the password, then download and check the course data. We enter the password only in a prompt that hides the letters; we never type it into a file.
+University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.
 
 [Read step 0.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-7).
 
@@ -362,7 +362,7 @@ No PLINK equivalent
 
 ## Step 1.7 · The export
 
-We check that the three genotype files belong together and display their sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.
+We check that the three genotype files are present and that their sizes agree with the sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.
 
 [Read step 1.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-7).
 
@@ -904,8 +904,8 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--check-sex` | Compares recorded sex with X chromosome patterns and the number of observed Y calls. |
-| &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest X coefficient accepted for a recorded female. |
-| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest X coefficient accepted for a recorded male. |
+| &nbsp;&nbsp;&rarr; `max-female-xf` | Sets 0.2 as the largest accepted X chromosome F value for a recorded female. F measures how homozygous the X chromosome looks, meaning how often the two copies carry the same DNA letter. |
+| &nbsp;&nbsp;&rarr; `min-male-xf` | Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks. |
 | &nbsp;&nbsp;&rarr; `max-female-ycount` | Accepts at most 100 observed Y calls for a recorded female. |
 | &nbsp;&nbsp;&rarr; `min-male-ycount` | Requires at least 1000 observed Y calls for a recorded male. |
 | `--out` | Sets the shared beginning of the output file names. |
@@ -966,7 +966,7 @@ guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune")
 | `--geno` | Keeps variants with no more than 2% missing calls. |
 | `--exclude` | Leaves out variants within the listed DNA regions. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads DNA regions with positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects a less strongly linked set within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2. |
+| `--indep-pairwise` | Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
@@ -986,7 +986,7 @@ bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 -
 
 ## Step 3.5 · Heterozygosity
 
-We check whether each sample has unusually many or few genotypes with two different alleles. We remove the unusually high-heterozygosity samples and keep the low-heterozygosity samples flagged for review, because an unusual value alone does not prove an error.
+We check whether each sample has unusually many or few sites with two different DNA letters. We remove samples with unusually many such sites and flag those with unusually few for review, because an unusual value alone does not prove an error.
 
 [Read step 3.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-5).
 
@@ -1022,7 +1022,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 | --- | --- |
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--extract` | Uses only the variants named in the supplied variant list. |
-| `--het` | Reports how often each sample has two matching alleles, compared with what the allele frequencies predict. R uses this report to calculate F and the review thresholds. |
+| `--het` | Reports, for each sample, the observed and expected numbers of genotypes with two matching DNA letters, and calculates F from them. R reads the F values and calculates the review thresholds. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 **Command 2: remove samples with unusually few matching letters**
@@ -1105,7 +1105,7 @@ guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
 | `--extract` | Uses only the variants named in the supplied variant list. |
 | `--make-king-table` | Estimates how closely related each pair of samples is and writes a table. |
-| `--king-table-filter` | Writes only pairs with estimated kinship above 0.0442, an approximate screening boundary for third-degree relatives such as first cousins. |
+| `--king-table-filter` | Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins. |
 | `--out` | Sets the shared beginning of the output file names. |
 
 **Command 2: remove repeated or closely related samples**
@@ -1404,7 +1404,7 @@ guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state. |
 | `--keep` | Uses only people without the disease, listed in results/guided/s4-4_controls.txt, for this test. |
 | `--chr` | Limits the test to chromosomes 1 to 22. |
-| `--hardy` | Tests whether genotype proportions, the shares of each DNA letter combination, match Hardy-Weinberg expectations. |
+| `--hardy` | Tests whether the shares of the three DNA letter combinations match those predicted from the allele frequencies when people mate at random. |
 | &nbsp;&nbsp;&rarr; `midp` | Uses the mid-p version of the exact test, which adjusts for the limited possible outcomes of whole-number counts. |
 | `--out` | Starts the test report file names with results/guided/s4-4_hardy. |
 
@@ -1775,7 +1775,7 @@ No PLINK equivalent
 
 ## Step 5.6 · Define an ancestry-matched cohort
 
-We remove study samples more than six standard deviations from the European reference mean on any of the first four components. Standard deviations measure the spread of the reference scores; this rule defines the group for our teaching analysis.
+We compare each study sample with a European reference group on the first four principal components, numbers that summarise patterns of genetic variation. We remove a sample if any of them lies more than six standard deviations (a measure of spread) from the reference mean; this rule defines the group for our teaching analysis.
 
 [Read step 5.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-6).
 
@@ -1867,7 +1867,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
 | `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2. |
+| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
 **Command 2: calculate components within the retained study group**
@@ -2108,7 +2108,7 @@ No PLINK equivalent
 
 ## Step 6.6 · Sparse genotypes and Firth correction
 
-We choose a tested variant with the lowest frequency of its less common DNA version and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
+We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
@@ -2134,7 +2134,7 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details. |
-| `--snp` | Selects the one variant that R chose, the tested variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID. |
+| `--snp` | Selects the one variant that R chose from the valid tests on chromosomes 1 to 22: the variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID. |
 | `--covar` | Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
@@ -2338,7 +2338,7 @@ No PLINK equivalent
 
 ## Step 7.4 · Multiple-testing thresholds
 
-We compare rules for multiple testing, which means allowing for the many chances to obtain a false result. We count results below 0.00000005, below 0.05 divided by the number of valid tests, and below 0.05 after an adjustment for false discoveries.
+We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 0.00000005, p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
 
 [Read step 7.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-4).
 

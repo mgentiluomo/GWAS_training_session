@@ -1,7 +1,7 @@
 ---
 title: "Module 6: Association"
 output: html_notebook
-course_source_sha256: "951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c"
+course_source_sha256: "6639025d18d4f65018e325b014353727b062d98a44a37bcd7fa00ebfb8ea01e5"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -226,7 +226,7 @@ No PLINK equivalent
 
 ## Step 6.6 · Sparse genotypes and Firth correction
 
-We choose a tested variant with the lowest frequency of its less common DNA version and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
+We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction reduces bias when groups are small, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
@@ -252,7 +252,7 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details. |
-| `--snp` | Selects the one variant that R chose, the tested variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID. |
+| `--snp` | Selects the one variant that R chose from the valid tests on chromosomes 1 to 22: the variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID. |
 | `--covar` | Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |

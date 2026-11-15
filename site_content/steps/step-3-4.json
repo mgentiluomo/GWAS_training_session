@@ -6,7 +6,7 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "ab1e9c2afbc2592bebd790049b97b9743afd9c511f5b912b8b6aa558e39d7181",
+  "source_sha256": "aa090b42561899a8a4965dc590c206814316b3369b3cac0012b0862a4935e7dc",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We select a smaller set of [autosomal](docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.",
@@ -111,7 +111,7 @@
         },
         {
           "name": "--indep-pairwise",
-          "explanation": "Selects a less strongly linked set within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2."
+          "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."
         },
         {
           "name": "--out",

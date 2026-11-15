@@ -260,7 +260,7 @@ No. Because of LD, several tested variants can point to the same single signal.
 ## 7.4 Multiple-testing thresholds {#step-7-4}
 
 
-<!-- step_meta: {"success_line":"There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7.","student_summary":"We compare rules for multiple testing, which means allowing for the many chances to obtain a false result. We count results below 0.00000005, below 0.05 divided by the number of valid tests, and below 0.05 after an adjustment for false discoveries.","student_plink_options":[]} -->
+<!-- step_meta: {"success_line":"There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7.","student_summary":"We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 0.00000005, p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.","student_plink_options":[]} -->
 ### What we do
 
 Compare three ways to decide which p-values are small enough to call a result: the usual GWAS threshold, a Bonferroni threshold for this scan and a false-discovery-rate adjustment.

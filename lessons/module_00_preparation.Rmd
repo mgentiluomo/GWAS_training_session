@@ -45,7 +45,7 @@ setwd(start_dir)
 
 ## 0.1 Install R {#step-0-1}
 
-<!-- step_meta: {"actions": [{"label": "Download R for Windows", "url": "https://cran.r-project.org/bin/windows/base/", "kind": "page", "os": "windows"}, {"label": "Download R for macOS", "url": "https://cran.r-project.org/bin/macosx/", "kind": "page", "os": "macos"}, {"label": "R for Linux", "url": "https://cran.r-project.org/bin/linux/", "kind": "page", "os": "linux"}], "success_line": "The R application opens.", "student_summary": "We install R, the program that runs the course commands. We choose the version that matches the computer's system and processor.", "student_kind": "outside_r", "student_action": "Check your system and processor in the computer's settings, then open the official CRAN page and follow the installation instructions for Windows, macOS or your Linux distribution. Open R and check that its window appears."} -->
+<!-- step_meta: {"actions": [{"label": "Download R for Windows", "url": "https://cran.r-project.org/bin/windows/base/", "kind": "page", "os": "windows"}, {"label": "Download R for macOS", "url": "https://cran.r-project.org/bin/macosx/", "kind": "page", "os": "macos"}, {"label": "R for Linux", "url": "https://cran.r-project.org/bin/linux/", "kind": "page", "os": "linux"}], "success_line": "The R application opens.", "student_summary": "We install R, the program that runs the course commands. We choose the version that matches the computer's system and processor.", "student_kind": "outside_r", "student_action": "Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears."} -->
 
 ### What we do
 
@@ -106,7 +106,7 @@ The R installer creates software files outside this course project.
 
 ## 0.2 Install RStudio {#step-0-2}
 
-<!-- step_meta: {"actions": [{"label": "Download RStudio Desktop", "url": "https://docs.posit.co/ide/user/download.html", "kind": "page"}], "success_line": "RStudio opens and the Console pane shows a `>` prompt.", "student_summary": "We install RStudio, a program that makes R easier to use. We find the Console area where we will run commands.", "student_kind": "outside_r", "student_action": "Download RStudio Desktop for your system from the official Posit page and follow its installation instructions for Windows, macOS or Linux. Open RStudio and find the Console area with a `>` prompt."} -->
+<!-- step_meta: {"actions": [{"label": "Download RStudio Desktop", "url": "https://docs.posit.co/ide/user/download.html", "kind": "page"}], "success_line": "RStudio opens and the Console pane shows a `>` prompt.", "student_summary": "We install RStudio, a program that makes R easier to use. We find the Console area where we will run commands.", "student_kind": "outside_r", "student_action": "Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt."} -->
 
 ### What we do
 
@@ -157,7 +157,7 @@ RStudio software files. No course data are created.
 
 ## 0.3 Download and extract the project {#step-0-3}
 
-<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download GWAS_course-2026.1.zip and extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts."} -->
+<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts."} -->
 
 ### What we do
 
@@ -327,7 +327,7 @@ R package files in your R library. No course data are created.
 
 ## 0.6 Put PLINK 2 in bin/ {#step-0-6}
 
-<!-- step_meta: {"actions": [{"label": "Download PLINK 2", "url": "https://www.cog-genomics.org/plink/2.0/", "kind": "page"}], "success_line": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux.", "student_summary": "We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.", "student_kind": "outside_r", "student_action": "Download the latest PLINK 2 build that matches your system and processor from the official page, then extract the ZIP file. Copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder."} -->
+<!-- step_meta: {"actions": [{"label": "Download PLINK 2", "url": "https://www.cog-genomics.org/plink/2.0/", "kind": "page"}], "success_line": "The extracted executable is named `plink2.exe` on Windows, or `plink2` on macOS or Linux.", "student_summary": "We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.", "student_kind": "outside_r", "student_action": "Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder."} -->
 
 ### What we do
 
@@ -400,7 +400,7 @@ Can a file named `plink2.zip` be used as the executable?
 
 ## 0.7 Request the password and download the data {#step-0-7}
 
-<!-- step_meta: {"actions": [{"label": "Request the course password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Course data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1", "kind": "page"}], "where": {"s0-7_data": "console"}, "success_line": "Course data are ready: 108 files verified.", "student_summary": "We request the password, then download and check the course data. We enter the password only in a prompt that hides the letters; we never type it into a file.", "student_plink_options": []} -->
+<!-- step_meta: {"actions": [{"label": "Request the course password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Course data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1", "kind": "page"}], "where": {"s0-7_data": "console"}, "success_line": "Course data are ready: 108 files verified.", "student_summary": "University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.", "student_plink_options": []} -->
 
 ### What we do
 

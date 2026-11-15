@@ -1,7 +1,7 @@
 ---
 title: "Module 0: Prepare your computer"
 output: html_notebook
-course_source_sha256: "99f0af82662326fd7fc60248c76086eb31dedbbf3f5bd36c6f11d22e29b512dc"
+course_source_sha256: "d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -24,7 +24,7 @@ We install R, the program that runs the course commands. We choose the version t
 
 No code to run in this step.
 
-What you do: Check your system and processor in the computer's settings, then open the official CRAN page and follow the installation instructions for Windows, macOS or your Linux distribution. Open R and check that its window appears.
+What you do: Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears.
 
 ## Step 0.2 · Install RStudio
 
@@ -34,7 +34,7 @@ We install RStudio, a program that makes R easier to use. We find the Console ar
 
 No code to run in this step.
 
-What you do: Download RStudio Desktop for your system from the official Posit page and follow its installation instructions for Windows, macOS or Linux. Open RStudio and find the Console area with a `>` prompt.
+What you do: Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt.
 
 ## Step 0.3 · Download and extract the project
 
@@ -44,7 +44,7 @@ We download and extract the complete course project. Keeping its files together 
 
 No code to run in this step.
 
-What you do: Download GWAS_course-2026.1.zip and extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
+What you do: Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
 
 ## Step 0.4 · Open the project and check R
 
@@ -116,11 +116,11 @@ We download PLINK 2, the program that analyses the DNA data. We put its program 
 
 No code to run in this step.
 
-What you do: Download the latest PLINK 2 build that matches your system and processor from the official page, then extract the ZIP file. Copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
+What you do: Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
 
 ## Step 0.7 · Request the password and download the data
 
-We request the password, then download and check the course data. We enter the password only in a prompt that hides the letters; we never type it into a file.
+University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.
 
 [Read step 0.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-7).
 

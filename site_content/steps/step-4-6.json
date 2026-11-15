@@ -6,7 +6,7 @@
   "anchor": "step-4-6",
   "title": "Variant QC summary and checkpoint",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a",
+  "source_sha256": "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the complete dataset after variant QC. Then we review what the filters did.",

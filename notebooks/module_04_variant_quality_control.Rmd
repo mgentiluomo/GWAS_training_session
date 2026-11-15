@@ -1,7 +1,7 @@
 ---
 title: "Module 4: Variant quality control"
 output: html_notebook
-course_source_sha256: "33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a"
+course_source_sha256: "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -191,7 +191,7 @@ guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 | `--pfile` | Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state. |
 | `--keep` | Uses only people without the disease, listed in results/guided/s4-4_controls.txt, for this test. |
 | `--chr` | Limits the test to chromosomes 1 to 22. |
-| `--hardy` | Tests whether genotype proportions, the shares of each DNA letter combination, match Hardy-Weinberg expectations. |
+| `--hardy` | Tests whether the shares of the three DNA letter combinations match those predicted from the allele frequencies when people mate at random. |
 | &nbsp;&nbsp;&rarr; `midp` | Uses the mid-p version of the exact test, which adjusts for the limited possible outcomes of whole-number counts. |
 | `--out` | Starts the test report file names with results/guided/s4-4_hardy. |
 

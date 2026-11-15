@@ -6,7 +6,7 @@
   "anchor": "step-5-4",
   "title": "Reference PCA and study projection",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "e3c104a02a37ae7e55c2d3a52d243f52727b139f299811843e57b40c09277828",
+  "source_sha256": "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.",

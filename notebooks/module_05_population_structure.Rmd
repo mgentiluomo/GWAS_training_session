@@ -1,7 +1,7 @@
 ---
 title: "Module 5: Population structure"
 output: html_notebook
-course_source_sha256: "e3c104a02a37ae7e55c2d3a52d243f52727b139f299811843e57b40c09277828"
+course_source_sha256: "347f3e4207b18bc3e6a936fe1b0dfd8f85a18c1a5f31940087288fac244d97d9"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -240,7 +240,7 @@ No PLINK equivalent
 
 ## Step 5.6 · Define an ancestry-matched cohort
 
-We remove study samples more than six standard deviations from the European reference mean on any of the first four components. Standard deviations measure the spread of the reference scores; this rule defines the group for our teaching analysis.
+We compare each study sample with a European reference group on the first four principal components, numbers that summarise patterns of genetic variation. We remove a sample if any of them lies more than six standard deviations (a measure of spread) from the reference mean; this rule defines the group for our teaching analysis.
 
 [Read step 5.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-6).
 
@@ -332,7 +332,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
 | `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases), using a squared correlation limit of 0.2. |
+| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
 **Command 2: calculate components within the retained study group**

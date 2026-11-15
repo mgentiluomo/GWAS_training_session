@@ -6,7 +6,7 @@
   "anchor": "step-4-4",
   "title": "Hardy-Weinberg and sample size",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "33c2e0db901cb10f56224acb003bfba6f90e405d34c28c7f87eece1feb194e1a",
+  "source_sha256": "09023605358e65fc6d6bf024505f8588b4b114e74d83176ad1128dc6b85ccea0",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We run an exact Hardy–Weinberg test in the controls only, using the mid-p version. Then we apply a threshold that depends on the sample size.",
@@ -93,7 +93,7 @@
         },
         {
           "name": "--hardy",
-          "explanation": "Tests whether genotype proportions, the shares of each DNA letter combination, match Hardy-Weinberg expectations.",
+          "explanation": "Tests whether the shares of the three DNA letter combinations match those predicted from the allele frequencies when people mate at random.",
           "modifiers": [
             {
               "name": "midp",
