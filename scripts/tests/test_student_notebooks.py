@@ -422,6 +422,16 @@ class QuartoRendererTests(unittest.TestCase):
         'guided_register(cfg, "9.9", "2.8", 1, 2)',
         "```"])
 
+    def test_command_titles_are_not_repeated(self):
+        group = lambda label: {"label": label, "options": [{"name": "--glm", "explanation": "Fits a model."}]}
+        record = {"option_groups": [group("Command 1: first job"), group("second job")], "terminal_commands": ["bin/plink2 --glm --threads 2 --memory 2048"]}
+        text = chr(10).join(students.option_table_lines(record))
+        self.assertIn("**Command 1: first job**", text)
+        self.assertIn("**Command 2: second job**", text)
+        self.assertNotIn("Command 1: Command", text)
+        for path in (ROOT / "lessons").glob("module_0*.Rmd"):
+            self.assertNotRegex(path.read_text(encoding="utf-8"), r'"label": "Command \d')
+
     def test_default_format_stays_rmd(self):
         self.assertEqual(students.DEFAULT_FORMAT, "rmd")
         self.assertEqual(set(students.RENDERERS), {"rmd", "qmd"})

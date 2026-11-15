@@ -118,7 +118,8 @@ def option_table_lines(record: dict) -> list[str]:
     if record["option_groups"]:
         for index, group in enumerate(record["option_groups"], 1):
             if len(record["option_groups"]) > 1:
-                lines.extend([f'**Command {index}: {group["label"]}**', ""])
+                title = re.sub(r"^Command \d+: ", "", group["label"])
+                lines.extend([f"**Command {index}: {title}**", ""])
             lines.extend(["| Option or modifier | What it does |", "| --- | --- |"])
             for option in group["options"]:
                 explanation = option["explanation"].replace("|", "\\|")
