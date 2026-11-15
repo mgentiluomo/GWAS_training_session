@@ -6,14 +6,14 @@
   "anchor": "step-0-3",
   "title": "Download and extract the project",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "27c9edeeec0d7b8ba9027b022cd59511286bc9ef3d155b4e749ee07a99b1e1a1",
+  "source_sha256": "aec2d0bc161b258a714572ea32400f8a7aa9422697b27a734aaaec45dc6b8794",
   "verification": "manual_required",
   "blocks": {
-    "what_we_do": "Download and extract the whole source project. Follow these actions:\n\n1. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip) from release `project-2026.1`. This fixed version contains the course project, not the encrypted data.\n2. On Windows, right-click the ZIP and choose \"Extract All\", then \"Extract\". On macOS, double-click the ZIP. On Linux, use your file manager to extract it.\n3. Extract it under `C:/` on Windows or your home folder on macOS and Linux. The ZIP supplies its own `GWAS_course` folder. The standard paths are `C:/GWAS_course` and `~/GWAS_course`.\n4. Open that folder. You should see `config.R`, `GWAS_course.Rproj` and the folders `R`, `lessons` and `scripts`.\n\nKeep the whole folder together. You may use another writable location or folder name. Do not nest a second copy of the project inside it.\n\nIf you already use Git, a plain `git clone https://github.com/mgentiluomo/GWAS_training_session.git` also works. Its default branch is `course/2026-guided-training`. The default folder name `GWAS_training_session` is valid. Open `GWAS_course.Rproj` inside it; no folder or branch rename is needed.",
+    "what_we_do": "Download and extract the whole source project. Follow these actions:\n\n1. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip) from release `project-2026.1`. This fixed version contains the course project, not the encrypted data.\n2. On Windows, right-click the ZIP and choose \"Extract All\", then \"Extract\". On macOS, double-click the ZIP. On Linux, use your file manager to extract it.\n3. Extract it under `C:/` on Windows or your home folder on macOS and Linux. The ZIP supplies its own `GWAS_course` folder. The standard paths are `C:/GWAS_course` and `~/GWAS_course`.\n4. Open that folder. You should see `config.R`, `GWAS_course.Rproj` and the folders `R`, `lessons`, `notebooks` and `scripts`.\n\nKeep the whole folder together. You may use another writable location or folder name. Do not nest a second copy of the project inside it.\n\nIf you already use Git, a plain `git clone https://github.com/mgentiluomo/GWAS_training_session.git` also works. Its default branch is `course/2026-guided-training`. The default folder name `GWAS_training_session` is valid. Open `GWAS_course.Rproj` inside it; no folder or branch rename is needed.",
     "why": "The source project contains code and text. The encrypted data are separate and are downloaded at step 0.7. One project folder keeps the relative paths consistent.",
     "you_need": "R and RStudio from steps 0.1 and 0.2, an internet connection and a folder where you can save files.",
     "command": "No R code to run. Download and extract the whole project as described above.",
-    "expected_result": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`. The standard folder is `C:/GWAS_course` on Windows or `~/GWAS_course` on macOS and Linux. Other writable folder names also work.",
+    "expected_result": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`. The standard folder is `C:/GWAS_course` on Windows or `~/GWAS_course` on macOS and Linux. Other writable folder names also work.",
     "troubleshooting": "If `config.R` is missing, check that you opened the extracted project folder. Do not use a single downloaded notebook. Do not create an empty replacement file or rename a downloaded HTML page to `.R`.",
     "quick_check": "Does downloading the source project also download the encrypted classroom data?\n\n<details><summary>Show the answer</summary>No. Download the matching data at step 0.7.</details>",
     "files_created": "The complete extracted source project."
@@ -29,7 +29,7 @@
   "figures": [],
   "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.",
   "student_kind": "outside_r",
-  "student_action": "Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.",
+  "student_action": "Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.",
   "actions": [
     {
       "label": "Download the project ZIP",
@@ -37,6 +37,6 @@
       "kind": "download"
     }
   ],
-  "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`.",
-  "student_expected_result": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons` and `scripts`. The standard folder is `C:/GWAS_course` on Windows or `~/GWAS_course` on macOS and Linux. Other writable folder names also work."
+  "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`.",
+  "student_expected_result": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`. The standard folder is `C:/GWAS_course` on Windows or `~/GWAS_course` on macOS and Linux. Other writable folder names also work."
 }

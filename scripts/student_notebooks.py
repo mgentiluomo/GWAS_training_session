@@ -333,7 +333,7 @@ def render_qmd(models: list[dict], complete: bool = False) -> str:
     title = "GWAS course: modules 0 to 7" if complete else f'Module {module["module"]}: {module["title"]}'
     lines = ["---", f"title: {json.dumps(title, ensure_ascii=False)}", "format:", "  html:", "    toc: true",
              "    toc-depth: 2", '    toc-title: "Contents"', "    toc-location: left", "    toc-expand: true",
-             "    anchor-sections: true", "    code-copy: true", "    code-fold: false",
+             "    anchor-sections: true", "    code-copy: true", "    code-fold: false", "    code-overflow: wrap",
              "    embed-resources: true", "    include-after-body:", "      text: |", *LINK_SCRIPT, "editor: visual",
              *([] if complete else [f'course_source_sha256: "{module["source_sha256"]}"']), "---", "",
              "Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.",
