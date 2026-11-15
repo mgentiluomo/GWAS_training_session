@@ -27,18 +27,21 @@ class ProjectPackageTests(unittest.TestCase):
         files = package.inventory()
         notebooks = sorted(k for k in files if k.startswith("notebooks/"))
         self.assertEqual(len(notebooks), 9)
-        self.assertIn("notebooks/gwas_course_complete.Rmd", notebooks)
+        self.assertIn("notebooks/gwas_course_complete.qmd", notebooks)
         self.assertTrue(all(package.NOTEBOOK_NAME.fullmatch(k) for k in notebooks))
-        for allowed in ("notebooks/module_03_sample_quality_control.Rmd", "notebooks/gwas_course_complete.Rmd"):
+        self.assertFalse([k for k in notebooks if k.endswith(".Rmd")])
+        for allowed in ("notebooks/module_03_sample_quality_control.qmd", "notebooks/gwas_course_complete.qmd"):
             self.assertTrue(package.NOTEBOOK_NAME.fullmatch(allowed))
-        for refused in ("notebooks/module_03_sample_quality_control.qmd", "notebooks/experiment_html/a.html",
-                        "notebooks/render_check/module_03.html", "notebooks/module_08_extra.Rmd",
-                        "notebooks/notes.md", "notebooks_qmd/module_03.qmd"):
+        for refused in ("notebooks/module_03_sample_quality_control.Rmd", "notebooks/gwas_course_complete.Rmd",
+                        "notebooks/experiment_html/a.html", "notebooks/_quarto.yml", "notebooks/.gitignore",
+                        "notebooks/render_check/module_03.html", "notebooks/render_check/qmd/module_03.html",
+                        "notebooks/module_08_extra.qmd", "notebooks/notes.md", "notebooks_qmd/module_03.qmd"):
             self.assertIsNone(package.NOTEBOOK_NAME.fullmatch(refused), refused)
 
     def test_untracked_experiments_stay_out_of_the_inventory(self):
         files = package.inventory()
-        self.assertFalse([k for k in files if k.endswith((".qmd", ".html")) or "render_check" in k or "experiment" in k])
+        self.assertFalse([k for k in files if k.endswith(".html") or "render_check" in k or "experiment" in k])
+        self.assertFalse([k for k in files if k.endswith(".qmd") and not k.startswith("notebooks/")])
 
     def test_local_links_and_anchors(self):
         files = {"README.md": b"# Home\n[Guide](docs/setup.md#ready)\n",

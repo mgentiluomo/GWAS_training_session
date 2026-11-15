@@ -22,7 +22,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = ("lessons", "R", "examples/formats", "notebooks")
 # Only the generated student notebooks ship. Experiments and render folders never do.
-NOTEBOOK_NAME = re.compile(r"notebooks/(?:module_0[0-7]_[^/]+|gwas_course_complete)\.Rmd")
+NOTEBOOK_NAME = re.compile(r"notebooks/(?:module_0[0-7]_[^/]+|gwas_course_complete)\.qmd")
 FILES = (
     "config.R", "GWAS_course.Rproj", "scripts/preflight.R",
     "scripts/run_main_path.R", "scripts/check_course.R", "scripts/install_packages.R",
