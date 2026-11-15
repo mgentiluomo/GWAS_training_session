@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026.3 (project release, 15 November 2026)
+
+- The package now contains PLINK 2 Beta 1.4 (build 7 November 2026) for Windows, macOS (Apple Silicon and Intel) and Linux. They are the non-AVX2 builds. Step 0.6 now runs `prepare_course_plink()`, which copies the right build into `bin/` and checks its SHA-256 value.
+- The licence text of PLINK 2 (GPL 3), the notices of its parts and the link to its source are in `third_party/plink2/`. The source of the tag `v2.0.0-b.1.4` is attached to the release.
+- The Windows non-AVX2 build and the AVX2 build used for the validation gave identical results on the complete main path (counts, lambda 1.016, hits, clumps, p-values and principal components). See `docs/review/plink_home_comparison.md`. The macOS and Linux builds were checked only by their hashes.
+- Step 0.3 now names release `project-2026.3`.
+- `download_course_data()` waits up to an hour for the download and gives a plain message if it stops. A slow connection no longer ends the download after 60 seconds.
+- The setup check (step 0.8) no longer stops on the files of the old demo. Without course data it prints a warning and ends.
+- The data release is unchanged (`data-2026.1`).
+
 ## 2026.2 (project release, 15 November 2026)
 
 - Student notebooks are Quarto files (`notebooks/*.qmd`), one per module and one for the whole course.
