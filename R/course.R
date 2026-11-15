@@ -1,8 +1,19 @@
 # Shared course utilities. Analytical choices remain visible in the notebooks.
 
-course_download_file <- function(url, destination) {
-  status <- utils::download.file(url, destination, mode = "wb", quiet = TRUE, method = "libcurl")
-  if (!identical(status, 0L)) stop("The course download failed. Check your connection and try again.", call. = FALSE)
+# R stops a download after 60 seconds by default (the "timeout" option). The course archive is large and a slow
+# connection needs longer. The limit is raised for this download only and restored afterwards.
+COURSE_DOWNLOAD_TIMEOUT <- 3600
+
+course_download_file <- function(url, destination, downloader = utils::download.file) {
+  previous <- options(timeout = max(COURSE_DOWNLOAD_TIMEOUT, getOption("timeout")))
+  on.exit(options(previous), add = TRUE)
+  status <- tryCatch(downloader(url, destination, mode = "wb", quiet = TRUE, method = "libcurl"),
+                     error = function(e) 1L)
+  if (!identical(as.integer(status), 0L)) {
+    unlink(destination)
+    stop("The download stopped before the end. This can happen on a slow or unstable connection. ",
+         "Run the same command again. If it keeps failing, ask the instructor.", call. = FALSE)
+  }
 }
 
 course_archive_call <- function(expr) {

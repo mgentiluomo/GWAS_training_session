@@ -167,7 +167,7 @@ We download and extract the complete course project. Keeping its files together 
 
 ::: {.callout-note title="What you do"}
 
-No R code runs in this step. Download [GWAS_course-2026.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.2/GWAS_course-2026.2.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
+No R code runs in this step. Download [GWAS_course-2026.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3/GWAS_course-2026.3.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
 
 :::
 
@@ -248,13 +248,33 @@ No PLINK equivalent
 
 ## Step 0.6 · Put PLINK 2 in bin/ {#step-0-6}
 
-We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.
+We prepare PLINK 2, the program that analyses the DNA data. The project already contains it, so R copies the right version for your computer into the bin folder and checks it.
 
 [Read step 0.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-6).
 
-::: {.callout-note title="What you do"}
+```{r}
+#| label: s0-6_plink
+#| eval: false
+source("R/plink_setup.R")  # <1>
+prepare_course_plink()  # <2>
+```
 
-No R code runs in this step. Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
+1. Load the helper that prepares PLINK 2.
+2. Copy the PLINK 2 build for your computer into the bin folder and check it.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+R prints one line. On the first run it is `PLINK 2 2.0.0-b.1.4 is ready in bin/ (windows-x86_64, from the package).` The system name in brackets matches your computer. If the file is already there, R prints `The course PLINK 2 program is already in bin/ and has the expected version.` The folder `bin` now holds `plink2.exe` on Windows, or `plink2` on macOS or Linux.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
 
 :::
 

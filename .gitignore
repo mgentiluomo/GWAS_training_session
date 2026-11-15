@@ -12,3 +12,8 @@ lessons/*_files/
 _site/
 .quarto/
 __pycache__/
+
+# PLINK 2 programs and archives are never tracked (see third_party/plink2/README.md)
+bin/plink2
+bin/plink2.exe
+third_party/plink2/programs/

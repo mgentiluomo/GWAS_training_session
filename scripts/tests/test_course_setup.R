@@ -125,6 +125,25 @@ local({
   release <- list(archive_url = "https://example.invalid/course.zip",
                   manifest_url = "https://example.invalid/MANIFEST.tsv",
                   archive_sha256 = hash(zip), manifest_sha256 = hash(manifest_file))
+  test("downloads get a longer time limit that is restored, and a stopped download gives a plain message", {
+    destination <- tempfile("download-test-")
+    options(timeout = 60)
+    seen <- NULL
+    ok <- function(url, destination, ...) { seen <<- getOption("timeout"); writeLines("x", destination); 0L }
+    course$course_download_file("https://example.invalid/file", destination, downloader = ok)
+    stopifnot(seen >= 3600, identical(getOption("timeout"), 60), file.exists(destination))
+    options(timeout = 7200)
+    course$course_download_file("https://example.invalid/file", destination, downloader = ok)
+    stopifnot(seen == 7200, identical(getOption("timeout"), 7200))
+    options(timeout = 60)
+    stopped <- function(url, destination, ...) { writeLines("partial", destination); stop("download failed") }
+    msg <- error_message(course$course_download_file("https://example.invalid/file", destination, downloader = stopped))
+    stopifnot(grepl("Run the same command again", msg, fixed = TRUE), grepl("slow or unstable connection", msg, fixed = TRUE),
+              !grepl("download failed", msg, fixed = TRUE), !file.exists(destination), identical(getOption("timeout"), 60))
+    nonzero <- function(url, destination, ...) 1L
+    msg <- error_message(course$course_download_file("https://example.invalid/file", destination, downloader = nonzero))
+    stopifnot(grepl("Run the same command again", msg, fixed = TRUE), identical(getOption("timeout"), 60))
+  })
   downloads <- 0L
   course$course_download_file <- function(url, destination) {
     downloads <<- downloads + 1L
