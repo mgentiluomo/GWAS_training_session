@@ -10,6 +10,7 @@ format:
     anchor-sections: true
     code-copy: true
     code-fold: false
+    code-overflow: wrap
     embed-resources: true
     include-after-body:
       text: |
