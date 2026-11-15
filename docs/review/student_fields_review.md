@@ -1,5 +1,71 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 15 November, release 2026.2
+
+Written for the author, Manuel Gentiluomo. Status: published. History was not rewritten.
+
+### Result in one table
+
+| Item | Value |
+| --- | --- |
+| Project release | `project-2026.2`, not a pre-release, on `https://github.com/mgentiluomo/GWAS_training_session/releases/tag/project-2026.2` |
+| Tag | annotated `project-2026.2` on `ef74130` (merge commit of `course/2026-guided-training`) |
+| Asset | `GWAS_course-2026.2.zip`, 269,423 bytes, 61 files |
+| SHA-256 | `c1a3c9381ba9cd319945c82782d3f20620597ba03886404de31ad7c372509ba9` |
+| Download check | The public URL gave the same SHA-256 and size. |
+| PLINK 2 in the package | No |
+| Data | `data-2026.1`, unchanged |
+| Website | `main` at `71c56f9`, published |
+
+### Phase 0. PLINK comparison: not run
+
+The plan needs the course data, `instructor/answer_key.json`, `instructor/build_report.md` and the AVX2 reference results. None of them is on this PC. There is no `C:\WEB_site\data_sources` folder, and a search found no answer key or data archive. The comparison would have been empty, and the plan says it must fail when a reference is missing. I followed rule 0b: **no PLINK in the package**. `plink/bundle` stays separate and now holds the 2026.2 work too. I did not prepare the licence notes again, because nothing ships.
+
+| Quantity | Result on this PC |
+| --- | --- |
+| Counts at every step | not run (no data) |
+| Lambda | not run |
+| Top hits and clumps | not run |
+| Archive hashes (earlier, browser download) | 4 of 4 match the pins |
+
+### Phase 1. Website changes
+
+- The label "Course bookkeeping, do not change" is removed. The lighter colour stays. axe found no colour contrast problem.
+- The cells of the option tables wrap. No option table scrolls sideways at 390 px on any of the 64 steps.
+- Two bugs found and fixed while checking all 64 steps. First, a screen-reader-only span inside a scroll region widened the whole page on steps 0.7, 1.8 and 6.8. Second, the "In short" box showed Markdown links as raw text. Both are fixed. The box also wraps long words.
+- Still scrolling inside a contained, keyboard-reachable box at 390 px: Markdown tables on steps 1.8, 1.9 and 6.8, and fenced code blocks on steps 0.7 and 1.10. Not changed.
+
+### Phase 2. Version 2026.2 in the course
+
+- References to `project-2026.1` and `GWAS_course-2026.1.zip` changed in module 0 (step 0.3), `README.md` and `docs/release_checklist.md`. Data references (`data-2026.1`) are unchanged. `docs/project_zip_report.md` and `docs/project_zip_proposal.md` stay as history of the first release.
+- `scripts/package_project.py`: the default version is 2026.2. The version rule was fixed to 2026.1 and now accepts 2026.N and 2026.N.M.
+- `docs/CHANGELOG.md` is new. `docs/session_report.md` and `docs/setup.md` have a short 2026.2 note. Step 0.6 was not changed, because PLINK is not in the package.
+- Tests: `test_student_notebooks` 35, `test_project_package` 6, `test_course_exports` 22, `test_prove_comment_only` 3, `--check-notebooks`, the comment-only proof, `test_guided_module_check.R` and `check_course.R` all passed. The nine `.qmd` rendered without warnings.
+- Merges: `course/2026-guided-training` `ef74130`. `plink/bundle` `9ea6070` (one conflict in `package_project.py`, solved by keeping both the PLINK arguments and the new version rule). On `plink/bundle`: `test_student_notebooks` 35, `test_project_package` 17, `test_plink_pins` 3, `test_course_exports` 22 and `test_plink_setup.R` passed.
+
+### Phase 3. Package and student test
+
+Built from `course/2026-guided-training` outside the repository. The nine `.qmd` are in. No generated `.Rmd`, no data, no render folder, no HTML. Extracted to `C:\Temp\gwas_release_test\GWAS_course`: the folders `R`, `lessons`, `notebooks`, `scripts` and the files `config.R` and `GWAS_course.Rproj` are there. `check_course.R` passed. The first chunk of `module_00_preparation.qmd` ran with `Rscript`. A notebook rendered from the extracted copy. `guided_check_module(3)` stops with "Complete step 0.7 before module 3", the right answer without data.
+
+### Phase 4. GitHub release
+
+`gh` was installed with winget. You logged in. I created the annotated tag, pushed it, and created the release with the ZIP and the `.sha256` file. The notes say what is new, that PLINK is not included, that Mac and Linux builds are pinned but not run, and that the data stay `data-2026.1`.
+
+### Phase 5. Public website
+
+- Synced to course commit `ef74130`. Step 0.3 links `GWAS_course-2026.2.zip`.
+- `tsc` clean, `lint` 0 errors (10 old warnings), normal build and `GWAS_REVIEW_BUILD=1` build passed.
+- **The production build shows all 8 modules and all 64 steps** (`PUBLISHED_MODULES` is 0 to 7). I did not change this.
+- axe (WCAG 2.0 to 2.2 A and AA, best practice) on module 3 and steps 0.3, 0.6, 3.3, 6.4 and 7.7, at 390 px and 1280 px, light and dark: only the old `label-content-name-mismatch` on the header logo. No page scroll.
+- Merged into `main` with `--no-ff` (`71c56f9`), build and lint on `main` passed, pushed.
+- After 3 minutes, `https://www.manuelgentiluomo.it`: `/teaching/gwas`, `/teaching/gwas/module-0/step-0-3`, `/teaching/gwas/module-3`, `/teaching/gwas/module-3/step-3-3` and `/teaching/gwas/module-6/step-6-2` answer 200 with the new texts. Step 0.3 has three links to the 2026.2 ZIP. Step 6.2 has the new odds text. The ZIP link answers 200. `/gwas/notebooks/module_03_sample_quality_control.qmd` and `gwas_course_complete.qmd` answer 200. **The text is identical to the files in the release.** Only the line endings differ: the files in the ZIP have Windows line endings, the site copies have Unix ones. This is harmless for RStudio and Quarto.
+
+### Skipped, and open
+
+- The PLINK comparison and PLINK in the package (see phase 0).
+- Analysis on the course data, notebook execution, macOS and Linux, the other PLINK builds.
+- The GitHub release has no source archive of the PLINK tag, because PLINK is not shipped.
+
 ## Session of 15 November, preview review
 
 Written for the author, Manuel Gentiluomo. Status: finished. No release. Nothing was pushed to the website `main` branch. History was not rewritten.
