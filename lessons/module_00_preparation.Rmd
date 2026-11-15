@@ -19,7 +19,7 @@ Keep your computer's language and decimal settings as they are.
 
 Validation: the R commands in this module ran without errors on Windows. The software installers and the password prompt in RStudio are checked by hand.
 
-This [notebook](../docs/glossary.md#notebook) is the source of the guided preparation module. A notebook is a file that mixes text and R commands.
+The student notebook for this module is `notebooks/module_00_preparation.qmd`. A [notebook](../docs/glossary.md#notebook) is a file that mixes text and R commands. The folder `lessons/` holds the source files that the author edits. You do not open them.
 
 Lesson text, figures and simulated data: [CC BY-NC-SA 4.0](../LICENSE-CONTENT.md). Code: [MIT](../LICENSE).
 
@@ -215,7 +215,7 @@ The complete extracted source project.
 Open the project, then open this notebook. Follow these actions:
 
 1. In the folder you extracted or cloned at step 0.3, double-click `GWAS_course.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_course` at the top right.
-2. In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor.
+2. In the Files pane, click the folder `notebooks`. Then click `module_00_preparation.qmd`. It opens in the editor. The file `gwas_course_complete.qmd` holds all modules in one notebook, if you prefer one file. The folder `lessons` holds the source files for the author. You do not need it.
 3. Run commands in the console. Always work from the [project root](../docs/glossary.md#working-directory), which is the main folder of the project.
 
 <!-- screenshot: {"kind": "screenshot", "asset_path": "Figures/screenshots/s0-4_project_panes_windows.png", "platform": "windows", "placement": "what_we_do", "alt_text": "Course project open in RStudio on Windows, with the lesson in Source beside Console and Files."} -->
