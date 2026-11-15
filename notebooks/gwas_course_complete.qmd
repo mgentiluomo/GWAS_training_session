@@ -1,15 +1,132 @@
 ---
 title: "GWAS course: modules 0 to 7"
-output: html_notebook
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
 All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
 The linked step pages explain the ideas and provide troubleshooting.
 
-# Module 0: Prepare your computer
+# Course map {#course-map}
 
-```{r module0_check}
+Every module and step of the main path. Select a name to jump to it.
+
+- [Module 0: Prepare your computer](#module-0)
+  - [0.1 Install R](#step-0-1)
+  - [0.2 Install RStudio](#step-0-2)
+  - [0.3 Download and extract the project](#step-0-3)
+  - [0.4 Open the project and check R](#step-0-4)
+  - [0.5 Install the R packages](#step-0-5)
+  - [0.6 Put PLINK 2 in bin/](#step-0-6)
+  - [0.7 Request the password and download the data](#step-0-7)
+  - [0.8 Run the setup check](#step-0-8)
+- [Module 1: From DNA to array data](#module-1)
+  - [1.1 SNPs and genotypes](#step-1-1)
+  - [1.2 How an array measures DNA](#step-1-2)
+  - [1.3 The Global Screening Array](#step-1-3)
+  - [1.4 From sample to scanned chip](#step-1-4)
+  - [1.5 Calling genotypes](#step-1-5)
+  - [1.6 Problems born in the laboratory](#step-1-6)
+  - [1.7 The export](#step-1-7)
+  - [1.8 Where genetic data come from](#step-1-8)
+  - [1.9 A map of genetic file formats](#step-1-9)
+  - [1.10 The formats you will meet most often](#step-1-10)
+  - [1.11 How large projects share genetic data](#step-1-11)
+- [Module 2: Files and formats](#module-2)
+  - [2.1 The starting files](#step-2-1)
+  - [2.2 Convert to PLINK 2 native format](#step-2-2)
+  - [2.3 Sample and variant tables](#step-2-3)
+  - [2.4 First overview](#step-2-4)
+  - [2.5 Alleles and strand](#step-2-5)
+  - [2.6 Genome builds and lift-over](#step-2-6)
+  - [2.7 Add phenotype and covariates](#step-2-7)
+  - [2.8 Module 2 checkpoint](#step-2-8)
+- [Module 3: Sample quality control](#module-3)
+  - [3.1 Rough cleaning](#step-3-1)
+  - [3.2 Sample call rate](#step-3-2)
+  - [3.3 Recorded and genetic sex](#step-3-3)
+  - [3.4 LD pruning](#step-3-4)
+  - [3.5 Heterozygosity](#step-3-5)
+  - [3.6 Relatedness and duplicates](#step-3-6)
+  - [3.7 Batch effects](#step-3-7)
+  - [3.8 Sample QC summary and checkpoint](#step-3-8)
+- [Module 4: Variant quality control](#module-4)
+  - [4.1 Variant call rate](#step-4-1)
+  - [4.2 Differential missingness](#step-4-2)
+  - [4.3 Allele frequency](#step-4-3)
+  - [4.4 Hardy-Weinberg and sample size](#step-4-4)
+  - [4.5 Sex chromosomes, MT and duplicated sites](#step-4-5)
+  - [4.6 Variant QC summary and checkpoint](#step-4-6)
+- [Module 5: Population structure](#module-5)
+  - [5.1 Why ancestry matters](#step-5-1)
+  - [5.2 Prepare variants for reference PCA](#step-5-2)
+  - [5.3 Match build, position and alleles](#step-5-3)
+  - [5.4 Reference PCA and study projection](#step-5-4)
+  - [5.5 Plot the reference and projected study](#step-5-5)
+  - [5.6 Define an ancestry-matched cohort](#step-5-6)
+  - [5.7 Cohort PCs and how many to include](#step-5-7)
+- [Module 6: Association](#module-6)
+  - [6.1 One variant by hand](#step-6-1)
+  - [6.2 The additive logistic model](#step-6-2)
+  - [6.3 Prepare covariates](#step-6-3)
+  - [6.4 Run the association scan](#step-6-4)
+  - [6.5 Read association output](#step-6-5)
+  - [6.6 Sparse genotypes and Firth correction](#step-6-6)
+  - [6.7 First look and association checkpoint](#step-6-7)
+  - [6.8 Create the summary statistics file](#step-6-8)
+- [Module 7: Plots and reporting](#module-7)
+  - [7.1 QQ plot](#step-7-1)
+  - [7.2 Genomic inflation factor](#step-7-2)
+  - [7.3 Manhattan plot](#step-7-3)
+  - [7.4 Multiple-testing thresholds](#step-7-4)
+  - [7.5 Clump correlated results](#step-7-5)
+  - [7.6 Regional plot](#step-7-6)
+  - [7.7 Compare without PCs and without QC](#step-7-7)
+  - [7.8 Final summary and reporting](#step-7-8)
+
+# Module 0: Prepare your computer {#module-0}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 90 minutes.
+
+**Before you start.** Nothing except the project folder. The first code chunk checks it.
+
+**Steps.**
+
+- [0.1 Install R](#step-0-1)
+- [0.2 Install RStudio](#step-0-2)
+- [0.3 Download and extract the project](#step-0-3)
+- [0.4 Open the project and check R](#step-0-4)
+- [0.5 Install the R packages](#step-0-5)
+- [0.6 Put PLINK 2 in bin/](#step-0-6)
+- [0.7 Request the password and download the data](#step-0-7)
+- [0.8 Run the setup check](#step-0-8)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module0_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 if (!file.exists("config.R") || !file.exists("R/guided.R")) {
   stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)
@@ -17,60 +134,68 @@ if (!file.exists("config.R") || !file.exists("R/guided.R")) {
 if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))
 ```
 
-## Step 0.1 · Install R
+## Step 0.1 · Install R {#step-0-1}
 
 We install R, the program that runs the course commands. We choose the version that matches the computer's system and processor.
 
 [Read step 0.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-1).
 
-No code to run in this step.
+::: {.callout-note title="What you do"}
 
-What you do: Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears.
+No R code runs in this step. Check your system and processor in the computer's settings. Open [CRAN](https://cran.r-project.org/), choose your system and follow its installation instructions. On macOS, choose arm64 for Apple Silicon or x86_64 for Intel. Open R and check that its window appears.
 
-## Step 0.2 · Install RStudio
+:::
+
+## Step 0.2 · Install RStudio {#step-0-2}
 
 We install RStudio, a program that makes R easier to use. We find the Console area where we will run commands.
 
 [Read step 0.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-2).
 
-No code to run in this step.
+::: {.callout-note title="What you do"}
 
-What you do: Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt.
+No R code runs in this step. Download RStudio Desktop for your system from the [official Posit page](https://docs.posit.co/ide/user/download.html) and follow its installation instructions. Open RStudio and find the Console area with a `>` prompt.
 
-## Step 0.3 · Download and extract the project
+:::
+
+## Step 0.3 · Download and extract the project {#step-0-3}
 
 We download and extract the complete course project. Keeping its files together lets the commands find the files they need.
 
 [Read step 0.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-3).
 
-No code to run in this step.
+::: {.callout-note title="What you do"}
 
-What you do: Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
+No R code runs in this step. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts.
 
-## Step 0.4 · Open the project and check R
+:::
+
+## Step 0.4 · Open the project and check R {#step-0-4}
 
 We open the course project and check that R can find its files. We display the system and R version, then try a small calculation to check that commands run.
 
 [Read step 0.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-4).
 
-```{r s0-4_project}
-# 1. Show the folder where R looks for files.
-getwd()
-# 2. Check that the required project files exist.
-stopifnot(file.exists("config.R"), file.exists("R/course.R"))
-# 3. Show the computer's system and processor information.
-Sys.info()[c("sysname", "release", "machine")]
-# 4. Show the installed R version.
-R.version.string
-# 5. Add two numbers to check that R runs commands.
-2 + 3
+```{r}
+#| label: s0-4_project
+getwd()  # <1>
+stopifnot(file.exists("config.R"), file.exists("R/course.R"))  # <2>
+Sys.info()[c("sysname", "release", "machine")]  # <3>
+R.version.string  # <4>
+2 + 3  # <5>
 ```
+
+1. Show the folder where R looks for files.
+2. Check that the required project files exist.
+3. Show the computer's system and processor information.
+4. Show the installed R version.
+5. Add two numbers to check that R runs commands.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 R prints the path of your project folder. The file checks finish without an error. Your folder path will differ from the author's path.
 
@@ -78,86 +203,108 @@ R prints your system information, its version and the result `[1] 5` from the sm
 
 `[1] 5`
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 0.5 · Install the R packages
+:::
+
+## Step 0.5 · Install the R packages {#step-0-5}
 
 We install the R packages, which add functions needed by the course. These prepare R to ask for a hidden password and check the downloaded files.
 
 [Read step 0.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-5).
 
-```{r s0-5_packages, eval=FALSE}
-# 1. Load the helper that prepares the course packages.
-source("R/package_setup.R")
-# 2. Install any required packages that are missing.
-install_course_packages()
-# 3. Load the course functions into R.
-source("R/course.R")
+```{r}
+#| label: s0-5_packages
+#| eval: false
+source("R/package_setup.R")  # <1>
+install_course_packages()  # <2>
+source("R/course.R")  # <3>
 ```
+
+1. Load the helper that prepares the course packages.
+2. Install any required packages that are missing.
+3. Load the course functions into R.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The `>` prompt returns. If packages were installed, R also prints `Course packages are ready.` Already installed packages need no download.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 0.6 · Put PLINK 2 in bin/
+:::
+
+## Step 0.6 · Put PLINK 2 in bin/ {#step-0-6}
 
 We download PLINK 2, the program that analyses the DNA data. We put its program file in the course folder so R can find and run it.
 
 [Read step 0.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-6).
 
-No code to run in this step.
+::: {.callout-note title="What you do"}
 
-What you do: Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
+No R code runs in this step. Download the latest PLINK 2 version for your system and processor from the [official download page](https://www.cog-genomics.org/plink/2.0/). If you do not know whether your processor supports AVX2, choose the matching 64-bit version without AVX2. For Windows ARM or Linux ARM, ask support for a compatible version. Extract the ZIP file and copy only plink2.exe on Windows, or plink2 on macOS or Linux, into the project's bin/ folder.
 
-## Step 0.7 · Request the password and download the data
+:::
+
+## Step 0.7 · Request the password and download the data {#step-0-7}
 
 University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.
 
 [Read step 0.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-7).
 
-```{r s0-7_data, eval=FALSE}
-# 1. Download the course data and check that the files are complete and unchanged.
-download_course_data()
+```{r}
+#| label: s0-7_data
+#| eval: false
+download_course_data()  # <1>
 ```
+
+1. Download the course data and check that the files are complete and unchanged.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 On the first successful run, R prints `Course data are ready: 108 files verified.` On a later run with verified data, it prints `Course data are already ready: 108 files verified. Nothing to do.` It does not download or ask for the password again. The data are in the folder `data/course/`. The archive and its small manifest file (a list of the files inside) must both match their configured SHA-256 values. R also checks every extracted data file.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 0.8 · Run the setup check
+:::
+
+## Step 0.8 · Run the setup check {#step-0-8}
 
 We run the setup check to test the R packages, data files and PLINK 2. PLINK reads 20 DNA positions and writes a report, including a test in a folder whose name contains spaces and non-English letters.
 
 [Read step 0.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-0/step-0-8).
 
-```{r s0-8_preflight}
-# 1. Create a separate place in R to hold the course settings.
-settings <- new.env(parent = baseenv())
-# 2. Read the course settings from config.R.
-sys.source("config.R", settings)
-# 3. Show the PLINK version used to test the course.
-settings$course_settings$tested_plink_version
-# 4. Run the setup checks, including the small PLINK test.
-source("scripts/preflight.R")
+```{r}
+#| label: s0-8_preflight
+settings <- new.env(parent = baseenv())  # <1>
+sys.source("config.R", settings)  # <2>
+settings$course_settings$tested_plink_version  # <3>
+source("scripts/preflight.R")  # <4>
 ```
+
+1. Create a separate place in R to hold the course settings.
+2. Read the course settings from config.R.
+3. Show the PLINK version used to test the course.
+4. Run the setup checks, including the small PLINK test.
 
 ### What each option does
 
@@ -172,7 +319,7 @@ source("scripts/preflight.R")
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The setup check prints one short line per check, with `PASS` or the problem. It keeps the full PLINK output in `results/guided/preflight.txt` (or the folder selected by `COURSE_OUTPUT_DIR`). The tested PLINK version is printed before the checks.
 
@@ -180,7 +327,9 @@ The setup check prints one short line per check, with `PASS` or the problem. It 
 
 The guided starting data have 2,016 sample wells and 299,523 variants, representing 2,000 simulated people. PLINK finishes the frequency test on 20 variants. The report can show sex as "ambiguous". This is normal at this stage: the starting FAM has no recorded sex. The probe reads autosomal variants and does not perform the sex check from step 3.3. A path such as `PATHCH~1` in the report is the safe form of a folder with non-English letters.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -189,283 +338,408 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --autosome --thin-count 20 --seed 20261111 --freq --out results/guided/s0-8_probe --threads 2 --memory 2048
 ```
 
-# Module 1: From DNA to array data
+:::
 
-```{r module1_check}
+## Previous and next {#previous-next-0 .unlisted}
+
+- Next: [Module 1: From DNA to array data](#module-1)
+
+# Module 1: From DNA to array data {#module-1}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 90 minutes.
+
+**Before you start.** You need the course data from step 0.7. The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [1.1 SNPs and genotypes](#step-1-1)
+- [1.2 How an array measures DNA](#step-1-2)
+- [1.3 The Global Screening Array](#step-1-3)
+- [1.4 From sample to scanned chip](#step-1-4)
+- [1.5 Calling genotypes](#step-1-5)
+- [1.6 Problems born in the laboratory](#step-1-6)
+- [1.7 The export](#step-1-7)
+- [1.8 Where genetic data come from](#step-1-8)
+- [1.9 A map of genetic file formats](#step-1-9)
+- [1.10 The formats you will meet most often](#step-1-10)
+- [1.11 How large projects share genetic data](#step-1-11)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module1_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(1)
 ```
 
-```{r module1_setup}
+```{r}
+#| label: module1_setup
 source("R/guided.R")
 cfg <- guided_init()
 ```
 
-## Step 1.1 · SNPs and genotypes
+## Step 1.1 · SNPs and genotypes {#step-1-1}
 
 We read a table describing the DNA sites measured by the array. We count its rows and look at site names, chromosome positions and possible DNA letters to understand what the array measures.
 
 [Read step 1.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-1).
 
-```{r s1-1}
-# 1. Read the table describing the DNA sites on the array.
-ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
-# 2. Count the rows and show the first site descriptions.
-cat(nrow(ann), "rows in the annotation\n")
+```{r}
+#| label: s1-1
+ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))  # <1>
+cat(nrow(ann), "rows in the annotation\n")  # <2>
 head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
 ```
+
+1. Read the table describing the DNA sites on the array.
+2. Count the rows and show the first site descriptions.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-A table with the site name, the chromosome, the [GRCh38](../docs/glossary.md#grch38) position and the two alleles on the [plus strand](../docs/glossary.md#plus-strand). GRCh38 is the version of the human reference genome that gives the positions. The annotation contains 299,523 rows. Array site names are not always rs identifiers.
+A table with the site name, the chromosome, the [GRCh38](#glossary-grch38) position and the two alleles on the [plus strand](#glossary-plus-strand). GRCh38 is the version of the human reference genome that gives the positions. The annotation contains 299,523 rows. Array site names are not always rs identifiers.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.2 · How an array measures DNA
+:::
+
+## Step 1.2 · How an array measures DNA {#step-1-2}
 
 We find the three laboratory report files and read the first 12 lines of the first report. This shows how the laboratory organises information before we read the recorded DNA results.
 
 [Read step 1.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-2).
 
-```{r s1-2}
-# 1. Find the laboratory reports and check that there are three files.
-reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)
+```{r}
+#| label: s1-2
+reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)  # <1>
 stopifnot(length(reports) == 3L)
-# 2. Show the first 12 lines of the first report.
-readLines(reports[1], n = 12L)
+readLines(reports[1], n = 12L)  # <2>
 ```
+
+1. Find the laboratory reports and check that there are three files.
+2. Show the first 12 lines of the first report.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The top of a simulated Final Report: first the header, then the start of the data section. The supplied reports contain genotype calls and GC scores. They do not contain raw intensity data, so you cannot redraw cluster plots in this exercise.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.3 · The Global Screening Array
+:::
+
+## Step 1.3 · The Global Screening Array {#step-1-3}
 
 We count the array entries on each chromosome. We also check that the table has 299,523 rows and no repeated site names, so we can recognise the expected starting data.
 
 [Read step 1.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-3).
 
-```{r s1-3}
-# 1. Count the array entries on each chromosome.
-table(ann$Chr)
-# 2. Check the total number of rows and look for repeated site names.
-stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))
+```{r}
+#| label: s1-3
+table(ann$Chr)  # <1>
+stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))  # <2>
 ```
+
+1. Count the array entries on each chromosome.
+2. Check the total number of rows and look for repeated site names.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA). There are 299,523 array entries at the start. The same genomic site can appear under two different names. We review this at step 4.5.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.4 · From sample to scanned chip
+:::
+
+## Step 1.4 · From sample to scanned chip {#step-1-4}
 
 We read the sample sheet and count measurements on each laboratory plate. We count labelled repeat measurements and check that the sheet has 2,016 rows, because one person can have more than one measurement.
 
 [Read step 1.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-4).
 
-```{r s1-4}
-# 1. Read the sample sheet as text to preserve sample labels.
-sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")
-# 2. Count measurements on each plate and labelled repeat measurements.
-table(sheet$Plate)
+```{r}
+#| label: s1-4
+sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")  # <1>
+table(sheet$Plate)  # <2>
 sum(nzchar(sheet$Replicate_of))
-# 3. Check that the sheet contains 2,016 measurements.
-stopifnot(nrow(sheet) == 2016L)
+stopifnot(nrow(sheet) == 2016L)  # <3>
 ```
+
+1. Read the sample sheet as text to preserve sample labels.
+2. Count measurements on each plate and labelled repeat measurements.
+3. Check that the sheet contains 2,016 measurements.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Twenty-one plates, each with 96 wells, give 2,016 measurements. Sixteen wells are labelled as technical replicates. The simulation started from 2,000 people.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.5 · Calling genotypes
+:::
+
+## Step 1.5 · Calling genotypes {#step-1-5}
 
 We read the data section of a laboratory report and display its first rows. We summarise the GC scores, which describe the quality of recorded DNA results, to see what information the report provides.
 
 [Read step 1.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-5).
 
-```{r s1-5}
-# 1. Read the report and find where its data section begins.
-lines <- readLines(reports[1], warn = FALSE)
+```{r}
+#| label: s1-5
+lines <- readLines(reports[1], warn = FALSE)  # <1>
 start <- match("[Data]", lines)
-# 2. Read the data as a table with semicolons separating its columns.
-example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")
-# 3. Show the first rows and summarise the quality scores as numbers.
-head(example)
+example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")  # <2>
+head(example)  # <3>
 summary(as.numeric(example[["GC Score"]]))
 ```
+
+1. Read the report and find where its data section begins.
+2. Read the data as a table with semicolons separating its columns.
+3. Show the first rows and summarise the quality scores as numbers.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.6 · Problems born in the laboratory
+:::
+
+## Step 1.6 · Problems born in the laboratory {#step-1-6}
 
 We check that the sample sheet includes plate, well, sample and repeat-measurement labels, then display its first rows. These labels help us investigate laboratory problems during later checks.
 
 [Read step 1.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-6).
 
-```{r s1-6}
-# 1. Check that the sheet contains the required laboratory labels.
-stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))
-# 2. Show the first rows to inspect the laboratory labels.
-head(sheet)
+```{r}
+#| label: s1-6
+stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))  # <1>
+head(sheet)  # <2>
 ```
+
+1. Check that the sheet contains the required laboratory labels.
+2. Show the first rows to inspect the laboratory labels.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The table has the information that you need to study batch membership and labelled replicates. No person is removed in module 1.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.7 · The export
+:::
+
+## Step 1.7 · The export {#step-1-7}
 
 We check that the three genotype files are present and that their sizes agree with the sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.
 
 [Read step 1.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-7).
 
-```{r s1-7}
-# 1. Check the matching genotype files and count their samples and DNA sites.
-initial <- check_bed(cfg$input)
-# 2. Display the counts and check the expected starting totals.
-print(initial)
+```{r}
+#| label: s1-7
+initial <- check_bed(cfg$input)  # <1>
+print(initial)  # <2>
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 ```
+
+1. Check the matching genotype files and count their samples and DNA sites.
+2. Display the counts and check the expected starting totals.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 1.8 · Where genetic data come from
+:::
+
+## Step 1.8 · Where genetic data come from {#step-1-8}
 
 We compare arrays, sequencing and predicted genotypes, which estimate unmeasured DNA results using a reference group. We read what each source measures and misses so we can understand which questions its data can answer.
 
 [Read step 1.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-8).
 
-This step is reading only. There is no code to run.
+::: {.callout-note title="What you do"}
 
-## Step 1.9 · A map of genetic file formats
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-8). There is no code to run.
+
+:::
+
+## Step 1.9 · A map of genetic file formats {#step-1-9}
 
 We follow genetic files from laboratory measurements to analysis results. We compare what the formats store and the checks they need so we can choose suitable files and avoid mixing incompatible information.
 
 [Read step 1.9 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-9).
 
-This step is reading only. There is no code to run.
+::: {.callout-note title="What you do"}
 
-## Step 1.10 · The formats you will meet most often
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-9). There is no code to run.
+
+:::
+
+## Step 1.10 · The formats you will meet most often {#step-1-10}
 
 We read small invented examples to learn what common genetic file fields mean. We examine example conversion commands without running them, so we can understand what conversions preserve and what they may lose.
 
 [Read step 1.10 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-10).
 
-This step is reading only. There is no code to run.
+::: {.callout-note title="What you do"}
 
-## Step 1.11 · How large projects share genetic data
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-10). There is no code to run.
+
+:::
+
+## Step 1.11 · How large projects share genetic data {#step-1-11}
 
 We read how large research projects provide genetic data in several formats. We compare the information each format retains and the work it supports to understand why one study may supply several kinds of files.
 
 [Read step 1.11 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-11).
 
-This step is reading only. There is no code to run.
+::: {.callout-note title="What you do"}
 
-# Module 2: Files and formats
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-11). There is no code to run.
 
-```{r module2_check}
+:::
+
+## Previous and next {#previous-next-1 .unlisted}
+
+- Previous: [Module 0: Prepare your computer](#module-0)
+- Next: [Module 2: Files and formats](#module-2)
+
+# Module 2: Files and formats {#module-2}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 60 minutes.
+
+**Before you start.** You need the course data from step 0.7. The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [2.1 The starting files](#step-2-1)
+- [2.2 Convert to PLINK 2 native format](#step-2-2)
+- [2.3 Sample and variant tables](#step-2-3)
+- [2.4 First overview](#step-2-4)
+- [2.5 Alleles and strand](#step-2-5)
+- [2.6 Genome builds and lift-over](#step-2-6)
+- [2.7 Add phenotype and covariates](#step-2-7)
+- [2.8 Module 2 checkpoint](#step-2-8)
+
+**Where the module ends.** The checkpoint at step 2.8.
+
+:::
+
+```{r}
+#| label: module2_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(2)
 ```
 
-## Step 2.1 · The starting files
+## Step 2.1 · The starting files {#step-2-1}
 
 We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.
 
 [Read step 2.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-1).
 
-```{r s2-1}
-# 1. Check the three laboratory files and show their sizes.
-print(check_bed(cfg$input))
-# 2. Show the first rows of sample information.
-head(read_fam(cfg$input))
+```{r}
+#| label: s2-1
+print(check_bed(cfg$input))  # <1>
+head(read_fam(cfg$input))  # <2>
 ```
+
+1. Check the three laboratory files and show their sizes.
+2. Show the first rows of sample information.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 2.2 · Convert to PLINK 2 native format
+:::
+
+## Step 2.2 · Convert to PLINK 2 native format {#step-2-2}
 
 We convert the laboratory files to the format that PLINK 2 uses for this course. We check that the conversion keeps every sample and variant, a place in the DNA where people can differ.
 
 [Read step 2.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-2).
 
-```{r s2-2}
-# 1. Choose the name for the converted files.
-out <- guided_path(cfg, "2.2")
-# 2. Convert the laboratory files to the native PLINK 2 format.
-run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))
-# 3. Check that all 2,016 samples and 299,523 variants remain.
-stopifnot(all(guided_counts(out) == c(2016, 299523)))
+```{r}
+#| label: s2-2
+out <- guided_path(cfg, "2.2")  # <1>
+run_plink(cfg, c("--bfile", cfg$input, "--make-pgen", "--out", out), paste0(out, c(".pgen", ".pvar", ".psam")))  # <2>
+stopifnot(all(guided_counts(out) == c(2016, 299523)))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_source_checkpoint(cfg)
 ```
+
+1. Choose the name for the converted files.
+2. Convert the laboratory files to the native PLINK 2 format.
+3. Check that all 2,016 samples and 299,523 variants remain.
 
 ### What each option does
 
@@ -477,11 +751,13 @@ guided_source_checkpoint(cfg)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](../docs/glossary.md#reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.
+The 2,016 samples and 299,523 variants are all kept. PLINK can mark the [reference allele](#glossary-reference-allele) (REF) as provisional. This happens because a BED file does not say which allele matches the genome reference.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -490,53 +766,63 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --bfile data/course/lab_export/sim2026_lab --make-pgen --out results/guided/s2-2_state --threads 2 --memory 2048
 ```
 
-## Step 2.3 · Sample and variant tables
+:::
+
+## Step 2.3 · Sample and variant tables {#step-2-3}
 
 We read the tables that describe the samples and the DNA sites. We inspect their first rows and check the sample identifiers so we can match information to the right sample.
 
 [Read step 2.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-3).
 
-```{r s2-3}
-# 1. Read the sample and variant tables from the converted files.
-samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))
+```{r}
+#| label: s2-3
+samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))  # <1>
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
-# 2. Show the first rows of both tables.
-head(samples)
+head(samples)  # <2>
 head(variants)
-# 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples")  # <3>
 ```
+
+1. Read the sample and variant tables from the converted files.
+2. Show the first rows of both tables.
+3. Check that the sample identifiers are valid and unique.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 2.4 · First overview
+:::
+
+## Step 2.4 · First overview {#step-2-4}
 
 We measure the share of missing DNA results for each sample and each site. These reports help us find possible problems before we choose what to remove.
 
 [Read step 2.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-4).
 
-```{r s2-4}
-# 1. Choose the names for the reports of missing results.
-out <- guided_path(cfg, "2.4", "missing")
-# 2. Measure missing results for each sample and each variant.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))
-# 3. Read both reports into R.
-smiss <- guided_table(paste0(out, ".smiss"))
+```{r}
+#| label: s2-4
+out <- guided_path(cfg, "2.4", "missing")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--missing", "--out", out))  # <2>
+smiss <- guided_table(paste0(out, ".smiss"))  # <3>
 vmiss <- guided_table(paste0(out, ".vmiss"))
-# 4. Summarise the share of missing results in each report.
-summary(as.numeric(smiss$F_MISS))
+summary(as.numeric(smiss$F_MISS))  # <4>
 summary(as.numeric(vmiss$F_MISS))
 ```
+
+1. Choose the names for the reports of missing results.
+2. Measure missing results for each sample and each variant.
+3. Read both reports into R.
+4. Summarise the share of missing results in each report.
 
 ### What each option does
 
@@ -548,11 +834,13 @@ summary(as.numeric(vmiss$F_MISS))
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 You get a sample report and a variant report. Some values are much worse than the main group. No samples and no variants are removed at this step.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -561,43 +849,47 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-2_state --missing --out results/guided/s2-4_missing --threads 2 --memory 2048
 ```
 
-## Step 2.5 · Alleles and strand
+:::
+
+## Step 2.5 · Alleles and strand {#step-2-5}
 
 We compare the DNA letters at each site with the supplied reference table. We correct 400 sites read from the opposite DNA strand and remove 3,013 sites whose letters cannot establish a clear match.
 
 [Read step 2.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-5).
 
-```{r s2-5}
-# 1. Read the laboratory variant table and the reference DNA letters.
-bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)
+```{r}
+#| label: s2-5
+bim <- read_ws(paste0(cfg$input, ".bim"), header = FALSE)  # <1>
 ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
-# 2. Match every laboratory site to the reference table by its identifier.
-k <- match(bim[[2]], ann$Name)
+k <- match(bim[[2]], ann$Name)  # <2>
 stopifnot(!anyNA(k))
-# 3. Put each pair of DNA letters in a consistent order for comparison.
-pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
+pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))  # <3>
 observed <- pair(bim[[5]], bim[[6]])
 reference <- pair(ann$Ref_Plus[k], ann$Alt_Plus[k])
-# 4. Find the reference letter pairs as they would appear on the opposite strand.
-complement <- chartr("ACGT", "TGCA", reference)
+complement <- chartr("ACGT", "TGCA", reference)  # <4>
 complement <- pair(substr(complement, 1, 1), substr(complement, 2, 2))
-# 5. Identify sites to correct and sites with ambiguous or incompatible letters.
-palindromic <- reference %in% c("AT", "CG")
+palindromic <- reference %in% c("AT", "CG")  # <5>
 flip <- !palindromic & observed != reference & observed == complement
 exclude <- palindromic | (observed != reference & observed != complement)
-# 6. Save both lists and check their expected sizes.
-flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))
+flip_file <- guided_list(bim[[2]][flip], guided_path(cfg, "2.5", "flip.txt"))  # <6>
 exclude_file <- guided_list(bim[[2]][exclude], guided_path(cfg, "2.5", "exclude.txt"))
 stopifnot(sum(flip) == 400L, sum(exclude) == 3013L)
-# 7. Correct the listed sites and remove the excluded sites in a new copy.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.2"), "--flip", flip_file, "--exclude", exclude_file,  # <7>
   "--make-pgen", "--out", guided_path(cfg, "2.5")))
-# 8. Check that 2,016 samples and 296,510 variants remain.
-stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))
+stopifnot(all(guided_counts(guided_path(cfg, "2.5")) == c(2016, 296510)))  # <8>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--flip", "--exclude"), value = c(flip_file, exclude_file))
 guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 ```
+
+1. Read the laboratory variant table and the reference DNA letters.
+2. Match every laboratory site to the reference table by its identifier.
+3. Put each pair of DNA letters in a consistent order for comparison.
+4. Find the reference letter pairs as they would appear on the opposite strand.
+5. Identify sites to correct and sites with ambiguous or incompatible letters.
+6. Save both lists and check their expected sizes.
+7. Correct the listed sites and remove the excluded sites in a new copy.
+8. Check that 2,016 samples and 296,510 variants remain.
 
 ### What each option does
 
@@ -611,11 +903,13 @@ guided_register(cfg, "2.5", "2.2", 2016, 296510, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 400 sites are flipped and 3,013 sites are excluded. 2,016 samples and 296,510 variants remain. The planted problem categories overlap, so do not simply add their nominal counts.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -624,40 +918,44 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-2_state --flip results/guided/s2-5_flip.txt --exclude results/guided/s2-5_exclude.txt --make-pgen --out results/guided/s2-5_state --threads 2 --memory 2048
 ```
 
-## Step 2.6 · Genome builds and lift-over
+:::
+
+## Step 2.6 · Genome builds and lift-over {#step-2-6}
 
 We convert the DNA positions in a separate exercise from the GRCh37 genome reference to GRCh38. We keep sites that map to the same chromosome, correct opposite-strand letters and check the new positions without changing the main dataset.
 
 [Read step 2.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-6).
 
-```{r s2-6}
-# 1. Read the variant positions in the separate GRCh37 exercise.
-legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")
+```{r}
+#| label: s2-6
+legacy <- file.path(cfg$data_dir, "grch37_exercise", "legacy_grch37")  # <1>
 bim37 <- read_ws(paste0(legacy, ".bim"), header = FALSE)
-# 2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
-chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")
+chain <- file.path(cfg$data_dir, "grch37_exercise", "hg19ToHg38.over.chain.gz")  # <2>
 require_files(chain)
-# 3. Convert the positions and keep sites that stay on the same chromosome.
-lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)
+lifted <- guided_liftover(paste0("chr", bim37[[1]]), bim37[[4]], chain)  # <3>
 keep <- !is.na(lifted$position) & lifted$chromosome == paste0("chr", bim37[[1]])
-# 4. Save the new positions and the list of sites to keep.
-map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])
+map <- data.frame(ID = bim37[[2]][keep], POS = lifted$position[keep])  # <4>
 map_file <- guided_path(cfg, "2.6", "update_map.tsv")
 write.table(map, map_file, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
 keep_file <- guided_list(map$ID, guided_path(cfg, "2.6", "mapped.txt"))
-# 5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
-args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)
+args <- c("--bfile", legacy, "--extract", keep_file, "--update-map", map_file)  # <5>
 reverse <- bim37[[2]][keep & lifted$strand == "-"]
 if (length(reverse)) args <- c(args, "--flip", guided_list(reverse, guided_path(cfg, "2.6", "reverse.txt")))
-# 6. Save the converted exercise separately from the main dataset.
-run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))
-# 7. Check the new positions against matching sites in the supplied reference table.
-ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+run_plink(cfg, c(args, "--make-pgen", "--out", guided_path(cfg, "2.6", "grch38")))  # <6>
+ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))  # <7>
 k <- match(map$ID, ann$Name)
 stopifnot(all(map$POS[!is.na(k)] == as.numeric(ann$Position_GRCh38[k[!is.na(k)]])))
-# 8. Show how many sites were read, kept and mapped to the opposite strand.
-print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))
+print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_strand = length(reverse)))  # <8>
 ```
+
+1. Read the variant positions in the separate GRCh37 exercise.
+2. Find the supplied file that links GRCh37 positions to GRCh38 positions.
+3. Convert the positions and keep sites that stay on the same chromosome.
+4. Save the new positions and the list of sites to keep.
+5. Prepare the PLINK options and add a correction for opposite-strand sites if needed.
+6. Save the converted exercise separately from the main dataset.
+7. Check the new positions against matching sites in the supplied reference table.
+8. Show how many sites were read, kept and mapped to the opposite strand.
 
 ### What each option does
 
@@ -672,11 +970,13 @@ print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_s
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The exercise has 10,000 sites. 9,970 of them map to the same chromosome, and eight of these map to the reverse strand in this chain file. PLINK prints a warning that the base-pair positions are now unsorted. This warning is expected: the new GRCh38 positions are not in the old order. The resulting exercise variants are not sorted by position. Sort them explicitly before any operation that needs sorted input. Mapped positions whose identifier also appears in the course annotation agree with GRCh38. The main 296,510-site state from 2.5 is unchanged. A lift-over can lose sites, so record the mapping counts that are reported.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -685,30 +985,34 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-## Step 2.7 · Add phenotype and covariates
+:::
+
+## Step 2.7 · Add phenotype and covariates {#step-2-7}
 
 We match disease status, age and recorded sex to each laboratory well by its identifiers. We save the information table and add disease status and sex to the DNA files so later checks use the right person's information.
 
 [Read step 2.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-7).
 
-```{r s2-7}
-# 1. Match the sample sheet to each person's disease status, age and recorded sex.
-metadata <- guided_metadata(cfg)
-# 2. Select and name the columns for the sample information file.
-pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]
+```{r}
+#| label: s2-7
+metadata <- guided_metadata(cfg)  # <1>
+pheno <- metadata[c("FID", "IID", "SEX", "Age", "Disease")]  # <2>
 names(pheno)[1] <- "#FID"
 pheno_file <- guided_path(cfg, "2.7", "phenotypes.tsv")
-# 3. Save the sample information table.
-guided_write(pheno, pheno_file)
-# 4. Add recorded sex and disease status to a new copy of the DNA files.
-run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,
+guided_write(pheno, pheno_file)  # <3>
+run_plink(cfg, c("--pfile", guided_path(cfg, "2.5"), "--update-sex", pheno_file,  # <4>
   "--pheno", pheno_file, "--pheno-name", "Disease", "--make-pgen", "--out", guided_path(cfg, "2.7")))
-# 5. Check that all 2,016 samples and 296,510 variants remain.
-stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))
+stopifnot(all(guided_counts(guided_path(cfg, "2.7")) == c(2016, 296510)))  # <5>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--update-sex", "--pheno", "--pheno-name"), value = c(pheno_file, pheno_file, "Disease"))
 guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 ```
+
+1. Match the sample sheet to each person's disease status, age and recorded sex.
+2. Select and name the columns for the sample information file.
+3. Save the sample information table.
+4. Add recorded sex and disease status to a new copy of the DNA files.
+5. Check that all 2,016 samples and 296,510 variants remain.
 
 ### What each option does
 
@@ -723,11 +1027,13 @@ guided_register(cfg, "2.7", "2.5", 2016, 296510, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 All 2,016 wells are matched, and 296,510 variants remain. There are 2,000 people before we remove low-quality wells, relatives and ancestry outliers.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -736,56 +1042,93 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s2-5_state --update-sex results/guided/s2-7_phenotypes.tsv --pheno results/guided/s2-7_phenotypes.tsv --pheno-name Disease --make-pgen --out results/guided/s2-7_state --threads 2 --memory 2048
 ```
 
-## Step 2.8 · Module 2 checkpoint
+:::
+
+## Step 2.8 · Module 2 checkpoint {#step-2-8}
 
 We save a complete checked starting point for module 3, with 2,016 samples and 296,510 variants. This saved copy lets us restart the analysis without repeating module 2.
 
 [Read step 2.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-8).
 
-```{r s2-8}
-# 1. Save the full starting point and check its files and counts.
+```{r}
+#| label: s2-8
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
+guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)  # <1>
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
+
+1. Save the full starting point and check its files and counts.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches the counts and the [SHA-256](../docs/glossary.md#sha-256) checks of its checkpoint. A SHA-256 check compares a short fingerprint of a file, to prove that the file has not changed.
+You get a full 2.8 checkpoint with 2,016 samples and 296,510 variants. The working state matches the counts and the [SHA-256](#glossary-sha-256) checks of its checkpoint. A SHA-256 check compares a short fingerprint of a file, to prove that the file has not changed.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-# Module 3: Sample quality control
+:::
 
-```{r module3_check}
+## Previous and next {#previous-next-2 .unlisted}
+
+- Previous: [Module 1: From DNA to array data](#module-1)
+- Next: [Module 3: Sample quality control](#module-3)
+
+# Module 3: Sample quality control {#module-3}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 70 minutes.
+
+**Before you start.** You need the full [checkpoint at step 2.8](https://www.manuelgentiluomo.it/teaching/gwas/module-2/step-2-8). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [3.1 Rough cleaning](#step-3-1)
+- [3.2 Sample call rate](#step-3-2)
+- [3.3 Recorded and genetic sex](#step-3-3)
+- [3.4 LD pruning](#step-3-4)
+- [3.5 Heterozygosity](#step-3-5)
+- [3.6 Relatedness and duplicates](#step-3-6)
+- [3.7 Batch effects](#step-3-7)
+- [3.8 Sample QC summary and checkpoint](#step-3-8)
+
+**Where the module ends.** The checkpoint at step 3.8.
+
+:::
+
+```{r}
+#| label: module3_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(3)
 ```
 
-## Step 3.1 · Rough cleaning
+## Step 3.1 · Rough cleaning {#step-3-1}
 
 We remove samples and variants with very many missing calls. This first clean prevents the worst failures from distorting the checks that follow.
 
 [Read step 3.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-1).
 
-```{r s3-1}
-# 1. Choose the input files and the names for the saved files.
-input <- guided_path(cfg, "2.8")
+```{r}
+#| label: s3-1
+input <- guided_path(cfg, "2.8")  # <1>
 rough <- guided_path(cfg, "3.1", "samples")
-# 2. Remove samples with more than 10% of calls missing.
-run_plink(cfg, c("--pfile", input, "--mind", "0.10", "--make-pgen", "--out", rough))
-# 3. Remove variants with more than 10% of calls missing.
-run_plink(cfg, c("--pfile", rough, "--geno", "0.10", "--make-pgen", "--out", guided_path(cfg, "3.1")))
+run_plink(cfg, c("--pfile", input, "--mind", "0.10", "--make-pgen", "--out", rough))  # <2>
+run_plink(cfg, c("--pfile", rough, "--geno", "0.10", "--make-pgen", "--out", guided_path(cfg, "3.1")))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.1", "2.8")
 guided_register(cfg, "3.1", "2.8", 2013, 296360, operations = ops)
 ```
+
+1. Choose the input files and the names for the saved files.
+2. Remove samples with more than 10% of calls missing.
+3. Remove variants with more than 10% of calls missing.
 
 ### What each option does
 
@@ -809,11 +1152,13 @@ guided_register(cfg, "3.1", "2.8", 2013, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Three wells and 150 variants are removed. 2,013 samples and 296,360 variants remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -823,19 +1168,23 @@ bin/plink2 --pfile results/guided/s2-8_state --mind 0.10 --make-pgen --out resul
 bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out results/guided/s3-1_state --threads 2 --memory 2048
 ```
 
-## Step 3.2 · Sample call rate
+:::
+
+## Step 3.2 · Sample call rate {#step-3-2}
 
 We remove samples with more than 2% of their genotype calls missing. This keeps samples with enough information for the later analysis.
 
 [Read step 3.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-2).
 
-```{r s3-2}
-# 1. Remove samples with more than 2% of calls missing.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.1"), "--mind", "0.02", "--make-pgen", "--out", guided_path(cfg, "3.2")))
+```{r}
+#| label: s3-2
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.1"), "--mind", "0.02", "--make-pgen", "--out", guided_path(cfg, "3.2")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.2", "3.1")
 guided_register(cfg, "3.2", "3.1", 1971, 296360, operations = ops)
 ```
+
+1. Remove samples with more than 2% of calls missing.
 
 ### What each option does
 
@@ -848,11 +1197,13 @@ guided_register(cfg, "3.2", "3.1", 1971, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 42 more wells are removed. 1,971 samples and 296,360 variants remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -861,31 +1212,35 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
 ```
 
-## Step 3.3 · Recorded and genetic sex
+:::
+
+## Step 3.3 · Recorded and genetic sex {#step-3-3}
 
 We compare recorded sex with patterns in the X and Y chromosome calls. We remove flagged wells from this teaching analysis because a mismatch needs review before the sample is used.
 
 [Read step 3.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-3).
 
-```{r s3-3}
-# 1. Choose names for the chromosome files and sex report.
-split <- guided_path(cfg, "3.3", "par")
+```{r}
+#| label: s3-3
+split <- guided_path(cfg, "3.3", "par")  # <1>
 report <- guided_path(cfg, "3.3", "sexcheck")
-# 2. Label the regions shared by the X and Y chromosomes.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.2"), "--split-par", "b38", "--make-pgen", "--out", split))
-# 3. Compare recorded sex with the X and Y chromosome results.
-run_plink(cfg, c("--pfile", split, "--check-sex", "max-female-xf=0.2", "min-male-xf=0.8",
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.2"), "--split-par", "b38", "--make-pgen", "--out", split))  # <2>
+run_plink(cfg, c("--pfile", split, "--check-sex", "max-female-xf=0.2", "min-male-xf=0.8",  # <3>
   "max-female-ycount=100", "min-male-ycount=1000", "--out", report))
-# 4. Read the report and list samples that need to be removed.
-sexcheck <- guided_table(paste0(report, ".sexcheck"))
+sexcheck <- guided_table(paste0(report, ".sexcheck"))  # <4>
 bad <- sexcheck$IID[sexcheck$STATUS != "OK"]
 remove_file <- guided_list(bad, guided_path(cfg, "3.3", "remove.txt"), TRUE)
-# 5. Save the dataset without the flagged samples.
-run_plink(cfg, c("--pfile", split, "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.3")))
+run_plink(cfg, c("--pfile", split, "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.3")))  # <5>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.3", "3.2", extra = data.frame(option = "--split-par", value = "b38"))
 guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 ```
+
+1. Choose names for the chromosome files and sex report.
+2. Label the regions shared by the X and Y chromosomes.
+3. Compare recorded sex with the X and Y chromosome results.
+4. Read the report and list samples that need to be removed.
+5. Save the dataset without the flagged samples.
 
 ### What each option does
 
@@ -921,11 +1276,13 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Eight flagged wells are removed. 1,963 samples remain. 520 sites are labelled PAR1 or PAR2. The number of variants does not change.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -936,25 +1293,29 @@ bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-mal
 bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048
 ```
 
-## Step 3.4 · LD pruning
+:::
+
+## Step 3.4 · LD pruning {#step-3-4}
 
 We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.
 
 [Read step 3.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-4).
 
-```{r s3-4}
-# 1. Write the list of regions where nearby variants are strongly linked.
-regions <- guided_high_ld(cfg)
-# 2. Select variants with less similar patterns of DNA letters.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
+```{r}
+#| label: s3-4
+regions <- guided_high_ld(cfg)  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",  # <2>
   "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
-# 3. Check and print how many variants were selected.
-pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
+pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))  # <3>
 stopifnot(length(pruned) == 69539L)
 cat(length(pruned), "variants kept by LD pruning\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
+
+1. Write the list of regions where nearby variants are strongly linked.
+2. Select variants with less similar patterns of DNA letters.
+3. Check and print how many variants were selected.
 
 ### What each option does
 
@@ -971,11 +1332,13 @@ guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune")
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -984,35 +1347,39 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
 
-## Step 3.5 · Heterozygosity
+:::
+
+## Step 3.5 · Heterozygosity {#step-3-5}
 
 We check whether each sample has unusually many or few sites with two different DNA letters. We remove samples with unusually many such sites and flag those with unusually few for review, because an unusual value alone does not prove an error.
 
 [Read step 3.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-5).
 
-```{r s3-5}
-# 1. Choose the name for the report of matching DNA letters.
-report <- guided_path(cfg, "3.5", "het")
-# 2. Measure matching DNA letters using the selected variants.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"), "--het", "--out", report))
-# 3. Read the report and calculate the average and spread of F.
-het <- guided_table(paste0(report, ".het"))
+```{r}
+#| label: s3-5
+report <- guided_path(cfg, "3.5", "het")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"), "--het", "--out", report))  # <2>
+het <- guided_table(paste0(report, ".het"))  # <3>
 f <- as.numeric(het$F)
 mean_f <- mean(f); sd_f <- sqrt(mean((f - mean_f)^2))
-# 4. Find samples with unusually low or high F values.
-low <- het$IID[f < mean_f - 3 * sd_f]
+low <- het$IID[f < mean_f - 3 * sd_f]  # <4>
 high <- het$IID[f > mean_f + 3 * sd_f]
-# 5. Save the high F review list and the low F removal list.
-guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
+guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)  # <5>
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
-# 6. Save the dataset without the low F samples.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
-# 7. Print the average, spread and numbers of flagged samples.
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))  # <6>
+print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))  # <7>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 ```
+
+1. Choose the name for the report of matching DNA letters.
+2. Measure matching DNA letters using the selected variants.
+3. Read the report and calculate the average and spread of F.
+4. Find samples with unusually low or high F values.
+5. Save the high F review list and the low F removal list.
+6. Save the dataset without the low F samples.
+7. Print the average, spread and numbers of flagged samples.
 
 ### What each option does
 
@@ -1036,11 +1403,13 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 13 wells with low F are removed. Eight wells with high F are flagged and kept. The mean F is approximately 0.0078. The population SD is approximately 0.0298. 1,950 samples remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1050,51 +1419,55 @@ bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
 ```
 
-## Step 3.6 · Relatedness and duplicates
+:::
+
+## Step 3.6 · Relatedness and duplicates {#step-3-6}
 
 We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules so that repeated or closely related people do not distort the later association analysis.
 
 [Read step 3.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-6).
 
-```{r s3-6}
-# 1. Choose the name for the report comparing pairs of samples.
-report <- guided_path(cfg, "3.6", "king")
-# 2. Compare pairs using the selected variants.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"),
+```{r}
+#| label: s3-6
+report <- guided_path(cfg, "3.6", "king")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"),  # <2>
   "--make-king-table", "--king-table-filter", "0.0442", "--out", report))
-# 3. Read the pairs and put the closest matches first.
-kin <- guided_table(paste0(report, ".kin0"))
+kin <- guided_table(paste0(report, ".kin0"))  # <3>
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
-# 4. Read the sample details and start an empty removal list.
-metadata <- guided_metadata(cfg)
+metadata <- guided_metadata(cfg)  # <4>
 remove <- character()
-# 5. Review each pair to decide which samples to remove.
-for (i in seq_len(nrow(kin))) {
+for (i in seq_len(nrow(kin))) {  # <5>
   a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
-  # 6. Treat the closest matches as repeated samples.
-  if (value > 0.354) {
-    # 7. Remove the labelled repeat when its name ends in _R2.
-    if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
+  if (value > 0.354) {  # <6>
+    if (endsWith(a, "_R2") || endsWith(b, "_R2")) {  # <7>
       remove <- union(remove, if (endsWith(a, "_R2")) a else b)
     } else {
-      # 8. Compare sex, age and disease status for unlabelled repeats.
-      ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
+      ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)  # <8>
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
-      # 9. Keep one matching record or remove both conflicting records.
-      remove <- union(remove, if (same) max(a, b) else c(a, b))
+      remove <- union(remove, if (same) max(a, b) else c(a, b))  # <9>
     }
-  # 10. Keep one person from each remaining closely related pair.
-  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))  # <10>
 }
-# 11. Write the removal list.
-remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
-# 12. Save the dataset without the listed samples.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))
+remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)  # <11>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))  # <12>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.6", "3.5")
 guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 ```
+
+1. Choose the name for the report comparing pairs of samples.
+2. Compare pairs using the selected variants.
+3. Read the pairs and put the closest matches first.
+4. Read the sample details and start an empty removal list.
+5. Review each pair to decide which samples to remove.
+6. Treat the closest matches as repeated samples.
+7. Remove the labelled repeat when its name ends in _R2.
+8. Compare sex, age and disease status for unlabelled repeats.
+9. Keep one matching record or remove both conflicting records.
+10. Keep one person from each remaining closely related pair.
+11. Write the removal list.
+12. Save the dataset without the listed samples.
 
 ### What each option does
 
@@ -1119,11 +1492,13 @@ guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 There are 19 duplicate-class pairs and ten first-degree pairs. In total, 30 records are removed. 1,920 samples remain. Pairs can overlap, because one person can be in more than one pair. For this reason, the pair counts are not counts of unique people.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1133,35 +1508,39 @@ bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
 
-## Step 3.7 · Batch effects
+:::
+
+## Step 3.7 · Batch effects {#step-3-7}
 
 We compare the fraction of successful genotype calls across laboratory plates. We remove the faulty plate in these simulated data because samples processed together can share technical problems.
 
 [Read step 3.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-7).
 
-```{r s3-7}
-# 1. Choose the name for the missing-call report.
-report <- guided_path(cfg, "3.7", "missing")
-# 2. Count missing calls for each sample.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--missing", "sample-only", "--out", report))
-# 3. Read the report and match each sample to its laboratory plate.
-missing <- guided_table(paste0(report, ".smiss"))
+```{r}
+#| label: s3-7
+report <- guided_path(cfg, "3.7", "missing")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--missing", "sample-only", "--out", report))  # <2>
+missing <- guided_table(paste0(report, ".smiss"))  # <3>
 metadata <- guided_metadata(cfg)
 plate <- metadata$Plate[match(missing$IID, metadata$IID)]
-# 4. Calculate and print the middle call rate for each plate.
-median_missing <- tapply(as.numeric(missing$F_MISS), plate, median)
+median_missing <- tapply(as.numeric(missing$F_MISS), plate, median)  # <4>
 print(sort(1 - median_missing))
-# 5. Find the plate with the most missing calls and check its name.
-worst <- names(which.max(median_missing))
+worst <- names(which.max(median_missing))  # <5>
 stopifnot(worst == "P14")
-# 6. Write the list of samples from the faulty plate.
-remove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, "3.7", "remove.txt"), TRUE)
-# 7. Save the dataset without samples from that plate.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.7")))
+remove_file <- guided_list(missing$IID[plate == worst], guided_path(cfg, "3.7", "remove.txt"), TRUE)  # <6>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.6"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.7")))  # <7>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.7", "3.6")
 guided_register(cfg, "3.7", "3.6", 1844, 296360, operations = ops)
 ```
+
+1. Choose the name for the missing-call report.
+2. Count missing calls for each sample.
+3. Read the report and match each sample to its laboratory plate.
+4. Calculate and print the middle call rate for each plate.
+5. Find the plate with the most missing calls and check its name.
+6. Write the list of samples from the faulty plate.
+7. Save the dataset without samples from that plate.
 
 ### What each option does
 
@@ -1185,11 +1564,13 @@ guided_register(cfg, "3.7", "3.6", 1844, 296360, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Plate P14 has a median call rate of approximately 98.56%. The other plates have 99.84%. The 76 remaining wells of plate P14 are removed. 1,844 samples and 296,360 variants remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1199,53 +1580,88 @@ bin/plink2 --pfile results/guided/s3-6_state --missing sample-only --out results
 bin/plink2 --pfile results/guided/s3-6_state --remove results/guided/s3-7_remove.txt --make-pgen --out results/guided/s3-7_state --threads 2 --memory 2048
 ```
 
-## Step 3.8 · Sample QC summary and checkpoint
+:::
+
+## Step 3.8 · Sample QC summary and checkpoint {#step-3-8}
 
 We save the complete dataset after sample quality control and review the recorded counts. This gives us a checked starting point for variant quality control in module 4.
 
 [Read step 3.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-8).
 
-```{r s3-8}
-# 1. Save a complete copy of the dataset after sample checks.
-guided_snapshot(cfg, "3.8", guided_path(cfg, "3.7"), 1844, 296360, parent = "3.7")
-# 2. Print the recorded sample and variant counts.
-print(read.delim(file.path(cfg$out, "step_counts.tsv")))
-# 3. Check that the saved files have the expected counts.
-check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
+```{r}
+#| label: s3-8
+guided_snapshot(cfg, "3.8", guided_path(cfg, "3.7"), 1844, 296360, parent = "3.7")  # <1>
+print(read.delim(file.path(cfg$out, "step_counts.tsv")))  # <2>
+check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)  # <3>
 ```
+
+1. Save a complete copy of the dataset after sample checks.
+2. Print the recorded sample and variant counts.
+3. Check that the saved files have the expected counts.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-# Module 4: Variant quality control
+:::
 
-```{r module4_check}
+## Previous and next {#previous-next-3 .unlisted}
+
+- Previous: [Module 2: Files and formats](#module-2)
+- Next: [Module 4: Variant quality control](#module-4)
+
+# Module 4: Variant quality control {#module-4}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 45 minutes.
+
+**Before you start.** You need the full [checkpoint at step 3.8](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-8). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [4.1 Variant call rate](#step-4-1)
+- [4.2 Differential missingness](#step-4-2)
+- [4.3 Allele frequency](#step-4-3)
+- [4.4 Hardy-Weinberg and sample size](#step-4-4)
+- [4.5 Sex chromosomes, MT and duplicated sites](#step-4-5)
+- [4.6 Variant QC summary and checkpoint](#step-4-6)
+
+**Where the module ends.** The checkpoint at step 4.6.
+
+:::
+
+```{r}
+#| label: module4_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(4)
 ```
 
-## Step 4.1 · Variant call rate
+## Step 4.1 · Variant call rate {#step-4-1}
 
 We remove variants with more than 2% of their results missing. This keeps sites in the DNA with results for at least 98% of the remaining people.
 
 [Read step 4.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-1).
 
-```{r s4-1}
-# 1. Remove variants with more than 2% of their results missing.
-run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))
+```{r}
+#| label: s4-1
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.8"), "--geno", "0.02", "--make-pgen", "--out", guided_path(cfg, "4.1")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.1", "3.8")
 guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 ```
+
+1. Remove variants with more than 2% of their results missing.
 
 ### What each option does
 
@@ -1258,11 +1674,13 @@ guided_register(cfg, "4.1", "3.8", 1844, 295559, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 801 variants are removed. This is not exactly the 800 planted low-call variants. 1,844 samples and 295,559 variants remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1271,26 +1689,30 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out results/guided/s4-1_state --threads 2 --memory 2048
 ```
 
-## Step 4.2 · Differential missingness
+:::
+
+## Step 4.2 · Differential missingness {#step-4-2}
 
 We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 
-```{r s4-2}
-# 1. Compare missing results in people with and without the disease.
-report <- guided_path(cfg, "4.2", "missing")
+```{r}
+#| label: s4-2
+report <- guided_path(cfg, "4.2", "missing")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--test-missing", "--out", report))
-# 2. Read the test results and list variants with p-values below 0.00001.
-x <- guided_table(paste0(report, ".missing"))
+x <- guided_table(paste0(report, ".missing"))  # <2>
 p <- as.numeric(x$P)
 exclude <- guided_list(x$ID[!is.na(p) & p < 1e-5], guided_path(cfg, "4.2", "exclude.txt"))
-# 3. Remove the listed variants and save the remaining data.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.1"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.2")))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.2", "4.1")
 guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 ```
+
+1. Compare missing results in people with and without the disease.
+2. Read the test results and list variants with p-values below 0.00001.
+3. Remove the listed variants and save the remaining data.
 
 ### What each option does
 
@@ -1313,11 +1735,13 @@ guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 120 variants are excluded. 295,439 variants and 1,844 samples remain.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1327,19 +1751,23 @@ bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/guided
 bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclude.txt --make-pgen --out results/guided/s4-2_state --threads 2 --memory 2048
 ```
 
-## Step 4.3 · Allele frequency
+:::
+
+## Step 4.3 · Allele frequency {#step-4-3}
 
 We keep variants whose less common DNA version appears in at least 1% of the chromosome copies. This removes variants with too little information for the main disease analysis.
 
 [Read step 4.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-3).
 
-```{r s4-3}
-# 1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
+```{r}
+#| label: s4-3
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
 guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 ```
+
+1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
 
 ### What each option does
 
@@ -1352,11 +1780,13 @@ guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1365,35 +1795,39 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out results/guided/s4-3_state --threads 2 --memory 2048
 ```
 
-## Step 4.4 · Hardy-Weinberg and sample size
+:::
+
+## Step 4.4 · Hardy-Weinberg and sample size {#step-4-4}
 
 We test whether DNA letter combinations on chromosomes 1 to 22 follow expected proportions in people without the disease. We remove variants that fail a rule based on the number of people tested, to reduce possible measurement errors.
 
 [Read step 4.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-4).
 
-```{r s4-4}
-# 1. Read the sample table and list people without the disease.
-psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))
+```{r}
+#| label: s4-4
+psam <- guided_table(paste0(guided_path(cfg, "4.3"), ".psam"))  # <1>
 controls <- guided_list(psam$IID[psam$Disease == "1"], guided_path(cfg, "4.4", "controls.txt"), TRUE)
-# 2. Test expected DNA letter combinations on chromosomes 1 to 22.
-report <- guided_path(cfg, "4.4", "hardy")
+report <- guided_path(cfg, "4.4", "hardy")  # <2>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--keep", controls, "--chr", "1-22", "--hardy", "midp", "--out", report))
-# 3. Calculate a cutoff for each variant from the number of people tested.
-hwe <- guided_table(paste0(report, ".hardy"))
+hwe <- guided_table(paste0(report, ".hardy"))  # <3>
 n_control <- as.numeric(hwe$HOM_A1_CT) + as.numeric(hwe$HET_A1_CT) + as.numeric(hwe$TWO_AX_CT)
 cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
-# 4. List variants with test p-values below their cutoff.
-p <- as.numeric(hwe$MIDP)
+p <- as.numeric(hwe$MIDP)  # <4>
 exclude <- guided_list(hwe$ID[!is.na(p) & p < cutoff], guided_path(cfg, "4.4", "exclude.txt"))
-# 5. Remove the listed variants from all people and save the remaining data.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))
-# 6. Check that the three named variants are absent from the saved data.
-retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.3"), "--exclude", exclude, "--make-pgen", "--out", guided_path(cfg, "4.4")))  # <5>
+retained <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))$ID  # <6>
 stopifnot(!any(c("rs4988235", "rs12913832", "rs1426654") %in% retained))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.4", "4.3")
 guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 ```
+
+1. Read the sample table and list people without the disease.
+2. Test expected DNA letter combinations on chromosomes 1 to 22.
+3. Calculate a cutoff for each variant from the number of people tested.
+4. List variants with test p-values below their cutoff.
+5. Remove the listed variants from all people and save the remaining data.
+6. Check that the three named variants are absent from the saved data.
 
 ### What each option does
 
@@ -1419,11 +1853,13 @@ guided_register(cfg, "4.4", "4.3", 1844, 238852, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1433,45 +1869,49 @@ bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls
 bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
 ```
 
-## Step 4.5 · Sex chromosomes, MT and duplicated sites
+:::
+
+## Step 4.5 · Sex chromosomes, MT and duplicated sites {#step-4-5}
 
 We remove variants on X, Y and mitochondrial DNA with unexpected results in more than 1% of people checked. We then rename variants by their DNA location and letters, keep one copy of matching duplicates and remove copies that disagree.
 
 [Read step 4.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-5).
 
-```{r s4-5}
-# 1. Export X, Y and mitochondrial DNA results as a table.
-report <- guided_path(cfg, "4.5", "sexchr")
+```{r}
+#| label: s4-5
+report <- guided_path(cfg, "4.5", "sexchr")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--chr", "X,Y,MT", "--export", "A", "--out", report))
-# 2. Read the column names and the exported results.
-header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]
+header <- strsplit(readLines(paste0(report, ".raw"), n = 1L), "[[:space:]]+")[[1]]  # <2>
 raw <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE, quote = "", comment.char = "",
   colClasses = c(rep("character", 6), rep("integer", length(header) - 6L)), na.strings = "NA")
-# 3. Arrange the DNA results by person and variant and identify each chromosome.
-genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L
+genotypes <- as.matrix(raw[, -(1:6), drop = FALSE]); genotypes[is.na(genotypes)] <- -1L  # <3>
 ids <- sub("_[^_]+$", "", names(raw)[-(1:6)])
 pvar <- guided_table(paste0(guided_path(cfg, "4.4"), ".pvar"))
 chromosome <- pvar$CHROM[match(ids, pvar$ID)]
-# 4. Calculate the share of unexpected results for each variant.
-wrong <- numeric(length(ids))
+wrong <- numeric(length(ids))  # <4>
 wrong[chromosome == "X"] <- colMeans(genotypes[raw$SEX == "1", chromosome == "X", drop = FALSE] == 1L)
 wrong[chromosome == "Y"] <- colMeans(genotypes[raw$SEX == "2", chromosome == "Y", drop = FALSE] >= 0L)
 wrong[chromosome == "MT"] <- colMeans(genotypes[, chromosome == "MT", drop = FALSE] == 1L)
-# 5. List variants with unexpected results in more than 1% of people checked.
-exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))
-# 6. Remove the listed variants and check the remaining counts.
-sex_state <- guided_path(cfg, "4.5", "sex_state")
+exclude <- guided_list(ids[wrong > 0.01], guided_path(cfg, "4.5", "exclude.txt"))  # <5>
+sex_state <- guided_path(cfg, "4.5", "sex_state")  # <6>
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.4"), "--exclude", exclude, "--make-pgen", "--out", sex_state))
 stopifnot(all(guided_counts(sex_state) == c(1844, 238819)))
-# 7. Rename variants by location and DNA letters and remove duplicate entries.
-run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",
+run_plink(cfg, c("--pfile", sex_state, "--set-all-var-ids", "@:#:$r:$a", "--rm-dup", "exclude-mismatch", "list",  # <7>
   "--make-pgen", "--out", guided_path(cfg, "4.5")))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- data.frame(option = c("--exclude", "--set-all-var-ids", "--rm-dup"), value = c(exclude, "@:#:$r:$a", "exclude-mismatch"))
 guided_register(cfg, "4.5", "4.4", 1844, 238513, operations = ops)
-# 8. Free the computer memory used by the large tables.
-rm(raw, genotypes); invisible(gc())
+rm(raw, genotypes); invisible(gc())  # <8>
 ```
+
+1. Export X, Y and mitochondrial DNA results as a table.
+2. Read the column names and the exported results.
+3. Arrange the DNA results by person and variant and identify each chromosome.
+4. Calculate the share of unexpected results for each variant.
+5. List variants with unexpected results in more than 1% of people checked.
+6. Remove the listed variants and check the remaining counts.
+7. Rename variants by location and DNA letters and remove duplicate entries.
+8. Free the computer memory used by the large tables.
 
 ### What each option does
 
@@ -1508,11 +1948,13 @@ rm(raw, genotypes); invisible(gc())
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 33 variants with impossible calls on the sex chromosomes or MT are removed. The duplicate review removes 306 entries. It keeps one of each of the 280 matching pairs, and it removes both members of the 13 pairs that disagree. The final number of variants is 238,513.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1523,158 +1965,212 @@ bin/plink2 --pfile results/guided/s4-4_state --exclude results/guided/s4-5_exclu
 bin/plink2 --pfile results/guided/s4-5_sex_state --set-all-var-ids '@:#:$r:$a' --rm-dup exclude-mismatch list --make-pgen --out results/guided/s4-5_state --threads 2 --memory 2048
 ```
 
-## Step 4.6 · Variant QC summary and checkpoint
+:::
+
+## Step 4.6 · Variant QC summary and checkpoint {#step-4-6}
 
 We save a complete checked starting point for module 5. We check the saved files and counts so we can restart from the same data later.
 
 [Read step 4.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-6).
 
-```{r s4-6}
-# 1. Save the complete dataset and check the saved files and counts.
+```{r}
+#| label: s4-6
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")
+guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5")  # <1>
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 ```
+
+1. Save the complete dataset and check the saved files and counts.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-# Module 5: Population structure
+:::
 
-```{r module5_check}
+## Previous and next {#previous-next-4 .unlisted}
+
+- Previous: [Module 3: Sample quality control](#module-3)
+- Next: [Module 5: Population structure](#module-5)
+
+# Module 5: Population structure {#module-5}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 60 minutes.
+
+**Before you start.** You need the full [checkpoint at step 4.6](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-6). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [5.1 Why ancestry matters](#step-5-1)
+- [5.2 Prepare variants for reference PCA](#step-5-2)
+- [5.3 Match build, position and alleles](#step-5-3)
+- [5.4 Reference PCA and study projection](#step-5-4)
+- [5.5 Plot the reference and projected study](#step-5-5)
+- [5.6 Define an ancestry-matched cohort](#step-5-6)
+- [5.7 Cohort PCs and how many to include](#step-5-7)
+
+**Where the module ends.** The checkpoint at step 5.7.
+
+:::
+
+```{r}
+#| label: module5_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(5)
 ```
 
-## Step 5.1 · Why ancestry matters
+## Step 5.1 · Why ancestry matters {#step-5-1}
 
 We count the reference samples in each labelled group. These groups help us compare inherited genetic backgrounds and understand how differences between cases and controls can create false disease associations.
 
 [Read step 5.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-1).
 
-```{r s5-1}
-# 1. Read the reference sample table.
-reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+```{r}
+#| label: s5-1
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
 reference_samples <- guided_table(paste0(reference, ".psam"))
-# 2. Count the samples in each reference group.
-table(reference_samples$SuperPop)
+table(reference_samples$SuperPop)  # <2>
 ```
+
+1. Read the reference sample table.
+2. Count the samples in each reference group.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 This supplied subset has 1,062 samples labelled EUR, AFR, EAS and SAS. The labels describe where the reference samples were collected. The table shows only the groups present in this subset, not every possible 1000 Genomes group.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 5.2 · Prepare variants for reference PCA
+:::
+
+## Step 5.2 · Prepare variants for reference PCA {#step-5-2}
 
 We find and save the 48,614 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
 
 [Read step 5.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-2).
 
-```{r s5-2}
-# 1. Read the study and reference site tables.
-reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+```{r}
+#| label: s5-2
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
 study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference_sites <- guided_table(paste0(reference, ".pvar"))
-# 2. Find the site names that occur in both tables.
-common <- sort(intersect(study_sites$ID, reference_sites$ID))
-# 3. Save the shared site names and check their number.
-guided_list(common, guided_path(cfg, "5.2", "common.txt"))
+common <- sort(intersect(study_sites$ID, reference_sites$ID))  # <2>
+guided_list(common, guided_path(cfg, "5.2", "common.txt"))  # <3>
 stopifnot(length(common) == 48614L)
 cat(length(common), "shared autosomal sites kept\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
 ```
 
+1. Read the study and reference site tables.
+2. Find the site names that occur in both tables.
+3. Save the shared site names and check their number.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 48,614 shared sites are kept for the reference PCA and the projection.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 5.3 · Match build, position and alleles
+:::
+
+## Step 5.3 · Match build, position and alleles {#step-5-3}
 
 We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.
 
 [Read step 5.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-3).
 
-```{r s5-3}
-# 1. Read the shared site names and both site tables.
-common <- readLines(guided_path(cfg, "5.2", "common.txt"))
+```{r}
+#| label: s5-3
+common <- readLines(guided_path(cfg, "5.2", "common.txt"))  # <1>
 study <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
 ref <- guided_table(paste0(reference, ".pvar"))
-# 2. Match site names and compare allele pairs in either order.
-a <- match(common, study$ID); b <- match(common, ref$ID)
+a <- match(common, study$ID); b <- match(common, ref$ID)  # <2>
 pair <- function(a, b) ifelse(a < b, paste0(a, b), paste0(b, a))
-# 3. Check chromosomes, positions and alleles and print the matched count.
-stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),
+stopifnot(all(sub("^chr", "", study$CHROM[a]) == sub("^chr", "", ref$CHROM[b])),  # <3>
   all(study$POS[a] == ref$POS[b]), all(pair(study$REF[a], study$ALT[a]) == pair(ref$REF[b], ref$ALT[b])))
 cat("All", length(common), "shared sites agree on chromosome, position and alleles\n")
 ```
+
+1. Read the shared site names and both site tables.
+2. Match site names and compare allele pairs in either order.
+3. Check chromosomes, positions and alleles and print the matched count.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 5.4 · Reference PCA and study projection
+:::
+
+## Step 5.4 · Reference PCA and study projection {#step-5-4}
 
 We calculate ten principal components in the reference, each a number summarising one pattern of genetic variation. We then project both groups onto these fixed reference axes, meaning we place them on the same scale so we can compare them.
 
 [Read step 5.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-4).
 
-```{r s5-4}
-# 1. Set the reference input, shared site list and output names.
-reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+```{r}
+#| label: s5-4
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")  # <1>
 common <- guided_path(cfg, "5.2", "common.txt")
 fit <- guided_path(cfg, "5.4", "reference")
-# 2. Calculate ten reference components and save their allele contributions.
-run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))
-# 3. Find the columns containing site names, alleles and component contributions.
-weights <- guided_table(paste0(fit, ".eigenvec.allele"))
+run_plink(cfg, c("--pfile", reference, "--extract", common, "--freq", "--pca", "10", "allele-wts", "--out", fit))  # <2>
+weights <- guided_table(paste0(fit, ".eigenvec.allele"))  # <3>
 id_column <- match("ID", names(weights)); allele_column <- match("A1", names(weights))
 first_pc <- match("PC1", names(weights))
-# 4. Prepare the same reference frequencies and scoring rules for both groups.
-score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),
+score <- c("--read-freq", paste0(fit, ".afreq"), "--score", paste0(fit, ".eigenvec.allele"),  # <4>
   id_column, allele_column, "header-read", "no-mean-imputation", "variance-standardize",
   "--score-col-nums", paste0(first_pc, "-", first_pc + 9L))
-# 5. Place the reference samples on the fixed reference axes.
-run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))
-# 6. Place the study samples on the same reference axes.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))
+run_plink(cfg, c("--pfile", reference, "--extract", common, score, "--out", guided_path(cfg, "5.4", "ref_scores")))  # <5>
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--extract", common, score, "--out", guided_path(cfg, "5.4", "study_scores")))  # <6>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".eigenval", ".eigenvec.allele")), paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"), paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore")), parent = "5.2")
 ```
+
+1. Set the reference input, shared site list and output names.
+2. Calculate ten reference components and save their allele contributions.
+3. Find the columns containing site names, alleles and component contributions.
+4. Prepare the same reference frequencies and scoring rules for both groups.
+5. Place the reference samples on the fixed reference axes.
+6. Place the study samples on the same reference axes.
 
 ### What each option does
 
@@ -1719,11 +2215,13 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Reference eigenvectors and eigenvalues, allele weights, and two `.sscore` files (score tables) with the columns PC1_AVG to PC10_AVG. The study projection contains 1,844 samples.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1734,74 +2232,84 @@ bin/plink2 --pfile data/course/pca_reference/ref1000g_grch38 --extract results/g
 bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_common.txt --read-freq results/guided/s5-4_reference.afreq --score results/guided/s5-4_reference.eigenvec.allele 2 5 header-read no-mean-imputation variance-standardize --score-col-nums 6-15 --out results/guided/s5-4_study_scores --threads 2 --memory 2048
 ```
 
-## Step 5.5 · Plot the reference and projected study
+:::
+
+## Step 5.5 · Plot the reference and projected study {#step-5-5}
 
 We plot the first two principal components, each a number summarising one pattern of genetic variation. We show reference groups with labels and symbols and add the study samples to see how their genetic backgrounds compare.
 
 [Read step 5.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-5).
 
-```{r s5-5}
-# 1. Read both score tables and the reference group labels.
-ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+```{r}
+#| label: s5-5
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))  # <1>
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
-# 2. Match the reference labels to samples and choose group symbols and colours.
-group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]  # <2>
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
-# 3. Open a picture file and plot the first two reference components.
-png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
+png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)  # <3>
 plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
   xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
-# 4. Add the study samples and a key for the groups.
-points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
+points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")  # <4>
 legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-# 5. Finish saving the picture and print its location.
-invisible(dev.off())
+invisible(dev.off())  # <5>
 cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
 ```
+
+1. Read both score tables and the reference group labels.
+2. Match the reference labels to samples and choose group symbols and colours.
+3. Open a picture file and plot the first two reference components.
+4. Add the study samples and a key for the groups.
+5. Finish saving the picture and print its location.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 5.6 · Define an ancestry-matched cohort
+:::
+
+## Step 5.6 · Define an ancestry-matched cohort {#step-5-6}
 
 We compare each study sample with a European reference group on the first four principal components, numbers that summarise patterns of genetic variation. We remove a sample if any of them lies more than six standard deviations (a measure of spread) from the reference mean; this rule defines the group for our teaching analysis.
 
 [Read step 5.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-6).
 
-```{r s5-6}
-# 1. Read the reference and study scores and reference group labels.
-ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+```{r}
+#| label: s5-6
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))  # <1>
 study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
-# 2. Select the European reference samples and the first four component scores.
-eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"
+eur <- metadata$SuperPop[match(ref$IID, metadata$IID)] == "EUR"  # <2>
 columns <- paste0("PC", 1:4, "_AVG")
 r <- sapply(ref[eur, columns, drop = FALSE], as.numeric)
 s <- sapply(study[columns], as.numeric)
-# 3. Measure each study score's distance from the reference mean using its spread.
-centre <- colMeans(r)
+centre <- colMeans(r)  # <3>
 spread <- sqrt(colMeans(sweep(r, 2, centre, "-")^2))
 z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
-# 4. List samples more than six standard deviations away on any selected component.
-bad <- study$IID[apply(abs(z), 1, max) > 6]
+bad <- study$IID[apply(abs(z), 1, max) > 6]  # <4>
 remove <- guided_list(bad, guided_path(cfg, "5.6", "remove.txt"), TRUE)
-# 5. Remove the listed samples and save the retained study group.
-run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))
+run_plink(cfg, c("--pfile", guided_path(cfg, "4.6"), "--remove", remove, "--make-pgen", "--out", guided_path(cfg, "5.6")))  # <5>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "5.6", "4.6")
 guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 ```
+
+1. Read the reference and study scores and reference group labels.
+2. Select the European reference samples and the first four component scores.
+3. Measure each study score's distance from the reference mean using its spread.
+4. List samples more than six standard deviations away on any selected component.
+5. Remove the listed samples and save the retained study group.
 
 ### What each option does
 
@@ -1814,11 +2322,13 @@ guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 33 remaining outlier records are excluded. 1,811 samples and 238,513 variants remain. Some of the simulated outliers were already removed in earlier QC steps. So 33 is not the total number of outliers in the original data.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1827,34 +2337,38 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
 ```
 
-## Step 5.7 · Cohort PCs and how many to include
+:::
+
+## Step 5.7 · Cohort PCs and how many to include {#step-5-7}
 
 We select common sites with weaker links and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
 
 [Read step 5.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7).
 
-```{r s5-7}
-# 1. Prepare the regions to exclude and the site selection output name.
-regions <- guided_high_ld(cfg)
+```{r}
+#| label: s5-7
+regions <- guided_high_ld(cfg)  # <1>
 prune <- guided_path(cfg, "5.7", "prune")
-# 2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,  # <2>
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
-# 3. Calculate ten components within the retained study group using the selected sites.
-report <- guided_path(cfg, "5.7", "pca")
+report <- guided_path(cfg, "5.7", "pca")  # <3>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
-# 4. Read how much variation each component explains and plot these values.
-eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)
+eigenvalues <- scan(paste0(report, ".eigenval"), quiet = TRUE)  # <4>
 png(guided_path(cfg, "5.7", "scree.png"), width = 1000, height = 700, res = 130)
 plot(seq_along(eigenvalues), eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Retained cohort: first ten PCs")
-# 5. Finish saving the picture and print its location.
-invisible(dev.off())
+invisible(dev.off())  # <5>
 cat("The plot was saved to ", guided_path(cfg, "5.7", "scree.png"), "\n", sep = "")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_snapshot(cfg, "5.7", guided_path(cfg, "5.6"), 1811, 238513, parent = "5.6")
 file.copy(paste0(report, c(".eigenvec", ".eigenval")), file.path(cfg$out, "checkpoints", "5.7"), overwrite = TRUE)
 check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 ```
+
+1. Prepare the regions to exclude and the site selection output name.
+2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+3. Calculate ten components within the retained study group using the selected sites.
+4. Read how much variation each component explains and plot these values.
+5. Finish saving the picture and print its location.
 
 ### What each option does
 
@@ -1881,11 +2395,13 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Ten cohort PCs, a scree plot and a complete saved state for step 5.7 with 1,811 samples and 238,513 variants. The first cohort eigenvalue is about 14. The signs of the eigenvectors can differ on your computer. This does not change how the PCs adjust the association. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1895,36 +2411,67 @@ bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed
 bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
 ```
 
-# Module 6: Association
+:::
 
-```{r module6_check}
+## Previous and next {#previous-next-5 .unlisted}
+
+- Previous: [Module 4: Variant quality control](#module-4)
+- Next: [Module 6: Association](#module-6)
+
+# Module 6: Association {#module-6}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 60 minutes.
+
+**Before you start.** You need the full [checkpoint at step 5.7](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [6.1 One variant by hand](#step-6-1)
+- [6.2 The additive logistic model](#step-6-2)
+- [6.3 Prepare covariates](#step-6-3)
+- [6.4 Run the association scan](#step-6-4)
+- [6.5 Read association output](#step-6-5)
+- [6.6 Sparse genotypes and Firth correction](#step-6-6)
+- [6.7 First look and association checkpoint](#step-6-7)
+- [6.8 Create the summary statistics file](#step-6-8)
+
+**Where the module ends.** The checkpoint at step 6.8.
+
+:::
+
+```{r}
+#| label: module6_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(6)
 ```
 
-## Step 6.1 · One variant by hand
+## Step 6.1 · One variant by hand {#step-6-1}
 
 We count cases and controls who carry at least one copy of a chosen DNA letter at one variant. We compare their odds of disease with those of non-carriers; odds are the number of cases divided by the number of controls.
 
 [Read step 6.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-1).
 
-```{r s6-1}
-# 1. Export the number of copies of one DNA letter at the chosen variant.
-report <- guided_path(cfg, "6.1", "example")
+```{r}
+#| label: s6-1
+report <- guided_path(cfg, "6.1", "example")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", "9:96426973:A:G", "--export", "A", "--out", report))
 x <- read.table(paste0(report, ".raw"), header = TRUE, check.names = FALSE)
-# 2. Match the exported samples to their case or control status.
-dose <- as.numeric(x[[7]])
+dose <- as.numeric(x[[7]])  # <2>
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 case <- psam$Disease[match(x$IID, psam$IID)] == "2"
-# 3. Count carriers and non-carriers and compare their odds of disease.
-tab <- table(case = case, carrier = dose > 0)
+tab <- table(case = case, carrier = dose > 0)  # <3>
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 ```
+
+1. Export the number of copies of one DNA letter at the chosen variant.
+2. Match the exported samples to their case or control status.
+3. Count carriers and non-carriers and compare their odds of disease.
 
 ### What each option does
 
@@ -1938,11 +2485,13 @@ guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 A table of carriers and non-carriers in the retained cohort, and a finite odds ratio. Read the direction of the odds ratio with the allele in the exported column. This allele is not always the one that raises risk.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -1951,95 +2500,111 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --out results/guided/s6-1_example --threads 2 --memory 2048
 ```
 
-## Step 6.2 · The additive logistic model
+:::
+
+## Step 6.2 · The additive logistic model {#step-6-2}
 
 We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.
 
 [Read step 6.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2).
 
-```{r s6-2}
-# 1. Read the exported variant and match each sample to its case or control status.
-x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
+```{r}
+#| label: s6-2
+x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)  # <1>
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
-# 2. Fit the model and show how each extra copy changes the odds of disease.
-fit <- glm(case ~ dosage, data = example, family = binomial())
+fit <- glm(case ~ dosage, data = example, family = binomial())  # <2>
 summary(fit)
 exp(coef(fit)["dosage"])
 ```
+
+1. Read the exported variant and match each sample to its case or control status.
+2. Fit the model and show how each extra copy changes the odds of disease.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-An intercept and a dosage coefficient, each with a standard error and a [p-value](../docs/glossary.md#p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
+An intercept and a dosage coefficient, each with a standard error and a [p-value](#glossary-p-value). The odds ratio per allele and the carrier odds ratio need not be equal.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.3 · Prepare covariates
+:::
+
+## Step 6.3 · Prepare covariates {#step-6-3}
 
 We prepare covariates, extra factors used to adjust the disease comparison: age and ten numbers describing patterns of genetic variation. We match them to sample IDs and check for missing values and columns that repeat information from other columns.
 
 [Read step 6.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-3).
 
-```{r s6-3}
-# 1. Read sample details, genetic component scores and age records.
-psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+```{r}
+#| label: s6-3
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))  # <1>
 pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
 metadata <- guided_metadata(cfg)
-# 2. Match sample IDs and make a complete table of age and ten component scores.
-a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)
+a <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)  # <2>
 stopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))
 covar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))
 for (name in paste0("PC", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])
 stopifnot(!anyNA(covar))
-# 3. Check that no model column repeats information from the other columns.
-design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))
+design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))  # <3>
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
-# 4. Save the covariate table and print its number of rows.
-guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))  # <4>
 cat(nrow(covar), "complete covariate rows written\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
 ```
 
+1. Read sample details, genetic component scores and age records.
+2. Match sample IDs and make a complete table of age and ten component scores.
+3. Check that no model column repeats information from the other columns.
+4. Save the covariate table and print its number of rows.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.4 · Run the association scan
+:::
+
+## Step 6.4 · Run the association scan {#step-6-4}
 
 We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.
 
 [Read step 6.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-4).
 
-```{r s6-4}
-# 1. Test variants with the frequency rule and the chosen adjustment factors.
-out <- guided_path(cfg, "6.4", "association")
+```{r}
+#| label: s6-4
+out <- guided_path(cfg, "6.4", "association")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
-# 2. Check the number of valid tests and results below the course significance threshold.
-valid <- valid_p(results$P)
+valid <- valid_p(results$P)  # <2>
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
-# 3. Save a table of the association results.
-guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+guided_write(results, guided_path(cfg, "6.4", "results.tsv"))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
 ```
+
+1. Test variants with the frequency rule and the chosen adjustment factors.
+2. Check the number of valid tests and results below the course significance threshold.
+3. Save a table of the association results.
 
 ### What each option does
 
@@ -2058,11 +2623,13 @@ guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybr
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -2071,63 +2638,73 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-4_association --threads 2 --memory 2048
 ```
 
-## Step 6.5 · Read association output
+:::
+
+## Step 6.5 · Read association output {#step-6-5}
 
 We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
 
 [Read step 6.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-5).
 
-```{r s6-5}
-# 1. Read the scan results and count the model status codes.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-5
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 print(table(results$ERRCODE, useNA = "ifany"))
-# 2. Keep valid tests and calculate intervals describing uncertainty in their effects.
-valid <- results[valid_p(results$P), ]
+valid <- results[valid_p(results$P), ]  # <2>
 valid$CI_LOW <- exp(log(valid$OR) - 1.96 * valid[["LOG(OR)_SE"]])
 valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
-# 3. Sort by p-value and print the first ten results with their tested DNA letters.
-top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
+top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]  # <3>
 print(head(top, 10))
-# 4. Save the first 20 results for later review.
-guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))  # <4>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
 ```
+
+1. Read the scan results and count the model status codes.
+2. Keep valid tests and calculate intervals describing uncertainty in their effects.
+3. Sort by p-value and print the first ten results with their tested DNA letters.
+4. Save the first 20 results for later review.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The leading regions are on chromosomes 9, 3 and 12. The table keeps the effect allele and the OBS_CT of each variant. Every p-value and odds ratio refers to the tested A1 allele, whatever the variant ID looks like.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.6 · Sparse genotypes and Firth correction
+:::
+
+## Step 6.6 · Sparse genotypes and Firth correction {#step-6-6}
 
 We choose the variant with the lowest frequency of its less common DNA version among the valid tests on chromosomes 1 to 22 and compare its ordinary model result with a forced Firth result. Firth correction gives usable estimates when very few people carry the allele, but it does not add information.
 
 [Read step 6.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-6).
 
-```{r s6-6}
-# 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-6
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
 candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
 chosen <- results$ID[candidates[which.min(minor[candidates])]]
-# 2. Save the chosen variant ID and force the Firth model at that variant.
-guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
+guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))  # <2>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
-# 3. Print both estimates and check that the Firth test gives one valid result.
-comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
+comparison <- guided_association(guided_path(cfg, "6.6", "firth"))  # <3>
 print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
 print(comparison[, c("ID", "A1", "OR", "P")])
 stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 ```
+
+1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
+2. Save the chosen variant ID and force the Firth model at that variant.
+3. Print both estimates and check that the Firth test gives one valid result.
 
 ### What each option does
 
@@ -2146,11 +2723,13 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 One forced Firth result with a finite value, next to the ordinary estimate from the main scan for the same A1 allele. Small differences in the numbers are normal. Forced Firth is not a better scan for the whole genome.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -2159,20 +2738,21 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
 ```
 
-## Step 6.7 · First look and association checkpoint
+:::
+
+## Step 6.7 · First look and association checkpoint {#step-6-7}
 
 We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.
 
 [Read step 6.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-7).
 
-```{r s6-7}
-# 1. Read the results and summarise the study size and test values.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-7
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
   genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
   lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
-# 2. Save and print the summary table.
-guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
+guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))  # <2>
 print(summary)
 # Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
@@ -2181,42 +2761,45 @@ guided_artifact_checkpoint(cfg, "6.7", files)
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
+1. Read the results and summarise the study size and test values.
+2. Save and print the summary table.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
-1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
+1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 6.8 · Create the summary statistics file
+:::
+
+## Step 6.8 · Create the summary statistics file {#step-6-8}
 
 We save the scan results in a standard table with one row per tested variant and a separate file explaining its columns. We read the saved table back and check its values and counts so the next plots use a verified file.
 
 [Read step 6.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-8).
 
-```{r s6-8}
-# 1. Read the scan and arrange its results in the standard columns.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+```{r}
+#| label: s6-8
+results <- guided_association(guided_path(cfg, "6.4", "association"))  # <1>
 stats <- guided_standardise_scan(results)
-# 2. Check the columns and values and choose the summary file name.
-guided_check_summary(stats, rows = nrow(results))
+guided_check_summary(stats, rows = nrow(results))  # <2>
 stats_file <- guided_summary_path(cfg)
-# 3. Save the summary table and a file explaining each column.
-guided_write_summary(stats, stats_file)
+guided_write_summary(stats, stats_file)  # <3>
 dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
 guided_write(guided_summary_dictionary(), dictionary_file)
 # Read the file back, as the plots will, and check that nothing was lost.
-# 4. Read the saved table and check that it matches the original results.
-saved <- guided_summary_stats(cfg)
+saved <- guided_summary_stats(cfg)  # <4>
 guided_check_summary(saved, rows = nrow(results))
 stopifnot(isTRUE(all.equal(saved, stats)))
-# 5. Compare test counts with the saved scan summary and print the checked results.
-first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
+first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))  # <5>
 finite <- valid_p(saved$p_value)
 stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
 print(head(saved, 5))
@@ -2227,165 +2810,228 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
+1. Read the scan and arrange its results in the standard columns.
+2. Check the columns and values and choose the summary file name.
+3. Save the summary table and a file explaining each column.
+4. Read the saved table and check that it matches the original results.
+5. Compare test counts with the saved scan summary and print the checked results.
+
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.7. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.8 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-# Module 7: Plots and reporting
+:::
 
-```{r module7_check}
+## Previous and next {#previous-next-6 .unlisted}
+
+- Previous: [Module 5: Population structure](#module-5)
+- Next: [Module 7: Plots and reporting](#module-7)
+
+# Module 7: Plots and reporting {#module-7}
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 75 minutes.
+
+**Before you start.** You need the full [checkpoint at step 6.8](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-8). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [7.1 QQ plot](#step-7-1)
+- [7.2 Genomic inflation factor](#step-7-2)
+- [7.3 Manhattan plot](#step-7-3)
+- [7.4 Multiple-testing thresholds](#step-7-4)
+- [7.5 Clump correlated results](#step-7-5)
+- [7.6 Regional plot](#step-7-6)
+- [7.7 Compare without PCs and without QC](#step-7-7)
+- [7.8 Final summary and reporting](#step-7-8)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module7_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 source("R/guided.R"); guided_check_module(7)
 ```
 
-## Step 7.1 · QQ plot
+## Step 7.1 · QQ plot {#step-7-1}
 
 We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.
 
 [Read step 7.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-1).
 
-```{r s7-1}
-# 1. Read the saved association summary table.
-stats <- guided_summary_stats(cfg)
-# 2. Select chromosomes 1 to 22 for the plot.
-autosomal <- stats$chromosome %in% as.character(1:22)
-# 3. Save the plot comparing observed p-values with values expected by chance.
-save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))
+```{r}
+#| label: s7-1
+stats <- guided_summary_stats(cfg)  # <1>
+autosomal <- stats$chromosome %in% as.character(1:22)  # <2>
+save_plot(guided_path(cfg, "7.1", "qq.png"), function() plot_qq(stats$p_value[autosomal], "Adjusted simulated GWAS: autosomal QQ plot"))  # <3>
 ```
+
+1. Read the saved association summary table.
+2. Select chromosomes 1 to 22 for the plot.
+3. Save the plot comparing observed p-values with values expected by chance.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 7.2 · Genomic inflation factor
+:::
+
+## Step 7.2 · Genomic inflation factor {#step-7-2}
 
 We calculate lambda, a number that compares the middle of the test results with what chance predicts. We check that it is close to 1.016 and save it to help assess the results alongside the QQ plot.
 
 [Read step 7.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-2).
 
-```{r s7-2}
-# 1. Read the saved association summary table.
-stats <- guided_summary_stats(cfg)
-# 2. Select p-values for chromosomes 1 to 22.
-p <- stats$p_value[stats$chromosome %in% as.character(1:22)]
-# 3. Calculate and check the overall size of the test results.
-lambda <- lambda_gc(p)
+```{r}
+#| label: s7-2
+stats <- guided_summary_stats(cfg)  # <1>
+p <- stats$p_value[stats$chromosome %in% as.character(1:22)]  # <2>
+lambda <- lambda_gc(p)  # <3>
 print(lambda)
 stopifnot(abs(lambda - 1.016) < 0.001)
-# 4. Save lambda in a table.
-guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path(cfg, "7.2", "lambda.tsv"))
+guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path(cfg, "7.2", "lambda.tsv"))  # <4>
 ```
+
+1. Read the saved association summary table.
+2. Select p-values for chromosomes 1 to 22.
+3. Calculate and check the overall size of the test results.
+4. Save lambda in a table.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Lambda is approximately 1.016. R calculates it from the valid autosomal tests.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 7.3 · Manhattan plot
+:::
+
+## Step 7.3 · Manhattan plot {#step-7-3}
 
 We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.
 
 [Read step 7.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-3).
 
-```{r s7-3}
-# 1. Read the saved association summary table.
-stats <- guided_summary_stats(cfg)
-# 2. Prepare the chromosome, position and p-value columns.
-plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
+```{r}
+#| label: s7-3
+stats <- guided_summary_stats(cfg)  # <1>
+plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),  # <2>
   POS = stats$base_pair_location, P = stats$p_value)
-# 3. Save the plot of results along the chromosomes.
-save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
-# 4. Check that eight variants have p-values below 0.00000005.
-stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
+save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))  # <3>
+stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)  # <4>
 ```
+
+1. Read the saved association summary table.
+2. Prepare the chromosome, position and p-value columns.
+3. Save the plot of results along the chromosomes.
+4. Check that eight variants have p-values below 0.00000005.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 7.4 · Multiple-testing thresholds
+:::
+
+## Step 7.4 · Multiple-testing thresholds {#step-7-4}
 
 We compare three rules for multiple testing, which means allowing for the many chances to obtain a false result. We count p-values below 5 × 10⁻⁸ (0.00000005), p-values below 0.05 divided by the number of valid tests, and Benjamini-Hochberg adjusted p-values below 0.05. The third rule controls the expected share of false results among those called significant.
 
 [Read step 7.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-4).
 
-```{r s7-4}
-# 1. Read the saved association summary table.
-stats <- guided_summary_stats(cfg)
-# 2. Keep only valid p-values.
-p <- stats$p_value[valid_p(stats$p_value)]
-# 3. Compare three rules for deciding which results are strong enough.
-threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
+```{r}
+#| label: s7-4
+stats <- guided_summary_stats(cfg)  # <1>
+p <- stats$p_value[valid_p(stats$p_value)]  # <2>
+threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),  # <3>
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
 print(threshold)
-# 4. Save the threshold comparison table.
-guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))
+guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))  # <4>
 ```
+
+1. Read the saved association summary table.
+2. Keep only valid p-values.
+3. Compare three rules for deciding which results are strong enough.
+4. Save the threshold comparison table.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
 
-## Step 7.5 · Clump correlated results
+:::
+
+## Step 7.5 · Clump correlated results {#step-7-5}
 
 We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.
 
 [Read step 7.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-5).
 
-```{r s7-5}
-# 1. Choose the name for the grouped association results.
-report <- guided_path(cfg, "7.5", "clump")
-# 2. Group nearby correlated variants using the final cohort.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
+```{r}
+#| label: s7-5
+report <- guided_path(cfg, "7.5", "clump")  # <1>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),  # <2>
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
-# 3. Read the groups and check that there are three.
-clumps <- guided_table(paste0(report, ".clumps"))
+clumps <- guided_table(paste0(report, ".clumps"))  # <3>
 print(clumps)
 stopifnot(nrow(clumps) == 3L)
 ```
+
+1. Choose the name for the grouped association results.
+2. Group nearby correlated variants using the final cohort.
+3. Read the groups and check that there are three.
 
 ### What each option does
 
@@ -2404,11 +3050,13 @@ stopifnot(nrow(clumps) == 3L)
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -2417,35 +3065,31 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
 ```
 
-## Step 7.6 · Regional plot
+:::
+
+## Step 7.6 · Regional plot {#step-7-6}
 
 We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.
 
 [Read step 7.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-6).
 
-```{r s7-6}
-# 1. Choose the chromosome 9 variant and the output name.
-lead <- "9:96426973:A:G"
+```{r}
+#| label: s7-6
+lead <- "9:96426973:A:G"  # <1>
 report <- guided_path(cfg, "7.6", "ld")
-# 2. Measure correlations with the chosen variant within 500,000 DNA positions.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",  # <2>
   "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
-# 3. Read the correlation table and select the regional association results.
-ld <- guided_table(paste0(report, ".vcor"))
+ld <- guided_table(paste0(report, ".vcor"))  # <3>
 stats <- guided_summary_stats(cfg)
 region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
-# 4. Find and check the column holding squared correlations.
-r2_column <- grep("R2$", names(ld), value = TRUE)
+r2_column <- grep("R2$", names(ld), value = TRUE)  # <4>
 stopifnot(length(r2_column) == 1L)
-# 5. Match each regional variant to its correlation with the chosen variant.
-r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
+r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])  # <5>
 r2[region$variant_id == lead] <- 1
-# 6. Choose symbols and colours for the correlation ranges.
-bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
+bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)  # <6>
 colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
 shapes <- c(1, 2, 3, 4, 16)
-# 7. Draw and save the regional plot with a legend and significance line.
-png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
+png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)  # <7>
 plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
   pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
 abline(h = -log10(5e-8), lty = 2)
@@ -2453,11 +3097,19 @@ legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 t
   pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
 invisible(dev.off())
 cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
-# 8. Check that four regional variants have p-values below 0.00000005.
-stopifnot(sum(region$p_value < 5e-8) == 4L)
+stopifnot(sum(region$p_value < 5e-8) == 4L)  # <8>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 ```
+
+1. Choose the chromosome 9 variant and the output name.
+2. Measure correlations with the chosen variant within 500,000 DNA positions.
+3. Read the correlation table and select the regional association results.
+4. Find and check the column holding squared correlations.
+5. Match each regional variant to its correlation with the chosen variant.
+6. Choose symbols and colours for the correlation ranges.
+7. Draw and save the regional plot with a legend and significance line.
+8. Check that four regional variants have p-values below 0.00000005.
 
 ### What each option does
 
@@ -2475,11 +3127,13 @@ guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cf
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -2488,46 +3142,40 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
 ```
 
-## Step 7.7 · Compare without PCs and without QC
+:::
+
+## Step 7.7 · Compare without PCs and without QC {#step-7-7}
 
 We repeat the association tests without genetic components, the numbers that summarise ancestry, and then without sample and variant quality checks as well. We compare counts and plots to see how these choices change the results.
 
 [Read step 7.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-7).
 
-```{r s7-7}
-# 1. Repeat the final cohort analysis using age and sex without genetic components.
-no_pc <- guided_path(cfg, "7.7", "no_pcs")
+```{r}
+#| label: s7-7
+no_pc <- guided_path(cfg, "7.7", "no_pcs")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
-# 2. Read the original sample information and save ages for all wells.
-metadata <- guided_metadata(cfg)
+metadata <- guided_metadata(cfg)  # <2>
 all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
 all_file <- guided_path(cfg, "7.7", "all_ages.tsv"); guided_write(all_covar, all_file)
-# 3. Choose the output name and find the cohort saved before quality checks.
-no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")
+no_qc <- guided_path(cfg, "7.7", "no_qc_no_pcs")  # <3>
 baseline <- guided_path(cfg, "2.8")
 if (!file.exists(paste0(baseline, ".pgen"))) baseline <- file.path(cfg$data_dir, "checkpoints", "2.8", "state")
-# 4. Test the cohort before sample and variant quality checks using age and sex.
-run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,
+run_plink(cfg, c("--pfile", baseline, "--maf", "0.01", "--covar", all_file,  # <4>
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_qc))
-# 5. Read the main results and put the comparison results into matching columns.
-main <- guided_summary_stats(cfg)
+main <- guided_summary_stats(cfg)  # <5>
 a <- guided_standardise_scan(guided_association(no_pc))
 b <- guided_standardise_scan(guided_association(no_qc))
-# 6. Check that the main and cleaned comparison analyses use the same samples per variant.
-k <- match(main$variant_id, a$variant_id)
+k <- match(main$variant_id, a$variant_id)  # <6>
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
-# 7. Count valid tests and strong results and calculate lambda for each analysis.
-autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
+autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]  # <7>
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
-# 8. Save the comparison table.
-guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
-# 9. Save three plots with the same scale to compare the analyses.
-save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
+guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))  # <8>
+save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
   par(mfrow = c(1, 3))
   plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
   limits <- c(0, max(-log10(unlist(plotted))))
@@ -2536,6 +3184,16 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
 }, width = 2100, height = 750)
 ```
+
+1. Repeat the final cohort analysis using age and sex without genetic components.
+2. Read the original sample information and save ages for all wells.
+3. Choose the output name and find the cohort saved before quality checks.
+4. Test the cohort before sample and variant quality checks using age and sex.
+5. Read the main results and put the comparison results into matching columns.
+6. Check that the main and cleaned comparison analyses use the same samples per variant.
+7. Count valid tests and strong results and calculate lambda for each analysis.
+8. Save the comparison table.
+9. Save three plots with the same scale to compare the analyses.
 
 ### What each option does
 
@@ -2571,11 +3229,13 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
 
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 These commands are shown for reference. Run the R chunk above to follow the course.
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
@@ -2585,26 +3245,25 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s7-7_all_ages.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_qc_no_pcs --threads 2 --memory 2048
 ```
 
-## Step 7.8 · Final summary and reporting
+:::
+
+## Step 7.8 · Final summary and reporting {#step-7-8}
 
 We save a final report and a table of the strongest variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
 
 [Read step 7.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-8).
 
-```{r s7-8}
-# 1. Read the final sample counts, comparison table, variant groups and association results.
-psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
+```{r}
+#| label: s7-8
+psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))  # <1>
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-# 2. Select the strongest variant in each group and calculate its uncertainty interval.
-lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
+lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]  # <2>
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
-# 3. Save the table of the three strongest variants.
-guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
-# 4. Prepare the report describing the analysis, results and limitations.
-summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
+guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))  # <3>
+summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",  # <4>
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
   paste("Final cohort:", nrow(psam), "samples; cases:", sum(psam$Disease == "2"), "; controls:", sum(psam$Disease == "1")),
@@ -2618,8 +3277,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
   "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",
   "No biological discovery or clinical recommendation follows from this simulation.")
-# 5. Save the report as a text file.
-writeLines(summary, guided_path(cfg, "7.8", "summary.md"), useBytes = TRUE)
+writeLines(summary, guided_path(cfg, "7.8", "summary.md"), useBytes = TRUE)  # <5>
 # Course bookkeeping: records the counts for the next step. Do not change.
 files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads.tsv"),
   guided_path(cfg, "7.1", "qq.png"), guided_path(cfg, "7.3", "manhattan.png"),
@@ -2628,18 +3286,65 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
 guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
-# 6. Print the final report.
-cat(paste(summary, collapse = "\n"), "\n")
+cat(paste(summary, collapse = "\n"), "\n")  # <6>
 ```
+
+1. Read the final sample counts, comparison table, variant groups and association results.
+2. Select the strongest variant in each group and calculate its uncertainty interval.
+3. Save the table of the three strongest variants.
+4. Prepare the report describing the analysis, results and limitations.
+5. Save the report as a text file.
+6. Print the final report.
 
 ### What each option does
 
 No PLINK options are used in this step.
 
-### Expected result
+::: {.callout-tip title="Expected result" collapse="true"}
 
 A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures. The 7.8 checkpoint manifest protects these files. The main path ends here. Imputation, mixed models and the analysis after a GWAS are not part of it.
 
-### PLINK terminal equivalent
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
+
+:::
+
+## Previous and next {#previous-next-7 .unlisted}
+
+- Previous: [Module 6: Association](#module-6)
+- Next: this is the last module of the main path.
+
+# Glossary terms used in this notebook {#glossary}
+
+These entries repeat the course glossary so that every link in this notebook works offline.
+
+## FID / IID {#glossary-fid-iid .unlisted}
+
+The identifier pair used to match samples between files.
+
+## GRCh38 {#glossary-grch38 .unlisted}
+
+The 2013 version of the human reference genome. Each position in the genome has a coordinate in this version, and files must use the same version to be compared.
+
+## Lambda GC {#glossary-lambda-gc .unlisted}
+
+Summary of test-statistic inflation/deflation, not proof of a valid model.
+
+## p-value {#glossary-p-value .unlisted}
+
+Under the null model, probability of a statistic at least as extreme as observed.
+
+## Plus strand {#glossary-plus-strand .unlisted}
+
+One of the two strands of the DNA double helix, used as the common reference for writing alleles. Using the plus strand for all sites avoids confusion between the two strands.
+
+## Reference allele {#glossary-reference-allele .unlisted}
+
+The allele that matches the reference genome at a site. It is often written REF. The other allele is often written ALT.
+
+## SHA-256 {#glossary-sha-256 .unlisted}
+
+A short code calculated from the content of a file. If the file changes, the code changes, so it shows whether a file is intact.

@@ -1,0 +1,356 @@
+---
+title: "Module 1: From DNA to array data"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+course_source_sha256: "fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b"
+---
+
+Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
+All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
+The linked step pages explain the ideas and provide troubleshooting.
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 90 minutes.
+
+**Before you start.** You need the course data from step 0.7. The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [1.1 SNPs and genotypes](#step-1-1)
+- [1.2 How an array measures DNA](#step-1-2)
+- [1.3 The Global Screening Array](#step-1-3)
+- [1.4 From sample to scanned chip](#step-1-4)
+- [1.5 Calling genotypes](#step-1-5)
+- [1.6 Problems born in the laboratory](#step-1-6)
+- [1.7 The export](#step-1-7)
+- [1.8 Where genetic data come from](#step-1-8)
+- [1.9 A map of genetic file formats](#step-1-9)
+- [1.10 The formats you will meet most often](#step-1-10)
+- [1.11 How large projects share genetic data](#step-1-11)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: module1_check
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+source("R/guided.R"); guided_check_module(1)
+```
+
+```{r}
+#| label: module1_setup
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## Step 1.1 · SNPs and genotypes {#step-1-1}
+
+We read a table describing the DNA sites measured by the array. We count its rows and look at site names, chromosome positions and possible DNA letters to understand what the array measures.
+
+[Read step 1.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-1).
+
+```{r}
+#| label: s1-1
+ann <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))  # <1>
+cat(nrow(ann), "rows in the annotation\n")  # <2>
+head(ann[c("Name", "Chr", "Position_GRCh38", "Ref_Plus", "Alt_Plus")])
+```
+
+1. Read the table describing the DNA sites on the array.
+2. Count the rows and show the first site descriptions.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+A table with the site name, the chromosome, the [GRCh38](#glossary-grch38) position and the two alleles on the [plus strand](#glossary-plus-strand). GRCh38 is the version of the human reference genome that gives the positions. The annotation contains 299,523 rows. Array site names are not always rs identifiers.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.2 · How an array measures DNA {#step-1-2}
+
+We find the three laboratory report files and read the first 12 lines of the first report. This shows how the laboratory organises information before we read the recorded DNA results.
+
+[Read step 1.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-2).
+
+```{r}
+#| label: s1-2
+reports <- list.files(file.path(cfg$data_dir, "final_report"), full.names = TRUE)  # <1>
+stopifnot(length(reports) == 3L)
+readLines(reports[1], n = 12L)  # <2>
+```
+
+1. Find the laboratory reports and check that there are three files.
+2. Show the first 12 lines of the first report.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+The top of a simulated Final Report: first the header, then the start of the data section. The supplied reports contain genotype calls and GC scores. They do not contain raw intensity data, so you cannot redraw cluster plots in this exercise.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.3 · The Global Screening Array {#step-1-3}
+
+We count the array entries on each chromosome. We also check that the table has 299,523 rows and no repeated site names, so we can recognise the expected starting data.
+
+[Read step 1.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-3).
+
+```{r}
+#| label: s1-3
+table(ann$Chr)  # <1>
+stopifnot(nrow(ann) == 299523L, !anyDuplicated(ann$Name))  # <2>
+```
+
+1. Count the array entries on each chromosome.
+2. Check the total number of rows and look for repeated site names.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Autosomes 1 to 22, plus X, Y and MT (mitochondrial DNA). There are 299,523 array entries at the start. The same genomic site can appear under two different names. We review this at step 4.5.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.4 · From sample to scanned chip {#step-1-4}
+
+We read the sample sheet and count measurements on each laboratory plate. We count labelled repeat measurements and check that the sheet has 2,016 rows, because one person can have more than one measurement.
+
+[Read step 1.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-4).
+
+```{r}
+#| label: s1-4
+sheet <- read.csv(file.path(cfg$data_dir, "lab_export", "sample_sheet.csv"), colClasses = "character")  # <1>
+table(sheet$Plate)  # <2>
+sum(nzchar(sheet$Replicate_of))
+stopifnot(nrow(sheet) == 2016L)  # <3>
+```
+
+1. Read the sample sheet as text to preserve sample labels.
+2. Count measurements on each plate and labelled repeat measurements.
+3. Check that the sheet contains 2,016 measurements.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Twenty-one plates, each with 96 wells, give 2,016 measurements. Sixteen wells are labelled as technical replicates. The simulation started from 2,000 people.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.5 · Calling genotypes {#step-1-5}
+
+We read the data section of a laboratory report and display its first rows. We summarise the GC scores, which describe the quality of recorded DNA results, to see what information the report provides.
+
+[Read step 1.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-5).
+
+```{r}
+#| label: s1-5
+lines <- readLines(reports[1], warn = FALSE)  # <1>
+start <- match("[Data]", lines)
+example <- read.table(text = lines[(start + 1L):length(lines)], sep = ";", header = TRUE, quote = "", check.names = FALSE, colClasses = "character")  # <2>
+head(example)  # <3>
+summary(as.numeric(example[["GC Score"]]))
+```
+
+1. Read the report and find where its data section begins.
+2. Read the data as a table with semicolons separating its columns.
+3. Show the first rows and summarise the quality scores as numbers.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+The columns are SNP Name, Sample ID, GC Score, Allele1 - Plus and Allele2 - Plus. The examples are short excerpts of reports. They are not the full table of 299,523 sites for every person.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.6 · Problems born in the laboratory {#step-1-6}
+
+We check that the sample sheet includes plate, well, sample and repeat-measurement labels, then display its first rows. These labels help us investigate laboratory problems during later checks.
+
+[Read step 1.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-6).
+
+```{r}
+#| label: s1-6
+stopifnot(all(c("Plate", "Well", "Sample_ID", "Replicate_of") %in% names(sheet)))  # <1>
+head(sheet)  # <2>
+```
+
+1. Check that the sheet contains the required laboratory labels.
+2. Show the first rows to inspect the laboratory labels.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+The table has the information that you need to study batch membership and labelled replicates. No person is removed in module 1.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.7 · The export {#step-1-7}
+
+We check that the three genotype files are present and that their sizes agree with the sample and DNA site counts. We confirm that they contain 2,016 sample wells and 299,523 sites before we begin the analysis.
+
+[Read step 1.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-7).
+
+```{r}
+#| label: s1-7
+initial <- check_bed(cfg$input)  # <1>
+print(initial)  # <2>
+stopifnot(initial$samples == 2016L, initial$variants == 299523L)
+```
+
+1. Check the matching genotype files and count their samples and DNA sites.
+2. Display the counts and check the expected starting totals.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+2,016 sample wells and 299,523 variants. No QC has been applied yet. The first FAM file has no case/control phenotype.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+## Step 1.8 · Where genetic data come from {#step-1-8}
+
+We compare arrays, sequencing and predicted genotypes, which estimate unmeasured DNA results using a reference group. We read what each source measures and misses so we can understand which questions its data can answer.
+
+[Read step 1.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-8).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-8). There is no code to run.
+
+:::
+
+## Step 1.9 · A map of genetic file formats {#step-1-9}
+
+We follow genetic files from laboratory measurements to analysis results. We compare what the formats store and the checks they need so we can choose suitable files and avoid mixing incompatible information.
+
+[Read step 1.9 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-9).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-9). There is no code to run.
+
+:::
+
+## Step 1.10 · The formats you will meet most often {#step-1-10}
+
+We read small invented examples to learn what common genetic file fields mean. We examine example conversion commands without running them, so we can understand what conversions preserve and what they may lose.
+
+[Read step 1.10 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-10).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-10). There is no code to run.
+
+:::
+
+## Step 1.11 · How large projects share genetic data {#step-1-11}
+
+We read how large research projects provide genetic data in several formats. We compare the information each format retains and the work it supports to understand why one study may supply several kinds of files.
+
+[Read step 1.11 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-11).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-1/step-1-11). There is no code to run.
+
+:::
+
+## Glossary terms used in this notebook {#glossary}
+
+These entries repeat the course glossary so that every link in this notebook works offline.
+
+### GRCh38 {#glossary-grch38 .unlisted}
+
+The 2013 version of the human reference genome. Each position in the genome has a coordinate in this version, and files must use the same version to be compared.
+
+### Plus strand {#glossary-plus-strand .unlisted}
+
+One of the two strands of the DNA double helix, used as the common reference for writing alleles. Using the plus strand for all sites avoids confusion between the two strands.
+
+## Where next {#where-next}
+
+- Previous: [Module 0: Prepare your computer](module_00_preparation.qmd)
+- Next: [Module 2: Files and formats](module_02_files_and_formats.qmd)
+- This module on the course website: [Module 1](https://www.manuelgentiluomo.it/teaching/gwas/module-1)
