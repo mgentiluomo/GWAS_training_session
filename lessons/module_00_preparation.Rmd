@@ -157,13 +157,13 @@ RStudio software files. No course data are created.
 
 ## 0.3 Download and extract the project {#step-0-3}
 
-<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts."} -->
+<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.2/GWAS_course-2026.2.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download [GWAS_course-2026.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.2/GWAS_course-2026.2.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts."} -->
 
 ### What we do
 
 Download and extract the whole source project. Follow these actions:
 
-1. Download [GWAS_course-2026.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.1/GWAS_course-2026.1.zip) from release `project-2026.1`. This fixed version contains the course project, not the encrypted data.
+1. Download [GWAS_course-2026.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.2/GWAS_course-2026.2.zip) from release `project-2026.1`. This fixed version contains the course project, not the encrypted data.
 2. On Windows, right-click the ZIP and choose "Extract All", then "Extract". On macOS, double-click the ZIP. On Linux, use your file manager to extract it.
 3. Extract it under `C:/` on Windows or your home folder on macOS and Linux. The ZIP supplies its own `GWAS_course` folder. The standard paths are `C:/GWAS_course` and `~/GWAS_course`.
 4. Open that folder. You should see `config.R`, `GWAS_course.Rproj` and the folders `R`, `lessons`, `notebooks` and `scripts`.
