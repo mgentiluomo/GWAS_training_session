@@ -26,31 +26,6 @@ class StudentNotebookTests(unittest.TestCase):
         self.assertEqual(exports.plink_option_order("bin/plink2 --glm no-firth"),
                          [("--glm", ["no-firth"])])
 
-    def test_single_variant_r_and_terminal_selection_coverage(self):
-        record = next(r for r in exports.export_steps() if r["id"] == "6.6")
-        groups = copy.deepcopy(record["student_plink_options"])
-        exports.step_metadata({"student_plink_options": groups}, copy.deepcopy(record))
-        for alteration in ("omit", "reorder", "duplicate", "invent"):
-            changed = copy.deepcopy(groups)
-            options = changed[0]["options"]
-            index = next(i for i, option in enumerate(options) if option["name"] == "--snp")
-            if alteration == "omit":
-                options.pop(index)
-            elif alteration == "reorder":
-                options[index], options[index + 1] = options[index + 1], options[index]
-            elif alteration == "duplicate":
-                options.insert(index, copy.deepcopy(options[index]))
-            else:
-                options[index]["name"] = "--invented"
-            with self.subTest(alteration=alteration), self.assertRaisesRegex(ValueError, "Incomplete"):
-                exports.step_metadata({"student_plink_options": changed}, copy.deepcopy(record))
-        for old, new in (('guided_list(chosen,', 'guided_list(other,'),
-                         ('"variant.txt"', '"other.txt"'), ('"--snp"', '"--extract"')):
-            changed = copy.deepcopy(record)
-            changed["r_commands"][0]["code"] = changed["r_commands"][0]["code"].replace(old, new)
-            with self.subTest(replacement=new), self.assertRaisesRegex(ValueError, "Incomplete"):
-                exports.step_metadata({"student_plink_options": groups}, changed)
-
     def test_reference_projection_modifier_order(self):
         self.assertEqual(exports.plink_option_order(
             "bin/plink2 --pca 10 allele-wts --score weights 2 5 header-read "

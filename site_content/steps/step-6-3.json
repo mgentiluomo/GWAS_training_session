@@ -6,7 +6,7 @@
   "anchor": "step-6-3",
   "title": "Prepare covariates",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "1b84745b4aa964f72c8573ebbf7fe07478eac89530fb5acf737a81244ca8438d",
+  "source_sha256": "951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Join age and ten principal components ([PCs](docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).",

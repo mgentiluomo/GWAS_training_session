@@ -650,7 +650,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 1b84745b4aa964f72c8573ebbf7fe07478eac89530fb5acf737a81244ca8438d
+# SHA-256: 951efae79a3bdb9a0e8ff06082f87fc3fa1f82d68b329dfc024cfa8efa54352c
 
 # Chunk: setup
 source("R/guided.R")

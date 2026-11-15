@@ -2134,8 +2134,7 @@ stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details. |
-| `--extract` | Selects the single variant listed in s6-6_variant.txt, chosen for the lowest frequency of its less common DNA version among valid autosomal tests. |
-| `--snp` | In the R command, selects the chosen variant by its exact ID instead of reading s6-6_variant.txt with --extract. |
+| `--snp` | Selects the one variant that R chose, the tested variant with the lowest frequency of its less common DNA version. R saves its ID in s6-6_variant.txt. In a terminal, type that ID instead of VARIANT_ID. |
 | `--covar` | Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
@@ -2157,7 +2156,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s5-7_state --extract results/guided/s6-6_variant.txt --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --snp VARIANT_ID --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm firth sex hide-covar --out results/guided/s6-6_firth --threads 2 --memory 2048
 ```
 
 ## Step 6.7 · First look and association checkpoint
