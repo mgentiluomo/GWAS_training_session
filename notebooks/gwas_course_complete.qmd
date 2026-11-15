@@ -2504,7 +2504,7 @@ bin/plink2 --pfile results/guided/s5-7_state --snp 9:96426973:A:G --export A --o
 
 ## Step 6.2 · The additive logistic model {#step-6-2}
 
-We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.
+We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy of the allele multiplies the odds of disease, the chance of having the disease divided by the chance of not having it. This multiplier is the odds ratio.
 
 [Read step 6.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2).
 

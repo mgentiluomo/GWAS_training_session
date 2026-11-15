@@ -318,11 +318,11 @@ The statement that there is no effect. In a GWAS test, it says that the variant 
 
 ### Odds {#odds}
 
-The odds of an outcome are the number of people with the outcome divided by the number without it. For example, 20 cases and 80 controls give odds of 0.25.
+The odds of an outcome are the chance of having the outcome divided by the chance of not having it. In a group, this equals the number of people with the outcome divided by the number without it. For example, 20 cases and 80 controls give odds of 0.25.
 
 ### OR {#or}
 
-Odds ratio per additional copy of the tested allele in an additive model.
+Odds ratio. It shows how many times the odds of disease are multiplied by each extra copy of the tested allele in an additive model. A value of 1 means no effect.
 
 ### Outlier {#outlier}
 

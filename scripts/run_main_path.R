@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: d49e23f903df94c23798ef4dbad93bdddafadba362bc99880030ab82e4fe0325
+# SHA-256: 27c9edeeec0d7b8ba9027b022cd59511286bc9ef3d155b4e749ee07a99b1e1a1
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -650,7 +650,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 46ff43a1042348499bb01004660f21e1e653c020dffe0f37e8214a1c1c3c991c
+# SHA-256: 501ba0639a4e377944727cdefd5646d66c49e97bb7bec02f5a0db40fae1c0c43
 
 # Chunk: setup
 source("R/guided.R")

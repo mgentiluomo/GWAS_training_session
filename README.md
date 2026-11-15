@@ -21,16 +21,16 @@ gets the same 2026 course. Its default folder name `GWAS_training_session` also 
 Open `GWAS_course.Rproj` from the extracted
 or cloned folder. Then read and run the numbered steps in order.
 
-| Module | Canonical notebook |
+| Module | Student notebook |
 | --- | --- |
-| 0 | [Computer preparation](lessons/module_00_preparation.Rmd) |
-| 1 | [From DNA to array data](lessons/module_01_from_dna_to_array_data.Rmd) |
-| 2 | [Files and formats](lessons/module_02_files_and_formats.Rmd) |
-| 3 | [Sample QC](lessons/module_03_sample_quality_control.Rmd) |
-| 4 | [Variant QC](lessons/module_04_variant_quality_control.Rmd) |
-| 5 | [Population structure](lessons/module_05_population_structure.Rmd) |
-| 6 | [Association](lessons/module_06_association.Rmd) |
-| 7 | [Plots and final summary](lessons/module_07_plots_and_reporting.Rmd) |
+| 0 | [Computer preparation](notebooks/module_00_preparation.qmd) |
+| 1 | [From DNA to array data](notebooks/module_01_from_dna_to_array_data.qmd) |
+| 2 | [Files and formats](notebooks/module_02_files_and_formats.qmd) |
+| 3 | [Sample QC](notebooks/module_03_sample_quality_control.qmd) |
+| 4 | [Variant QC](notebooks/module_04_variant_quality_control.qmd) |
+| 5 | [Population structure](notebooks/module_05_population_structure.qmd) |
+| 6 | [Association](notebooks/module_06_association.qmd) |
+| 7 | [Plots and final summary](notebooks/module_07_plots_and_reporting.qmd) |
 
 **The classroom data are available in [release data-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1).**
 The repository holds code and text. Its only genotype-file exception is the
