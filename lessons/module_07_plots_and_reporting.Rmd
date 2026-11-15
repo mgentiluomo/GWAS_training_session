@@ -24,7 +24,7 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
-<!-- module_meta: {"prerequisites":{"checkpoint":"6.8","restart_step":"7.1","files":[{"base":"output","path":"s6-4_association.Disease.glm.logistic.hybrid"},{"base":"output","path":"s6-8_gwas_summary_statistics.tsv"},{"base":"output","path":"s5-7_state.pgen"},{"base":"output","path":"s5-7_state.pvar"},{"base":"output","path":"s5-7_state.psam"},{"base":"output","path":"s6-3_covariates.tsv"},{"base":"output","path":"step_counts.tsv"},{"base":"output","path":"checkpoints/index.tsv"},{"base":"data","path":"lab_export/sample_sheet.csv"},{"base":"data","path":"phenotypes/sim2026_phenotypes.tsv"},{"base":"data","path":"checkpoints/2.8/state.pgen"},{"base":"data","path":"checkpoints/2.8/state.pvar"},{"base":"data","path":"checkpoints/2.8/state.psam"}]}} -->
+<!-- module_meta: {"prerequisites":{"checkpoint":"6.8","restart_step":"6.1","files":[{"base":"output","path":"s6-4_association.Disease.glm.logistic.hybrid"},{"base":"output","path":"s6-8_gwas_summary_statistics.tsv"},{"base":"output","path":"s5-7_state.pgen"},{"base":"output","path":"s5-7_state.pvar"},{"base":"output","path":"s5-7_state.psam"},{"base":"output","path":"s6-3_covariates.tsv"},{"base":"output","path":"step_counts.tsv"},{"base":"output","path":"checkpoints/index.tsv"},{"base":"data","path":"lab_export/sample_sheet.csv"},{"base":"data","path":"phenotypes/sim2026_phenotypes.tsv"},{"base":"data","path":"checkpoints/2.8/state.pgen"},{"base":"data","path":"checkpoints/2.8/state.pvar"},{"base":"data","path":"checkpoints/2.8/state.psam"}]}} -->
 
 ## Module 7 at a glance {#module-7-overview}
 
