@@ -1,5 +1,74 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 15 November, evening
+
+Written for the author, Manuel Gentiluomo. Status: finished. No release. Nothing was pushed to the website `main` branch. History was not rewritten. The experimental files that ended up in `cf82dbf` are left as they are.
+
+### Point 1. Missing commits
+
+- `b36a55c` (ZIP with the `.qmd` only) was already in `course/2026-guided-training` and in `plink/bundle`.
+- `168da50` (the afternoon report) was in neither. The merge at the end of this session brought it in.
+- Project ZIP built outside the repository from the course branch: 61 files, nine `.qmd` notebooks, no generated `.Rmd` notebook. Not published.
+
+### Point 2. Step 0.4 and the references to `lessons/`
+
+Step 0.4 had no `student_action`, because it is a code step. I changed the step text and the module introduction instead.
+
+| Place | Before | After |
+| --- | --- | --- |
+| Module 0 introduction | "This notebook is the source of the guided preparation module. A notebook is a file that mixes text and R commands." | "The student notebook for this module is `notebooks/module_00_preparation.qmd`. A notebook is a file that mixes text and R commands. The folder `lessons/` holds the source files that the author edits. You do not open them." |
+| Step 0.4, action 2 | "In the Files pane, click the folder `lessons`. Then click this notebook. It opens in the editor." | "In the Files pane, click the folder `notebooks`. Then click `module_00_preparation.qmd`. It opens in the editor. The file `gwas_course_complete.qmd` holds all modules in one notebook, if you prefer one file. The folder `lessons` holds the source files for the author. You do not need it." |
+| `README.md` table | "Canonical notebook", links to `lessons/*.Rmd` | "Student notebook", links to `notebooks/*.qmd` |
+| `docs/setup.md` | link to `lessons/module_00_preparation.Rmd` | link to `notebooks/module_00_preparation.qmd` |
+
+I searched `docs/`, `R/`, `config.R` and the other lessons for `lessons/` and `.Rmd`. I found no other student-facing reference. The list of folders in steps 0.3 (`R`, `lessons`, `scripts`) is still true and I left it. Commit `30b9e64`.
+
+### Point 3. Step 3.5, command 2 title
+
+The code removes only one end.
+
+- `lessons/module_03_sample_quality_control.Rmd` line 501: `low <- het$IID[f < mean_f - 3 * sd_f]`.
+- Line 502: `high <- het$IID[f > mean_f + 3 * sd_f]`.
+- Line 504: `high` goes only to `flag_high.txt`, for review.
+- Lines 505 and 507: `remove_file` is built from `low`, and `--remove` uses it.
+
+A low F means too many heterozygous sites. So the removal is for unusually high heterozygosity only. The title stays "remove samples with unusually high heterozygosity". The summary, the option tables and the expected result ("13 wells with low F are removed") already agree with the code. No change, no commit.
+
+### Point 4. Step 6.2 and the glossary
+
+| Place | Before | After |
+| --- | --- | --- |
+| 6.2 summary | "... the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio." | "The model estimates how many times each extra copy of the allele multiplies the odds of disease, the chance of having the disease divided by the chance of not having it. This multiplier is the odds ratio." |
+| Glossary, Odds | "... the number of people with the outcome divided by the number without it." | "The odds of an outcome are the chance of having the outcome divided by the chance of not having it. In a group, this equals the number of people with the outcome divided by the number without it. ..." |
+| Glossary, OR | "Odds ratio per additional copy of the tested allele in an additive model." | "Odds ratio. It shows how many times the odds of disease are multiplied by each extra copy of the tested allele in an additive model. A value of 1 means no effect." |
+
+Commit `9c6a5b5`. **Not changed, for your decision:** the same phrase "the ratio of cases to controls" is still in the `--glm` explanations of steps 6.4 and 6.6 and in two commands of step 7.7. I did not extend the change, because you asked for 6.2 only.
+
+### Checks after points 2 to 4
+
+Comment-only proof passed. `test_student_notebooks` 35, `test_project_package` 6, `test_course_exports` 22, `test_prove_comment_only` 3, all OK. `--check-notebooks` passes. `test_guided_module_check.R` and `check_course.R` passed. The nine `.qmd` rendered with the RStudio Quarto (`--no-execute`) with no warnings. `notebooks/render_check/compare.html` is rebuilt: no problem in any row, 979 ids and no duplicate in the complete notebook.
+
+### Merges
+
+- `course/2026-guided-training`: merge commit `f63f2a2` (no squash), pushed.
+- `plink/bundle`: merge commit `1ab5610`, pushed. Tests: `test_student_notebooks` 35, `test_project_package` 17, `test_plink_pins` 3, `test_course_exports` 22, `test_plink_setup.R`, all OK. It is not merged into the course branch.
+- This report commit lives on `notebooks/all-modules` only.
+
+### Point 5. Website, branch `course/notebook-style`
+
+- Synced to course commit `f63f2a2`. The sync copied the nine `.qmd` files to `public/gwas/notebooks/`. Commit `7878fc4`, pushed. `main` untouched.
+- `tsc --noEmit` clean. `npm run lint`: 0 errors, 10 old warnings. `next build` with `GWAS_REVIEW_BUILD=1` passed.
+- Local production server: step 0.4 shows `module_00_preparation.qmd` and the sentence about the source files. Step 3.5 shows "unusually high heterozygosity". Step 6.2 shows "chance of not having it".
+- Downloads: `/gwas/notebooks/module_00_preparation.qmd` and `gwas_course_complete.qmd` answer 200, are byte-identical to the files in the course repository, and start with a valid Quarto header. The module 0 page and the course home carry `download="..."` buttons.
+
+### Point 6. Vercel preview
+
+I could not read the preview address without credentials. The GitHub API answers 404 for the private repository, and the guessed address does not exist. The commit page of the branch is opened in your browser. The Vercel check mark is on the latest commit, `7878fc4`.
+
+### Skipped
+
+Not run: analysis on the course data, execution of the notebooks, macOS and Linux, the other PLINK builds, the office comparison run.
+
 ## Session of 15 November, afternoon
 
 Written for the author, Manuel Gentiluomo. Status: finished. Nothing was released. The website branch is pushed but not merged into `main`.
