@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 27c9edeeec0d7b8ba9027b022cd59511286bc9ef3d155b4e749ee07a99b1e1a1
+# SHA-256: aec2d0bc161b258a714572ea32400f8a7aa9422697b27a734aaaec45dc6b8794
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -650,7 +650,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 501ba0639a4e377944727cdefd5646d66c49e97bb7bec02f5a0db40fae1c0c43
+# SHA-256: 26b1f7a69396e6f0d34c018b1eb4b88e941b29876b9607ebb9614a3b9eb0a31d
 
 # Chunk: setup
 source("R/guided.R")
@@ -801,7 +801,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: cd5f300045868b59086e7678516bfb2aa0ba9bd6aee5f2016796fd37a66c89e5
+# SHA-256: 06fdeafc05caa2970c1a82cd44bda2870224a2d255ee882c7e10e41e94cd857b
 
 # Chunk: setup
 source("R/guided.R")

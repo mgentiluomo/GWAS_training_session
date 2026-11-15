@@ -484,6 +484,7 @@ class QuartoRendererTests(unittest.TestCase):
                 self.assertIn("toc-location: left", text)
                 self.assertIn("code-copy: true", text)
                 self.assertIn("code-fold: false", text)
+                self.assertIn("code-overflow: wrap", text)
                 ids = re.findall(r"\{#([^} ]+)", text)
                 self.assertEqual(len(ids), len(set(ids)), "duplicate heading ids")
                 for target in re.findall(r"\]\(#([^)]+)\)", text):
