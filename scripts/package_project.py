@@ -6,7 +6,9 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+import csv
 import hashlib
+import io
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -20,7 +22,7 @@ from urllib.request import Request, urlopen
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-FOLDERS = ("lessons", "R", "examples/formats", "notebooks")
+FOLDERS = ("lessons", "R", "examples/formats", "notebooks", "third_party/plink2")
 # Only the generated student notebooks ship. Experiments and render folders never do.
 NOTEBOOK_NAME = re.compile(r"notebooks/(?:module_0[0-7]_[^/]+|gwas_course_complete)\.Rmd")
 FILES = (
@@ -46,6 +48,86 @@ def external_folder(path: Path, root: Path) -> Path:
     return path
 
 
+PINS_PATH = "third_party/plink2/releases.tsv"
+PROGRAM_FOLDER = "third_party/plink2/programs"
+# Anything under third_party/plink2 that is not a pin, a licence text or a README is refused.
+THIRD_PARTY_NAME = re.compile(r"third_party/plink2/(?:releases\.tsv|README\.md|COPYING|notices/[A-Za-z0-9._-]+)")
+# Programs and archives must never be tracked. They enter the ZIP only through fetch_programs().
+PROGRAM_NAME = re.compile(r"(?:^|/)(?:plink2?|ldsc|mtag|vcf_subset)(?:\.exe)?$", re.I)
+ARCHIVE_SUFFIXES = (".exe", ".dll", ".so", ".dylib", ".zip", ".7z", ".tar", ".gz", ".tgz", ".bz2", ".xz")
+PIN_COLUMNS = ("platform", "archive_url", "archive_sha256", "archive_bytes", "member", "executable_sha256", "executable_bytes")
+
+
+def read_pins(root: Path = ROOT) -> list[dict]:
+    """Read the reviewed pin list. The packager never writes or accepts a new hash by itself."""
+    with (root / PINS_PATH).open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    platforms = [row.get("platform") for row in rows]
+    if not rows or len(set(platforms)) != len(platforms):
+        raise ValueError("The PLINK 2 pin list is empty or repeats a platform.")
+    for row in rows:
+        if any(not row.get(column) for column in PIN_COLUMNS):
+            raise ValueError(f"The PLINK 2 pin list is incomplete for {row.get('platform')}.")
+        for column in ("archive_sha256", "executable_sha256"):
+            if not re.fullmatch(r"[0-9a-f]{64}", row[column]):
+                raise ValueError(f"The PLINK 2 pin list has an invalid {column} for {row['platform']}.")
+        if not re.fullmatch(r"[a-z0-9_-]+", row["platform"]) or not row["archive_url"].startswith("https://"):
+            raise ValueError(f"The PLINK 2 pin list has an unsafe entry for {row['platform']}.")
+    return rows
+
+
+def unsafe_archive_name(name: str) -> bool:
+    member = PurePosixPath(name)
+    return (not name or member.is_absolute() or ".." in member.parts or "\\" in name
+            or re.match(r"^[A-Za-z]:", name) is not None)
+
+
+def default_download(url: str, destination: Path) -> None:
+    request = Request(url, headers={"User-Agent": "GWAS-course-project-packager/1.0"})
+    partial = destination.with_name(destination.name + ".part")
+    with urlopen(request, timeout=120) as response, partial.open("wb") as handle:
+        shutil.copyfileobj(response, handle)
+    partial.replace(destination)
+
+
+def fetch_programs(pins: list[dict], cache: Path, download=default_download, root: Path = ROOT) -> dict[str, bytes]:
+    """Return the pinned programs, downloaded outside Git and checked before use.
+
+    The archive hash is checked before anything is extracted. Archive paths are checked,
+    only the named program is read, and its own hash is checked as well.
+    """
+    cache = external_folder(cache, root)
+    cache.mkdir(parents=True, exist_ok=True)
+    programs = {}
+    for row in pins:
+        archive = cache / PurePosixPath(urlsplit(row["archive_url"]).path).name
+        if not archive.exists():
+            download(row["archive_url"], archive)
+        data = archive.read_bytes()
+        if digest(data) != row["archive_sha256"] or len(data) != int(row["archive_bytes"]):
+            raise ValueError(f"The archive for {row['platform']} does not match its pin. Nothing was extracted. "
+                             f"Delete {archive} only after you have checked why.")
+        member = row["member"]
+        if unsafe_archive_name(member) or "/" in member:
+            raise ValueError(f"The pin list names an unsafe program path for {row['platform']}: {member}")
+        with zipfile.ZipFile(io.BytesIO(data)) as zipped:
+            names = zipped.namelist()
+            if any(unsafe_archive_name(name) for name in names):
+                raise ValueError(f"The archive for {row['platform']} holds an unsafe path. Nothing was extracted.")
+            if names.count(member) != 1:
+                raise ValueError(f"The archive for {row['platform']} must hold exactly one {member}.")
+            program = zipped.read(member)
+        if digest(program) != row["executable_sha256"] or len(program) != int(row["executable_bytes"]):
+            raise ValueError(f"The program for {row['platform']} does not match its pin.")
+        programs[f"{PROGRAM_FOLDER}/{row['platform']}/{member}"] = program
+    return programs
+
+
+def member_mode(name: str) -> int:
+    """Programs keep their execute permission inside the ZIP. Everything else is a plain file."""
+    return 0o100755 if name.startswith(PROGRAM_FOLDER + "/") else 0o100644
+
+
 def inventory(root: Path = ROOT) -> dict[str, bytes]:
     """Enumerate tracked allowlisted paths, reading their reviewed working bytes."""
     tracked = subprocess.check_output(
@@ -63,6 +145,10 @@ def inventory(root: Path = ROOT) -> dict[str, bytes]:
             raise ValueError(f"Required student source is missing: {name}")
         if name.startswith("lessons/") and not re.fullmatch(r"lessons/module_0[0-7]_[^/]+\.Rmd", name):
             raise ValueError(f"Unexpected student lesson source: {name}")
+        if name.startswith("third_party/") and not THIRD_PARTY_NAME.fullmatch(name):
+            raise ValueError(f"Unexpected third-party file: {name}")
+        if name.lower().endswith(ARCHIVE_SUFFIXES) or PROGRAM_NAME.search(name):
+            raise ValueError(f"A program or archive is tracked in Git: {name}")
         if name.startswith("notebooks/") and not NOTEBOOK_NAME.fullmatch(name):
             raise ValueError(f"Unexpected student notebook: {name}")
         if name.startswith("R/") and not name.endswith(".R"):
@@ -140,6 +226,8 @@ def verify_archive(path: Path, files: dict[str, bytes]) -> None:
                 raise ValueError(f"Unsafe project ZIP member: {name}")
             if archive.read(name) != files[name.removeprefix("GWAS_course/")]:
                 raise ValueError(f"The project ZIP changed source bytes: {name}")
+            if archive.getinfo(name).external_attr >> 16 != member_mode(name.removeprefix("GWAS_course/")):
+                raise ValueError(f"The project ZIP changed a file permission: {name}")
 
 
 def clean_environment() -> dict[str, str]:
@@ -198,7 +286,8 @@ def url_status(url: str, planned: str) -> dict:
         return {"url": url, "status": "unverified", "reason": str(error)}
 
 
-def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Path, dict]:
+def build(output: Path, version: str = "2026.1", root: Path = ROOT, plink_cache: Path | None = None,
+          download=default_download) -> tuple[Path, dict]:
     if not re.fullmatch(r"2026\.1(?:\.[1-9][0-9]*)?", version):
         raise ValueError("Use an explicit project release version, never latest.")
     output = external_folder(output, root)
@@ -206,6 +295,10 @@ def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Pat
         raise ValueError("Choose a new external output folder.")
     files = inventory(root)
     links = check_links(files)
+    programs = {}
+    if plink_cache is not None:
+        programs = fetch_programs(read_pins(root), plink_cache, download, root)
+        files.update(programs)
     planned = f"https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-{version}/GWAS_course-{version}.zip"
     source = files["lessons/module_00_preparation.Rmd"].decode("utf-8")
     if planned not in source or re.search(r"releases/(?:latest|download/latest)", source):
@@ -216,7 +309,8 @@ def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Pat
         for name, data in files.items():
             info = zipfile.ZipInfo("GWAS_course/" + name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
-            info.external_attr = 0o100644 << 16
+            info.create_system = 3  # Unix, so that the permission bits are honoured
+            info.external_attr = member_mode(name) << 16
             zipped.writestr(info, data, compresslevel=9)
     verify_archive(archive, files)
     checksum = digest(archive.read_bytes())
@@ -228,6 +322,7 @@ def build(output: Path, version: str = "2026.1", root: Path = ROOT) -> tuple[Pat
               "zip_bytes": archive.stat().st_size, "sha256": checksum,
               "allowlist_folders": FOLDERS, "allowlist_files": FILES,
               "files": [{"path": k, "bytes": len(v), "sha256": digest(v)} for k, v in files.items()],
+              "plink_programs": [{"path": k, "bytes": len(v), "sha256": digest(v)} for k, v in programs.items()],
               "links": links, "planned_asset_url": planned}
     return archive, report
 
@@ -238,6 +333,7 @@ def main() -> None:
     parser.add_argument("--version", default="2026.1")
     parser.add_argument("--fresh-check", action="store_true")
     parser.add_argument("--check-urls", action="store_true")
+    parser.add_argument("--plink-cache", type=Path, help="Outside-Git folder for the pinned PLINK 2 archives. Without it, no program is added.")
     parser.add_argument("--rscript", type=Path)
     parser.add_argument("--data-dir", type=Path)
     parser.add_argument("--plink", type=Path)
@@ -245,7 +341,7 @@ def main() -> None:
     if args.fresh_check and not all(p and p.is_file() if name != "data_dir" else p and p.is_dir()
                                     for name, p in [("rscript", args.rscript), ("data_dir", args.data_dir), ("plink", args.plink)]):
         parser.error("The fresh check needs an existing --rscript, --data-dir and --plink.")
-    archive, report = build(args.output, args.version)
+    archive, report = build(args.output, args.version, plink_cache=args.plink_cache)
     if args.fresh_check:
         report["fresh_folder_test"] = fresh_check(archive, args.output, args.rscript, args.data_dir, args.plink)
     if args.check_urls:
