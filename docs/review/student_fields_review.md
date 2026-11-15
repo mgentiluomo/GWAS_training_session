@@ -1,5 +1,175 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 15 November
+
+Written for the author, Manuel Gentiluomo. Status: finished. Everything below was done while you were away. Nothing was merged, nothing was released and the website repository was not touched. Branches `notebooks/all-modules` and `plink/bundle` are pushed as backups. `course/2026-guided-training` was not changed in this session.
+
+### A. Read these first
+
+1. **Phase B proposals that I did not apply** (section D below). Three items change a scientific statement or a teaching choice. They need your decision.
+2. **Module 0 text after the review.** Steps 0.1, 0.2, 0.3, 0.6 and 0.7 now carry links and a little more detail. The 0.7 summary has three sentences, one more than the usual limit of two. The 0.6 action is long. Check both, and check that the text still says what you teach.
+3. **The Quarto pages.** Open `notebooks/render_check/compare.html` (section G) and look at one module in both versions. The default stays `.Rmd`.
+4. **PLINK pins** (section I). They are a first pin and are not verified against any publisher checksum. Compare them with the official page before you rely on them.
+5. **The reviewer found nothing in steps 5.4, 6.2, 6.3, 7.1, 7.2 and 7.3.** That run was short. Read those summaries yourself, as you planned.
+
+### B. Decisions taken without asking
+
+1. **Module 7 restart.** `restore_checkpoint("6.1")` is supported, because the indexed restore picks the full checkpoint at 5.7. Module 7 now says: "Finish module 6 first. Or restart with: restore_checkpoint("6.1") and run module 6 again (use an empty folder)." The module 3 message is byte-identical to before. The rule in `R/guided.R`: when the restart step belongs to the module that makes the files, the message says "and run module N again". The R test was updated. Commit `d4b6c2d`.
+2. **Step 6.6.** The plain PLINK 2 command now uses `--snp VARIANT_ID`, as the R code does. The text says to replace `VARIANT_ID` with the ID that R saved in `s6-6_variant.txt`. No R chunk changed. The special 6.6 validator rule and its regression test were removed. The 2.6 conditional `--flip` rule stays. Commit `88ac93c`.
+3. **Phase B.** Codex reviewed the text without being told who wrote it. I applied only corrections that the lesson text clearly supports (section C). Commit `5113726`, with the comment-only proof.
+4. **Phase C.** I found no generator problem, so there was no generator commit.
+5. **Phase D.** The `qmd` renderer is behind `--notebook-format qmd`. The `.qmd` files carry no `execute: eval: false`. Students run them. I rendered them with `quarto render --no-execute` instead. Commit `2777593`.
+6. **Phase E.** The ZIP allowlist accepts only `notebooks/module_0N_*.Rmd` and `notebooks/gwas_course_complete.Rmd`. Any other tracked file in `notebooks/` stops the build. Commit `7580bfc`.
+7. **Phase F.** Followed `docs/plink_packaging_plan.md`, items 2 to 4. Module 0 text, expected numbers and `CLAUDE.md` were not changed.
+8. **ZIP metadata (branch `plink/bundle` only).** Every ZIP member now records a Unix creation system (value 3), so the permission bits are honoured on every platform. This changes the bytes of the project ZIP compared with earlier builds. The two builds in one run are still identical.
+9. **Pins.** I chose the four URLs listed in your brief. I did not look for publisher checksums.
+
+### C. Phase B: corrections applied
+
+Reviewer findings that I applied (wording, clarity, spelling, unsupported claims). Each correction is supported by a sentence in the lesson of the same step.
+
+| Step | Field | What changed |
+| --- | --- | --- |
+| 0.1 | action | Added the CRAN link and the macOS choice (arm64 or x86_64). |
+| 0.2 | action | Added the official Posit link. |
+| 0.3 | action | Added the project ZIP link of release `project-2026.1`. |
+| 0.6 | action | Added the official download link, the advice to choose the 64-bit version without AVX2 when unsure, and the note for Windows ARM and Linux ARM. |
+| 0.7 | summary | Added how to request the password and who may use the form. |
+| 1.7 | summary | The code checks that the files are present and that their sizes agree. It does not prove that the samples belong together. |
+| 3.3 | `max-female-xf`, `min-male-xf` | Replaced "X coefficient" with "X chromosome F value" and explained F in the lesson's own words. |
+| 3.4 | `--indep-pairwise` | Explained the squared correlation (r²) and that one site of every pair above 0.2 is dropped. |
+| 3.5 | summary and `--het` | Plainer words ("two different DNA letters"). `--het` reports the numbers, PLINK calculates F, R calculates the review thresholds. |
+| 3.6 | `--king-table-filter` | Added what the kinship score measures. |
+| 4.4 | `--hardy` | The expected shares come from the allele frequencies when people mate at random. |
+| 5.6 | summary | Explained the principal components in plain words. I kept the original sentence "this rule defines the group for our teaching analysis", which the reviewer had dropped. |
+| 5.7 | `--indep-pairwise` | Same r² explanation as 3.4. |
+| 6.6 | summary and `--snp` | The variant is chosen among valid tests on chromosomes 1 to 22. |
+| 7.4 | summary | Names the three rules. The third rule is the Benjamini-Hochberg adjusted p-value and controls the expected share of false results among those called significant. |
+
+### D. Phase B: proposals not applied
+
+For each item the original text is in the lesson now. The suggested text is the reviewer's, unless I say otherwise.
+
+**1. Step 3.4, student summary.** Not applied, because you fixed this exact text in an earlier session.
+
+- Original: "We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, otherwise the same genetic signal is counted many times."
+- Reviewer: pruning lowers the correlation inside the chosen windows. It does not guarantee independence, and "need independent variants" overstates what the checks require.
+- Suggested: "We select common DNA sites whose genotype patterns are less strongly correlated. This reduces the influence of groups of similar sites on the sample checks, while keeping the full dataset for association testing."
+- Supported by the lesson: yes ("less correlated", "It does not delete the other sites from the association data").
+
+**2. Step 3.3, `min-male-xf`, one extra sentence.** I applied the first sentence of the suggestion and left out the second, because the lesson does not state it.
+
+- Applied: "Sets 0.8 as the smallest accepted X chromosome F value for a recorded male. F measures how homozygous the X chromosome looks."
+- Not applied: "Values near 1 indicate the pattern expected when there is one X chromosome copy."
+- Supported by the lesson: no. PLINK's sex-check documentation supports it. Add it if you agree.
+
+**3. Step 4.5, `--export A`.** Changes a scientific statement.
+
+- Original: "Writes a table of allele counts, recorded as 0, 1 or 2 copies of a DNA version for each person and variant."
+- Reviewer: for chromosomes present in one copy, PLINK scales the values, so the numbers are not literal copy counts.
+- Suggested: "Writes a table with one row per person and values of 0, 1 or 2 for each variant. For chromosomes present in one copy, PLINK scales the values to 0 or 2, so 2 does not mean two physical copies."
+- Supported by the lesson: no. The lesson also calls these values copy counts. I could not confirm the scaling rule from memory, so check the PLINK 2 `--export` page before you decide.
+
+### E. Render check of the nine `.Rmd` notebooks (no code run)
+
+- Tool: `rmarkdown::render` with chunk evaluation off, pandoc from RStudio's Quarto folder. Output in `notebooks/render_check/` (untracked, excluded in `.git/info/exclude`).
+- Result: all nine notebooks rendered without errors. The only message is a pandoc deprecation notice (`--no-highlight`) from the installed `rmarkdown`. It does not come from the course.
+- Chunk labels: no duplicates (the complete notebook has 65 chunks).
+- Tables: every pipe table became an HTML table. The complete notebook has 41 pipe tables and 45 HTML tables, and no raw pipe line was left in the HTML.
+- Headings: no level is skipped in any notebook.
+- Internal links: every `../docs/glossary.md#...` anchor exists in the glossary (385 anchors, none missing). These links only work when the notebook stays in the project folder.
+- Generator problems: none found.
+- Not checked: the look of the pages in RStudio's notebook viewer, and the first-chunk behaviour when someone opens a notebook outside the project root (the check chunk handles `..`).
+
+### F. Link check
+
+I requested all 64 step-page URLs of the form `https://www.manuelgentiluomo.it/teaching/gwas/module-N/step-N-M`, following redirects. All 64 returned 200, and a made-up page returned 404, so the 200 values are real. Also 200: the data-access form, the project ZIP of release `project-2026.1`, the Posit download page, CRAN and the PLINK 2 page.
+
+### G. How to open `compare.html`
+
+1. Open the file `C:\GWAS_course\notebooks\render_check\compare.html` in a browser (double-click).
+2. Each row links to the `.Rmd` HTML and to the `.qmd` HTML of one notebook. The `.qmd` pages are in `C:\GWAS_course\notebooks_qmd\html\`.
+3. To regenerate everything after a change in a lesson:
+   - `python -B scripts/build_tutorial.py --export-notebooks notebooks_qmd --notebook-format qmd`
+   - in `notebooks_qmd`: `quarto render <file>.qmd --no-execute`, then move the HTML files into `html/`
+   - the `.Rmd` pages: the render script in the scratchpad of this session (not versioned): `rmarkdown::render` for each notebook with `knitr::opts_chunk$set(eval = FALSE)`.
+4. To make Quarto the default later, change one line: `DEFAULT_FORMAT = "rmd"` in `scripts/student_notebooks.py`. Three other places must follow: the allowlist pattern `NOTEBOOK_NAME` in `scripts/package_project.py` (it accepts only `.Rmd`), the freshness check in the tests (they check the default format), and the notebook paths named in `CLAUDE.md`. I changed none of them.
+5. The `.qmd` files differ from the `.Rmd` files in four ways: numbered comments become code annotations with the explanation list under the chunk, "Expected result" is a collapsed tip callout, "PLINK terminal equivalent" is a note callout, and the front matter has `editor: visual`.
+
+### H. Project ZIP
+
+Built twice into temporary folders outside the repository and deleted afterwards. Nothing was published.
+
+| Build | Files | ZIP size | Uncompressed |
+| --- | --- | --- | --- |
+| `notebooks/all-modules`, no programs | 61 | 258,339 bytes | 881,364 bytes |
+| `plink/bundle`, `--plink-cache` with the four pinned archives | 75 | 21,506,382 bytes | 75,437,395 bytes |
+
+Contents of the first build: 8 lessons, 9 notebooks, 4 files in `R/`, 4 in `scripts/`, 5 in `docs/`, 25 invented format examples (one of them is the invented `.pgen`, which is allowed), `config.R`, the project file, the README and the two licence files. The nine notebooks are inside. No `.qmd`, no HTML, no render folder, no archive and no program is inside. The link checker of the packager validated every local link, including the glossary anchors used by the notebooks. On `plink/bundle` the second build adds `R/plink_setup.R`, the pin list, the licence texts and the four programs (mode 0755, Unix creation system).
+
+### I. PLINK groundwork (branch `plink/bundle`)
+
+Status: items 2 to 4 of the plan are done. Item 1 (the comparison run at the office), the Apple Silicon check, the module 0 text, `LICENSE-CONTENT.md`, `bin/README.md`, `docs/troubleshooting.md` and the manual-download rule in `CLAUDE.md` are not done, as you asked.
+
+**Pins to verify.** All four are "first pin, to be verified by the author against the official page". I downloaded each archive once on 15 November 2026 from `https://s3.amazonaws.com/plink2-assets/beta1/`. A hash taken at the first download detects later changes. It does not prove that the first file was genuine.
+
+| Platform | Archive SHA-256 | Executable SHA-256 |
+| --- | --- | --- |
+| windows-x86_64 | `0a7c1bff1d5a3a7a01a27f789c4fbd92f7631c7ed27fd376b8c36fe2cf6f3f48` | `b57537f14734f15325bf2dd5d2de431308e025a66cabc1b1494249ee1d7142b9` |
+| macos-arm64 | `6027138e618e3b4978950c2a3fd5e1015c66349a90b037843129192bcbf87efe` | `e6d321565e2a4fd20874a7c21ac6c2cfe3e0802549bdffdfbe9623438cd6bf4a` |
+| macos-x86_64 | `6a16027c51a86bd8efba31f2eb4f7dbdbbe331001006109c79ce303e6870e3ec` | `0564701a0efe3a91bf2b5fac430efc84779e65e92675af4cfcc31e6d034d981b` |
+| linux-x86_64 | `16b5cf92faed7e8b8aa1010c6eab9bac17c92b57ccfa69c4d059b1b17b98eb70` | `93ab85dde8743b76e815a84a13bc6e62650148cb6abf785e1909c8d08c589dcc` |
+
+- Only the Windows program was run: `plink2.exe --version` printed `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`. The other three were not run (they need their own systems).
+- Source tag `v2.0.0-b.1.4` resolves on GitHub to commit `760ee7329e8914de52f75a4e470cecabccbde0d9`, as in the plan.
+- Each archive also holds `ldsc`, `mtag` and `vcf_subset`. They are not extracted. The Linux archive holds `intel-simplified-software-license.txt`, which I included in `third_party/plink2/notices/`.
+- Licence texts from the source tag (commit above): `COPYING` (GPL 3), `COPYING.LESSER`, `LICENSE.QD`, and the notices of libdeflate, simde and zstd. The plan asks you to check the dependency notices against the four binaries before release. I did not do that.
+
+**Item 2, `R/plink_setup.R`.** `prepare_course_plink()` picks the pin row from the system and the CPU (Apple Silicon under Rosetta uses the arm64 build), checks every SHA-256, copies the program to `bin/`, sets mode 755 on macOS and Linux and runs `--version`. It never replaces a different program in `bin/`. It stops with a clear message on Windows ARM, Linux ARM, 32-bit R, musl, glibc older than 2.31 and unknown systems. Failure help covers macOS quarantine (`xattr -d com.apple.quarantine bin/plink2`, never run for the student) and "Kernel too old". The tests use fake programs and fake archives. They never use the network. I also ran it for real on this Windows PC with the real pin list and download: it prepared the program and the second call reported "already ready".
+
+**Item 3, packager.** `--plink-cache DIR` (outside Git) downloads when missing, checks the archive hash and size before it opens the archive, rejects absolute paths, `..`, backslashes and drive letters, reads only the named member, checks the program hash and size, and adds the program with mode 0755. A cached archive with a wrong hash is never trusted. Without the option no program is added. Tracked programs or archives stop the build, `.gitignore` lists the program names, and `scripts/tests/test_plink_pins.py` fails if any tracked file is a program, an archive or has an executable or ZIP header.
+
+**Not yet connected.** Step 0.6 still tells students to download PLINK by hand. Nothing calls `prepare_course_plink()` yet. The R helper looks for a packaged program in `third_party/plink2/programs/<platform>/` first and downloads the pinned archive otherwise.
+
+### J. Test results (Windows 11, this machine)
+
+- `notebooks/all-modules`: `python -B -m unittest discover -s scripts/tests -p "test_*.py"`: 62 tests, OK, 1 skipped (the encrypted release round trip needs a password and 7-Zip).
+- `plink/bundle`: 76 tests, OK, 1 skipped (same test).
+- `python -B scripts/build_tutorial.py --export-notebooks notebooks --check-notebooks`: nine notebooks up to date after every commit.
+- `scripts/author/prove_comment_only.py --base <previous commit>`: passed after the module 7 restart commit, the 6.6 commit and the Phase B corrections. The 6.6 commit and the Phase B commit change text outside chunks or inside `step_meta` comments only.
+- `scripts/tests/test_guided_module_check.R`: passed.
+- `scripts/tests/test_plink_setup.R`: passed (on `plink/bundle`).
+- `scripts/check_course.R`: passed.
+- Quarto: nine `.qmd` files rendered with `--no-execute` without errors (the module 3 page shows 83 code annotation markers).
+- Not run: any analysis on course data, PLINK on course data, the R notebooks (no data on this machine), macOS, Linux, the other three PLINK builds, the comparison run against `answer_key.json`.
+
+### K. Commits
+
+`notebooks/all-modules` (pushed), after the earlier review commit `1cb8f9f`:
+
+- `d4b6c2d` Point the module 7 restart advice to restore_checkpoint("6.1") and module 6
+- `88ac93c` Align the step 6.6 terminal command with the R code (--snp) and drop the special validator rule
+- `2777593` Add an optional Quarto (qmd) renderer behind --notebook-format qmd
+- `5113726` Correct student summaries and option explanations after an independent review
+- `7580bfc` Ship the nine student notebooks in the project ZIP allowlist
+- the commit that adds this section
+
+`plink/bundle` (created from `7580bfc`, pushed):
+
+- `5a228cf` Pin the four PLINK 2 Beta 1.4 builds and add the licence texts
+- `335e1bf` Add prepare_course_plink() to select, verify and install the pinned PLINK 2 program
+- `32c9912` Packager: add pinned PLINK 2 programs from an outside-Git cache, with hash, path and permission checks
+
+`plink/bundle` does not contain this review section. Merge `notebooks/all-modules` into it, or the other way round, when you decide.
+
+### L. Where I stopped
+
+All phases A to G are done. No usage limit stopped the work. Untracked and left alone: `notebooks/experiment_html/`, `notebooks/module_03_sample_quality_control.qmd` (your earlier Quarto experiment), and the excluded folders `notebooks/render_check/` and `notebooks_qmd/`. Nothing was merged into `course/2026-guided-training`. No release was created and the website repository was not synced.
+
+---
+
+## Earlier review (14 November)
+
 Written for the author, Manuel Gentiluomo. Status: finished. Branch `notebooks/all-modules` (local only, not pushed, not merged). Date of the work: 14 November 2026.
 
 Everything in this file was produced while you were away. Nothing was executed on course data: this machine has no `data/course` folder and no PLINK. The notebooks were generated and checked, not run.
