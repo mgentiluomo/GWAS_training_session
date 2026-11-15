@@ -19,6 +19,7 @@ Module 0 covers these steps:
 4. Open the project and check the working directory, R version and `2 + 3` (0.4).
 5. Install the R packages (0.5).
 6. Put the matching PLINK 2 executable in `bin/` (0.6).
+   The project package 2026.2 does not contain PLINK 2. Step 0.6 explains where to download it.
 7. Request the password and run `download_course_data()` (0.7).
 8. Run `scripts/preflight.R` (0.8).
 

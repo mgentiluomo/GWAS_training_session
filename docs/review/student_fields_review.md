@@ -1,5 +1,54 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 15 November, preview review
+
+Written for the author, Manuel Gentiluomo. Status: finished. No release. Nothing was pushed to the website `main` branch. History was not rewritten.
+
+### A1. Odds in the other steps
+
+The phrase ", the ratio of cases to controls." was in the `--glm` explanations of steps 6.4, 6.6 and two commands of 7.7.
+
+- Before: "... changes the odds of disease, the ratio of cases to controls."
+- After: "... changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it."
+
+This matches step 6.2 and the glossary. Commits on `notebooks/all-modules`: `e7f113e` (odds), `5b7f030` (folder list), `5d290fd` (wrapped code). The final `grep` finds the old phrase in no lesson, notebook or site JSON. It still appears in `docs/review/student_fields_review.md`, in the quoted "before" text and in the older drafts. I left those, because they record what the text said at the time. It also appears in the untracked rendered HTML under `notebooks/render_check/` of earlier renders. I rebuilt the renders from the new notebooks.
+
+### A2. Folder list in module 0
+
+"`R`, `lessons` and `scripts`" became "`R`, `lessons`, `notebooks` and `scripts`" in the step 0.3 success line, in the action text of step 0.3, in the "You should see" line and in the expected result. Step 0.4 does not repeat the list. The project ZIP built from the course branch holds nine files under `notebooks/`.
+
+### A3. Wrapped code in the notebooks
+
+`code-overflow: wrap` is now in the generated header of every `.qmd`. A test checks it. The R code is unchanged. The comment-only proof passes.
+
+### Course checks
+
+`test_student_notebooks` 35, `test_project_package` 6, `test_course_exports` 22, `test_prove_comment_only` 3, all OK. `--check-notebooks` passes. `test_guided_module_check.R` and `check_course.R` passed. The nine `.qmd` rendered with the RStudio Quarto (`--no-execute`) with no warnings. `notebooks/render_check/compare.html` is rebuilt with no problem in any row.
+
+Merges: `course/2026-guided-training` `325f1f4` (no squash), `plink/bundle` `2bc6040`. `test_plink_pins` 3 OK and `test_plink_setup.R` passed. `plink/bundle` was not merged into the course branch. Both were pushed.
+
+### B. Website, branch `course/notebook-style`
+
+Content synced to course commit `325f1f4` (commit `dc489ea`).
+
+- **B1, long lines (`fcc9519`).** Code lines wrap inside the box, with a hanging indent of 1.5 rem for the continuation. The note markers stay in the gutter on the first visual line. The "Module setup" panel now uses the same component. The PLINK terminal box already wrapped its command with a flex layout, so I did not change it. At 390 px, no code box has a horizontal scrollbar on steps 3.3, 6.4 and 7.7. "Copy R code" copies the exported code. I compared the clipboard with the step JSON for steps 3.3, 4.5, 6.4, 7.7 and 7.8: all equal. Chrome on Windows returns the clipboard text with CRLF, so I compared after changing CRLF to LF. No line break is added.
+- **B2, bookkeeping (`0c98007`).** The marker is the comment line `# Course bookkeeping`. I looked at all 29 code blocks that have it. The block runs from that line to the end of the code, or to the next numbered comment. Two steps differ: 4.5 and 7.8 have a numbered comment after the bookkeeping lines (`# 8.` and `# 6.`), so the lighter block ends before it. The lines are in `--muted` colour with the label "Course bookkeeping, do not change". The text stays in the copied code. axe reports no colour contrast problem in light or dark.
+- **B3, time (`3705d06`).** All eight "At a glance" overviews contain "How long it takes", so "In this module" no longer shows the time. The page text has one mention per module (checked for modules 0 to 7). Other overlaps, not changed: the "Steps" list in "In this module" repeats the step cards further down. The overviews of modules 1 to 4 also name a slow step, and the checkpoint is named in module 2.
+
+**Checks.** `tsc --noEmit` clean. `npm run lint` 0 errors, 10 old warnings. `next build` with `GWAS_REVIEW_BUILD=1` passed. axe-core (WCAG 2.0 to 2.2 A and AA, plus best practice) on module 3 and steps 3.3, 6.4 and 7.7, at 390 px and 1280 px, light and dark, with the closed blocks opened: the only finding is the old `label-content-name-mismatch` on the header logo link. No horizontal page scroll. The Tab walk of 59 stops found no hidden stop and the markers work with Enter.
+
+One scroll remains: the option tables of steps 6.4 and 7.7 scroll sideways by a few pixels at 390 px (358 px content in 350 px). They are tables, not code boxes. The scroll region is keyboard reachable. I did not change it.
+
+**Screenshots** (scratchpad, `C:\Users\manue\AppData\Local\Temp\claude\c4b1ded9365bb562\712313de-0104-40a4-a15c-0d2a722ccdb6\scratchpad\axe\`): `step33_before_390.png`, `step33_before_1280.png`, `step33_after_390.png`, `step33_after_1280.png`. Before, the code scrolled sideways. After, it wraps and shows the label.
+
+### C1. Preview
+
+The address `https://personal-site-git-course-notebook-style-mgentiluomos-projects.vercel.app` answers 302 to a Vercel sign-in page (`vercel.com/sso-api`). The preview is protected, so curl could not read the four pages. I only note it. Open it while you are signed in to Vercel.
+
+### Skipped
+
+Not run: analysis on the course data, execution of the notebooks, macOS and Linux, the other PLINK builds, the office comparison run.
+
 ## Session of 15 November, evening
 
 Written for the author, Manuel Gentiluomo. Status: finished. No release. Nothing was pushed to the website `main` branch. History was not rewritten. The experimental files that ended up in `cf82dbf` are left as they are.
