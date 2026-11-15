@@ -118,7 +118,7 @@ No. Odds and probability are different things. An odds ratio is usually not the 
 ## 6.2 The additive logistic model {#step-6-2}
 
 
-<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value.", "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "An intercept and a dosage coefficient, each with a standard error and a p-value.", "student_summary": "We fit a logistic model, which describes the probability of being a case, using the number of copies of one DNA letter. The model estimates how many times each extra copy of the allele multiplies the odds of disease, the chance of having the disease divided by the chance of not having it. This multiplier is the odds ratio.", "student_plink_options": []} -->
 ### What we do
 
 Fit a [logistic regression](../docs/glossary.md#logistic-regression) for one variant in R. Connect the dosage to the odds ratio.

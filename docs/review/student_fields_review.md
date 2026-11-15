@@ -1,6 +1,90 @@
 # Review of the student fields for modules 0 to 7
 
-## Session of 15 November
+## Session of 15 November, afternoon
+
+Written for the author, Manuel Gentiluomo. Status: finished. Nothing was released. The website branch is pushed but not merged into `main`.
+
+### 1. PLINK download comparison (phase 0)
+
+All four archives that you downloaded with a browser match the hashes in `third_party/plink2/releases.tsv`.
+
+| Archive | Result |
+| --- | --- |
+| `plink2_win64_20261107.zip` | match |
+| `plink2_mac_arm64_20261107.zip` | match |
+| `plink2_mac_20261107.zip` | match |
+| `plink2_linux_x86_64_20261107.zip` | match |
+
+The manifest, `third_party/plink2/README.md` and `docs/plink_packaging_plan.md` now say that the pins were confirmed by a second, independent browser download on 15 November 2026. The wording "to be verified by the author against the official page" stays, because no publisher checksum was compared. The commit is on `plink/bundle`. The folder `PLINK` moved to `C:\PLINK_downloads`. `git status` is clean on all branches.
+
+### 2. Corrections applied (phase 1)
+
+| Step | Before | After |
+| --- | --- | --- |
+| 3.4 summary | "We pick a set of common variants that are not strongly linked to each other. The sample checks that follow need independent variants, ..." | Your text: "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan." |
+| 3.3 `min-male-xf` | "... F measures how homozygous the X chromosome looks." | Same, plus "Values near 1 are expected when there is only one X chromosome, as in males." |
+| 4.5 `--export A` (option table and lesson text) | "Writes a table of allele counts, recorded as 0, 1 or 2 copies ..." | "Writes a table with one row per person and values of 0, 1 or 2 for each variant. For chromosomes present in one copy, such as X in males, PLINK writes 0 or 2, so 2 does not mean two physical copies." Step 6.1 (one autosomal variant) keeps its text. |
+| 5.3 summary | "... pair of alleles, the alternative DNA letters, ..." | "... the two DNA letters that can occur at that site ..." |
+| 3.5 command 2 title | "remove samples with unusually few matching letters" | "remove samples with unusually high heterozygosity" |
+| 5.4 `no-mean-imputation` (both commands) | "Leaves missing genotype calls out of each average instead of replacing them with an average genotype." | "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency." |
+| 6.2 summary | "We calculate how each extra copy changes the odds of disease, ..." | "The model estimates how many times each extra copy multiplies the odds of disease, the ratio of cases to controls. This multiplier is the odds ratio." |
+| 6.4, 6.6, 7.7 `firth-fallback` and `firth`; 6.6 summary | "reduces bias with small groups" | "gives usable estimates when very few people carry the allele" |
+| 6.5 summary | "p-value, a measure of evidence against no effect" | "p-value, the chance of a result at least this strong if the variant had no effect" |
+| 6.6 table | Already aligned after the `--snp` change | Checked again: no `--extract` row remains. The table matches the R command and the terminal command. |
+| 4.2, 6.7, 7.3, 7.4, 7.5 thresholds | "0.00001", "0.00000005", "5e-8 (0.00000005)" | "1 × 10⁻⁵ (0.00001)", "5 × 10⁻⁸ (0.00000005)". Step 6.7 now names the threshold. Step 4.4 keeps its formula, which was not on your list. |
+| 7.7 headings | "Command 1: Command 1: ..." | "Command 1: ...". The lesson labels carried the prefix. The generator now removes a repeated "Command N:" prefix, and a test checks it. |
+
+Commits: the text corrections (`cf82dbf`) and the generator fix (`f19a674`).
+
+I made a mistake in `cf82dbf`. `git add notebooks` also added the untracked Quarto experiment (`notebooks/experiment_html/` and your `module_03_sample_quality_control.qmd`). I removed them from the index in `4abaff1`. They stay in the history of `cf82dbf`, so nothing is lost. The generated module 3 `.qmd` has now replaced your experimental file in the working folder.
+
+**Step 0.3, as it reads now (not touched, for you to check).**
+
+- Summary: "We download and extract the complete course project. Keeping its files together lets the commands find the files they need."
+- Action: "Download GWAS_course-2026.1.zip (link to the `project-2026.1` release). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons and scripts."
+
+### 3. Quarto as the student format (phase 2)
+
+- `DEFAULT_FORMAT` is now `"qmd"`. The nine generated `.Rmd` notebooks are removed. The `rmd` renderer stays in the registry (`--notebook-format rmd`). `--check-notebooks` also flags any leftover generated `.Rmd` notebook.
+- Each notebook has: a floating contents list on the left (steps, glossary, next links), numbered step headings with anchor links, an "In this module" box (time from the lesson, what you need, linked steps, the checkpoint where the module ends), code annotations from the numbered comments, copy buttons on, code never folded, the expected result as a collapsed tip, the PLINK terminal equivalent as a note, and a "What you do" box for reading and outside-R steps.
+- At the end of each module: "Where next" with previous and next `.qmd` links and the module page on the website. The complete notebook starts with a course map and repeats the previous and next logic between modules.
+- **Links between notebooks.** Quarto does not rewrite `.qmd` links to `.html` outside a website project. I tested a minimal `_quarto.yml` and it did not help. The notebooks keep the `.qmd` link, which opens the file in RStudio, and a small script in the rendered page changes it to `.html` in the browser. The script is in the YAML header, so no extra file ships.
+- **Glossary links.** The course glossary is a separate Markdown file, and `../docs/glossary.md#term` fails in a rendered page. Each notebook now ends with a "Glossary terms used in this notebook" appendix. The links point to it (`#glossary-term`). They work offline, in RStudio Visual mode and in the HTML. Only the terms a notebook uses are copied. A missing term stops the generator. The appendix headings are unlisted, so the contents list stays short.
+- **Check on the nine rendered pages.** Rendered with the Quarto in RStudio, `--no-execute`, no warnings. No duplicate ids, no broken links inside a page, and every step is in the contents list. Every code step has its Expected result and PLINK boxes. Every other step has a "What you do" box. The complete notebook has 979 ids, no duplicates, no broken link and 192 course map links.
+- **Open them.** `notebooks/render_check/compare.html` (untracked) is the index of the nine pages, with the check table. The pages are in `notebooks/render_check/qmd/`. Each render of a single file with `--output-dir` deletes the other files in that folder, so I rendered next to the source and moved the HTML.
+- **ZIP.** Built outside the repository: 61 files, 268,372 bytes. The nine `.qmd` notebooks are inside. No `.Rmd` notebook, render folder, HTML or archive is inside. Not published.
+- Commits: `00c4bd4` (the switch and the navigation features together) and `b36a55c` (ZIP allowlist). I could not split the switch and the navigation into two clean commits, because the renderer changes are in the same functions.
+
+### 4. Merge (phase 3)
+
+All checks passed, so I merged.
+
+- `course/2026-guided-training` now holds the merge commit `886fa02` (no squash) and is pushed.
+- `plink/bundle` holds `3d326e9`, the merge of `course/2026-guided-training` into it. It is pushed. It is not merged into the course branch. It waits for the office comparison run.
+
+### 5. Website prototype (phase 4)
+
+Branch `course/notebook-style` in `C:\WEB_site\sito`, from `main`. Not merged. Four commits: `a2a9ef9` (content sync to course commit `886fa02`), `fb28599` (the sync script copies the notebooks), `c518450` (the page features), `ae0ab5e` (marker gutter).
+
+- Step pages: "In short" (student summary), a "What you do" box for reading and outside-R steps, R code with numbered markers in a left gutter and the explanations under it (the markers are links, so the keyboard works; the copy button copies the exported code with its comments), a visible "What each option does" table per command with modifiers under their parent and the shared `--threads` and `--memory` line, the expected result collapsed, and the terminal equivalent in a note box with an accent border. The old "All options explained" list is hidden when the new tables exist. Previous and next navigation is unchanged. The format viewer, the "Do this" card, "Report a problem" and the beta label are untouched.
+- Module pages: an "In this module" box like the notebook, and a download button for the module notebook. The course home has a button for the complete notebook.
+- **Download choice.** The sync script copies the nine `.qmd` files to `public/gwas/notebooks/`. A raw GitHub link would show the file as text and the `download` attribute does not work across origins. The same pattern already holds for the format examples. The files come from the merged commit. No data and no password are involved.
+- **Checks.** `tsc --noEmit` passed. `npm run lint` gave 0 errors and 10 warnings that were there before. `next build` passed with `GWAS_REVIEW_BUILD=1`. axe-core (WCAG 2.0 to 2.2 A and AA, plus best practice) ran on module 3, step 3.3 and step 6.4, at 390 px and 1280 px, in light and dark, with the collapsed blocks opened. The only finding is `label-content-name-mismatch` on the header logo link (`.gap-2.5`). It appears on every page and the header is not part of this change. There is no horizontal page scroll at 390 px. A Tab walk of 59 stops on steps 3.3 and 6.4 found no hidden focus stop. The header and some Markdown links use the browser's own focus ring, not the site ring. My new controls use the site ring. Pressing Enter on a note marker moves to its explanation.
+- **Preview URL.** I could not read it. This machine has no `gh` or Vercel command, and the repository is private. Open the Vercel dashboard, then Deployments, then the branch `course/notebook-style`. Or open the branch on GitHub and follow the Vercel check on the latest commit (`ae0ab5e`). A preview build shows every module (`NEXT_PUBLIC_REVIEW_BUILD`).
+
+### 6. Tests
+
+- Course, `notebooks/all-modules` and `course/2026-guided-training` (Windows): `test_student_notebooks` 35 OK, `test_project_package` 6 OK, `test_course_exports` 22 OK, `test_prove_comment_only` 3 OK. `--check-notebooks` passes. The comment-only proof passes. R: `test_guided_module_check.R` and `check_course.R` passed.
+- `plink/bundle` after the merge: `test_student_notebooks` 35, `test_project_package` 17, `test_plink_pins` 3, `test_course_exports` 22, all OK. `test_plink_setup.R` passed.
+
+### 7. Skipped, open issues, where I stopped
+
+- Not run: any analysis on the course data, the notebooks themselves (they were rendered, not executed), macOS and Linux, the other PLINK builds, the office comparison run.
+- **Module 0 still tells students to open the notebook in `lessons/`.** The student notebooks are now `.qmd` files in `notebooks/`. I did not change module 0 text, as instructed. Please decide whether 0.4 should point to `notebooks/module_00_preparation.qmd`.
+- I did not update `docs/session_report.md`, `docs/release_checklist.md` or `docs/setup.md`.
+- I stopped after pushing the website branch and writing this section. No usage limit stopped me.
+
+## Session of 15 November (earlier)
 
 Written for the author, Manuel Gentiluomo. Status: finished. Everything below was done while you were away. Nothing was merged, nothing was released and the website repository was not touched. Branches `notebooks/all-modules` and `plink/bundle` are pushed as backups. `course/2026-guided-training` was not changed in this session.
 
