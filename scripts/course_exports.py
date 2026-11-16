@@ -230,9 +230,18 @@ def validate_student_option(option: dict, step: str, parent: bool = False) -> No
 
 def step_metadata(metadata: dict, record: dict) -> dict:
     """Validate optional UI metadata authored beside its canonical step."""
-    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line", "student_summary", "student_plink_options", "student_kind", "student_action"}:
+    if not isinstance(metadata, dict) or set(metadata) - {"actions", "where", "success_line", "student_summary", "student_plink_options", "student_kind", "student_action", "required_commands"}:
         raise ValueError(f"Unknown step metadata in {record['id']}.")
     result = {}
+    # A command that the whole-path script skips (eval=FALSE) can still be required for the student.
+    # It is exported with run_by_default true, so the website does not label it "Optional".
+    required = metadata.get("required_commands", [])
+    labels = {command["label"] for command in record["r_commands"]}
+    if not isinstance(required, list) or not set(required) <= labels:
+        raise ValueError(f"required_commands must list chunk labels of the step in {record['id']}.")
+    for command in record["r_commands"]:
+        if command["label"] in required:
+            command["run_by_default"] = True
     for field in ("student_summary", "student_kind", "student_action"):
         if field in metadata:
             value = metadata[field]

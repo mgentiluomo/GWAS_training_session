@@ -157,13 +157,13 @@ RStudio software files. No course data are created.
 
 ## 0.3 Download and extract the project {#step-0-3}
 
-<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3/GWAS_course-2026.3.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download [GWAS_course-2026.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3/GWAS_course-2026.3.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts."} -->
+<!-- step_meta: {"actions": [{"label": "Download the project ZIP", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.1/GWAS_course-2026.3.1.zip", "kind": "download"}], "success_line": "The project folder contains `config.R`, `GWAS_course.Rproj`, `R`, `lessons`, `notebooks` and `scripts`.", "student_summary": "We download and extract the complete course project. Keeping its files together lets the commands find the files they need.", "student_kind": "outside_r", "student_action": "Download [GWAS_course-2026.3.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.1/GWAS_course-2026.3.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts."} -->
 
 ### What we do
 
 Download and extract the whole source project. Follow these actions:
 
-1. Download [GWAS_course-2026.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3/GWAS_course-2026.3.zip) from release `project-2026.3`. This fixed version contains the course project, not the encrypted data.
+1. Download [GWAS_course-2026.3.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.1/GWAS_course-2026.3.1.zip) from release `project-2026.3.1`. This fixed version contains the course project, not the encrypted data.
 2. On Windows, right-click the ZIP and choose "Extract All", then "Extract". On macOS, double-click the ZIP. On Linux, use your file manager to extract it.
 3. Extract it under `C:/` on Windows or your home folder on macOS and Linux. The ZIP supplies its own `GWAS_course` folder. The standard paths are `C:/GWAS_course` and `~/GWAS_course`.
 4. Open that folder. You should see `config.R`, `GWAS_course.Rproj` and the folders `R`, `lessons`, `notebooks` and `scripts`.
@@ -276,7 +276,7 @@ RStudio may create local project settings in `.Rproj.user/`. Git ignores them.
 
 ## 0.5 Install the R packages {#step-0-5}
 
-<!-- step_meta: {"actions": [], "where": {"s0-5_packages": "console"}, "success_line": "The `>` prompt returns.", "student_summary": "We install the R packages, which add functions needed by the course. These prepare R to ask for a hidden password and check the downloaded files.", "student_plink_options": []} -->
+<!-- step_meta: {"actions": [], "required_commands": ["s0-5_packages"], "where": {"s0-5_packages": "console"}, "success_line": "The `>` prompt returns.", "student_summary": "We install the R packages, which add functions needed by the course. These prepare R to ask for a hidden password and check the downloaded files.", "student_plink_options": []} -->
 
 ### What we do
 
@@ -327,7 +327,7 @@ R package files in your R library. No course data are created.
 
 ## 0.6 Put PLINK 2 in bin/ {#step-0-6}
 
-<!-- step_meta: {"actions": [{"label": "Official PLINK 2 download page", "url": "https://www.cog-genomics.org/plink/2.0/", "kind": "page"}], "where": {"s0-6_plink": "console"}, "success_line": "PLINK 2 2.0.0-b.1.4 is ready in bin/", "student_summary": "We prepare PLINK 2, the program that analyses the DNA data. The project already contains it, so R copies the right version for your computer into the bin folder and checks it.", "student_plink_options": []} -->
+<!-- step_meta: {"actions": [], "required_commands": ["s0-6_plink"], "where": {"s0-6_plink": "console"}, "success_line": "PLINK 2 2.0.0-b.1.4 is ready in bin/", "student_summary": "We prepare PLINK 2, the program that analyses the DNA data. The project already contains it, so R copies the right version for your computer into the bin folder and checks it.", "student_plink_options": []} -->
 
 ### What we do
 
@@ -395,7 +395,7 @@ Does the command at step 0.6 download PLINK 2 from the internet?
 
 ## 0.7 Request the password and download the data {#step-0-7}
 
-<!-- step_meta: {"actions": [{"label": "Request the course password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Course data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1", "kind": "page"}], "where": {"s0-7_data": "console"}, "success_line": "Course data are ready: 108 files verified.", "student_summary": "University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.", "student_plink_options": []} -->
+<!-- step_meta: {"actions": [{"label": "Request the course password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Course data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/data-2026.1", "kind": "page"}], "required_commands": ["s0-7_data"], "where": {"s0-7_data": "console"}, "success_line": "Course data are ready: 108 files verified.", "student_summary": "University of Pisa users request the password through the [data access form](https://www.manuelgentiluomo.it/teaching/gwas/data-access) with an email address at unipi.it or one of its subdomains. Other users write to [manuel.gentiluomo@unipi.it](mailto:manuel.gentiluomo@unipi.it). We then download and check the course data, entering the password only in the prompt that hides the letters, never in a file.", "student_plink_options": []} -->
 
 ### What we do
 

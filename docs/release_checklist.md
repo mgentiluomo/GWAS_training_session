@@ -3,8 +3,8 @@
 ## Student project releases
 
 The project source package is separate from the encrypted data release.
-Use tag `project-2026.3`, asset `GWAS_course-2026.3.zip` and sidecar
-`GWAS_course-2026.3.zip.sha256`. The earlier project releases, `project-2026.1` and `project-2026.2`, stay published. Never use a `latest` URL. The author publishes
+Use tag `project-2026.3.1`, asset `GWAS_course-2026.3.1.zip` and sidecar
+`GWAS_course-2026.3.1.zip.sha256`. The earlier project releases, `project-2026.1`, `project-2026.2` and `project-2026.3`, stay published. Never use a `latest` URL. The author publishes
 the reviewed assets; the packaging script does not upload or create releases.
 
 The project file is `GWAS_course.Rproj`. The ZIP has one outer folder,
