@@ -130,6 +130,13 @@ Use `check_step("3.1")` to compare supplied outputs and `where_am_i()` to list
 verified progress. All three helpers accept `data_dir` and `work_dir` for a
 local installation outside the project.
 
+`check_step()` and `where_am_i()` compare file contents, not hashes, so that a run on
+Windows, macOS and Linux can match. Text and table files are compared with the line
+endings removed. Numbers may differ by a relative 1e-9 (the last printed digit of a
+number can change between systems). The result is "matches", "matches within
+rounding" (the largest difference is shown) or "different contents". Binary files such
+as `.pgen` must be identical. Figures and software records are not compared.
+
 The published `data-2026.1` package uses a boundary layout, with complete filesets
 at 2.8, 3.8, 4.6 and 5.7. `checkpoints/index.tsv` records expected counts and
 parent states. Intermediate folders store replay operations rather than another

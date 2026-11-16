@@ -267,6 +267,76 @@ course_checkpoint_names <- function(files, step, data_dir) {
          file.path(dirname(relative), paste0(prefix, basename(relative))))
 }
 
+# ---- File comparison that does not depend on the operating system -------------------------
+# Windows writes text files with CRLF line endings, macOS and Linux with LF. The maths
+# library of each system can also change the last printed digit of a number (about 1e-15).
+# So text and table files are compared by content, and numbers with a small relative tolerance.
+# Binary files (.pgen, .bed and others) are compared byte for byte. Figures are compared byte
+# for byte too, but a figure that differs is only reported, because each system draws it a little differently.
+
+course_ok_statuses <- c("matches", "matches within rounding", "not compared")
+course_numeric_tolerance <- 1e-9  # relative: |a - b| <= 1e-9 * max(|a|, |b|)
+
+course_file_kind <- function(path) {
+  ext <- tolower(tools::file_ext(path))
+  if (ext %in% c("png", "pdf", "jpg", "jpeg")) return("figure")
+  if (identical(basename(path), "software_versions.txt")) return("record")
+  head <- readBin(path, "raw", n = 8192L)
+  if (any(head == as.raw(0L))) "binary" else "text"
+}
+
+course_read_text <- function(path) {
+  lines <- readLines(path, warn = FALSE, encoding = "UTF-8")
+  sub("\r$", "", lines)
+}
+
+# Returns list(status, max_diff). status is one of "matches", "matches within rounding",
+# "different contents", "not compared".
+course_compare_files <- function(expected, actual, tolerance = course_numeric_tolerance) {
+  same_bytes <- identical(digest::digest(expected, algo = "sha256", file = TRUE),
+                          digest::digest(actual, algo = "sha256", file = TRUE))
+  if (same_bytes) return(list(status = "matches", max_diff = 0))
+  kind <- course_file_kind(expected)
+  if (kind %in% c("figure", "record")) return(list(status = "not compared", max_diff = NA_real_))
+  if (kind == "binary") return(list(status = "different contents", max_diff = NA_real_))
+  a <- course_read_text(expected)
+  b <- course_read_text(actual)
+  # The software line of a summary names the PLINK build that wrote it. It is not a result.
+  a <- a[!grepl("^Software:", a)]
+  b <- b[!grepl("^Software:", b)]
+  if (identical(a, b)) return(list(status = "matches", max_diff = 0))
+  if (length(a) != length(b)) return(list(status = "different contents", max_diff = NA_real_))
+  differ <- which(a != b)
+  cells_a <- strsplit(a[differ], "\t", fixed = TRUE)
+  cells_b <- strsplit(b[differ], "\t", fixed = TRUE)
+  worst <- 0
+  for (i in seq_along(differ)) {
+    x <- cells_a[[i]]
+    y <- cells_b[[i]]
+    if (length(x) != length(y)) return(list(status = "different contents", max_diff = NA_real_))
+    unequal <- which(x != y)
+    for (j in unequal) {
+      nx <- suppressWarnings(as.numeric(x[j]))
+      ny <- suppressWarnings(as.numeric(y[j]))
+      if (is.na(nx) || is.na(ny) || !is.finite(nx) || !is.finite(ny)) return(list(status = "different contents", max_diff = NA_real_))
+      change <- abs(nx - ny)
+      if (change > tolerance * max(abs(nx), abs(ny))) return(list(status = "different contents", max_diff = change))
+      worst <- max(worst, change)
+    }
+  }
+  list(status = "matches within rounding", max_diff = worst)
+}
+
+course_compare_note <- function(results) {
+  worst <- suppressWarnings(max(c(0, unlist(lapply(results, `[[`, "max_diff"))), na.rm = TRUE))
+  statuses <- vapply(results, `[[`, character(1), "status")
+  c(if (any(statuses == "matches within rounding"))
+      paste0("Some numbers differ only in the last digits (largest difference ", format(worst, digits = 3),
+             "). Different systems round the last digit differently. This is not a mistake."),
+    if (any(statuses == "not compared"))
+      "Figures and software records are not compared byte for byte, because each system writes them a little differently.")
+}
+
 check_step <- function(step, data_dir = "data/course", work_dir = "results/course", quiet = FALSE) {
   if (file.exists(file.path(data_dir, "checkpoints", "index.tsv"))) {
     return(course_index_check(step, data_dir, work_dir, quiet))
@@ -275,16 +345,18 @@ check_step <- function(step, data_dir = "data/course", work_dir = "results/cours
   names <- course_checkpoint_names(expected, step, data_dir)
   actual <- file.path(work_dir, step, names)
   if (!requireNamespace("digest", quietly = TRUE)) stop("Install the digest course package first.", call. = FALSE)
-  status <- vapply(seq_along(expected), function(i) {
-    if (!file.exists(actual[i]) || dir.exists(actual[i])) return("missing")
-    if (file.info(expected[i])$size != file.info(actual[i])$size) return("different size")
-    hashes <- vapply(c(expected[i], actual[i]), digest::digest, character(1), algo = "sha256", file = TRUE)
-    if (hashes[1] != hashes[2]) "different contents" else "matches"
-  }, character(1))
+  compared <- lapply(seq_along(expected), function(i) {
+    if (!file.exists(actual[i]) || dir.exists(actual[i])) return(list(status = "missing", max_diff = NA_real_))
+    if (course_file_kind(expected[i]) == "binary" && file.info(expected[i])$size != file.info(actual[i])$size) {
+      return(list(status = "different size", max_diff = NA_real_))
+    }
+    course_compare_files(expected[i], actual[i])
+  })
+  status <- vapply(compared, `[[`, character(1), "status")
   result <- data.frame(file = names, status = unname(status), stringsAsFactors = FALSE)
   # Removal lists alone cannot establish that the genotype step was completed.
   full <- course_checkpoint_complete(expected)
-  attr(result, "complete") <- full && all(status == "matches")
+  attr(result, "complete") <- full && all(status %in% course_ok_statuses)
   attr(result, "reference_complete") <- full
   if (!quiet) {
     print(result, row.names = FALSE)
@@ -293,6 +365,7 @@ check_step <- function(step, data_dir = "data/course", work_dir = "results/cours
     if (any(status %in% c("different size", "different contents"))) {
       message("Some files differ. Check the input checkpoint, software version and command options. Keep your current files for diagnosis.")
     }
+    for (note in course_compare_note(compared)) message(note)
     if (isTRUE(attr(result, "complete"))) message("Step ", step, " matches its supplied checkpoint.")
   }
   invisible(result)
@@ -377,14 +450,21 @@ course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
   if (nrow(row) != 1L) stop("No indexed checkpoint is supplied for that step.")
   if (row$kind == "artifacts") {
     manifest <- course_manifest(file.path(data_dir, "checkpoints", step, "MANIFEST.tsv"))
-    status <- vapply(seq_len(nrow(manifest)), function(i) {
+    compared <- lapply(seq_len(nrow(manifest)), function(i) {
       file <- file.path(work_dir, manifest$path[i])
-      if (!file.exists(file)) return("missing")
-      if (digest::digest(file, file = TRUE, algo = "sha256") == manifest$sha256[i]) "matches" else "different contents"
-    }, character(1))
+      if (!file.exists(file)) return(list(status = "missing", max_diff = NA_real_))
+      reference <- file.path(data_dir, "checkpoints", step, manifest$path[i])
+      if (file.exists(reference)) return(course_compare_files(reference, file))
+      list(status = if (digest::digest(file, file = TRUE, algo = "sha256") == manifest$sha256[i]) "matches" else "different contents",
+           max_diff = NA_real_)
+    })
+    status <- vapply(compared, `[[`, character(1), "status")
     result <- data.frame(file = manifest$path, status = status)
-    attr(result, "complete") <- all(status == "matches")
-    if (!quiet) print(result, row.names = FALSE)
+    attr(result, "complete") <- all(status %in% course_ok_statuses)
+    if (!quiet) {
+      print(result, row.names = FALSE)
+      for (note in course_compare_note(compared)) message(note)
+    }
     return(invisible(result))
   }
   prefix <- file.path(work_dir, paste0("s", sub(".", "-", step, fixed = TRUE), "_state"))
@@ -394,17 +474,18 @@ course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
     status <- if (all(counts == as.numeric(row[c("samples", "variants")]))) "matches counts" else "different counts"
     if (row$kind == "full" && status == "matches counts") {
       expected <- file.path(data_dir, "checkpoints", step, "state")
-      for (ext in c(".pgen", ".pvar", ".psam")) {
-        if (digest::digest(paste0(expected, ext), file = TRUE, algo = "sha256") !=
-            digest::digest(paste0(prefix, ext), file = TRUE, algo = "sha256")) status <- "different contents"
-      }
+      kinds <- vapply(c(".pgen", ".pvar", ".psam"), function(ext) {
+        course_compare_files(paste0(expected, ext), paste0(prefix, ext))$status
+      }, character(1))
+      if (any(kinds == "different contents")) status <- "different contents" else
+        if (any(kinds == "matches within rounding")) status <- "matches counts, last digits differ"
     }
   }
   result <- data.frame(step = step, status = status)
-  attr(result, "complete") <- status == "matches counts"
+  attr(result, "complete") <- status %in% c("matches counts", "matches counts, last digits differ")
   if (!quiet) {
     print(result, row.names = FALSE)
-    message(if (status == "matches counts") "The expected counts match. Full checkpoints also receive SHA-256 checks." else
+    message(if (status %in% c("matches counts", "matches counts, last digits differ")) "The expected counts match. Full checkpoints also compare the file contents (line endings are ignored)." else
       "Check the inputs, removal lists and command options; keep the current files for diagnosis.")
   }
   invisible(result)
