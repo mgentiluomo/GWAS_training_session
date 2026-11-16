@@ -410,10 +410,22 @@ course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
   invisible(result)
 }
 
+# The restart id is the first step that you will run again. The five course
+# checkpoints are saved states, not restart steps, so each one has a matching restart id.
+course_checkpoint_restart_ids <- c("2.8" = "3.1", "3.8" = "4.1", "4.6" = "5.1", "5.7" = "6.1", "6.8" = "7.1")
+
 course_index_restore <- function(step, data_dir, work_dir) {
   order <- course_step_order()
   position <- match(step, order)
   if (length(position) != 1L || is.na(position) || position <= match("2.2", order)) stop("Choose a restart step after 2.2.")
+  if (step %in% names(course_checkpoint_restart_ids)) {
+    use <- course_checkpoint_restart_ids[[step]]
+    stop("'", step, "' is the id of a saved checkpoint, not a restart step. The restart id is the first step that you will run. ",
+         "To continue after checkpoint ", step, ", use restore_checkpoint(\"", use, "\").", call. = FALSE)
+  }
+  if (file.exists(file.path(work_dir, "checkpoints", "index.tsv"))) {
+    stop("This work folder already has a checkpoint index. Choose a new work_dir.", call. = FALSE)
+  }
   index <- course_index(data_dir)
   candidates <- match(index$step, order)
   previous <- index$step[which.max(ifelse(candidates < position, candidates, -Inf))]
@@ -483,8 +495,28 @@ course_index_restore <- function(step, data_dir, work_dir) {
     prefix
   }
   prefix <- build(previous)
+  course_index_write_restored(index, previous, work_dir)
   message("Restored ", previous, " from its full checkpoint and stored operations. Restart at ", step, ".")
   invisible(prefix)
+}
+
+# After a restore, the work folder must look like a folder that reached the restored
+# step in the main path: the index lists every checkpoint up to that step, and
+# step_counts.tsv has the rows that the last saved state (not an analysis file) wrote.
+course_index_write_restored <- function(index, previous, work_dir) {
+  order <- course_step_order()
+  position <- match(index$step, order)
+  upto <- index[position <= match(previous, order), , drop = FALSE]
+  states <- upto[upto$kind != "artifacts", , drop = FALSE]
+  last_state <- states$step[nrow(states)]
+  counted <- index[position <= match(last_state, order), c("step", "samples", "variants"), drop = FALSE]
+  dir.create(file.path(work_dir, "checkpoints"), recursive = TRUE, showWarnings = FALSE)
+  write_table <- function(x, path) {
+    utils::write.table(x, path, sep = "\t", quote = FALSE, row.names = FALSE, na = "NA", dec = ".", fileEncoding = "UTF-8")
+  }
+  write_table(upto, file.path(work_dir, "checkpoints", "index.tsv"))
+  write_table(counted, file.path(work_dir, "step_counts.tsv"))
+  invisible(upto)
 }
 
 course_config <- function(root = ".", data_dir = NULL, output_dir = NULL) {

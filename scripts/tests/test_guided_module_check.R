@@ -252,7 +252,7 @@ test_guided_module_check <- function() {
   cat("Module 6 input checks passed: checkpoint, component scores and both metadata files.\n")
   # Module 7 reads the association outputs, final cohort and supplied pre-QC cohort.
   module7 <- guided_module_inputs[["7"]]
-  stopifnot(identical(module7$checkpoint, "6.8"), identical(module7$restart_step, "6.1"),
+  stopifnot(identical(module7$checkpoint, "6.8"), identical(module7$restart_step, "7.1"),
             identical(module7$data, c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv",
               "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam")),
             identical(module7$output, c("s6-4_association.Disease.glm.logistic.hybrid",
@@ -265,7 +265,7 @@ test_guided_module_check <- function() {
     expected <- if (data) paste0(
       "Course metadata are missing. Complete step 0.7 before module 7. Missing: ", paste(missing, collapse = ", ")) else paste0(
       "Some saved files from step 6.8 are missing: ", paste(missing, collapse = ", "),
-      '. Finish module 6 first. Or restart with: restore_checkpoint("6.1") and run module 6 again (use an empty folder).')
+      '. Finish module 6 first. Or restart here with: restore_checkpoint("7.1") (use an empty folder).')
     stopifnot(identical(message, expected))
   }
   touch(module7_data)

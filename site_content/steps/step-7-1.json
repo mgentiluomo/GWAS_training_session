@@ -6,7 +6,7 @@
   "anchor": "step-7-1",
   "title": "QQ plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "06fdeafc05caa2970c1a82cd44bda2870224a2d255ee882c7e10e41e94cd857b",
+  "source_sha256": "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](docs/glossary.md#autosome) variants, on chromosomes 1 to 22.\n\nThe plot reads the [summary statistics file](docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.",

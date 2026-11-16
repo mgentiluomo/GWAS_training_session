@@ -114,7 +114,15 @@ the external program and records its printed command.
 
 ## Rejoining the class
 
-For the guided 2026 course, `restore_checkpoint("3.2")` means restart step 3.2:
+For the guided 2026 course, the id that you give to `restore_checkpoint()` is the
+first step that you will run. To continue after a saved checkpoint, use the first
+step of the next module: `restore_checkpoint("3.1")` after 2.8, `"4.1"` after 3.8,
+`"5.1"` after 4.6, `"6.1"` after 5.7 and `"7.1"` after 6.8. If you give the id of a
+checkpoint itself (for example `"2.8"`), R stops and tells you which id to use.
+The restore also writes `checkpoints/index.tsv` and `step_counts.tsv` in the work
+folder, so the next module runs to the end. Use an empty work folder.
+
+`restore_checkpoint("3.2")` means restart step 3.2:
 it restores the preceding full checkpoint and applies stored removal lists and
 transformations through 3.1. Indexed outputs have prefixes such as
 `results/course/s3-1_state`. Existing files are refused; choose a new work folder.

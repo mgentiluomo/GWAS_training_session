@@ -48,7 +48,8 @@ the notebooks and omits manual installation/download steps. Author checks can
 use `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR` for external input/output folders.
 
 Full genotype checkpoints are at 2.8, 3.8, 4.6 and 5.7; intermediate restarts
-replay stored operations and check counts. Final outputs include Manhattan,
+replay stored operations and check counts. To restart a module, give the first step
+that you will run, for example `restore_checkpoint("5.1")` to start module 5. Final outputs include Manhattan,
 QQ and regional plots, lead variants with effect alleles/intervals, comparisons
 and `s7-8_summary.md`. See [Windows validation](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/VALIDATION.md) and the
 [session report](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/session_report.md) for results and limits.

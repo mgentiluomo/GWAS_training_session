@@ -1626,7 +1626,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
+Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations. To restart, give R the first step that you will run, for example `restore_checkpoint("4.1")` to start module 4. Use an empty output folder.
 
 :::
 
