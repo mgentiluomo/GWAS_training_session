@@ -6,7 +6,7 @@
   "anchor": "step-7-7",
   "title": "Compare without PCs and without QC",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "06fdeafc05caa2970c1a82cd44bda2870224a2d255ee882c7e10e41e94cd857b",
+  "source_sha256": "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.",

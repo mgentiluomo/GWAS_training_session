@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: e6f55f708394f9bcaf536701f1f25dd1001e30192ccd4c5acbc7d90c4ca0e856
+# SHA-256: 1c6fc2774ae9ba15c2af9ca8090264716928f9a4051cd9d4bd45a4b5c531daf4
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311
+# SHA-256: 3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8
 
 # Chunk: setup
 source("R/guided.R")
@@ -801,7 +801,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 06fdeafc05caa2970c1a82cd44bda2870224a2d255ee882c7e10e41e94cd857b
+# SHA-256: 6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31
 
 # Chunk: setup
 source("R/guided.R")

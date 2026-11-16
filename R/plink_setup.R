@@ -65,7 +65,8 @@ course_plink_manifest <- function(root = ".") {
   path <- file.path(root, "third_party", "plink2", "releases.tsv")
   if (!file.exists(path)) stop("The PLINK 2 pin list is missing: ", path, call. = FALSE)
   manifest <- utils::read.delim(path, colClasses = "character", check.names = FALSE)
-  needed <- c("platform", "plink_version", "build_date", "archive_url", "archive_sha256", "member", "executable_sha256")
+  needed <- c("platform", "plink_version", "build_date", "archive_url", "archive_sha256", "member", "executable_sha256",
+              "version_banner")
   if (!all(needed %in% names(manifest)) || anyDuplicated(manifest$platform)) {
     stop("The PLINK 2 pin list is not valid: ", path, call. = FALSE)
   }
@@ -75,11 +76,16 @@ course_plink_manifest <- function(root = ".") {
 course_sha256 <- function(path) digest::digest(path, algo = "sha256", file = TRUE)
 
 course_plink_version_text <- function(row) {
-  # The build date is stored as 2026-11-07 and PLINK prints it as 7 Nov 2026.
-  date <- as.Date(row$build_date)
-  paste0("v", row$plink_version, " ", .Machine$sizeof.pointer * 8L, "-bit (",
-         as.integer(format(date, "%d")), " ", month.abb[as.integer(format(date, "%m"))], " ",
-         format(date, "%Y"), ")")
+  # The exact first line that this build prints. The banner differs by build:
+  # "64-bit" on Windows and Intel macOS, "M1" on Apple Silicon, "LM 64-bit Intel" on Linux.
+  row$version_banner
+}
+
+# Spaces are ignored in the comparison, because the Linux build prints its
+# version and its build word without a space ("v2.0.0-b.1.4LM 64-bit Intel").
+course_plink_banner_matches <- function(expected, output) {
+  squash <- function(x) gsub("[[:space:]]+", "", x)
+  any(grepl(squash(expected), squash(output), fixed = TRUE))
 }
 
 course_plink_run_version <- function(path) {
@@ -87,13 +93,22 @@ course_plink_run_version <- function(path) {
                             error = function(e) paste("Could not run the program:", conditionMessage(e))))
 }
 
-course_plink_run_help <- function(platform, output) {
+course_plink_run_help <- function(platform, output, expected = NULL) {
   text <- paste(output, collapse = " ")
   if (grepl("GLIBC|Kernel too old|kernel too old", text)) {
     return(paste("The Linux system is too old for this PLINK 2 program (message: Kernel too old or missing GLIBC).",
                  "The program needs glibc 2.31 or newer. Ask the instructor for help."))
   }
-  if (identical(substr(platform, 1, 5), "macos")) {
+  # The program started and printed a version line, so nothing blocked it.
+  if (any(grepl("^PLINK v", trimws(output)))) {
+    return(paste0("The program runs, but its version line is not the one the course expects",
+                  if (!is.null(expected)) paste0(" (", expected, ")") else "",
+                  ". This is a problem of the course, not of your computer. Do not change any security setting.",
+                  " Ask the instructor for help and show this message."))
+  }
+  blocked <- !length(output) || !any(nzchar(trimws(output))) ||
+    grepl("killed|cannot be opened|not permitted|damaged|Could not run", text, ignore.case = TRUE)
+  if (identical(substr(platform, 1, 5), "macos") && blocked) {
     return(paste("macOS may have blocked the program. Open the Terminal in the project folder and type this command,",
                  "then run the step again:  xattr -d com.apple.quarantine bin/plink2"))
   }
@@ -133,9 +148,9 @@ prepare_course_plink <- function(root = ".", info = course_plink_system_info(),
   verify <- function(path) {
     output <- version_runner(path)
     expected <- course_plink_version_text(row)
-    if (!any(grepl(expected, output, fixed = TRUE))) {
+    if (!course_plink_banner_matches(expected, output)) {
       stop("The PLINK 2 program did not report the expected version (", expected, "). It printed: ",
-           paste(output, collapse = " "), "\n", course_plink_run_help(platform$id, output), call. = FALSE)
+           paste(output, collapse = " "), "\n", course_plink_run_help(platform$id, output, expected), call. = FALSE)
     }
     invisible(output)
   }

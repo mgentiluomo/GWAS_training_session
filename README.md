@@ -14,7 +14,7 @@ assumed. The guided steps explain the commands, files and statistical terms.
 
 The course follows modules 0 to 7. No programming experience is assumed.
 Start with module 0, which prepares your computer (see [setup](docs/setup.md)).
-Download [GWAS_course-2026.3.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.1/GWAS_course-2026.3.1.zip)
+Download [GWAS_course-2026.3.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.2/GWAS_course-2026.3.2.zip)
 from the versioned project release and extract the complete project. The default branch is `course/2026-guided-training`.
 No branch selection is needed. If you already use Git, `git clone https://github.com/mgentiluomo/GWAS_training_session.git`
 gets the same 2026 course. Its default folder name `GWAS_training_session` also works.
@@ -48,7 +48,8 @@ the notebooks and omits manual installation/download steps. Author checks can
 use `COURSE_DATA_DIR` and `COURSE_OUTPUT_DIR` for external input/output folders.
 
 Full genotype checkpoints are at 2.8, 3.8, 4.6 and 5.7; intermediate restarts
-replay stored operations and check counts. Final outputs include Manhattan,
+replay stored operations and check counts. To restart a module, give the first step
+that you will run, for example `restore_checkpoint("5.1")` to start module 5. Final outputs include Manhattan,
 QQ and regional plots, lead variants with effect alleles/intervals, comparisons
 and `s7-8_summary.md`. See [Windows validation](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/VALIDATION.md) and the
 [session report](https://github.com/mgentiluomo/GWAS_training_session/blob/course/2026-guided-training/docs/session_report.md) for results and limits.

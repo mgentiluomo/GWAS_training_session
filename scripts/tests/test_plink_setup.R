@@ -49,6 +49,10 @@ for (case in list(
 }
 
 # 2. A fake project with a pin list that points at fake programs and archives.
+banners <- c("windows-x86_64" = "PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)",
+             "macos-arm64" = "PLINK v2.0.0-b.1.4 M1 (7 Nov 2026)",
+             "macos-x86_64" = "PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)",
+             "linux-x86_64" = "PLINK v2.0.0-b.1.4LM 64-bit Intel (7 Nov 2026)")
 make_project <- function(platform = "linux-x86_64", member = "plink2", bytes = "fake plink program one") {
   root <- tempfile("project-")
   dir.create(file.path(root, "third_party", "plink2"), recursive = TRUE)
@@ -60,12 +64,13 @@ make_project <- function(platform = "linux-x86_64", member = "plink2", bytes = "
   write_stored_zip(zipfile, member, charToRaw(bytes))
   rows <- data.frame(platform = platform, plink_version = "2.0.0-b.1.4", build_date = "2026-11-07",
                      archive_url = "https://example.invalid/fake.zip", archive_sha256 = course_sha256(zipfile),
-                     member = member, executable_sha256 = course_sha256(program), stringsAsFactors = FALSE)
+                     member = member, executable_sha256 = course_sha256(program),
+                     version_banner = banners[[platform]], stringsAsFactors = FALSE)
   utils::write.table(rows, file.path(root, "third_party", "plink2", "releases.tsv"), sep = "\t",
                      quote = FALSE, row.names = FALSE)
   list(root = root, zip = zipfile, program = program, rows = rows)
 }
-good_version <- function(path) "PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)"
+good_version <- function(path) banners[["linux-x86_64"]]
 linux <- info("Linux", "x86_64", glibc = "2.35")
 no_network <- function(url, destination) stop("The test must not use the network.")
 copy_zip <- function(project) function(url, destination) {
@@ -127,6 +132,23 @@ fail_with(prepare_course_plink(tempfile(), linux, no_network, good_version, quie
 project <- make_project(platform = "macos-arm64")
 fail_with(prepare_course_plink(project$root, linux, no_network, good_version, quiet = TRUE), "no entry for linux-x86_64")
 
+# 6b. Each of the four builds passes with its own banner and fails with another build's banner.
+for (id in names(banners)) {
+  sysname <- c("windows-x86_64" = "Windows", "macos-arm64" = "Darwin", "macos-x86_64" = "Darwin", "linux-x86_64" = "Linux")[[id]]
+  machine <- c("windows-x86_64" = "x86-64", "macos-arm64" = "arm64", "macos-x86_64" = "x86_64", "linux-x86_64" = "x86_64")[[id]]
+  system_info <- if (identical(sysname, "Linux")) info(sysname, machine, glibc = "2.35") else info(sysname, machine)
+  project <- make_project(platform = id, member = if (identical(sysname, "Windows")) "plink2.exe" else "plink2")
+  ok <- prepare_course_plink(project$root, system_info, copy_zip(project), function(path) banners[[id]], quiet = TRUE)
+  stopifnot(identical(ok$status, "prepared"))
+  other <- setdiff(unique(banners), banners[[id]])[1]
+  project <- make_project(platform = id, member = if (identical(sysname, "Windows")) "plink2.exe" else "plink2")
+  fail_with(prepare_course_plink(project$root, system_info, copy_zip(project), function(path) other, quiet = TRUE),
+            "did not report the expected version")
+}
+# The Linux build may print its version with or without a space before "LM".
+stopifnot(course_plink_banner_matches(banners[["linux-x86_64"]], "PLINK v2.0.0-b.1.4 LM 64-bit Intel (7 Nov 2026)"))
+stopifnot(!course_plink_banner_matches(banners[["linux-x86_64"]], "PLINK v2.0.0-b.1.5LM 64-bit Intel (7 Nov 2026)"))
+
 # 7. Help text for macOS quarantine and an old Linux kernel.
 mac <- course_plink_run_help("macos-arm64", "zsh: killed ./plink2")
 stopifnot(grepl("xattr -d com.apple.quarantine bin/plink2", mac, fixed = TRUE))
@@ -138,9 +160,27 @@ mac_info <- info("Darwin", "arm64")
 failure <- tryCatch(prepare_course_plink(project$root, mac_info, copy_zip(project), function(path) "killed", quiet = TRUE),
                     error = conditionMessage)
 stopifnot(grepl("xattr -d com.apple.quarantine", failure, fixed = TRUE))
+# The program runs but prints another version line (the Apple Silicon case): no xattr advice.
+mac_runs <- course_plink_run_help("macos-arm64", "PLINK v2.0.0-b.2 M1 (1 Jan 2027)", banners[["macos-arm64"]])
+stopifnot(!grepl("xattr", mac_runs, fixed = TRUE), grepl("not the one the course expects", mac_runs, fixed = TRUE))
+project <- make_project(platform = "macos-arm64")
+failure <- tryCatch(prepare_course_plink(project$root, mac_info, copy_zip(project),
+                                         function(path) "PLINK v2.0.0-b.2 M1 (1 Jan 2027)", quiet = TRUE),
+                    error = conditionMessage)
+stopifnot(!grepl("xattr", failure, fixed = TRUE), grepl("not the one the course expects", failure, fixed = TRUE))
+# An empty output (the program did not start) still shows the xattr advice.
+stopifnot(grepl("xattr", course_plink_run_help("macos-x86_64", character(0)), fixed = TRUE))
 
 # 8. Version text for the real pin list, and no em dash in the helper.
 manifest <- course_plink_manifest(".")
-stopifnot(identical(course_plink_version_text(manifest[1, ]), "v2.0.0-b.1.4 64-bit (7 Nov 2026)"))
+for (id in names(banners)) {
+  stopifnot(identical(course_plink_version_text(manifest[manifest$platform == id, ]), banners[[id]]))
+}
+# The version check of the course set-up (R/course.R) uses only the version token of config.R,
+# so it must be found in the banner of every build, and no text may assume "64-bit".
+config_line <- grep("tested_plink_version", readLines("config.R"), value = TRUE)[1]
+tested_token <- strsplit(sub('.*"(PLINK [^"]*)".*', "\\1", config_line), " ", fixed = TRUE)[[1]][2L]
+stopifnot(identical(tested_token, "v2.0.0-b.1.4"))
+for (id in names(banners)) stopifnot(grepl(tested_token, banners[[id]], fixed = TRUE))
 stopifnot(!grepl("—", paste(readLines("R/plink_setup.R", encoding = "UTF-8"), collapse = "\n")))
 cat("PLINK 2 provisioning tests passed: platforms, hashes, copy, permissions, version, kept programs and messages.\n")

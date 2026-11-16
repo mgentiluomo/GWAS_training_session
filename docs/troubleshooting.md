@@ -114,13 +114,28 @@ the external program and records its printed command.
 
 ## Rejoining the class
 
-For the guided 2026 course, `restore_checkpoint("3.2")` means restart step 3.2:
+For the guided 2026 course, the id that you give to `restore_checkpoint()` is the
+first step that you will run. To continue after a saved checkpoint, use the first
+step of the next module: `restore_checkpoint("3.1")` after 2.8, `"4.1"` after 3.8,
+`"5.1"` after 4.6, `"6.1"` after 5.7 and `"7.1"` after 6.8. If you give the id of a
+checkpoint itself (for example `"2.8"`), R stops and tells you which id to use.
+The restore also writes `checkpoints/index.tsv` and `step_counts.tsv` in the work
+folder, so the next module runs to the end. Use an empty work folder.
+
+`restore_checkpoint("3.2")` means restart step 3.2:
 it restores the preceding full checkpoint and applies stored removal lists and
 transformations through 3.1. Indexed outputs have prefixes such as
 `results/course/s3-1_state`. Existing files are refused; choose a new work folder.
 Use `check_step("3.1")` to compare supplied outputs and `where_am_i()` to list
 verified progress. All three helpers accept `data_dir` and `work_dir` for a
 local installation outside the project.
+
+`check_step()` and `where_am_i()` compare file contents, not hashes, so that a run on
+Windows, macOS and Linux can match. Text and table files are compared with the line
+endings removed. Numbers may differ by a relative 1e-9 (the last printed digit of a
+number can change between systems). The result is "matches", "matches within
+rounding" (the largest difference is shown) or "different contents". Binary files such
+as `.pgen` must be identical. Figures and software records are not compared.
 
 The published `data-2026.1` package uses a boundary layout, with complete filesets
 at 2.8, 3.8, 4.6 and 5.7. `checkpoints/index.tsv` records expected counts and

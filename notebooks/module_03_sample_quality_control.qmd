@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "319bfe6dbcb31d164122b74bfec38329277d507f2c080bb604adcf9ee3703311"
+course_source_sha256: "3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -556,7 +556,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
+Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations. To restart, give R the first step that you will run, for example `restore_checkpoint("4.1")` to start module 4. Use an empty output folder.
 
 :::
 

@@ -167,7 +167,7 @@ We download and extract the complete course project. Keeping its files together 
 
 ::: {.callout-note title="What you do"}
 
-No R code runs in this step. Download [GWAS_course-2026.3.1.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.1/GWAS_course-2026.3.1.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
+No R code runs in this step. Download [GWAS_course-2026.3.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.2/GWAS_course-2026.3.2.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
 
 :::
 
@@ -1626,7 +1626,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
+Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations. To restart, give R the first step that you will run, for example `restore_checkpoint("4.1")` to start module 4. Use an empty output folder.
 
 :::
 
