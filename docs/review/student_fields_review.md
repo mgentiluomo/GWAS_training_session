@@ -1,5 +1,66 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 16 November, release 2026.3.3
+
+Written for the author, Manuel Gentiluomo. Status: release 2026.3.3 and website published. History was not rewritten. Choices that I made without asking are marked "Choice".
+
+### Result in one table
+
+| Item | Value |
+| --- | --- |
+| Project release | `project-2026.3.3`, not a pre-release: https://github.com/mgentiluomo/GWAS_training_session/releases/tag/project-2026.3.3 |
+| Tag | annotated `project-2026.3.3` on `78c8266` (merge commit of `course/2026-guided-training`) |
+| Asset | `GWAS_course-2026.3.3.zip`, 21,522,378 bytes, 75 files |
+| SHA-256 | `34e7444eca8aec25f44e8b0450f790a9b652e04044873c02302ad756aaf8064e` |
+| Download check | The public URL gave the same SHA-256 and size. |
+| Other assets | `GWAS_course-2026.3.3.zip.sha256`, `plink-ng-v2.0.0-b.1.4-source.zip` (the same archive as before) |
+| PLINK programs and data | Unchanged (Beta 1.4 of 7 November 2026, `data-2026.1`). |
+| Website | `main` at `0deeeca`. Live: step 0.3 links `GWAS_course-2026.3.3.zip` (11 links), step 0.6 shows the quarantine text. No revert was needed. |
+
+### Start of the session
+
+- `fetch` and `pull --ff-only` aligned `notebooks/all-modules` (`96491a7`) and `course/2026-guided-training` (`6f788e4`), the two commits from the Mac. I read `docs/review/plink_apple_silicon_check.md`, the retest of 2026.3.2 and its two proposed corrections.
+
+### Correction 1. Step 0.6 and the quarantine mark (commit `a2d0a6a`)
+
+- The step text now says: run only the command of the step, `prepare_course_plink()`, and do not open the programs inside `third_party/` by hand.
+- "If something goes wrong" now says in short paragraphs: why macOS can block a program that you start yourself (the browser marks the ZIP, macOS copies the mark to every file inside, the copy in `bin/` has no mark); if macOS warns about `bin/plink2`, choose "Done" and not "Move to Bin", then type `xattr -d com.apple.quarantine bin/plink2` in the project folder and run the step again; if `bin/plink2` has disappeared, run step 0.6 again, and extract the ZIP again if the program in `third_party/` has gone too. The link to Apple's instructions stays, with "Open Anyway" as the second route.
+- Step 0.8: I read it and the messages of `R/course.R` and `R/plink_setup.R`. Nothing contradicts the new text, so I did not change them. The `xattr` advice in `course_plink_run_help()` is still given only when macOS blocked the program.
+- Choice: the wording "choose Done" follows your instruction. The Mac report did not see the text of the macOS window, so I cannot confirm the label of the button on a real Mac.
+
+### Correction 2. Restart test (commit `9bec9dd`)
+
+- `scripts/author/test_checkpoint_restarts.R` compares the eight key files with `course_compare_files()`, the same function as `check_step()`. It prints "matches", "matches within rounding" or "different contents" for each file, with the largest difference, and passes only for the first two.
+- Run here (Windows, work folder outside the repository, verified staging data): **all five checkpoints pass** (2.8 with `"3.1"`, 3.8 with `"4.1"`, 4.6 with `"5.1"`, 5.7 with `"6.1"`, 6.8 with `"7.1"`). All 40 comparisons gave "matches", largest difference 0. Windows files have the same line endings and digits as the complete run, so "matches within rounding" cannot occur here. The tolerance and the line-ending rule are covered by `test_file_comparison.R` (CRLF against LF, a difference of 1e-15 accepted, a difference of 1e-3 rejected). A run on the Mac is the real proof for macOS.
+
+### Release steps
+
+- Version 2026.3.3 in `README.md`, step 0.3 of the lesson, the packager defaults, `docs/release_checklist.md` and `docs/CHANGELOG.md` (commit `9ef6f58`, with the regenerated site JSON, `run_main_path.R` and the nine notebooks). Merged without squash into `course/2026-guided-training` (`78c8266`) and pushed.
+- Comment-only proof against `project-2026.3.2`: passed for lesson R chunks, the main-path script and the exported R commands. Only the source hash of `run_main_path.R` and the text of step 0.6 changed.
+
+### Checks
+
+- Regenerated: 64 step JSON, 8 module JSON, `run_main_path.R`, 9 notebooks (`--check-notebooks` up to date). `check_text.py`: 0 errors, 0 warnings.
+- Python: `test_plink_pins`, `test_course_exports`, `test_student_notebooks`, `test_project_package`, `test_package_release` (1 skipped), `test_prove_comment_only`, `test_format_examples`, `test_sim2026` (36 tests): all passed.
+- R: `test_plink_setup`, `test_course_setup` (30), `test_preflight_no_data`, `test_preflight_output`, `test_summary_stats`, `test_guided_module_check`, `test_guided_modules`, `test_checkpoints`, `test_checkpoint_replay`, `test_file_comparison`, `test_session_locale`, `test_unicode_plink`, `test_main_path_recovery` (seven restarts) and `check_course.R`: all passed.
+- The nine `.qmd` rendered with the Quarto of RStudio in a copy of the project outside the repository, all exit 0. Each render prints the known knitr message about the working directory.
+- Package: `package_project.py --version 2026.3.3 --plink-cache C:\PLINK_downloads --fresh-check --check-urls`. Archive layout, allowlist and fresh-folder tests passed for the folders `GWAS_course` and `GWAS_training_session`. Of 78 links, 56 gave 200, 16 gave 203 (PubMed) and 5 gave 403 (sites that block scripts: UK Biobank, All of Us, Oxford and Complete Genomics). These 5 were also blocked before. The new asset URL was "pending", as expected.
+- Student trial in a new folder from the ZIP: `check_course.R`, `prepare_course_plink()` (`PLINK 2 2.0.0-b.1.4 is ready in bin/ (windows-x86_64, from the package)`, line `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`) and the preflight with data (`Preflight passed.`). Quick trial only: the whole main path was not repeated from the ZIP, because the main path itself was run in the restart test with the same code.
+
+### Website
+
+- `npm run sync:gwas` from `course/2026-guided-training` at `78c8266`. Twelve files changed (module 0 JSON, steps 0.1 to 0.8, the module 0 and complete notebooks, `index.json`). `tsc` clean, lint 0 errors (10 old warnings), normal build and `GWAS_REVIEW_BUILD=1` build passed.
+- axe (WCAG 2.0 to 2.2 A and AA) on steps 0.3 and 0.6 at 390 and 1280 px, light and dark: **0 violations in all 8 combinations** with axe-core 4.10.2, no page scroll. Choice: I used 4.10.2 because it gives the same result as the earlier sessions (0 violations).
+- **Finding, not new.** axe-core 4.14.1 reports one violation on both pages, `label-content-name-mismatch` (WCAG 2.5.3, "Label in Name"), on the logo link of the header: `<a ... aria-label="Home" href="/">`. The visible text of the link is not part of its accessible name. The live site from release 2026.3.2 shows the same finding, so this release did not cause it. It belongs to the site header and I did not change it.
+- `course/notebook-style` `372627d`, merged into `main` with `--no-ff` (`0deeeca`) and pushed. Live after about a minute: as in the table.
+
+### Still open
+
+- Only macOS Intel and Linux remain (see `docs/plink_office_comparison_checklist.md`). On the Intel Mac, download the ZIP with a browser, so that the real macOS window and the new text of step 0.6 are seen. The Linux banner and the Intel macOS banner come from the programs, not from runs.
+- Header logo link of the site (`aria-label="Home"`): add the visible name to the accessible name.
+- Choice: I did not merge `plink/bundle` with the new commits. It has no change that the course needs.
+- New folders outside the repository: `C:\GWAS_work_2026.3.3` (test runs, renders and axe tools, about 11 GB) and `C:\GWAS_release_2026.3.3` (the ZIP and its report). They can be deleted by hand.
+
 ## Session of 16 November, release 2026.3.2
 
 Written for the author, Manuel Gentiluomo. Status: release 2026.3.2 and website published. History was not rewritten. Choices that I made without asking are marked "Choice".
