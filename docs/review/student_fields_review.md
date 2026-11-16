@@ -1,5 +1,67 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 16 November, release 2026.3.2
+
+Written for the author, Manuel Gentiluomo. Status: release 2026.3.2 and website published. History was not rewritten. Choices that I made without asking are marked "Choice".
+
+### Result in one table
+
+| Item | Value |
+| --- | --- |
+| Project release | `project-2026.3.2`, not a pre-release: https://github.com/mgentiluomo/GWAS_training_session/releases/tag/project-2026.3.2 |
+| Tag | annotated `project-2026.3.2` on `83411df` (merge commit of `course/2026-guided-training`) |
+| Asset | `GWAS_course-2026.3.2.zip`, 21,522,149 bytes, 75 files |
+| SHA-256 | `6274733f03e3d6e0cd57f613e4378d044c342ee476ea3edac2ca95a5ba007b53` |
+| Download check | The public URL gave the same SHA-256 and size. |
+| Other assets | `GWAS_course-2026.3.2.zip.sha256`, `plink-ng-v2.0.0-b.1.4-source.zip` (same archive as before) |
+| PLINK programs and data | Unchanged (Beta 1.4 of 7 November 2026, `data-2026.1`). |
+| Website | `main` at `9cec15f`. Live: step 0.3 links `GWAS_course-2026.3.2.zip` (11 links), steps 0.5 to 0.7 show no "Optional". |
+
+### Correction 1. PLINK version line (commit `97b38f5`)
+
+- `third_party/plink2/releases.tsv` has a new column `version_banner`. I read the line in each pinned program (the hashes equal the pins): Windows and macOS Intel `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`, macOS arm64 `PLINK v2.0.0-b.1.4 M1 (7 Nov 2026)`, Linux `PLINK v2.0.0-b.1.4LM 64-bit Intel (7 Nov 2026)`. Linux and Intel macOS were not run here.
+- Choice: the comparison ignores spaces, because the Linux line has no space before `LM` and I could not run it. The program hash is still checked first.
+- `course_plink_run_help()` gives the `xattr` advice only when the output is empty or looks blocked (killed, cannot be opened, not permitted, damaged, could not run). If the program runs but prints another version line, the message says in plain words that the version is not the one of the course and not to change any security setting.
+- `R/course.R` (`tested_plink_version`) and `scripts/preflight.R` check only the token `v2.0.0-b.1.4`, so the preflight does not warn for Mac or Linux. The student texts (steps 0.6 and 0.8, success lines) do not assume "64-bit".
+- Tests: `test_plink_setup.R` has a case for each of the four builds (pass with its own line, fail with another), the space rule, the `M1` message without `xattr`, the empty output with `xattr`, and the check that the config token is in all four lines. `test_plink_pins.py` checks the column and the four lines.
+
+### Correction 2. Restart from checkpoints (commit `a88067f`)
+
+- Rule (Choice): the id is the first step that you will run: `3.1`, `4.1`, `5.1`, `6.1`, `7.1` for the checkpoints 2.8, 3.8, 4.6, 5.7 and 6.8. The metadata of module 7 now says `7.1` (it said `6.1`, which restored 5.7).
+- `restore_checkpoint("2.8")` (and 3.8, 4.6, 5.7, 6.8) now stops before it restores anything and says which id to use.
+- `course_index_restore()` now writes `checkpoints/index.tsv` (all indexed rows up to the restored state) and `step_counts.tsv` (the rows that the last saved state wrote, as in the main path). A work folder that already has an index is refused.
+- Texts: step 3.8 (which says how to restart), `docs/troubleshooting.md` and `README.md` explain the rule. The "Or restart here with" messages use the new ids.
+- Tests: `test_checkpoint_replay.R` checks the index, the counts and the message. `test_guided_module_check.R` has the module 7 id.
+- New author test `scripts/author/test_checkpoint_restarts.R`. For each checkpoint, in a new folder with the verified staging data, it restores, runs `guided_check_module()` and the chunks of every later module (from `run_main_path.R`) to the end, and compares `step_counts.tsv`, `checkpoints/index.tsv`, the association file, the summary statistics, the PCs, lambda, leads and clumps with a complete main-path run. **Passed for all five.** All eight files were byte for byte equal each time.
+
+### Correction 3. File comparison across systems (commit `16fe97f`)
+
+- `check_step()` and `where_am_i()` now compare content. Text and tables: line endings removed. Numbers: relative tolerance 1e-9 (`|a - b| <= 1e-9 * max(|a|, |b|)`), so a p-value near 1e-16 is still compared properly. The largest difference is shown. Messages: "matches", "matches within rounding", "different contents".
+- Binary files (`.pgen`, `.bed`) must be identical. Choice for figures (`.png`) and `software_versions.txt`: not compared byte for byte, shown as "not compared", because each system draws and writes them differently. The line `Software:` of `s7-8_summary.md` is ignored because it names the PLINK build.
+- On the Windows run, `where_am_i()` gives "complete" for all 30 checkpoints. A copy of the shipped `beta` file with LF endings gives "matches".
+- Tests (`test_file_comparison.R`): CRLF against LF equal, a difference of 1e-15 accepted with the difference shown, a difference of 1e-3 and a changed p-value near zero reported, a changed word and a missing line reported, binary and figure rules, and the three messages through `check_step()`.
+
+### Checks
+
+- Regenerated: export, 64 step JSON, 8 module JSON, `run_main_path.R`, 9 notebooks (`--check-notebooks` up to date).
+- Comment-only proof against `cb9f95d`: passed. The changed lesson text is outside code chunks; the only metadata change is the module 7 restart id.
+- Python: `test_plink_pins` 3, `test_course_exports` 22, `test_student_notebooks` 35, `test_project_package` 17, `test_package_release` (1 skipped), `test_prove_comment_only`, author tests 6. `check_text.py`: 0 errors.
+- R: `test_plink_setup`, `test_course_setup`, `test_preflight_no_data`, `test_preflight_output`, `test_summary_stats`, `test_guided_module_check`, `test_guided_modules`, `test_checkpoints`, `test_checkpoint_replay`, `test_file_comparison`, `test_session_locale`, `test_unicode_plink`, `check_course.R`: all passed. The tests that need data ran with the verified staging folder.
+- Package: `package_project.py --version 2026.3.2 --plink-cache`. Student trial in a new folder: `check_course.R`, first chunk of module 0, `prepare_course_plink()` (from the package, hash equal to the pin, `PLINK v2.0.0-b.1.4 64-bit`), preflight with data, `run_main_path.R` (exit 0), and a restart with `restore_checkpoint("5.1")` then modules 5 to 7 (exit 0). Its `step_counts.tsv`, `checkpoints/index.tsv`, summary statistics and association file are byte for byte equal to the complete run.
+- The nine `.qmd` rendered with the Quarto of RStudio, all exit 0. Each render prints the known knitr message about the working directory (same as 2026.3.1).
+
+### Website
+
+- `npm run sync:gwas` from `course/2026-guided-training` at `83411df` (32 files changed), `tsc` clean, lint 0 errors (10 old warnings), normal build and `GWAS_REVIEW_BUILD=1` build passed.
+- axe (WCAG 2.0 to 2.2 A and AA) on steps 0.3, 0.6, 0.8 and 3.8 at 390 and 1280 px, light and dark: **0 violations in all 16 combinations**, no page scroll. Steps 0.8 and 3.8 contain the word "Optional" in terminal-equivalent labels. That is intended and was there before.
+- `course/notebook-style` `124d682`, merged into `main` with `--no-ff` (`9cec15f`) and pushed. Live about 3 minutes later: as in the table. No revert was needed.
+
+### Still open
+
+- Repeat the Mac test (see `docs/plink_office_comparison_checklist.md`), then macOS Intel and Linux.
+- The Linux banner and the Intel macOS banner come from the programs, not from runs.
+- The empty folder `C:\GWAS_pkg` from the earlier session can be deleted by hand. New folders outside the repository: `C:\GWAS_release_2026.3.2` and `C:\GWAS_plinkstr` (test runs, about 2 GB).
+
 ## Session of 16 November, office confirmation and release 2026.3.1
 
 Written for the author, Manuel Gentiluomo. Status: release and website published. History was not rewritten.
