@@ -5,6 +5,10 @@
 #   2. runs guided_check_module() for each later module, and then the chunks of that module
 #      (taken from scripts/run_main_path.R),
 #   3. compares step_counts.tsv, checkpoints/index.tsv and the key result files with a complete main-path run.
+# The comparison is course_compare_files(), the same one that check_step() uses: line endings are ignored
+# (Windows CRLF against macOS and Linux LF) and numbers may differ by a relative 1e-9. Each file is reported as
+# "matches", "matches within rounding" or "different contents", with the largest difference. The test passes only
+# when every key file matches or matches within rounding, so it can pass on Windows, macOS and Linux.
 # The complete run is made first, in its own new folder, unless COURSE_CANONICAL_RUN names one.
 #
 # Run from the project root:
@@ -56,7 +60,24 @@ run <- function(label, lines, output) {
 
 key_files <- c("step_counts.tsv", "checkpoints/index.tsv", "s6-4_association.Disease.glm.logistic.hybrid",
                "s6-8_gwas_summary_statistics.tsv", "s5-7_pca.eigenvec", "s7-2_lambda.tsv", "s7-8_leads.tsv", "s7-5_clump.clumps")
-hash <- function(path) digest::digest(path, algo = "sha256", file = TRUE)
+
+# Compare each key file of a run with the same file of the complete run, as check_step() does.
+compare_key_files <- function(output) {
+  do.call(rbind, lapply(key_files, function(f) {
+    if (!file.exists(file.path(output, f))) {
+      return(data.frame(file = f, status = "different contents", max_diff = NA_real_, stringsAsFactors = FALSE))
+    }
+    result <- course_compare_files(file.path(canonical, f), file.path(output, f))
+    data.frame(file = f, status = result$status, max_diff = result$max_diff, stringsAsFactors = FALSE)
+  }))
+}
+describe_comparison <- function(table) {
+  vapply(seq_len(nrow(table)), function(i) {
+    diff <- table$max_diff[i]
+    size <- if (is.na(diff)) "largest difference: not a difference of numbers" else paste("largest difference:", format(diff, digits = 3))
+    sprintf("  %-50s %-24s %s", table$file[i], table$status[i], size)
+  }, character(1))
+}
 
 canonical <- Sys.getenv("COURSE_CANONICAL_RUN", unset = "")
 if (!nzchar(canonical)) {
@@ -65,8 +86,8 @@ if (!nzchar(canonical)) {
   run("complete", readLines("scripts/run_main_path.R", warn = FALSE), canonical)
 }
 stopifnot(dir.exists(canonical))
-reference <- vapply(key_files, function(f) if (file.exists(file.path(canonical, f))) hash(file.path(canonical, f)) else NA_character_, character(1))
-if (anyNA(reference)) stop("The complete run lacks: ", paste(key_files[is.na(reference)], collapse = ", "), call. = FALSE)
+lacking <- key_files[!file.exists(file.path(canonical, key_files))]
+if (length(lacking)) stop("The complete run lacks: ", paste(lacking, collapse = ", "), call. = FALSE)
 cat("Complete run has", nrow(read.delim(file.path(canonical, "step_counts.tsv"))), "rows in step_counts.tsv\n")
 
 results <- character()
@@ -81,15 +102,18 @@ for (k in seq_len(nrow(cases))) {
   }
   cat(sprintf("Checkpoint %s: restore_checkpoint(\"%s\"), then modules %d to 7\n", case$checkpoint, case$restart, case$first_module))
   run(paste0("restart_", case$checkpoint), lines, output)
-  found <- vapply(key_files, function(f) if (file.exists(file.path(output, f))) hash(file.path(output, f)) else NA_character_, character(1))
-  different <- key_files[is.na(found) | found != reference]
+  comparison <- compare_key_files(output)
+  cat(describe_comparison(comparison), sep = "\n")
+  different <- comparison$file[!comparison$status %in% c("matches", "matches within rounding")]
   if (length(different)) {
-    stop("After the restart from ", case$checkpoint, " these files differ from the complete run: ",
+    stop("After the restart from ", case$checkpoint, " these files have different contents from the complete run: ",
          paste(different, collapse = ", "), call. = FALSE)
   }
-  results <- c(results, sprintf("PASS: restart from %s with restore_checkpoint(\"%s\"); modules %d to 7 ran; %d key files equal the complete run.",
-                                case$checkpoint, case$restart, case$first_module, length(key_files)))
-  cat(tail(results, 1), "\n")
+  rounded <- sum(comparison$status == "matches within rounding")
+  line <- sprintf("PASS: restart from %s with restore_checkpoint(\"%s\"); modules %d to 7 ran; %d key files match the complete run (%d within rounding).",
+                  case$checkpoint, case$restart, case$first_module, length(key_files), rounded)
+  results <- c(results, line, describe_comparison(comparison))
+  cat(line, "\n")
 }
 
 # The old, confusing calls must now give a clear message and restore nothing.

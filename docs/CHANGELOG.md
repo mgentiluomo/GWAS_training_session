@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.3.3 (project release, 16 November 2026)
+
+- Step 0.6 explains the macOS quarantine mark in short steps. Run only `prepare_course_plink()`. Do not open the programs inside `third_party/` by hand, because macOS can block them and move them to the Bin. If macOS shows a warning about `bin/plink2`, choose "Done", not "Move to Bin". Then remove the mark with `xattr -d com.apple.quarantine bin/plink2` and run the step again. If `bin/plink2` has disappeared, run step 0.6 again. The link to Apple's instructions stays.
+- The author test for restarts now compares files with the same function as `check_step()`. It can pass on macOS and Linux. It is not part of the student package.
+- Nothing else changes for students. The PLINK programs are unchanged. The data release is unchanged (`data-2026.1`).
+
 ## 2026.3.2 (project release, 16 November 2026)
 
 - The PLINK version line is checked for each build. The pin list has a new column, `version_banner`, with the exact line that each program prints: `64-bit` on Windows and Intel macOS, `M1` on Apple Silicon and `LM 64-bit Intel` on Linux. `prepare_course_plink()` no longer fails on Apple Silicon. If the program runs but prints another version line, the message says that the version is not the one of the course. It gives the `xattr` advice only when macOS blocked the program. The Linux line was read from the program and has not been run on Linux yet.

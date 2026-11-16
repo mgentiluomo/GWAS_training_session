@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "1c6fc2774ae9ba15c2af9ca8090264716928f9a4051cd9d4bd45a4b5c531daf4"
+course_source_sha256: "2986ae658713e60f7dbc4e8f6403ffe4117373bb62c95443f2523ff59a8d0860"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -89,7 +89,7 @@ We download and extract the complete course project. Keeping its files together 
 
 ::: {.callout-note title="What you do"}
 
-No R code runs in this step. Download [GWAS_course-2026.3.2.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.2/GWAS_course-2026.3.2.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
+No R code runs in this step. Download [GWAS_course-2026.3.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.3/GWAS_course-2026.3.3.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
 
 :::
 
