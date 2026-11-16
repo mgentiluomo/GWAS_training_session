@@ -34,7 +34,7 @@ guided_module_inputs <- list(
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
   output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s5-7_pca.eigenvec")),
 `7` = list(
-  checkpoint = "6.8", restart_step = "6.1",
+  checkpoint = "6.8", restart_step = "7.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv", "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam"),
   output = c("s6-4_association.Disease.glm.logistic.hybrid", "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv"))
 )

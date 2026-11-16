@@ -16,7 +16,7 @@ The Windows x86_64 program was run with `--version` on Windows and printed `PLIN
 
 | File | Content |
 | --- | --- |
-| `releases.tsv` | One row for each supported platform: official archive address, archive SHA-256 and size, the executable inside the archive with its SHA-256 and size, and the source tag and commit. |
+| `releases.tsv` | One row for each supported platform: official archive address, archive SHA-256 and size, the executable inside the archive with its SHA-256 and size, the source tag and commit, and the exact version line (`version_banner`) that the program prints. The line differs by build: `64-bit` on Windows and Intel macOS, `M1` on Apple Silicon, `LM 64-bit Intel` on Linux (read from the program, not yet run on Linux). |
 | `COPYING` | GNU General Public License version 3, taken from the source tag. |
 | `notices/` | Licence texts of the parts that PLINK 2 includes (LGPL, BSD, MIT and a QD library licence) and the Intel licence text that the Linux archive ships. |
 

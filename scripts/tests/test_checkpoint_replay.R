@@ -30,5 +30,15 @@ local({
     isTRUE(attr(check_step("3.1", data, output), "complete")))
   failed <- tryCatch({restore_checkpoint("3.2", data, output); FALSE}, error = function(e) TRUE)
   stopifnot(failed)
+  # The restore writes the index and the step counts, so that the next module can run.
+  index <- read.delim(file.path(output, "checkpoints", "index.tsv"), colClasses = "character", na.strings = NULL)
+  counts <- read.delim(file.path(output, "step_counts.tsv"), colClasses = "character")
+  stopifnot(identical(index$step, c("2.8", "3.1")), identical(index$kind, c("full", "replay")),
+            identical(index$parent, c("", "2.8")), identical(counts$step, c("2.8", "3.1")),
+            identical(counts$samples, c("3", "2")), identical(counts$variants, c("5", "4")))
+  # A checkpoint id is not a restart step: the message names the id to use.
+  wrong <- tryCatch({restore_checkpoint("2.8", data, file.path(root, "wrong")); "no error"}, error = conditionMessage)
+  stopifnot(grepl("not a restart step", wrong, fixed = TRUE), grepl('restore_checkpoint("3.1")', wrong, fixed = TRUE),
+            !dir.exists(file.path(root, "wrong")))
   cat("Full-boundary checkpoint replay and count verification passed.\n")
 })

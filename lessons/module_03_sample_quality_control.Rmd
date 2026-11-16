@@ -822,7 +822,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations.
+Module 3 boundary: 1,844 samples and 296,360 variants. The restart operations for the steps in between are stored. The complete main-path package supplies full genotype copies at steps 2.8, 3.8, 4.6 and 5.7. Steps 4.6 and 5.7 are the ends of later modules. You can rebuild the states in between from the previous full checkpoint and the stored replay operations. To restart, give R the first step that you will run, for example `restore_checkpoint("4.1")` to start module 4. Use an empty output folder.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->

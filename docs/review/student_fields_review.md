@@ -2,7 +2,7 @@
 
 ## Session of 16 November, office confirmation and release 2026.3.1
 
-Written for the author, Manuel Gentiluomo. Status: release published, website not updated. History was not rewritten.
+Written for the author, Manuel Gentiluomo. Status: release and website published. History was not rewritten.
 
 ### Result in one table
 
@@ -16,7 +16,7 @@ Written for the author, Manuel Gentiluomo. Status: release published, website no
 | Download check | The public URL gave the same SHA-256 and size. |
 | Other assets | `GWAS_course-2026.3.1.zip.sha256`, `plink-ng-v2.0.0-b.1.4-source.zip` (the same archive as in 2026.3, SHA-256 `012cf4f54285b31b75a6cf3ab695770a2f93d8864f7f237570c7d3ec0e44da6d`) |
 | Data | `data-2026.1`, unchanged |
-| Website | **Not updated** (see "Skipped") |
+| Website | Published on 16 November: `main` at `6f2b187` (see "Phase 4") |
 
 ### Phase 0. This PC
 
@@ -46,9 +46,17 @@ Written for the author, Manuel Gentiluomo. Status: release published, website no
 - Student test in `C:\GWAS_student_test`: `check_course.R`, the first chunk of module 0, `prepare_course_plink()` (package build, hash equal to the pin), preflight with the data (passed) and `run_main_path.R` (exit 0). Counts, association file, eigenvectors, clumps, lambda and the summary statistics are byte for byte equal to the phase 1 run.
 - The nine `.qmd` rendered with the Quarto of RStudio (all exit 0). Each render prints one knitr message, "You changed the working directory ... It will be restored". The unchanged 2026.3 package prints the same message, so it is not new. I did not remove it.
 
+### Phase 4. Website (done later on 16 November)
+
+- **Your unsaved work.** `C:\WEB_site\sito` had changes to `src/app/notes/page.tsx`, `src/components/notes/ArticleRenderer.tsx` and the Jurassic Park note with its five images. The note text and the five images were already on `origin/notes/jurassic-park`, byte for byte (except line endings). The two `.tsx` changes (the Jurassic Park entry in the notes list and the `pre` rule in the renderer) were not there. I put everything on a new branch `wip/notes-office-2026-11-16` (`ca8127f`), pushed it, and did not merge it anywhere. The folder was clean afterwards.
+- **Sync.** `npm run sync:gwas` from `course/2026-guided-training` at `85cfcc2`: 64 steps, 8 modules. 12 files changed (steps 0.1 to 0.8, module 0, the index and two notebooks).
+- **Checks.** `tsc` clean. Lint: 0 errors (10 old warnings). Normal build and `GWAS_REVIEW_BUILD=1` build passed.
+- **axe** (axe-core 4 with the WCAG 2.0 to 2.2 A and AA tags, Chrome headless, `prefers-color-scheme` light and dark) on steps 0.3 and 0.6 at 390 px and 1280 px: **0 violations in all 8 combinations**, no page scroll, no "Optional" text.
+- **Merge.** `course/notebook-style` `77a6b32`, merged into `main` with `--no-ff` (`6f2b187`), pushed. Build and lint on `main` passed.
+- **Live check** (https://www.manuelgentiluomo.it, about 2 minutes after the push): step 0.3 links `GWAS_course-2026.3.1.zip` (11 links, none to 2026.3). Step 0.6 shows the R command (`prepare_course_plink`) with no "Optional" and no "Official PLINK 2 download page" button. Steps 0.5 and 0.7 show no "Optional". The release asset URL answers with a redirect to the download. No revert was needed.
+
 ### Skipped, and open
 
-- **Phase 4, the website.** Not done, because the repository `C:\WEB_site\sito` has uncommitted changes that are not mine. Still to do on `course/notebook-style`: `npm run sync:gwas`, `tsc`, lint, both builds, axe on steps 0.3 and 0.6, merge into `main`, check the live pages. Until then the site step 0.3 links the 2026.3 ZIP (still published) and step 0.6 still shows "Optional". After the sync, step 0.6 will show the R command alone in the "Do this" box.
 - The empty folder `C:\GWAS_pkg` stayed from a failed first call. The removal was blocked, so it can be deleted by hand. The folders `C:\GWAS_office`, `C:\GWAS_student_test`, `C:\GWAS_release_2026.3.1`, `C:\GWAS_release_assets`, `C:\GWAS_release_verify` and `C:\PLINK_downloads` are outside the repository.
 - No AVX2 run at the office. No run on macOS, Linux or Apple Silicon.
 

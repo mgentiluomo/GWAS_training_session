@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026.3.2 (project release, 16 November 2026)
+
+- The PLINK version line is checked for each build. The pin list has a new column, `version_banner`, with the exact line that each program prints: `64-bit` on Windows and Intel macOS, `M1` on Apple Silicon and `LM 64-bit Intel` on Linux. `prepare_course_plink()` no longer fails on Apple Silicon. If the program runs but prints another version line, the message says that the version is not the one of the course. It gives the `xattr` advice only when macOS blocked the program. The Linux line was read from the program and has not been run on Linux yet.
+- You can restart from all five checkpoints (2.8, 3.8, 4.6, 5.7 and 6.8). `restore_checkpoint()` now writes `checkpoints/index.tsv` and `step_counts.tsv`, so the next module runs to the end. The restart id is the first step that you will run: `"3.1"`, `"4.1"`, `"5.1"`, `"6.1"` or `"7.1"`. Module 7 now says `"7.1"`. If you give the id of a checkpoint itself, for example `"2.8"`, R stops and names the id to use.
+- `check_step()` and `where_am_i()` compare file contents, not hashes. Line endings are ignored (Windows CRLF against Mac and Linux LF). Numbers may differ by a relative 1e-9. The message says "matches", "matches within rounding" or "different contents". Binary files must be identical. Figures and software records are not compared.
+- The data release is unchanged (`data-2026.1`). The PLINK programs are unchanged.
+
 ## 2026.3.1 (project release, 16 November 2026)
 
 - The office confirmation passed. The Windows package build gives the same counts, lambda (1.016), hits, clumps, p-values and principal components as the reference files `answer_key.json`, `build_report.md` and `checkpoints/index.tsv`. See `docs/review/plink_office_confirmation.md`.
