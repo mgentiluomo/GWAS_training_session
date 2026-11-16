@@ -44,7 +44,7 @@ The Apple Silicon run gives the same counts, lambda, hits and clumps as the Wind
 ## Problems found
 
 1. **`prepare_course_plink()` fails on Apple Silicon.** It expects `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`. The macOS arm64 build prints `PLINK v2.0.0-b.1.4 M1 (7 Nov 2026)`. The hash is right and the program runs. The error message blames macOS and tells the student to run `xattr -d com.apple.quarantine`. That advice is wrong here. `bin/plink2` is copied before the check fails. A second run fails again. The later check in `R/course.R` only looks for `v2.0.0-b.1.4`, so the preflight and the course work. The macOS Intel build and the Linux build may print other banners too.
-2. **The checklist path "restore 2.8, then modules 3, 5, 6, 7" does not run.** `restore_checkpoint("5.1")` copies the 4.6 state but does not write `checkpoints/index.tsv`. Module 5 then stops at step 5.2 with "The artifact checkpoint parent is unavailable" (or with "cannot open file .../checkpoints/index.tsv" in an empty folder). Module 4 writes the index rows. The run above therefore used modules 3, 4, 5, 6, 7 from the restored 2.8. The failed attempt is kept in `out_ckpt_failed_no_module4`.
+2. **The checklist path "restore 2.8, then modules 3, 5, 6, 7" does not run.** `restore_checkpoint("5.1")` copies the 4.6 state but does not write `checkpoints/index.tsv`. Module 5 then stops at step 5.2 with "The artifact checkpoint parent is unavailable" (or with "cannot open file .../checkpoints/index.tsv" in an empty folder). Module 4 writes the index rows. The run above therefore used modules 3, 4, 5, 6, 7 from the restored 2.8. The failed attempt was deleted afterwards to free disk space.
 
 ## Comparison with the Windows runs
 
@@ -194,3 +194,84 @@ What the lessons say about the ids:
 So the `beta` difference of 1e-15 matters, but the line endings are the bigger problem. Any Mac or Linux student who runs `check_step("3.8")` or `where_am_i()` against the shipped reference gets "different contents", even when the run is correct. A Windows student gets "matches". The main path and the lessons do not show this, because they compare the folder with itself.
 
 Smallest fix: in `course_index_check()` (lines 383 and 398 to 399 of `R/course.R`), compare the files after removing carriage returns. For `s6-8_gwas_summary_statistics.tsv`, compare the table with a tolerance of 1e-12 on `beta` instead of a hash. Say in the output that PNG, software line files are not compared.
+
+## Retest of release 2026.3.2 (16 November)
+
+Same Mac as above (Apple M2, native arm64 R 4.4.0). Release `project-2026.3.2`, ZIP SHA-256 `6274733f03e3d6e0cd57f613e4378d044c342ee476ea3edac2ca95a5ba007b53` (matches). The release and the site were not changed.
+
+**Result: the numbers pass. `prepare_course_plink()` now works. Two points need a fix in the next release: the text of step 0.6 on quarantine, and the restart test script.**
+
+### Two download cases, side by side
+
+| | Chrome | Safari |
+| --- | --- | --- |
+| How it was made | ZIP downloaded with Chrome, opened by a double click in the Finder (Archive Utility) | Downloaded with Safari, which unpacked it by itself |
+| Folder tested | `~/Downloads/GWAS_course`, checked identical to the ZIP (`diff -rq`) | `~/Downloads/GWAS_course_old_safari` |
+| Folder state | Unmodified when the test started | **Seen once, then changed.** I had copied data and results into it and I had run the packaged `plink2` directly, which removed that file. It was not re-tested on a clean copy. |
+| Quarantine on ZIP | `0081;...;Chrome;...` | Not recorded (the ZIP was no longer there) |
+| Quarantine on folder | `0081;...;Chrome;...` | `0083;...;Safari;...` |
+| Quarantine on packaged `plink2` | `0081;...;Chrome;...` (same flag) | Seen with the flag before the file was removed |
+| `bin/plink2` after step 0.6 | Only `com.apple.provenance` and `com.apple.macl`. **No quarantine.** | Same (no quarantine) |
+| `prepare_course_plink()` | `PLINK 2 2.0.0-b.1.4 is ready in bin/ (macos-arm64, from the package)`, no error | Finished without an error |
+| `bin/plink2 --version` | `PLINK v2.0.0-b.1.4 M1 (7 Nov 2026)` | Not recorded |
+| Preflight without data | Passes with the warning "course data are missing" | Not recorded; the main path ran in that folder (see below) |
+
+I could not do a new Safari download on this Mac in the time available. The Safari column is therefore an observation on a folder that was later modified. The mechanism is the one measured for Chrome (below), because both browsers write `com.apple.quarantine` on the ZIP and Archive Utility or Safari copies it to the folder and to every file.
+
+### Chrome case, all steps
+
+- Step 0.6 and the preflight: as in the table. The preflight with data passes and does not warn about a different build.
+- 108 data files verified against `course.MANIFEST.tsv`.
+- `scripts/run_main_path.R`: exit code 0.
+- `where_am_i()`: all 30 checkpoints "complete".
+- `check_step()` for the 30 steps: 26 "matches", 19 "matches counts", 1 "matches within rounding" (`s6-8_gwas_summary_statistics.tsv`, largest difference 1.11e-15), 8 "not compared" (figures and software records). Never "different contents".
+- Comparison with Windows, made on the first complete run of 2026.3.2 in the Safari-flagged folder (the Chrome run was checked with `check_step()` only): all 22 step counts are equal; cohort 1,811 samples (900 cases, 911 controls); 238,513 variants before and 236,815 after the final filters; lambda 1.016465; the same three lead variants; eight hits and three clumps as before. The nine key files are equal once the Windows carriage returns are ignored. The main path in the Safari-flagged folder also finished with exit code 0.
+
+### Packaged `plink2` run directly, and what macOS does
+
+This was repeated on a copy of the Chrome file made with `cp -pc`, which keeps the quarantine flag.
+
+1. Command: `cd qtest/p && ./plink2 --version`.
+2. System log: at 16:05:44 `AMFI: ... has no CMS blob?` and `Unrecoverable CT signature issue`; at 16:05:45 `syspolicyd` wrote `Prompt shown (6, 0), waiting for response`; at 16:07:28 `ASP: Security policy would not allow process`.
+3. The command printed nothing for about two minutes. Then it ended with exit code 137 (killed) and the file was gone from the folder.
+4. The text of the macOS window was **not seen**: the author was not looking at the screen at 16:05. The author found a `plink2` file in the Bin (Trash) afterwards, so macOS moved it there. My shell cannot read `~/.Trash`, so I could not check this myself.
+5. The packaged file in the Safari folder disappeared in the same way earlier. The cause was not proven then; the Chrome copy test above explains it.
+6. The binary is signed only ad hoc (`Signature=adhoc`, linker-signed), not with a developer identity.
+
+Why `bin/plink2` works: `prepare_course_plink()` copies the file with R `file.copy()` (`R/plink_setup.R`, line 189). R does not copy extended attributes, so the copy in `bin/` has no `com.apple.quarantine`. A copy made on the same Mac with plain `cp` does keep the flag (the new flag has an empty application name). On a copy where `xattr -d com.apple.quarantine` was used, `--version` ran at once (exit 0). So the copy in `bin/` works because the flag is not copied, not because the program is trusted.
+
+I did not test whether macOS would also stop `bin/plink2` if the flag were present on it, other than on the copy above, where it did.
+
+### Restart test (`scripts/author/test_checkpoint_restarts.R`)
+
+Run from the Chrome folder, with the course data and the complete run above as the reference, in a new work folder. The script is the one in the clone, not changed.
+
+| Checkpoint | Restart id | Result |
+| --- | --- | --- |
+| 2.8 | 3.1 | PASS |
+| 3.8 | 4.1 | PASS |
+| 4.6 | 5.1 | PASS |
+| 5.7 | 6.1 | **Stops:** `s5-7_pca.eigenvec` differs |
+| 6.8 | 7.1 | Not reached by the original script; see below |
+
+Cause for 5.7: the restored checkpoint file comes from the Windows reference and has carriage returns (235,742 bytes against 233,930, one byte per line). The script compares SHA-256 of the raw bytes. With the carriage returns removed, both files have the same hash (`61bb00b0...`). After the restart from 5.7 the file is not written again, so the difference stays.
+
+To see the rest I ran a **copy** of the script, outside the repository (`restart_crignored.R`), that changes only the hash (carriage returns removed) and runs only 5.7 and 6.8. 5.7 passes. 6.8 stops at `s6-8_gwas_summary_statistics.tsv`, which is the restored Windows file. The two files have the same shape and the same non-numeric columns. The largest absolute difference in the numeric columns is 1.11e-15 (largest relative difference 5e-13). This is the last digit of `beta`, as in the main path.
+
+So the restart logic works on the Mac. The script fails on a non-Windows machine only because it compares bytes. The other seven key files were equal for 6.8 as well.
+
+### Problems found
+
+1. Step 0.6 tells the student to run `xattr -d com.apple.quarantine bin/plink2` and offers "Open Anyway". This does not cover the case seen here: a student who runs the packaged file in `third_party/plink2/programs/macos-arm64/` by hand loses that file, with no clear message.
+2. `test_checkpoint_restarts.R` cannot pass on macOS or Linux, because it compares raw bytes.
+
+### Corrections proposed for the next release (not made)
+
+1. **Step 0.6 text on quarantine.** Say that the student must only run `prepare_course_plink()`, and must not start `plink2` from `third_party/` by hand. Say that if macOS shows a warning for `plink2`, the student should choose "Done" (not "Move to Bin") and then run `xattr -d com.apple.quarantine bin/plink2` in the project folder. If the file has disappeared, run step 0.6 again, or extract the ZIP again. Keep "Open Anyway" in System Settings as the second route.
+2. **`test_checkpoint_restarts.R` must use `course_compare_files()`** (as `check_step()` does) instead of the byte-for-byte comparison, so that line endings are ignored and the last digit of `beta` has a tolerance. Then it can pass on macOS and Linux.
+3. `prepare_course_plink()` does not need to remove the quarantine from the packaged file: the copy in `bin/` is already clean. Removing it from the packaged file would only matter if we wanted that file to be runnable by hand. I would not add it.
+4. Keep the earlier suggestions 1 to 4 of this report. The first three were made in 2026.3.2 and were checked here; suggestion 4 (tolerance on `beta`) is covered by "matches within rounding".
+
+### Outcome
+
+On Apple Silicon, release 2026.3.2 gives the same results as Windows and `prepare_course_plink()` works. Checkpoint restarts work as well. The Apple Silicon check is closed. Still open: macOS Intel and Linux, and the two corrections above.
