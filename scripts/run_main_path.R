@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: e6f55f708394f9bcaf536701f1f25dd1001e30192ccd4c5acbc7d90c4ca0e856
+# SHA-256: 1c6fc2774ae9ba15c2af9ca8090264716928f9a4051cd9d4bd45a4b5c531daf4
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
