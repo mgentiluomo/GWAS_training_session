@@ -6,7 +6,7 @@
   "anchor": "step-0-5",
   "title": "Install the R packages",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "95f2c5f144ac45402ecf10ace76b6168c1d26d14280bf873e16f110699b68c61",
+  "source_sha256": "e6f55f708394f9bcaf536701f1f25dd1001e30192ccd4c5acbc7d90c4ca0e856",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Install the R packages used by the course. A package is an add-on that gives R more functions. Keep the project from step 0.4 open.",
@@ -23,7 +23,7 @@
     {
       "label": "s0-5_packages",
       "code": "# 1. Load the helper that prepares the course packages.\nsource(\"R/package_setup.R\")\n# 2. Install any required packages that are missing.\ninstall_course_packages()\n# 3. Load the course functions into R.\nsource(\"R/course.R\")",
-      "run_by_default": false,
+      "run_by_default": true,
       "where": "console"
     }
   ],

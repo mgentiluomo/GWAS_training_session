@@ -6,7 +6,7 @@
   "anchor": "step-0-6",
   "title": "Put PLINK 2 in bin/",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "95f2c5f144ac45402ecf10ace76b6168c1d26d14280bf873e16f110699b68c61",
+  "source_sha256": "e6f55f708394f9bcaf536701f1f25dd1001e30192ccd4c5acbc7d90c4ca0e856",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "The project package already contains PLINK 2 Beta 1.4 for Windows, macOS (Apple Silicon and Intel) and Linux. A build is a version of the program made for one system and processor. R finds your system, copies the matching build into the `bin/` folder and checks that it is the right file. You do not download anything. Follow these actions:\n\n1. Keep the project from step 0.4 open in RStudio.\n2. Run the command below in the console.\n3. Read the last line it prints. It should say that PLINK 2 is ready in `bin/`.\n\nThe program is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](docs/glossary.md#executable), the file your computer can run. The builds are in `third_party/plink2/programs/`. R never changes a different PLINK 2 file that you put in `bin/` yourself. It tells you instead. If you cloned the project with Git, the builds are not in the clone. R then downloads the pinned build and checks it in the same way.\n\nYou can still get PLINK 2 from the official page, <https://www.cog-genomics.org/plink/2.0/>. Use it only if R cannot prepare the program, or if your lecturer asks for a different version. Choose the build whose name matches your system and processor from step 0.1. Extract the ZIP file and copy only `plink2.exe` (or `plink2`) into `bin/`. If you are not sure that your processor supports AVX2 (an instruction set of the processor), choose the 64-bit build without AVX2.",
@@ -23,7 +23,7 @@
     {
       "label": "s0-6_plink",
       "code": "# 1. Load the helper that prepares PLINK 2.\nsource(\"R/plink_setup.R\")\n# 2. Copy the PLINK 2 build for your computer into the bin folder and check it.\nprepare_course_plink()",
-      "run_by_default": false,
+      "run_by_default": true,
       "where": "console"
     }
   ],
@@ -55,13 +55,7 @@
   ],
   "student_summary": "We prepare PLINK 2, the program that analyses the DNA data. The project already contains it, so R copies the right version for your computer into the bin folder and checks it.",
   "student_plink_options": [],
-  "actions": [
-    {
-      "label": "Official PLINK 2 download page",
-      "url": "https://www.cog-genomics.org/plink/2.0/",
-      "kind": "page"
-    }
-  ],
+  "actions": [],
   "success_line": "PLINK 2 2.0.0-b.1.4 is ready in bin/",
   "student_expected_result": "R prints one line. On the first run it is `PLINK 2 2.0.0-b.1.4 is ready in bin/ (windows-x86_64, from the package).` The system name in brackets matches your computer. If the file is already there, R prints `The course PLINK 2 program is already in bin/ and has the expected version.` The folder `bin` now holds `plink2.exe` on Windows, or `plink2` on macOS or Linux."
 }
