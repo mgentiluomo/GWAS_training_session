@@ -337,6 +337,8 @@ The project package already contains PLINK 2 Beta 1.4 for Windows, macOS (Apple 
 2. Run the command below in the console.
 3. Read the last line it prints. It should say that PLINK 2 is ready in `bin/`.
 
+Run only the command of this step. Do not open the programs inside `third_party/` by hand. On macOS, the system can block such a file and move it to the Bin. The command copies a clean build into `bin/`, and that copy is not blocked.
+
 The program is `plink2.exe` on Windows and `plink2` on macOS or Linux. This file is the [executable](../docs/glossary.md#executable), the file your computer can run. The builds are in `third_party/plink2/programs/`. R never changes a different PLINK 2 file that you put in `bin/` yourself. It tells you instead. If you cloned the project with Git, the builds are not in the clone. R then downloads the pinned build and checks it in the same way.
 
 You can still get PLINK 2 from the official page, <https://www.cog-genomics.org/plink/2.0/>. Use it only if R cannot prepare the program, or if your lecturer asks for a different version. Choose the build whose name matches your system and processor from step 0.1. Extract the ZIP file and copy only `plink2.exe` (or `plink2`) into `bin/`. If you are not sure that your processor supports AVX2 (an instruction set of the processor), choose the 64-bit build without AVX2.
@@ -373,7 +375,13 @@ R prints one line. On the first run it is `PLINK 2 2.0.0-b.1.4 is ready in bin/ 
 
 If R says that your computer cannot use the programs of the course, download PLINK 2 yourself from the official page, as described above. For Windows ARM or Linux ARM, ask support.
 
-On macOS, Gatekeeper may block the program. Open a terminal in the project folder and type `xattr -d com.apple.quarantine bin/plink2`. This command removes the quarantine mark that macOS adds to downloaded files. You can also open System Settings, then Privacy & Security, find the message for `plink2` and click "Open Anyway". Follow [Apple's instructions](https://support.apple.com/en-us/102445). Then run step 0.6 again.
+On macOS, run only the command of this step, `prepare_course_plink()`. Do not open the programs inside `third_party/` by hand. A browser marks the ZIP file as coming from the internet, and macOS copies this mark to every file inside it. macOS can then block a program that you start yourself and move it to the Bin. The copy in `bin/` does not carry the mark.
+
+If macOS shows a warning about `bin/plink2`, choose "Done". Do not choose "Move to Bin". Then open the Terminal in the project folder and type `xattr -d com.apple.quarantine bin/plink2`. This command removes the quarantine mark, the mark that macOS adds to files from the internet. Then run the command of step 0.6 again.
+
+If `bin/plink2` has disappeared, run the command of step 0.6 again. If the program in `third_party/` has disappeared too, extract the project ZIP again and run the command once more.
+
+You can also open System Settings, then Privacy & Security, find the message for `plink2` and click "Open Anyway". Follow [Apple's instructions](https://support.apple.com/en-us/102445).
 
 On Linux, PLINK 2 needs glibc 2.31 or newer. If you see the message "Kernel too old" or a glibc error, your system is too old for this build. Ask support. If the file lacks permission to run, type `chmod u+x bin/plink2` in the project folder.
 
