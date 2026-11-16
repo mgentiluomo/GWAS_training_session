@@ -295,7 +295,13 @@ class CourseExportsTests(unittest.TestCase):
         self.assertEqual([c["label"] for c in plink_step["r_commands"]], ["s0-6_plink"])
         self.assertIn("prepare_course_plink()", plink_step["r_commands"][0]["code"])
         self.assertEqual(plink_step["setup_code"], "")
-        self.assertFalse(plink_step["r_commands"][0]["run_by_default"])
+        # The command is required for the student, so the website must not label it optional.
+        self.assertTrue(plink_step["r_commands"][0]["run_by_default"])
+        self.assertEqual(plink_step["actions"], [])
+        for step_id in ("0.5", "0.6", "0.7"):
+            step = next(r for r in self.records if r["id"] == step_id)
+            self.assertTrue(all(c["run_by_default"] for c in step["r_commands"]), step_id)
+            self.assertEqual(step["verification"], "manual_required", step_id)
         system_step = self.records[0]
         self.assertIn("System type", system_step["blocks"]["what_we_do"])
         self.assertIn("Settings", system_step["blocks"]["what_we_do"])

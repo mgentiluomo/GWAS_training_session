@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026.3.1 (project release, 16 November 2026)
+
+- The office confirmation passed. The Windows package build gives the same counts, lambda (1.016), hits, clumps, p-values and principal components as the reference files `answer_key.json`, `build_report.md` and `checkpoints/index.tsv`. See `docs/review/plink_office_confirmation.md`.
+- Step 0.6 is corrected. The command `prepare_course_plink()` is now the main action. It is no longer marked "Optional". The official PLINK page is only the fallback, named in the text. Steps 0.5 and 0.7 had the same label on their commands. It is removed there too.
+- Step 0.3 now names release `project-2026.3.1`.
+- The data release is unchanged (`data-2026.1`).
+
 ## 2026.3 (project release, 15 November 2026)
 
 - The package now contains PLINK 2 Beta 1.4 (build 7 November 2026) for Windows, macOS (Apple Silicon and Intel) and Linux. They are the non-AVX2 builds. Step 0.6 now runs `prepare_course_plink()`, which copies the right build into `bin/` and checks its SHA-256 value.
