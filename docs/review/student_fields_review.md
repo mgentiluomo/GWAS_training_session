@@ -1,5 +1,57 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 16 November, office confirmation and release 2026.3.1
+
+Written for the author, Manuel Gentiluomo. Status: release published, website not updated. History was not rewritten.
+
+### Result in one table
+
+| Item | Value |
+| --- | --- |
+| Office confirmation | **Passes.** Details and tables in `docs/review/plink_office_confirmation.md`. |
+| Project release | `project-2026.3.1`, not a pre-release: https://github.com/mgentiluomo/GWAS_training_session/releases/tag/project-2026.3.1 |
+| Tag | annotated `project-2026.3.1` on `003e024` (merge commit of `course/2026-guided-training`) |
+| Asset | `GWAS_course-2026.3.1.zip`, 21,519,256 bytes, 75 files |
+| SHA-256 | `d99ae77694cb74c82a1279c692e5a7ed415a5a7dbff2a7e88c8fed2c0c969ecf` |
+| Download check | The public URL gave the same SHA-256 and size. |
+| Other assets | `GWAS_course-2026.3.1.zip.sha256`, `plink-ng-v2.0.0-b.1.4-source.zip` (the same archive as in 2026.3, SHA-256 `012cf4f54285b31b75a6cf3ab695770a2f93d8864f7f237570c7d3ec0e44da6d`) |
+| Data | `data-2026.1`, unchanged |
+| Website | **Not updated** (see "Skipped") |
+
+### Phase 0. This PC
+
+- `C:\GWAS_course` was clean. `fetch` and `pull --ff-only` aligned `course/2026-guided-training`. The branches `notebooks/all-modules` and `plink/bundle` existed only on the remote. I created them locally at the remote commits.
+- `C:\WEB_site\sito` has uncommitted changes (`src/app/notes/page.tsx`, `src/components/notes/ArticleRenderer.tsx`, `content/notes/jurassic-park.md`, `public/images/notes/jurassic-park/`). I did not touch them. The website phase was not done.
+
+### Phase 1. Confirmation
+
+- Reference files found: `C:\WEB_site\data_sources\sim2026\instructor\answer_key.json` (`56dc070f...3fac`), `build_report.md` (`f966e0ef...768e`) and `checkpoints/index.tsv` in the staging folder `classroom-stage-2026.1-final` (`f5d95011...18fe`). Full hashes are in the confirmation file.
+- Package `GWAS_course-2026.3.zip`: SHA-256 matched. Extracted to `C:\GWAS_office`. `prepare_course_plink()` used the package build, with no download. `PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)`. `plink2.exe` SHA-256 `b57537f1...42b9`, equal to the pin.
+- Data: the 108 staging files match `course.MANIFEST.tsv` of `data-2026.1` (sizes and SHA-256).
+- Preflight, `check_course.R` and `run_main_path.R` (new output folder): all passed, exit code 0.
+- Comparison: all counts at every step, the lists of removed samples, lambda 1.016, 8 hits, 3 clumps and lead p-values equal the reference files. P-values, PCs and plot inputs are byte for byte equal to an earlier run on this PC and agree with the home comparison. No difference.
+
+### Phase 2. Step 0.6 (branch `notebooks/all-modules`)
+
+- **Cause.** The exporter sets `run_by_default` to false for every chunk with `eval=FALSE`. The site shows "Optional" for such a chunk, in the "Do this" box and under the code. Steps 0.5, 0.6 and 0.7 each have a necessary command with `eval=FALSE`, because the whole-path script must not run them.
+- **Fix at the source (course).** New step metadata `required_commands` (a list of chunk labels). Those commands are exported with `run_by_default: true`. `eval=FALSE`, the whole-path script and the `manual_required` verification do not change. Used in 0.5, 0.6 and 0.7. Step 0.6 no longer has the "Official PLINK 2 download page" button, so the R command is the main action. The page stays as the written fallback in the step text. A test was added in `test_course_exports.py`.
+- **Audit of the 64 steps.** Only 0.5, 0.6 and 0.7 had a command marked "Optional". All three are fixed. Steps with both a button and a command: 0.6 (fixed) and 0.7. Step 0.7 has two buttons ("Request the course password", "Course data release"). They are real prerequisites, not a replacement for the command, so I left them. The other 61 steps have no external action next to a command. The label "Optional: you do not need it for the course" on the PLINK terminal equivalent is intended.
+- **Regenerated:** export, 64 step JSON, 8 module JSON, `run_main_path.R` (only the hash line changed) and the 9 notebooks. Tests that passed: `test_plink_pins` 3, `test_course_exports` 22, `test_student_notebooks` 35, `test_project_package` 17, `test_prove_comment_only`, `test_package_release` (1 skipped), `test_plink_setup.R`, `test_course_setup.R`, `test_preflight_no_data.R`, `test_preflight_output.R`, `test_summary_stats.R`, `test_guided_module_check.R`, `check_course.R`, `check_text.py` and `--check-notebooks`.
+- **Version.** Step 0.3, README, `release_checklist.md` and the default of `package_project.py` name 2026.3.1. Changelog entry 2026.3.1 added. `grep` finds no `2026.3.zip` or `project-2026.3/` in student texts.
+- **Merges** (no squash, no rewrite): `notebooks/all-modules` into `course/2026-guided-training` (`003e024`), then `course/2026-guided-training` into `plink/bundle` (`a2effd9`). All pushed.
+
+### Phase 3. Package
+
+- `scripts/package_project.py --version 2026.3.1 --plink-cache C:\PLINK_downloads --output C:\GWAS_release_2026.3.1`. The four PLINK archives were downloaded by the project mechanism and checked against the pins.
+- Student test in `C:\GWAS_student_test`: `check_course.R`, the first chunk of module 0, `prepare_course_plink()` (package build, hash equal to the pin), preflight with the data (passed) and `run_main_path.R` (exit 0). Counts, association file, eigenvectors, clumps, lambda and the summary statistics are byte for byte equal to the phase 1 run.
+- The nine `.qmd` rendered with the Quarto of RStudio (all exit 0). Each render prints one knitr message, "You changed the working directory ... It will be restored". The unchanged 2026.3 package prints the same message, so it is not new. I did not remove it.
+
+### Skipped, and open
+
+- **Phase 4, the website.** Not done, because the repository `C:\WEB_site\sito` has uncommitted changes that are not mine. Still to do on `course/notebook-style`: `npm run sync:gwas`, `tsc`, lint, both builds, axe on steps 0.3 and 0.6, merge into `main`, check the live pages. Until then the site step 0.3 links the 2026.3 ZIP (still published) and step 0.6 still shows "Optional". After the sync, step 0.6 will show the R command alone in the "Do this" box.
+- The empty folder `C:\GWAS_pkg` stayed from a failed first call. The removal was blocked, so it can be deleted by hand. The folders `C:\GWAS_office`, `C:\GWAS_student_test`, `C:\GWAS_release_2026.3.1`, `C:\GWAS_release_assets`, `C:\GWAS_release_verify` and `C:\PLINK_downloads` are outside the repository.
+- No AVX2 run at the office. No run on macOS, Linux or Apple Silicon.
+
 ## Session of 15 November, home PLINK comparison and release 2026.3
 
 Written for the author, Manuel Gentiluomo. Status: published. History was not rewritten.
