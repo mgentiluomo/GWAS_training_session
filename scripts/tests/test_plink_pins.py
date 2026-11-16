@@ -9,7 +9,11 @@ ROOT = Path(__file__).resolve().parents[2]
 PINS = ROOT / "third_party/plink2"
 COLUMNS = ["platform", "system", "cpu", "plink_version", "build_date", "avx2", "archive_url", "archive_sha256",
            "archive_bytes", "member", "executable_sha256", "executable_bytes", "source_tag", "source_commit",
-           "pin_status", "version_run_here"]
+           "pin_status", "version_run_here", "version_banner"]
+BANNERS = {"windows-x86_64": "PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)",
+           "macos-arm64": "PLINK v2.0.0-b.1.4 M1 (7 Nov 2026)",
+           "macos-x86_64": "PLINK v2.0.0-b.1.4 64-bit (7 Nov 2026)",
+           "linux-x86_64": "PLINK v2.0.0-b.1.4LM 64-bit Intel (7 Nov 2026)"}
 
 
 def manifest_rows():
@@ -30,6 +34,7 @@ class PlinkPinTests(unittest.TestCase):
                 self.assertTrue(all(row[c] for c in COLUMNS))
                 self.assertEqual(row["plink_version"], "2.0.0-b.1.4")
                 self.assertEqual(row["avx2"], "no")
+                self.assertEqual(row["version_banner"], BANNERS[row["platform"]])
                 self.assertTrue(row["archive_url"].startswith("https://s3.amazonaws.com/plink2-assets/"))
                 self.assertTrue(row["archive_url"].endswith(".zip"))
                 for column in ("archive_sha256", "executable_sha256"):
