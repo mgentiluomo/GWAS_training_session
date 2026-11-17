@@ -20,7 +20,9 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8"
+editor_options:
+  chunk_output_type: console
+course_source_sha256: "f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -121,6 +123,68 @@ bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out res
 
 :::
 
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The step makes a rough first clean. `--mind` is the largest share of missing calls that a sample may have. `--geno` is the same limit for a variant. A low value is strict and removes more. A high value is generous. At 0.10 only wells and sites that are clearly broken are removed. The finer checks come later, at steps 3.2 and 4.1, so this first clean can be generous. Each trial below starts from the same input as the step and changes one threshold only.
+
+```{r}
+#| label: s3-1_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only. Your results folder is not changed.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+samples <- threshold_counts(cfg, guided_path(cfg, "2.8"), "--mind", thresholds)  # <1>
+samples$course_value <- samples$threshold == 0.10
+samples
+variants <- threshold_counts(cfg, guided_path(cfg, "3.1", "samples"), "--geno", thresholds)  # <2>
+variants$course_value <- variants$threshold == 0.10
+variants
+par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_threshold_trials(variants, "Variants removed")  # <3>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+1. Samples: --mind on the cohort saved at 2.8.
+2. Variants: --geno on the samples that remain after --mind 0.10.
+3. Plot the removed numbers. The course value is the large diamond.
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s2-8_state --mind 0.05 --make-just-psam --out results/trials/s3-1_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s3-1_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name. For variants, use `--geno` and `--make-just-pvar`, and start from `results/guided/s3-1_samples`. PLINK 2 treats a dosage without a hard call as missing by default (the `dosage` modifier changes this). The course data have hard calls only, so this makes no difference here.
+
+The expected result of the trials:
+
+Samples removed by `--mind`:
+
+| Threshold | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.01 | 121 | 1,895 |
+| 0.02 | 45 | 1,971 |
+| 0.05 | 3 | 2,013 |
+| **0.1 (course value)** | 3 | 2,013 |
+| 0.2 | 3 | 2,013 |
+
+Variants removed by `--geno`, after `--mind 0.10`:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.01 | 3,705 | 292,805 |
+| 0.02 | 958 | 295,552 |
+| 0.05 | 735 | 295,775 |
+| **0.1 (course value)** | 150 | 296,360 |
+| 0.2 | 130 | 296,380 |
+
+How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
 ## Step 3.2 · Sample call rate {#step-3-2}
 
 We remove samples with more than 2% of their genotype calls missing. This keeps samples with enough information for the later analysis.
@@ -162,6 +226,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 ```sh
 bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The call rate of a sample is the share of its calls that are not missing. `--mind 0.02` removes samples with more than 2% missing calls, which is a call rate below 98%. A lower limit keeps more samples but lets in samples with poor DNA. A higher limit removes more samples and may throw away good data. A call rate of 95% to 98% is a common choice in genome-wide studies, and 98% is the stricter end of it. Each trial starts from the cohort saved at 3.1 and changes the limit only.
+
+```{r}
+#| label: s3-2_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+trial <- threshold_counts(cfg, guided_path(cfg, "3.1"), "--mind", thresholds)
+trial$course_value <- trial$threshold == 0.02
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-1_state --mind 0.05 --make-just-psam --out results/trials/s3-2_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s3-2_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name.
+
+The expected result of the trials:
+
+| Threshold | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.01 | 118 | 1,895 |
+| **0.02 (course value)** | 42 | 1,971 |
+| 0.05 | 0 | 2,013 |
+| 0.1 | 0 | 2,013 |
+| 0.2 | 0 | 2,013 |
+
+How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
+
+Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -264,7 +372,7 @@ cat(length(pruned), "variants kept by LD pruning\n")
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
-1. Write the list of regions where nearby variants are strongly linked.
+1. Write the list of regions where nearby variants are strongly correlated.
 2. Select variants with less similar patterns of DNA letters.
 3. Check and print how many variants were selected.
 
@@ -318,7 +426,8 @@ high <- het$IID[f > mean_f + 3 * sd_f]
 guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)  # <5>
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))  # <6>
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))  # <7>
+print(c(mean_F = mean_f, SD_F = sd_f))  # <7>
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
@@ -330,7 +439,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 4. Find samples with unusually low or high F values.
 5. Save the high F review list and the low F removal list.
 6. Save the dataset without the low F samples.
-7. Print the average, spread and numbers of flagged samples.
+7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
 
 ### What each option does
 
@@ -369,6 +478,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The statistic F compares the homozygosity that we see in a sample with the homozygosity that we expect from the allele frequencies. A very low F means too many heterozygous calls, which can come from contamination. A very high F means too few, which can come from related parents or a different ancestry. The course removes samples with F more than 3 standard deviations (SD) below the mean. It only flags, and keeps, samples with F more than 3 SD above the mean. The trials change the number of SD from 2 to 4. They use the same F values.
+
+```{r}
+#| label: s3-5_thresholds
+#| eval: false
+# Optional. The trials use the table of F values that the step wrote. No PLINK run is needed.
+multipliers <- c(2, 2.5, 3, 3.5, 4)
+trial <- het_counts(guided_table(paste0(guided_path(cfg, "3.5", "het"), ".het")), multipliers)
+trial$course_value <- trial$threshold == 3
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/trials/s3-5_trial --threads 2 --memory 2048
+```
+
+This command writes the F table (`results/trials/s3-5_trial.het`). The limit itself is not a PLINK option: the course calculates it in R from the table. To repeat a trial in R, change the number 3 in the rule for `low` and `high` at the step.
+
+The expected result of the trials:
+
+| SD from the mean | Samples removed | Samples remaining | Samples flagged |
+| --- | --- | --- | --- |
+| 2 | 13 | 1,950 | 13 |
+| 2.5 | 13 | 1,950 | 11 |
+| **3 (course value)** | 13 | 1,950 | 8 |
+| 3.5 | 13 | 1,950 | 5 |
+| 4 | 13 | 1,950 | 0 |
+
+How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
+
+Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -458,6 +611,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The kinship coefficient estimates how much DNA two samples share. The usual KING cutoffs are 0.354 for repeated samples and identical twins, 0.177 for first-degree relatives, 0.0884 for second-degree relatives and 0.0442 for third-degree relatives (Manichaikul et al. 2010, doi:10.1093/bioinformatics/btq559). This step does not use `--king-cutoff`. It writes the table of pairs with `--make-king-table` and `--king-table-filter 0.0442`, and a rule in R decides who to remove. The trials change the cutoff for relatives. Pairs above 0.354 are always treated as repeats.
+
+```{r}
+#| label: s3-6_thresholds
+#| eval: false
+# Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
+cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
+kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
+trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs))
+trial$course_value <- trial$threshold == 0.177
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --king-cutoff 0.177 --out results/trials/s3-6_trial --threads 2 --memory 2048
+```
+
+`--king-cutoff` removes one member of each pair above the cutoff with a greedy rule, and it writes two lists of sample IDs (`.king.cutoff.in.id` and `.king.cutoff.out.id`). Its count can differ a little from the course rule, which also treats repeats separately. To repeat the trial, change the number after `--king-cutoff`.
+
+The expected result of the trials:
+
+| Kinship cutoff | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.0442 | 30 | 1,920 |
+| 0.0884 | 30 | 1,920 |
+| **0.177 (course value)** | 30 | 1,920 |
+| 0.354 | 20 | 1,930 |
+
+How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed samples. In this simulated cohort no extra pair lies between 0.0442 and 0.177. At 0.354 only repeated samples are removed (20), and the ten first-degree pairs stay in the data. Real cohorts usually have many more distant relatives, so the counts would then differ.
+
+Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

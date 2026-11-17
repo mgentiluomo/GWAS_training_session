@@ -1,0 +1,478 @@
+{
+  "schema_version": "1.0",
+  "note": "Each trial starts from the same input as its step and changes one threshold.",
+  "sweeps": [
+    {
+      "step": "3.1",
+      "title": "Rough clean: variants",
+      "option": "--geno",
+      "input_samples": 2013,
+      "input_variants": 296510,
+      "trials": [
+        {
+          "threshold": 0.01,
+          "label": "0.01",
+          "samples_removed": 0,
+          "variants_removed": 3705,
+          "samples_remaining": 2013,
+          "variants_remaining": 292805,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.02,
+          "label": "0.02",
+          "samples_removed": 0,
+          "variants_removed": 958,
+          "samples_remaining": 2013,
+          "variants_remaining": 295552,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.05,
+          "label": "0.05",
+          "samples_removed": 0,
+          "variants_removed": 735,
+          "samples_remaining": 2013,
+          "variants_remaining": 295775,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 0,
+          "variants_removed": 150,
+          "samples_remaining": 2013,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 0,
+          "variants_removed": 130,
+          "samples_remaining": 2013,
+          "variants_remaining": 296380,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.1",
+      "title": "Rough clean: samples",
+      "option": "--mind",
+      "input_samples": 2016,
+      "input_variants": 296510,
+      "trials": [
+        {
+          "threshold": 0.01,
+          "label": "0.01",
+          "samples_removed": 121,
+          "variants_removed": 0,
+          "samples_remaining": 1895,
+          "variants_remaining": 296510,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.02,
+          "label": "0.02",
+          "samples_removed": 45,
+          "variants_removed": 0,
+          "samples_remaining": 1971,
+          "variants_remaining": 296510,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.05,
+          "label": "0.05",
+          "samples_removed": 3,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296510,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 3,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296510,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 3,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296510,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.2",
+      "title": "Call rate of samples",
+      "option": "--mind",
+      "input_samples": 2013,
+      "input_variants": 296360,
+      "trials": [
+        {
+          "threshold": 0.01,
+          "label": "0.01",
+          "samples_removed": 118,
+          "variants_removed": 0,
+          "samples_remaining": 1895,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.02,
+          "label": "0.02",
+          "samples_removed": 42,
+          "variants_removed": 0,
+          "samples_remaining": 1971,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.05,
+          "label": "0.05",
+          "samples_removed": 0,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 0,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 0,
+          "variants_removed": 0,
+          "samples_remaining": 2013,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.5",
+      "title": "Heterozygosity",
+      "option": "F cutoff (standard deviations)",
+      "input_samples": 1963,
+      "input_variants": 296360,
+      "trials": [
+        {
+          "threshold": 2,
+          "label": "2",
+          "samples_removed": 13,
+          "variants_removed": 0,
+          "samples_remaining": 1950,
+          "variants_remaining": 296360,
+          "samples_flagged": 13,
+          "course_value": false
+        },
+        {
+          "threshold": 2.5,
+          "label": "2.5",
+          "samples_removed": 13,
+          "variants_removed": 0,
+          "samples_remaining": 1950,
+          "variants_remaining": 296360,
+          "samples_flagged": 11,
+          "course_value": false
+        },
+        {
+          "threshold": 3,
+          "label": "3",
+          "samples_removed": 13,
+          "variants_removed": 0,
+          "samples_remaining": 1950,
+          "variants_remaining": 296360,
+          "samples_flagged": 8,
+          "course_value": true
+        },
+        {
+          "threshold": 3.5,
+          "label": "3.5",
+          "samples_removed": 13,
+          "variants_removed": 0,
+          "samples_remaining": 1950,
+          "variants_remaining": 296360,
+          "samples_flagged": 5,
+          "course_value": false
+        },
+        {
+          "threshold": 4,
+          "label": "4",
+          "samples_removed": 13,
+          "variants_removed": 0,
+          "samples_remaining": 1950,
+          "variants_remaining": 296360,
+          "samples_flagged": 0,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.6",
+      "title": "Relatedness",
+      "option": "KING kinship cutoff",
+      "input_samples": 1950,
+      "input_variants": 296360,
+      "trials": [
+        {
+          "threshold": 0.0442,
+          "label": "0.0442",
+          "samples_removed": 30,
+          "variants_removed": 0,
+          "samples_remaining": 1920,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.0884,
+          "label": "0.0884",
+          "samples_removed": 30,
+          "variants_removed": 0,
+          "samples_remaining": 1920,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.177,
+          "label": "0.177",
+          "samples_removed": 30,
+          "variants_removed": 0,
+          "samples_remaining": 1920,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.354,
+          "label": "0.354",
+          "samples_removed": 20,
+          "variants_removed": 0,
+          "samples_remaining": 1930,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "4.1",
+      "title": "Call rate of variants",
+      "option": "--geno",
+      "input_samples": 1844,
+      "input_variants": 296360,
+      "trials": [
+        {
+          "threshold": 0.01,
+          "label": "0.01",
+          "samples_removed": 0,
+          "variants_removed": 1053,
+          "samples_remaining": 1844,
+          "variants_remaining": 295307,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.02,
+          "label": "0.02",
+          "samples_removed": 0,
+          "variants_removed": 801,
+          "samples_remaining": 1844,
+          "variants_remaining": 295559,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.05,
+          "label": "0.05",
+          "samples_removed": 0,
+          "variants_removed": 561,
+          "samples_remaining": 1844,
+          "variants_remaining": 295799,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 0,
+          "variants_removed": 0,
+          "samples_remaining": 1844,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 0,
+          "variants_removed": 0,
+          "samples_remaining": 1844,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "4.3",
+      "title": "Allele frequency",
+      "option": "--maf",
+      "input_samples": 1844,
+      "input_variants": 295439,
+      "trials": [
+        {
+          "threshold": 0.001,
+          "label": "0.001",
+          "samples_removed": 0,
+          "variants_removed": 33951,
+          "samples_remaining": 1844,
+          "variants_remaining": 261488,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.005,
+          "label": "0.005",
+          "samples_removed": 0,
+          "variants_removed": 47184,
+          "samples_remaining": 1844,
+          "variants_remaining": 248255,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.01,
+          "label": "0.01",
+          "samples_removed": 0,
+          "variants_removed": 56420,
+          "samples_remaining": 1844,
+          "variants_remaining": 239019,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.02,
+          "label": "0.02",
+          "samples_removed": 0,
+          "variants_removed": 89204,
+          "samples_remaining": 1844,
+          "variants_remaining": 206235,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.05,
+          "label": "0.05",
+          "samples_removed": 0,
+          "variants_removed": 156235,
+          "samples_remaining": 1844,
+          "variants_remaining": 139204,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "4.4",
+      "title": "Hardy-Weinberg equilibrium",
+      "option": "HWE p-value cutoff",
+      "input_samples": 1844,
+      "input_variants": 239019,
+      "trials": [
+        {
+          "threshold": 0.001,
+          "label": "1e-03",
+          "samples_removed": 0,
+          "variants_removed": 700,
+          "samples_remaining": 1844,
+          "variants_remaining": 238319,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.0001,
+          "label": "1e-04",
+          "samples_removed": 0,
+          "variants_removed": 273,
+          "samples_remaining": 1844,
+          "variants_remaining": 238746,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 1e-06,
+          "label": "1e-06",
+          "samples_removed": 0,
+          "variants_removed": 167,
+          "samples_remaining": 1844,
+          "variants_remaining": 238852,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 1e-08,
+          "label": "1e-08",
+          "samples_removed": 0,
+          "variants_removed": 150,
+          "samples_remaining": 1844,
+          "variants_remaining": 238869,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 1e-10,
+          "label": "1e-10",
+          "samples_removed": 0,
+          "variants_removed": 127,
+          "samples_remaining": 1844,
+          "variants_remaining": 238892,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": null,
+          "label": "course rule",
+          "samples_removed": 0,
+          "variants_removed": 167,
+          "samples_remaining": 1844,
+          "variants_remaining": 238852,
+          "samples_flagged": null,
+          "course_value": true
+        }
+      ]
+    }
+  ]
+}

@@ -43,7 +43,7 @@ cfg <- guided_init()
 ## 2.1 The starting files {#step-2-1}
 
 
-<!-- step_meta: {"success_line": "You see 2,016 sample wells and 299,523 variant entries before QC.", "student_summary": "We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "You see 2,016 sample wells and 299,523 variant entries before quality control (QC).", "student_summary": "We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.", "student_plink_options": []} -->
 ### What we do
 
 We identify the complete set of files exported by the laboratory. We keep these input files unchanged.
@@ -75,7 +75,7 @@ R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before quality control (QC). Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->
@@ -196,7 +196,7 @@ variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)
 head(variants)
 # 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples", verbose = TRUE)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -207,7 +207,7 @@ R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
+The last line printed is `Laboratory samples: no ID problems found.` A check that prints nothing can leave you unsure whether it ran, so this message confirms that it ran and passed. The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->
@@ -457,10 +457,10 @@ print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_s
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. If R finds reverse-strand mappings, add `--flip` with the reverse list that R generates. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
+`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. `--flip` replaces each base by its complement at the listed IDs. The list `s2-6_reverse.txt` holds the eight sites that map to the opposite strand. R adds this option only when such sites exist, and here they do, so the terminal command includes it. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 

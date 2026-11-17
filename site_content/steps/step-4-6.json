@@ -6,11 +6,11 @@
   "anchor": "step-4-6",
   "title": "Variant QC summary and checkpoint",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe",
+  "source_sha256": "590070cd5b754eb36f8d6fc9676a68e9bde1ea6bbab901085bdfa496a35008cd",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the complete dataset after variant QC. Then we review what the filters did.",
-    "why": "Every QC threshold is a trade. We keep more information, or we lower the technical risk. Record the counts, the software, the genome build, the exclusions and the known limits. Then another reader can rebuild the same state.\n\nThe final set is ready for the study of population structure. It is not automatically free from confounding. Confounding means that another factor, such as ancestry, creates a false link between a variant and the disease.",
+    "why": "Every QC threshold is a trade. We keep more information, or we lower the technical risk. Record the counts, the software, the genome build, the exclusions and the known limits. Then another reader can rebuild the same state.\n\nThe final set is ready for the study of population structure. It is not automatically free from confounding. Confounding means that another factor, such as ancestry, creates a false association between a variant and the disease.",
     "you_need": "The dataset from step 4.5, which we call state 4.5, and the records of the earlier exclusions.",
     "command": "```{r s4-6}\n# 1. Save the complete dataset and check the saved files and counts.\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_snapshot(cfg, \"4.6\", guided_path(cfg, \"4.5\"), 1844, 238513, parent = \"4.5\")\ncheck_step(\"4.6\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable: this step needs no PLINK command. The R chunk is the complete command.\n\nR reads or calculates the displayed values without changing the genotype files.",
     "expected_result": "The full module 4 checkpoint has 1,844 samples and 238,513 variants. The counts and the SHA-256 checksums agree with the saved snapshot. A checksum is a short code that proves a file was not changed.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.",

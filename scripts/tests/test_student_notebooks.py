@@ -118,13 +118,11 @@ class StudentNotebookTests(unittest.TestCase):
                 options[index]["name"] = "--invented"
             with self.subTest(alteration=alteration), self.assertRaisesRegex(ValueError, "Incomplete"):
                 exports.step_metadata({"student_plink_options": changed}, copy.deepcopy(record))
-        # An unconditional or unconsumed flag must not relax terminal coverage.
-        for replacement in ('unused <- c(args, "--flip"', 'args <- c(args, "--flip"'):
-            changed_record = copy.deepcopy(record)
-            changed_record["r_commands"][0]["code"] = changed_record["r_commands"][0]["code"].replace(
-                'if (length(reverse)) args <- c(args, "--flip"', replacement)
-            with self.subTest(replacement=replacement), self.assertRaisesRegex(ValueError, "Incomplete"):
-                exports.step_metadata({"student_plink_options": groups}, changed_record)
+        # The terminal command shows --flip, in the same position as in the R code, because
+        # the exercise has reverse-strand sites. R still adds the option only when it is needed.
+        command = record["plink"]["commands"][0].split()
+        self.assertLess(command.index("--update-map"), command.index("--flip"))
+        self.assertLess(command.index("--flip"), command.index("--make-pgen"))
 
     def test_parser_requires_exact_resource_values_in_every_command(self):
         record = next(r for r in exports.export_steps() if r["id"] == "3.3")
@@ -465,6 +463,7 @@ class QuartoRendererTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue(text.startswith("---\ntitle:"))
                 self.assertIn("editor: visual", text)
+                self.assertIn("editor_options:\n  chunk_output_type: console\n", text.replace("\r\n", "\n"))
                 self.assertNotIn("html_notebook", text)
                 self.assertNotIn("execute:", text)
                 self.assertEqual(text.count("```{r}"), text.count("#| label:"))

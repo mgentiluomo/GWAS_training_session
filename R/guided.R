@@ -224,6 +224,19 @@ guided_summary_columns <- function() {
     "effect_allele_frequency", "odds_ratio", "beta", "standard_error", "p_value", "n")
 }
 
+# Look up the rs number of variants from the array annotation, by chromosome and GRCh38 position.
+# The array writes some names as "GSA-rs123"; the label is then "rs123". When no rs number exists
+# (for example for "chr1-914572"), the label is the course variant name and a note is printed.
+guided_variant_labels <- function(cfg, chromosome, position, variant_id) {
+  annotation <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
+  hit <- match(paste(chromosome, position), paste(annotation$Chr, annotation$Position_GRCh38))
+  name <- sub("^GSA-", "", annotation$Name[hit])
+  has_rs <- !is.na(hit) & grepl("^rs[0-9]+$", name)
+  label <- ifelse(has_rs, name, variant_id)
+  if (any(!has_rs)) message("No rs number was found for: ", paste(variant_id[!has_rs], collapse = ", "), ". The course variant name is used instead.")
+  label
+}
+
 guided_summary_path <- function(cfg) guided_path(cfg, "6.8", "gwas_summary_statistics.tsv")
 
 # Convert a parsed PLINK scan (from guided_association) into the standard summary statistics columns.

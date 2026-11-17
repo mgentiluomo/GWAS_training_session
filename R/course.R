@@ -700,11 +700,12 @@ read_ws <- function(path, header = TRUE) {
 
 id_key <- function(x) paste(x$FID, x$IID, sep = "\t")
 
-check_ids <- function(x, label) {
+check_ids <- function(x, label, verbose = FALSE) {
   if (!all(c("FID", "IID") %in% names(x))) stop(label, ": FID and IID columns are required.")
   if (anyNA(x[c("FID", "IID")]) || any(!nzchar(x$FID)) || any(!nzchar(x$IID)))
     stop(label, ": missing identifiers.")
   if (anyDuplicated(id_key(x))) stop(label, ": duplicate FID/IID pairs. Resolve them before joining.")
+  if (verbose) cat(label, ": no ID problems found.\n", sep = "")
   invisible(x)
 }
 
@@ -764,7 +765,7 @@ course_plink_path <- function(path, root) {
   relative
 }
 
-run_plink <- function(cfg, args, expected = character()) {
+run_plink <- function(cfg, args, expected = character(), quiet = FALSE) {
   args <- as.character(args)
   oi <- match("--out", args)
   if (is.na(oi) || oi == length(args)) stop("Every command needs --out for a separate log.")
@@ -781,12 +782,12 @@ run_plink <- function(cfg, args, expected = character()) {
   on.exit(setwd(previous_directory), add = TRUE)
   args <- c(args, "--threads", cfg$threads, "--memory", cfg$memory_mb)
   command <- paste(shQuote(executable), paste(shQuote(args), collapse = " "))
-  cat(command, "\n")
+  if (!quiet) cat(command, "\n")
   writeLines(c(paste("Started:", Sys.time()), cfg$version, command), paste0(prefix, ".command.txt"))
   # system2 quotes the executable. Quote each argument so paths with spaces work.
   output <- suppressWarnings(system2(executable, args = shQuote(args), stdout = TRUE, stderr = TRUE))
   writeLines(output, paste0(prefix, ".console.txt"))
-  cat(paste(if (isTRUE(cfg$preflight)) output else tail(output, 10), collapse = "\n"), "\n")
+  if (!quiet) cat(paste(if (isTRUE(cfg$preflight)) output else tail(output, 10), collapse = "\n"), "\n")
   status <- attr(output, "status")
   if (!is.null(status) && status != 0L) stop("PLINK stopped. Read ", prefix, ".console.txt before continuing.")
   require_files(expected)
@@ -922,7 +923,49 @@ plot_qq <- function(p, title = "QQ plot", xlim = NULL, ylim = NULL) {
   legend("topleft", legend = paste("lambda GC =", round(lambda_gc(p), 3)), bty = "n")
 }
 
-plot_manhattan <- function(x, title = "Manhattan plot") {
+# Find the lead variant of each region that passes a p-value threshold.
+# Significant variants closer than `window` base pairs on the same chromosome form one region.
+# The lead variant of a region is the one with the smallest p-value. Rows are ordered by p-value.
+region_leads <- function(chromosome, position, p, threshold = 5e-8, window = 500000) {
+  chromosome <- as.character(chromosome); position <- as.numeric(position)
+  hits <- which(valid_p(p) & p < threshold & is.finite(position))
+  if (!length(hits)) return(data.frame(index = integer(0), chromosome = character(0), position = numeric(0), p = numeric(0)))
+  chr_number <- suppressWarnings(as.numeric(chromosome[hits]))
+  hits <- hits[order(chr_number, position[hits])]
+  new_region <- c(TRUE, chromosome[hits][-1] != chromosome[hits][-length(hits)] | diff(position[hits]) > window)
+  region <- cumsum(new_region)
+  lead <- vapply(split(hits, region), function(i) i[which.min(p[i])], integer(1))
+  leads <- data.frame(index = as.integer(lead), chromosome = chromosome[lead], position = position[lead], p = p[lead],
+                      stringsAsFactors = FALSE)
+  leads[order(leads$p), , drop = FALSE]
+}
+
+# Place text labels above their points without overlap. Call this after plot().
+# Each label is moved up in small steps until it no longer touches an earlier label.
+place_labels <- function(x, y, labels, step = 0.06) {
+  if (!length(x)) return(invisible(NULL))
+  usr <- par("usr"); height <- strheight("A", cex = 0.8); width <- strwidth(labels, cex = 0.8)
+  boxes <- list(); order_x <- order(x)
+  for (i in order_x) {
+    ly <- y[i] + step * (usr[4] - usr[3])
+    repeat {
+      clash <- any(vapply(boxes, function(b) abs(b$x - x[i]) < (b$w + width[i]) / 2 + 0.01 * (usr[2] - usr[1]) &&
+        abs(b$y - ly) < height * 1.4, logical(1)))
+      if (!clash || ly > usr[4]) break
+      ly <- ly + height * 1.5
+    }
+    boxes[[length(boxes) + 1L]] <- list(x = x[i], y = ly, w = width[i])
+    segments(x[i], y[i], x[i], ly - height * 0.9, col = "#444444", lwd = 0.8)
+    text(x[i], ly, labels[i], cex = 0.8, col = "#111111")
+  }
+  invisible(NULL)
+}
+
+# x needs the columns CHROM, POS and P. An optional column LABEL holds the text for the lead variants.
+# suggestive = TRUE adds the dotted line for suggestive results at 5e-5.
+# label_leads = TRUE labels the lead variant of each region below 5e-8. max_labels sets how many regions get a label.
+# ylim lets several plots share one vertical scale.
+plot_manhattan <- function(x, title = "Manhattan plot", suggestive = FALSE, label_leads = FALSE, max_labels = 3, ylim = NULL) {
   x <- x[valid_p(x$P) & is.finite(x$CHROM) & x$CHROM %in% 1:22 & is.finite(x$POS), ]
   if (!nrow(x)) stop("No valid autosomal association results to plot.")
   x <- x[order(x$CHROM, x$POS), ]
@@ -931,13 +974,151 @@ plot_manhattan <- function(x, title = "Manhattan plot") {
   offsets <- c(0, head(cumsum(lengths), -1))
   positions <- x$POS + offsets[match(x$CHROM, chrs)]
   centers <- vapply(chrs, function(chr) mean(range(positions[x$CHROM == chr])), numeric(1))
+  if (is.null(ylim)) ylim <- c(0, max(8, -log10(x$P)))
+  if (label_leads) ylim[2] <- ylim[2] * 1.15
   plot(positions, -log10(x$P), pch = 16, cex = 0.5, xaxt = "n",
        col = c("#174A67", "#A34B18")[1 + match(x$CHROM, chrs) %% 2],
-       xlab = "Chromosome", ylab = "-log10(p)", main = title,
-       ylim = c(0, max(8, -log10(x$P))))
+       xlab = "Chromosome", ylab = "-log10(p)", main = title, ylim = ylim)
   axis(1, at = centers, labels = chrs, las = 2, cex.axis = 0.8, gap.axis = 0)
   abline(h = -log10(5e-8), col = "#B91C1C", lty = 2)
-  legend("topright", "Conventional GWAS threshold: 5e-8", lty = 2, col = "#B91C1C", bty = "n", cex = 0.8)
+  legend_text <- "Genome-wide threshold: 5e-8"; legend_lty <- 2; legend_col <- "#B91C1C"
+  if (suggestive) {
+    abline(h = -log10(5e-5), col = "#444444", lty = 3)
+    legend_text <- c(legend_text, "Suggestive threshold: 5e-5"); legend_lty <- c(legend_lty, 3); legend_col <- c(legend_col, "#444444")
+  }
+  legend("topright", legend_text, lty = legend_lty, col = legend_col, bty = "n", cex = 0.8)
+  if (label_leads) {
+    leads <- head(region_leads(x$CHROM, x$POS, x$P), max_labels)
+    if (nrow(leads)) {
+      text_labels <- if ("LABEL" %in% names(x)) x$LABEL[leads$index] else paste0(leads$chromosome, ":", leads$position)
+      place_labels(positions[leads$index], -log10(x$P[leads$index]), text_labels)
+    }
+  }
+}
+
+# Regional plot: association strength with the squared correlation (r2) to the lead as a continuous colour scale.
+# region needs base_pair_location and p_value. r2 has one value per row of region (NA when unavailable).
+plot_regional <- function(region, r2, lead_row, chromosome, lead_label, title) {
+  scale_colours <- hcl.colors(101, "viridis", rev = TRUE)
+  layout(matrix(1:2, nrow = 1), widths = c(6, 1)); on.exit(layout(1), add = TRUE)
+  par(mar = c(5, 4.5, 4, 1))
+  colour <- ifelse(is.na(r2), "#666666", scale_colours[1 + round(100 * pmin(pmax(r2, 0), 1))])
+  draw <- order(!is.na(r2), r2, na.last = FALSE)
+  x <- region$base_pair_location / 1e6; y <- -log10(region$p_value)
+  plot(x[draw], y[draw], col = colour[draw], pch = ifelse(is.na(r2[draw]), 4, 16), cex = 1.1,
+       xlab = paste0("GRCh38 chromosome ", chromosome, " position (Mb)"), ylab = "-log10(p)", main = title,
+       ylim = c(0, max(y) * 1.2))
+  abline(h = -log10(5e-8), lty = 2, col = "#B91C1C")
+  points(x[lead_row], y[lead_row], pch = 18, cex = 2.4, col = "#111111")
+  text(x[lead_row], y[lead_row], lead_label, pos = 3, offset = 1, cex = 0.9, font = 2)
+  legend("topleft", legend = c("Lead variant", "Genome-wide threshold: 5e-8", if (anyNA(r2)) "LD unavailable"),
+         pch = c(18, NA, if (anyNA(r2)) 4), lty = c(NA, 2, if (anyNA(r2)) NA), col = c("#111111", "#B91C1C", if (anyNA(r2)) "#666666"),
+         bty = "n", cex = 0.8)
+  par(mar = c(5, 0.5, 4, 4.5))
+  image(x = 1, y = seq(0, 1, length.out = 101), z = matrix(seq(0, 1, length.out = 101), nrow = 1), col = scale_colours,
+        axes = FALSE, xlab = "", ylab = "")
+  axis(4, at = seq(0, 1, 0.2), las = 1); mtext("r2 with the lead", side = 4, line = 3, cex = 0.8); box()
+}
+
+# Threshold trials (optional boxes in steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4).
+# Each trial starts from the same input and changes one threshold only. Trials never build on each other.
+# The PLINK trials write only a tiny temporary list file in a temporary folder, which is deleted at the end.
+
+# Count how many samples (--mind) or variants (--geno, --maf) PLINK removes at each threshold.
+# input is the file name prefix of a PGEN set. The result has the threshold, the removed count and the remaining count.
+threshold_counts <- function(cfg, input, option, values) {
+  if (!option %in% c("--mind", "--geno", "--maf")) stop("This helper supports --mind, --geno and --maf.")
+  kind <- if (option == "--mind") "samples" else "variants"
+  write_option <- if (kind == "samples") "--make-just-psam" else "--make-just-pvar"
+  folder <- tempfile("threshold-"); dir.create(folder)
+  on.exit(unlink(folder, recursive = TRUE), add = TRUE)
+  rows <- lapply(seq_along(values), function(i) {
+    prefix <- file.path(folder, paste0("trial", i))
+    output <- run_plink(cfg, c("--pfile", input, option, format(values[i], scientific = FALSE), write_option, "--out", prefix), quiet = TRUE)
+    loaded_line <- grep(paste0(kind, " .*loaded from|", kind, " loaded from"), output, value = TRUE)[1]
+    loaded <- as.numeric(sub("[^0-9].*", "", trimws(loaded_line)))
+    removed_line <- grep(paste0(kind, " removed"), output, value = TRUE)
+    removed <- if (length(removed_line)) as.numeric(sub(paste0(" ", kind, " removed.*"), "", sub(".*: ", "", removed_line[1]))) else 0
+    data.frame(threshold = values[i], removed = removed, remaining = loaded - removed)
+  })
+  do.call(rbind, rows)
+}
+
+# Count the samples that the heterozygosity rule removes (F below the mean minus k standard deviations)
+# and the samples that it flags (F above the mean plus k standard deviations). het is the PLINK .het table.
+het_counts <- function(het, multipliers) {
+  f <- as.numeric(het$F)
+  centre <- mean(f); spread <- sqrt(mean((f - centre)^2))
+  data.frame(threshold = multipliers, removed = vapply(multipliers, function(k) sum(f < centre - k * spread), numeric(1)),
+             flagged = vapply(multipliers, function(k) sum(f > centre + k * spread), numeric(1)))
+}
+
+# Count the variants that a Hardy-Weinberg threshold removes. hardy is the PLINK .hardy table of the controls.
+# Fixed thresholds are compared with the p-value (MIDP). With course_rule = TRUE the cutoff depends on the number of controls.
+hwe_counts <- function(hardy, thresholds, course_rule = TRUE) {
+  p <- as.numeric(hardy$MIDP)
+  n_control <- as.numeric(hardy$HOM_A1_CT) + as.numeric(hardy$HET_A1_CT) + as.numeric(hardy$TWO_AX_CT)
+  rows <- data.frame(threshold = thresholds, removed = vapply(thresholds, function(x) sum(!is.na(p) & p < x), numeric(1)))
+  if (course_rule) {
+    cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
+    rows <- rbind(rows, data.frame(threshold = NA_real_, removed = sum(!is.na(p) & p < cutoff)))
+  }
+  rows
+}
+
+# Count the samples that the relatedness rule of step 3.6 removes when the first-degree cutoff changes.
+# kin is the PLINK .kin0 table and metadata is the table from guided_metadata(). Pairs above 0.354 are always treated as repeats.
+kinship_counts <- function(kin, metadata, cutoffs) {
+  kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+  vapply(cutoffs, function(cutoff) {
+    remove <- character()
+    for (i in seq_len(nrow(kin))) {
+      a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
+      if (value > 0.354) {
+        if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
+          remove <- union(remove, if (endsWith(a, "_R2")) a else b)
+        } else {
+          ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
+          same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])), unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
+          remove <- union(remove, if (same) max(a, b) else c(a, b))
+        }
+      } else if (value > cutoff && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+    }
+    length(remove)
+  }, numeric(1))
+}
+
+# Plot the result of a threshold trial: the number removed at each threshold. The course value is a large diamond with a label.
+# trial needs the columns threshold and removed. course_value (TRUE for one row) marks the course threshold.
+chr_quote <- intToUtf8(34)
+plot_threshold_trials <- function(trial, ylab = "Removed", log_x = TRUE, course_label = "course value", engine = "base") {
+  if (engine == "ggplot2") {
+    if (!requireNamespace("ggplot2", quietly = TRUE)) {
+      message("The ggplot2 package is not installed, so the base R plot is drawn. To install it once: install.packages(", chr_quote, "ggplot2", chr_quote, ")")
+    } else {
+      shown <- trial[!is.na(trial$threshold), , drop = FALSE]
+      course <- shown[shown$course_value, , drop = FALSE]
+      plot <- ggplot2::ggplot(shown, ggplot2::aes(x = threshold, y = removed)) +
+        ggplot2::geom_line() + ggplot2::geom_point(size = 2) +
+        ggplot2::geom_point(data = course, shape = 18, size = 5, colour = "#B91C1C") +
+        ggplot2::geom_text(data = course, ggplot2::aes(label = course_label), vjust = -1.2, colour = "#B91C1C") +
+        ggplot2::scale_x_continuous(trans = if (log_x) "log10" else "identity", breaks = shown$threshold, labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE)) +
+        ggplot2::labs(x = "Threshold", y = ylab, title = "Trials with other thresholds") + ggplot2::theme_minimal()
+      print(plot)
+      return(invisible(trial))
+    }
+  }
+  fixed <- !is.na(trial$threshold)
+  x <- trial$threshold[fixed]; y <- trial$removed[fixed]
+  mark <- trial$course_value[fixed]
+  plot(x, y, type = "b", pch = 16, log = if (log_x) "x" else "", xaxt = "n", xlab = "Threshold", ylab = ylab,
+       ylim = c(0, max(y) * 1.15), main = "Trials with other thresholds")
+  axis(1, at = x, labels = format(x, scientific = FALSE, drop0trailing = TRUE), cex.axis = 0.85)
+  if (any(mark)) {
+    points(x[mark], y[mark], pch = 18, cex = 2.2, col = "#B91C1C")
+    text(x[mark], y[mark], course_label, pos = 3, offset = 1, col = "#B91C1C", cex = 0.9)
+  }
+  invisible(trial)
 }
 
 save_plot <- function(path, draw, width = 1800, height = 1200) {

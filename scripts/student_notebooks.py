@@ -59,6 +59,7 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 "option_groups": record.get("student_plink_options", []),
                 "expected_result": record.get("student_expected_result", ""),
                 "terminal_commands": record["plink"]["commands"],
+                "thresholds": (record.get("blocks") or {}).get("try_other_thresholds", ""),
             })
         models.append({"module": number, "title": module["title"], "prerequisites": spec,
                        "time": re.match(r"[^.]*\.", time_line[1])[0] if time_line else "",
@@ -173,6 +174,8 @@ def render_steps_rmd(model: dict) -> list[str]:
                           "", "```sh", *record["terminal_commands"], "```", ""])
         else:
             lines.extend(["No PLINK equivalent", ""])
+        if record.get("thresholds"):
+            lines.extend(["### Try other thresholds (optional)", "", notebook_links(record["thresholds"]), ""])
     return lines
 
 
@@ -232,6 +235,12 @@ def glossary_entries(root: Path = ROOT) -> dict[str, tuple[str, str]]:
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         entries[match[2]] = (match[1], text[match.end():end].strip())
     return entries
+
+
+def qmd_thresholds(text: str, used: set[str]) -> str:
+    """The optional threshold box keeps its prose. Its R chunk becomes a Quarto chunk that does not run."""
+    chunk = re.compile(r"^```\{r [^\n]*}\n.*?^```$", re.M | re.S)
+    return chunk.sub(lambda m: "\n".join(qmd_chunk(m.group(0))), qmd_links(text, used))
 
 
 def qmd_links(text: str, used: set[str]) -> str:
@@ -335,6 +344,7 @@ def render_qmd(models: list[dict], complete: bool = False) -> str:
              "    toc-depth: 2", '    toc-title: "Contents"', "    toc-location: left", "    toc-expand: true",
              "    anchor-sections: true", "    code-copy: true", "    code-fold: false", "    code-overflow: wrap",
              "    embed-resources: true", "    include-after-body:", "      text: |", *LINK_SCRIPT, "editor: visual",
+             "editor_options:", "  chunk_output_type: console",
              *([] if complete else [f'course_source_sha256: "{module["source_sha256"]}"']), "---", "",
              "Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.",
              "All data are simulated. Read each summary, run its chunk and compare your result with the expected result.",
@@ -392,6 +402,9 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
                           "", "```sh", *record["terminal_commands"], "```", "", ":::", ""])
         else:
             lines.extend(['::: {.callout-note title="PLINK terminal equivalent"}', "", "No PLINK equivalent", "", ":::", ""])
+        if record.get("thresholds"):
+            lines.extend(['::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}', "",
+                          qmd_thresholds(record["thresholds"], used), "", ":::", ""])
     return lines
 
 

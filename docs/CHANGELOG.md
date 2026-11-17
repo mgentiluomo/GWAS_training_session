@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026.4 (project release, 17 November 2026)
+
+- New optional boxes "Try other thresholds" in steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4. Each box repeats the count with other thresholds and shows a table. The course value is marked. The boxes do not change your results.
+- Step 5.5 draws PC1 with PC2, PC1 with PC3 and PC2 with PC3, with the key outside the plot. An optional box shows a 3D plot with ellipses (package `rgl`, not installed by step 0.5).
+- Step 7.3 can add a dotted line for suggestive results at 5e-5 and labels the lead variant of each region with its rs number. Step 7.6 draws all three regions with a continuous colour scale. Step 7.7 compares the QQ and Manhattan plots from the least to the most adjusted analysis.
+- Step 2.3 prints "no ID problems found" when the check passes. The terminal command of step 2.6 now includes `--flip`. Step 3.5 prints its counts as whole numbers. Step 1.9 says that ONT and PacBio produce an unaligned BAM file. Acronyms are spelled out at first use. "Strong" is kept for effects and "linked" is replaced where it meant "associated with".
+- The notebooks have `chunk_output_type: console` in their header.
+- All course numbers are unchanged: 1,811 samples, 238,513 variants, lambda 1.016, eight hits and three clumps. The data release is unchanged (`data-2026.1`). The PLINK programs are unchanged.
+
 ## 2026.3.3 (project release, 16 November 2026)
 
 - Step 0.6 explains the macOS quarantine mark in short steps. Run only `prepare_course_plink()`. Do not open the programs inside `third_party/` by hand, because macOS can block them and move them to the Bin. If macOS shows a warning about `bin/plink2`, choose "Done", not "Move to Bin". Then remove the mark with `xattr -d com.apple.quarantine bin/plink2` and run the step again. If `bin/plink2` has disappeared, run step 0.6 again. The link to Apple's instructions stays.

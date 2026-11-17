@@ -6,7 +6,7 @@
   "anchor": "step-6-4",
   "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "26b1f7a69396e6f0d34c018b1eb4b88e941b29876b9607ebb9614a3b9eb0a31d",
+  "source_sha256": "105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",

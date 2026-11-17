@@ -6,42 +6,46 @@
   "anchor": "step-7-6",
   "title": "Regional plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31",
+  "source_sha256": "85361cea5bcc0fdaab7b0363d8301e3cf503c9156774ba9ed660a2d5b016a0db",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.",
-    "why": "A [regional plot](docs/glossary.md#regional-plot) shows a small part of the genome. It shows three things together: the position, the strength of the association and the LD. We use L2, on chromosome 9. We do not use L1, because L1 has only one genome-wide significant variant in this set of array variants.\n\nNearby points with a high r^2 to the lead variant can carry the same association signal. Low LD, or several separate peaks, do not by themselves show several causal effects. We do not name genes and we do not add any other annotation here.",
-    "you_need": "The summary statistics file from step 6.8, the final cohort and the lead variant 9:96426973:A:G from the clump on chromosome 9.",
-    "command": "```{r s7-6}\n# 1. Choose the chromosome 9 variant and the output name.\nlead <- \"9:96426973:A:G\"\nreport <- guided_path(cfg, \"7.6\", \"ld\")\n# 2. Measure correlations with the chosen variant within 500,000 DNA positions.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--chr\", \"9\", \"--from-bp\", \"95926973\", \"--to-bp\", \"96926973\",\n  \"--r2-unphased\", \"--ld-snp\", lead, \"--ld-window-kb\", \"500\", \"--ld-window-r2\", \"0\", \"--out\", report))\n# 3. Read the correlation table and select the regional association results.\nld <- guided_table(paste0(report, \".vcor\"))\nstats <- guided_summary_stats(cfg)\nregion <- stats[stats$chromosome == \"9\" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]\n# 4. Find and check the column holding squared correlations.\nr2_column <- grep(\"R2$\", names(ld), value = TRUE)\nstopifnot(length(r2_column) == 1L)\n# 5. Match each regional variant to its correlation with the chosen variant.\nr2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])\nr2[region$variant_id == lead] <- 1\n# 6. Choose symbols and colours for the correlation ranges.\nbin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)\ncolours <- c(\"#0072B2\", \"#56B4E9\", \"#009E73\", \"#E69F00\", \"#D55E00\")\nshapes <- c(1, 2, 3, 4, 16)\n# 7. Draw and save the regional plot with a legend and significance line.\npng(guided_path(cfg, \"7.6\", \"regional.png\"), width = 1400, height = 900, res = 150)\nplot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), \"#666666\", colours[bin]),\n  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = \"GRCh38 chromosome 9 position (Mb)\", ylab = \"-log10(p)\", main = \"L2: association and LD to the lead\")\nabline(h = -log10(5e-8), lty = 2)\nlegend(\"topright\", legend = c(\"r2: 0 to 0.2\", \"0.2 to 0.4\", \"0.4 to 0.6\", \"0.6 to 0.8\", \"0.8 to 1\", \"LD unavailable\"),\n  pch = c(shapes, 8), col = c(colours, \"#666666\"), cex = 0.8)\ninvisible(dev.off())\ncat(\"The plot was saved to \", guided_path(cfg, \"7.6\", \"regional.png\"), \"\\n\", sep = \"\")\n# 8. Check that four regional variants have p-values below 0.00000005.\nstopifnot(sum(region$p_value < 5e-8) == 4L)\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"7.6\", c(paste0(report, \".vcor\"), guided_path(cfg, \"7.6\", \"regional.png\")), parent = \"6.8\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048\n```\n\n`--chr 9`, `--from-bp` and `--to-bp` define an interval of one megabase on chromosome 9 in GRCh38. `--r2-unphased` reports the squared correlation of the genotype dosages. `--ld-snp` makes the lead variant the first member of every pair. `--ld-window-kb 500` limits the distance from the lead to 500 kilobases. `--ld-window-r2 0` keeps low correlations as well as high ones; without it, points with low LD could disappear from the report. `--out`, threads and memory have the meanings given earlier.",
-    "expected_result": "L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says \"LD unavailable\". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose \"View File\").\n\nThe tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.",
+    "what_we_do": "Look closely at the three regions with genome-wide significant variants: L1 on chromosome 3, L2 on chromosome 9 and L3 on chromosome 12. We draw one plot for each region. Each variant is coloured by its LD with the lead variant of its region.",
+    "why": "A [regional plot](docs/glossary.md#regional-plot) shows a small part of the genome. It shows three things together: the position, the strength of the association and the LD. L1 has only one genome-wide significant variant in this set of array variants, so its plot shows one isolated high point. L2 and L3 have several.\n\nNearby points with a high r^2 to the lead variant can carry the same association signal. Low LD, or several separate peaks, do not by themselves show several causal effects. We do not name genes and we do not add any other annotation here.\n\nThe colour scale is continuous. It runs from pale yellow, where r^2 is 0 and the two variants share no information, to dark purple, where r^2 is 1 and the genotypes are the same. Darker means more similar, so the plot is also readable in grey. The lead variant is a black diamond with its rs number. A grey cross means that PLINK gave no LD value for that variant. The value is not silently set to zero.",
+    "you_need": "The summary statistics file from step 6.8, the final cohort and the three lead variants 3:163224115:T:C, 9:96426973:A:G and 12:120965921:G:A from the clumps.",
+    "command": "```{r s7-6}\n# 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.\nregions <- data.frame(label = c(\"L1\", \"L2\", \"L3\"), chromosome = c(\"3\", \"9\", \"12\"),\n  position = c(163224115, 96426973, 120965921), lead = c(\"3:163224115:T:C\", \"9:96426973:A:G\", \"12:120965921:G:A\"),\n  ld = c(\"ld_chr3\", \"ld\", \"ld_chr12\"), picture = c(\"regional_chr3.png\", \"regional.png\", \"regional_chr12.png\"),\n  expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)\n# 2. Read the association results once and look up the rs number of each lead variant.\nstats <- guided_summary_stats(cfg)\nregions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)\n# 3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.\nfor (i in seq_len(nrow(regions))) {\n  report <- guided_path(cfg, \"7.6\", regions$ld[i])\n  run_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--chr\", regions$chromosome[i],\n    \"--from-bp\", format(regions$position[i] - 500000, scientific = FALSE), \"--to-bp\", format(regions$position[i] + 500000, scientific = FALSE),\n    \"--r2-unphased\", \"--ld-snp\", regions$lead[i], \"--ld-window-kb\", \"500\", \"--ld-window-r2\", \"0\", \"--out\", report))\n  # 4. Read the correlation table and select the regional association results.\n  ld <- guided_table(paste0(report, \".vcor\"))\n  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]\n  # 5. Find and check the column holding squared correlations.\n  r2_column <- grep(\"R2$\", names(ld), value = TRUE)\n  stopifnot(length(r2_column) == 1L)\n  # 6. Match each regional variant to its correlation with the lead variant.\n  r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])\n  r2[region$variant_id == regions$lead[i]] <- 1\n  # 7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.\n  png(guided_path(cfg, \"7.6\", regions$picture[i]), width = 1500, height = 900, res = 150)\n  plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],\n    paste0(regions$label[i], \": association and LD to the lead\"))\n  invisible(dev.off())\n  cat(\"The plot was saved to \", guided_path(cfg, \"7.6\", regions$picture[i]), \"\\n\", sep = \"\")\n  # 8. Check the number of regional variants with p-values below 0.00000005.\n  stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])\n}\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"7.6\", c(paste0(guided_path(cfg, \"7.6\", \"ld\"), \".vcor\"), guided_path(cfg, \"7.6\", \"regional.png\")), parent = \"6.8\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows). The three commands are for L1, L2 and L3:\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --chr 3 --from-bp 162724115 --to-bp 163724115 --r2-unphased --ld-snp 3:163224115:T:C --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr3 --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048\nbin/plink2 --pfile results/guided/s5-7_state --chr 12 --from-bp 120465921 --to-bp 121465921 --r2-unphased --ld-snp 12:120965921:G:A --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr12 --threads 2 --memory 2048\n```\n\n`--chr`, `--from-bp` and `--to-bp` define an interval of one megabase around each lead variant in GRCh38. `--r2-unphased` reports the squared correlation of the genotype dosages. `--ld-snp` makes the lead variant the first member of every pair. `--ld-window-kb 500` limits the distance from the lead to 500 kilobases. `--ld-window-r2 0` keeps low correlations as well as high ones; without it, points with low LD could disappear from the report. `--out`, threads and memory have the meanings given earlier.",
+    "expected_result": "L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says \"LD unavailable\". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose \"View File\").\n\nThe tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.",
     "troubleshooting": "Stop at the first error. Check the input file that R names and the previous step. Keep the command and the messages from the console. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
-    "quick_check": "Does the highest point always identify the causal variant?\n\n<details><summary>Show the answer</summary>\n\nNo. The lead variant is the strongest association among the sites that we tested. It may only mark a cause that we did not measure.\n\n</details>",
-    "files_created": "`s7-6_ld.vcor`, `s7-6_regional.png` and the regional analysis checkpoint."
+    "quick_check": "Does the highest point always identify the causal variant?\n\n<details><summary>Show the answer</summary>\n\nNo. The lead variant is the association with the smallest p-value among the sites that we tested. It may only mark a cause that we did not measure.\n\n</details>",
+    "files_created": "`s7-6_ld.vcor`, `s7-6_ld_chr3.vcor`, `s7-6_ld_chr12.vcor`, `s7-6_regional.png` (L2), `s7-6_regional_chr3.png` (L1), `s7-6_regional_chr12.png` (L3) and the regional analysis checkpoint."
   },
   "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s7-6",
-      "code": "# 1. Choose the chromosome 9 variant and the output name.\nlead <- \"9:96426973:A:G\"\nreport <- guided_path(cfg, \"7.6\", \"ld\")\n# 2. Measure correlations with the chosen variant within 500,000 DNA positions.\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--chr\", \"9\", \"--from-bp\", \"95926973\", \"--to-bp\", \"96926973\",\n  \"--r2-unphased\", \"--ld-snp\", lead, \"--ld-window-kb\", \"500\", \"--ld-window-r2\", \"0\", \"--out\", report))\n# 3. Read the correlation table and select the regional association results.\nld <- guided_table(paste0(report, \".vcor\"))\nstats <- guided_summary_stats(cfg)\nregion <- stats[stats$chromosome == \"9\" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]\n# 4. Find and check the column holding squared correlations.\nr2_column <- grep(\"R2$\", names(ld), value = TRUE)\nstopifnot(length(r2_column) == 1L)\n# 5. Match each regional variant to its correlation with the chosen variant.\nr2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])\nr2[region$variant_id == lead] <- 1\n# 6. Choose symbols and colours for the correlation ranges.\nbin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)\ncolours <- c(\"#0072B2\", \"#56B4E9\", \"#009E73\", \"#E69F00\", \"#D55E00\")\nshapes <- c(1, 2, 3, 4, 16)\n# 7. Draw and save the regional plot with a legend and significance line.\npng(guided_path(cfg, \"7.6\", \"regional.png\"), width = 1400, height = 900, res = 150)\nplot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), \"#666666\", colours[bin]),\n  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = \"GRCh38 chromosome 9 position (Mb)\", ylab = \"-log10(p)\", main = \"L2: association and LD to the lead\")\nabline(h = -log10(5e-8), lty = 2)\nlegend(\"topright\", legend = c(\"r2: 0 to 0.2\", \"0.2 to 0.4\", \"0.4 to 0.6\", \"0.6 to 0.8\", \"0.8 to 1\", \"LD unavailable\"),\n  pch = c(shapes, 8), col = c(colours, \"#666666\"), cex = 0.8)\ninvisible(dev.off())\ncat(\"The plot was saved to \", guided_path(cfg, \"7.6\", \"regional.png\"), \"\\n\", sep = \"\")\n# 8. Check that four regional variants have p-values below 0.00000005.\nstopifnot(sum(region$p_value < 5e-8) == 4L)\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"7.6\", c(paste0(report, \".vcor\"), guided_path(cfg, \"7.6\", \"regional.png\")), parent = \"6.8\")",
+      "code": "# 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.\nregions <- data.frame(label = c(\"L1\", \"L2\", \"L3\"), chromosome = c(\"3\", \"9\", \"12\"),\n  position = c(163224115, 96426973, 120965921), lead = c(\"3:163224115:T:C\", \"9:96426973:A:G\", \"12:120965921:G:A\"),\n  ld = c(\"ld_chr3\", \"ld\", \"ld_chr12\"), picture = c(\"regional_chr3.png\", \"regional.png\", \"regional_chr12.png\"),\n  expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)\n# 2. Read the association results once and look up the rs number of each lead variant.\nstats <- guided_summary_stats(cfg)\nregions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)\n# 3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.\nfor (i in seq_len(nrow(regions))) {\n  report <- guided_path(cfg, \"7.6\", regions$ld[i])\n  run_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--chr\", regions$chromosome[i],\n    \"--from-bp\", format(regions$position[i] - 500000, scientific = FALSE), \"--to-bp\", format(regions$position[i] + 500000, scientific = FALSE),\n    \"--r2-unphased\", \"--ld-snp\", regions$lead[i], \"--ld-window-kb\", \"500\", \"--ld-window-r2\", \"0\", \"--out\", report))\n  # 4. Read the correlation table and select the regional association results.\n  ld <- guided_table(paste0(report, \".vcor\"))\n  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]\n  # 5. Find and check the column holding squared correlations.\n  r2_column <- grep(\"R2$\", names(ld), value = TRUE)\n  stopifnot(length(r2_column) == 1L)\n  # 6. Match each regional variant to its correlation with the lead variant.\n  r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])\n  r2[region$variant_id == regions$lead[i]] <- 1\n  # 7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.\n  png(guided_path(cfg, \"7.6\", regions$picture[i]), width = 1500, height = 900, res = 150)\n  plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],\n    paste0(regions$label[i], \": association and LD to the lead\"))\n  invisible(dev.off())\n  cat(\"The plot was saved to \", guided_path(cfg, \"7.6\", regions$picture[i]), \"\\n\", sep = \"\")\n  # 8. Check the number of regional variants with p-values below 0.00000005.\n  stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])\n}\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"7.6\", c(paste0(guided_path(cfg, \"7.6\", \"ld\"), \".vcor\"), guided_path(cfg, \"7.6\", \"regional.png\")), parent = \"6.8\")",
       "run_by_default": true
     }
   ],
   "notebook_only_expected_code": [
-    "if (requireNamespace(\"knitr\", quietly = TRUE) && knitr::is_html_output()) {\n  knitr::include_graphics(normalizePath(guided_path(cfg, \"7.6\", \"regional.png\"), winslash = \"/\", mustWork = FALSE), rel_path = FALSE)\n}"
+    "if (requireNamespace(\"knitr\", quietly = TRUE) && knitr::is_html_output()) {\n  knitr::include_graphics(normalizePath(guided_path(cfg, \"7.6\", \"regional.png\"), winslash = \"/\", mustWork = FALSE), rel_path = FALSE)\n}",
+    "if (requireNamespace(\"knitr\", quietly = TRUE) && knitr::is_html_output()) {\n  knitr::include_graphics(normalizePath(guided_path(cfg, \"7.6\", \"regional_chr3.png\"), winslash = \"/\", mustWork = FALSE), rel_path = FALSE)\n}",
+    "if (requireNamespace(\"knitr\", quietly = TRUE) && knitr::is_html_output()) {\n  knitr::include_graphics(normalizePath(guided_path(cfg, \"7.6\", \"regional_chr12.png\"), winslash = \"/\", mustWork = FALSE), rel_path = FALSE)\n}"
   ],
   "plink": {
     "applicable": true,
     "commands": [
-      "bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048"
+      "bin/plink2 --pfile results/guided/s5-7_state --chr 3 --from-bp 162724115 --to-bp 163724115 --r2-unphased --ld-snp 3:163224115:T:C --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr3 --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048",
+      "bin/plink2 --pfile results/guided/s5-7_state --chr 12 --from-bp 120465921 --to-bp 121465921 --r2-unphased --ld-snp 12:120965921:G:A --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr12 --threads 2 --memory 2048"
     ],
     "options": [
       {
         "name": "--chr",
-        "explanation_markdown": "`--chr 9`, `--from-bp` and `--to-bp` define an interval of one megabase on chromosome 9 in GRCh38."
+        "explanation_markdown": "`--chr`, `--from-bp` and `--to-bp` define an interval of one megabase around each lead variant in GRCh38."
       },
       {
         "name": "--from-bp",
-        "explanation_markdown": "`--chr 9`, `--from-bp` and `--to-bp` define an interval of one megabase on chromosome 9 in GRCh38."
+        "explanation_markdown": "`--chr`, `--from-bp` and `--to-bp` define an interval of one megabase around each lead variant in GRCh38."
       },
       {
         "name": "--ld-snp",
@@ -81,7 +85,7 @@
       },
       {
         "name": "--to-bp",
-        "explanation_markdown": "`--chr 9`, `--from-bp` and `--to-bp` define an interval of one megabase on chromosome 9 in GRCh38."
+        "explanation_markdown": "`--chr`, `--from-bp` and `--to-bp` define an interval of one megabase around each lead variant in GRCh38."
       }
     ]
   },
@@ -90,12 +94,53 @@
       "kind": "placeholder",
       "asset": null,
       "gemini_prompt": "Create a labelled teaching schematic for Regional plot. Use shapes and text as well as colour. Do not invent numeric course results, gene annotations or individual identities. This complements the tested R plot; it does not replace it.",
-      "alt_text": "Four L2 variants pass the genome-wide threshold; symbol and colour indicate LD with the chromosome 9 lead.",
+      "alt_text": "Four L2 variants on chromosome 9 pass the genome-wide threshold, and the lead variant rs10820598 is labelled. Colour from pale yellow to dark purple shows LD with the lead.",
       "reviewed": false
     }
   ],
-  "student_summary": "We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.",
+  "student_summary": "We draw three detailed regional plots, one for each region with genome-wide significant variants, on chromosomes 3, 9 and 12. Each plot shows the strength of each association and how closely its DNA pattern follows the lead variant, using a continuous colour scale.",
   "student_plink_options": [
+    {
+      "label": "measure correlation around the chromosome 3 lead",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."
+        },
+        {
+          "name": "--chr",
+          "explanation": "Selects chromosome 3 for the regional comparison."
+        },
+        {
+          "name": "--from-bp",
+          "explanation": "Starts the selected GRCh38 interval at DNA position 162724115."
+        },
+        {
+          "name": "--to-bp",
+          "explanation": "Ends the selected GRCh38 interval at DNA position 163724115."
+        },
+        {
+          "name": "--r2-unphased",
+          "explanation": "Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."
+        },
+        {
+          "name": "--ld-snp",
+          "explanation": "Pairs variant 3:163224115:T:C with the other selected variants to measure their correlation with it."
+        },
+        {
+          "name": "--ld-window-kb",
+          "explanation": "Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 3:163224115:T:C."
+        },
+        {
+          "name": "--ld-window-r2",
+          "explanation": "Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with s7-6_ld_chr3, including the correlation table s7-6_ld_chr3.vcor."
+        }
+      ]
+    },
     {
       "label": "measure correlation around the chromosome 9 lead",
       "options": [
@@ -136,11 +181,52 @@
           "explanation": "Starts output file names with s7-6_ld, including the correlation table s7-6_ld.vcor."
         }
       ]
+    },
+    {
+      "label": "measure correlation around the chromosome 12 lead",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."
+        },
+        {
+          "name": "--chr",
+          "explanation": "Selects chromosome 12 for the regional comparison."
+        },
+        {
+          "name": "--from-bp",
+          "explanation": "Starts the selected GRCh38 interval at DNA position 120465921."
+        },
+        {
+          "name": "--to-bp",
+          "explanation": "Ends the selected GRCh38 interval at DNA position 121465921."
+        },
+        {
+          "name": "--r2-unphased",
+          "explanation": "Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."
+        },
+        {
+          "name": "--ld-snp",
+          "explanation": "Pairs variant 12:120965921:G:A with the other selected variants to measure their correlation with it."
+        },
+        {
+          "name": "--ld-window-kb",
+          "explanation": "Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 12:120965921:G:A."
+        },
+        {
+          "name": "--ld-window-r2",
+          "explanation": "Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with s7-6_ld_chr12, including the correlation table s7-6_ld_chr12.vcor."
+        }
+      ]
     }
   ],
   "success_line": "L2 has four genome-wide significant variants.",
   "verification_notes": [
     "The tested PLINK version is set in `config.R` and recorded in\n`software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows."
   ],
-  "student_expected_result": "L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says \"LD unavailable\". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose \"View File\")."
+  "student_expected_result": "L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says \"LD unavailable\". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose \"View File\")."
 }

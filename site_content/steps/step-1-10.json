@@ -6,7 +6,7 @@
   "anchor": "step-1-10",
   "title": "The formats you will meet most often",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b",
+  "source_sha256": "94a3f68425ce2db95dcf1358d11ea06a28892921f8c0c41858e8fce1908d0d41",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 9 minutes. You can come back to it later.\n\nRead fields in tiny invented examples. Conversion commands below are examples to read, not instructions to run.",

@@ -50,7 +50,7 @@ Calculate a simple carrier odds ratio for one variant on an [autosome](../docs/g
 
 ### Why
 
-The [odds](../docs/glossary.md#odds) of an outcome are the number of people with the outcome divided by the number without it. An odds ratio (OR) compares the odds in two groups. An OR of 1 means the odds are equal. A carrier has at least one copy of an [allele](../docs/glossary.md#allele) (one version of the variant). We compare carriers of the allele named in the exported column with non-carriers. This is a teaching calculation. It is not the additive, adjusted model that the real GWAS uses. The counted allele matters: if you count the other allele, the contrast changes.
+The [odds](../docs/glossary.md#odds) of an outcome are the number of people with the outcome divided by the number without it. An odds ratio (OR) compares the odds in two groups. An OR of 1 means the odds are equal. A carrier has at least one copy of an [allele](../docs/glossary.md#allele) (one version of the variant). We compare carriers of the allele named in the exported column with non-carriers. This is a teaching calculation. It is not the additive, adjusted model that the real genome-wide association study (GWAS) uses. The counted allele matters: if you count the other allele, the contrast changes.
 
 ### You need
 
@@ -333,7 +333,7 @@ No. The p-value depends on the effect, the uncertainty and the sample size. Also
 ## 6.5 Read association output {#step-6-5}
 
 
-<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12.", "student_summary": "We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12.", "student_summary": "We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this extreme if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.", "student_plink_options": []} -->
 ### What we do
 
 Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.
@@ -556,7 +556,7 @@ Do eight significant variants always mean eight independent association signals?
 
 <details><summary>Show the answer</summary>
 
-No. Nearby variants can share one signal because of [LD](../docs/glossary.md#ld). Clumping at 7.5 groups the correlated associations.
+No. Nearby variants can share one signal because of [linkage disequilibrium (LD)](../docs/glossary.md#ld). Clumping at 7.5 groups the correlated associations.
 
 </details>
 

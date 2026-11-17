@@ -29,12 +29,14 @@ BLOCKS = [
     ("troubleshooting", "<details><summary>If something goes wrong</summary>"),
     ("what_this_check_can_reveal", "### What this check can reveal"),
     ("quick_check", "### Quick check"), ("files_created", "### Files created"),
-    # Optional ninth block for readers who want the statistics and the literature behind a step.
+    # Optional block for readers who want to see what other thresholds would do. It comes after "Files created".
+    ("try_other_thresholds", "<details><summary>Try other thresholds (optional)</summary>"),
+    # Optional last block for readers who want the statistics and the literature behind a step.
     # It must come last, after "Files created", so the beginner path ends where it always did.
     ("under_the_hood", "<details><summary>Under the hood & literature</summary>"),
 ]
-OPTIONAL_BLOCKS = {"what_this_check_can_reveal", "under_the_hood"}
-COLLAPSED_BLOCKS = {"expected_result", "troubleshooting", "under_the_hood"}
+OPTIONAL_BLOCKS = {"what_this_check_can_reveal", "try_other_thresholds", "under_the_hood"}
+COLLAPSED_BLOCKS = {"expected_result", "troubleshooting", "try_other_thresholds", "under_the_hood"}
 FENCE = re.compile(r"^```.*?^```\s*$", re.M | re.S)
 MD_LINK = re.compile(r"(\]\()([^)\s]+)((?:\s+\"[^\"]*\")?\))")
 HTML_HREF = re.compile(r"(\bhref=\")([^\"]+)(\")")

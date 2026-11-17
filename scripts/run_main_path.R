@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 2986ae658713e60f7dbc4e8f6403ffe4117373bb62c95443f2523ff59a8d0860
+# SHA-256: 7d51ac0c935abf29c2171838e9b18128d4391caa73e75f8f079e6ba2d87cc328
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -38,7 +38,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: fd2627437905239c40f1ba7db5af4c8a071ffb77c3f8285fa516a2b2af54612b
+# SHA-256: 94a3f68425ce2db95dcf1358d11ea06a28892921f8c0c41858e8fce1908d0d41
 
 # Chunk: setup
 source("R/guided.R")
@@ -104,7 +104,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e
+# SHA-256: de606f5ba9e6e4e393faa4ded7f7cfc494d077cd55f6b126a4871acb2cf82dba
 
 # Chunk: setup
 source("R/guided.R")
@@ -137,7 +137,7 @@ variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)
 head(variants)
 # 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples", verbose = TRUE)
 
 
 # Chunk: s2-4
@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8
+# SHA-256: f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7
 
 # Chunk: setup
 source("R/guided.R")
@@ -289,7 +289,7 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 
 
 # Chunk: s3-4
-# 1. Write the list of regions where nearby variants are strongly linked.
+# 1. Write the list of regions where nearby variants are strongly correlated.
 regions <- guided_high_ld(cfg)
 # 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
@@ -319,8 +319,9 @@ guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 # 6. Save the dataset without the low F samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
-# 7. Print the average, spread and numbers of flagged samples.
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+# 7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
+print(c(mean_F = mean_f, SD_F = sd_f))
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
@@ -399,7 +400,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe
+# SHA-256: 590070cd5b754eb36f8d6fc9676a68e9bde1ea6bbab901085bdfa496a35008cd
 
 # Chunk: setup
 source("R/guided.R")
@@ -502,7 +503,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3
+# SHA-256: a1f5838a8c0bc6bca5b88d0b1d9a54a0e56c9952eac4a84de3fa6feefeb026d5
 
 # Chunk: setup
 source("R/guided.R")
@@ -579,21 +580,42 @@ metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch
 group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
-# 3. Open a picture file and plot the first two reference components.
-png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
-plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
-  xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
-# 4. Add the study samples and a key for the groups.
-points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
-legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-# 5. Finish saving the picture and print its location.
-invisible(dev.off())
-cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
+# 3. Define one plotting function, so that all pictures use the same symbols, colours and key.
+plot_components <- function(x, y, file) {
+  png(file, width = 1400, height = 850, res = 140)
+  par(mar = c(5, 4.5, 4, 9))
+  plot(as.numeric(ref[[paste0("PC", x, "_AVG")]]), as.numeric(ref[[paste0("PC", y, "_AVG")]]), col = colours[code], pch = code,
+    xlab = paste0("Reference PC", x, " score"), ylab = paste0("Reference PC", y, " score"),
+    main = paste0("GRCh38 reference and projected simulated study: PC", x, " and PC", y))
+  # Add the study samples and a key for the groups. The key sits outside the plot, on the right, so it hides no points.
+  points(as.numeric(study[[paste0("PC", x, "_AVG")]]), as.numeric(study[[paste0("PC", y, "_AVG")]]), pch = 20, cex = 0.4, col = "#333333")
+  legend("topright", inset = c(-0.21, 0), xpd = TRUE, legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+  invisible(dev.off())
+}
+# 4. Save the picture for PC1 and PC2, then the two extra pictures for PC1 and PC3 and for PC2 and PC3.
+files <- c(guided_path(cfg, "5.5", "reference_projection.png"),
+  guided_path(cfg, "5.5", "reference_projection_pc1_pc3.png"),
+  guided_path(cfg, "5.5", "reference_projection_pc2_pc3.png"))
+plot_components(1, 2, files[1]); plot_components(1, 3, files[2]); plot_components(2, 3, files[3])
+# 5. Print the location of each picture.
+for (file in files) cat("The plot was saved to ", file, "\n", sep = "")
 
 
 # Chunk: s5-5_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s5-5_expected_figure_pc1_pc3
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection_pc1_pc3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s5-5_expected_figure_pc2_pc3
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection_pc2_pc3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -625,7 +647,7 @@ guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 # 1. Prepare the regions to exclude and the site selection output name.
 regions <- guided_high_ld(cfg)
 prune <- guided_path(cfg, "5.7", "prune")
-# 2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+# 2. Select common sites on chromosomes 1 to 22 with weaker correlations with each other.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
 # 3. Calculate ten components within the retained study group using the selected sites.
@@ -650,7 +672,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 26b1f7a69396e6f0d34c018b1eb4b88e941b29876b9607ebb9614a3b9eb0a31d
+# SHA-256: 105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b
 
 # Chunk: setup
 source("R/guided.R")
@@ -801,7 +823,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31
+# SHA-256: 85361cea5bcc0fdaab7b0363d8301e3cf503c9156774ba9ed660a2d5b016a0db
 
 # Chunk: setup
 source("R/guided.R")
@@ -842,9 +864,19 @@ stats <- guided_summary_stats(cfg)
 # 2. Prepare the chromosome, position and p-value columns.
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
   POS = stats$base_pair_location, P = stats$p_value)
-# 3. Save the plot of results along the chromosomes.
-save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
-# 4. Check that eight variants have p-values below 0.00000005.
+# 3. Find the lead variant of each region below 5e-8 and look up its rs number.
+leads <- region_leads(plot_data$CHROM, plot_data$POS, plot_data$P)
+plot_data$LABEL <- NA_character_
+plot_data$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, stats$variant_id[leads$index])
+# 4. Save the plot of results along the chromosomes.
+# Optional: suggestive = TRUE adds a dotted line at 5e-5. label_leads = FALSE hides the rs numbers.
+# max_labels sets how many regions get a label (the regions with the smallest p-values come first).
+save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",
+  suggestive = FALSE, label_leads = TRUE, max_labels = 3))
+# 5. Save a second picture with the optional suggestive line switched on.
+save_plot(guided_path(cfg, "7.3", "manhattan_suggestive.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",
+  suggestive = TRUE, label_leads = TRUE, max_labels = 3))
+# 6. Check that eight variants have p-values below 0.00000005.
 stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 
 
@@ -854,12 +886,18 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 
+# Chunk: s7-3_expected_figure_suggestive
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.3", "manhattan_suggestive.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
 # Chunk: s7-4
 # 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
 # 2. Keep only valid p-values.
 p <- stats$p_value[valid_p(stats$p_value)]
-# 3. Compare three rules for deciding which results are strong enough.
+# 3. Compare three rules for deciding which results are convincing enough.
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
@@ -882,44 +920,57 @@ stopifnot(nrow(clumps) == 3L)
 
 
 # Chunk: s7-6
-# 1. Choose the chromosome 9 variant and the output name.
-lead <- "9:96426973:A:G"
-report <- guided_path(cfg, "7.6", "ld")
-# 2. Measure correlations with the chosen variant within 500,000 DNA positions.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
-  "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
-# 3. Read the correlation table and select the regional association results.
-ld <- guided_table(paste0(report, ".vcor"))
+# 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
+regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),
+  position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
+  ld = c("ld_chr3", "ld", "ld_chr12"), picture = c("regional_chr3.png", "regional.png", "regional_chr12.png"),
+  expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)
+# 2. Read the association results once and look up the rs number of each lead variant.
 stats <- guided_summary_stats(cfg)
-region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
-# 4. Find and check the column holding squared correlations.
-r2_column <- grep("R2$", names(ld), value = TRUE)
-stopifnot(length(r2_column) == 1L)
-# 5. Match each regional variant to its correlation with the chosen variant.
-r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
-r2[region$variant_id == lead] <- 1
-# 6. Choose symbols and colours for the correlation ranges.
-bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
-colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
-shapes <- c(1, 2, 3, 4, 16)
-# 7. Draw and save the regional plot with a legend and significance line.
-png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
-plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
-  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
-abline(h = -log10(5e-8), lty = 2)
-legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
-  pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
-invisible(dev.off())
-cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
-# 8. Check that four regional variants have p-values below 0.00000005.
-stopifnot(sum(region$p_value < 5e-8) == 4L)
+regions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)
+# 3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.
+for (i in seq_len(nrow(regions))) {
+  report <- guided_path(cfg, "7.6", regions$ld[i])
+  run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", regions$chromosome[i],
+    "--from-bp", format(regions$position[i] - 500000, scientific = FALSE), "--to-bp", format(regions$position[i] + 500000, scientific = FALSE),
+    "--r2-unphased", "--ld-snp", regions$lead[i], "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+  # 4. Read the correlation table and select the regional association results.
+  ld <- guided_table(paste0(report, ".vcor"))
+  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
+  # 5. Find and check the column holding squared correlations.
+  r2_column <- grep("R2$", names(ld), value = TRUE)
+  stopifnot(length(r2_column) == 1L)
+  # 6. Match each regional variant to its correlation with the lead variant.
+  r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
+  r2[region$variant_id == regions$lead[i]] <- 1
+  # 7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.
+  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = 900, res = 150)
+  plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],
+    paste0(regions$label[i], ": association and LD to the lead"))
+  invisible(dev.off())
+  cat("The plot was saved to ", guided_path(cfg, "7.6", regions$picture[i]), "\n", sep = "")
+  # 8. Check the number of regional variants with p-values below 0.00000005.
+  stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])
+}
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 
 
 # Chunk: s7-6_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s7-6_expected_figure_chr3
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional_chr3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s7-6_expected_figure_chr12
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional_chr12.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -946,7 +997,7 @@ b <- guided_standardise_scan(guided_association(no_qc))
 # 6. Check that the main and cleaned comparison analyses use the same samples per variant.
 k <- match(main$variant_id, a$variant_id)
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
-# 7. Count valid tests and strong results and calculate lambda for each analysis.
+# 7. Count valid tests and results below the genome-wide threshold and calculate lambda for each analysis.
 autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
@@ -955,20 +1006,45 @@ print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
 # 8. Save the comparison table.
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
-# 9. Save three plots with the same scale to compare the analyses.
+# 9. Save three QQ plots with the same scale to compare the analyses.
+# The order goes from the least adjusted analysis to the most adjusted one.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
-  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
+  plotted <- list(autosomal_p(b), autosomal_p(a), autosomal_p(main))
   limits <- c(0, max(-log10(unlist(plotted))))
-  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
-  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
   plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
 }, width = 2100, height = 750)
+# 10. Prepare the same three analyses for Manhattan plots. Each lead variant gets its rs number as a label.
+manhattan_data <- function(x) {
+  d <- data.frame(CHROM = suppressWarnings(as.numeric(x$chromosome)), POS = x$base_pair_location, P = x$p_value, LABEL = NA_character_)
+  leads <- region_leads(d$CHROM, d$POS, d$P)
+  d$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, x$variant_id[leads$index])
+  d
+}
+panels <- list(b = manhattan_data(b), a = manhattan_data(a), main = manhattan_data(main))
+# 11. Use one vertical scale for all three Manhattan plots, so that the heights can be compared.
+top <- max(8, -log10(unlist(lapply(panels, function(d) d$P[valid_p(d$P)]))))
+# 12. Save the Manhattan comparison, again from the least to the most adjusted analysis.
+# Optional: suggestive = TRUE adds the dotted line at 5e-5 to every panel. max_labels sets how many regions get a label.
+save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {
+  par(mfrow = c(3, 1), mar = c(4, 4.5, 3, 1))
+  plot_manhattan(panels$b, "No sample/variant QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$a, "QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$main, "QC + ten PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+}, width = 1800, height = 2400)
 
 
 # Chunk: s7-7_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "qq_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s7-7_expected_figure_manhattan
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "manhattan_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
@@ -978,11 +1054,11 @@ psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-# 2. Select the strongest variant in each group and calculate its uncertainty interval.
+# 2. Select the lead variant in each group and calculate its uncertainty interval.
 lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
-# 3. Save the table of the three strongest variants.
+# 3. Save the table of the three lead variants.
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 # 4. Prepare the report describing the analysis, results and limitations.
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
@@ -993,7 +1069,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
-  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",

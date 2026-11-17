@@ -6,7 +6,7 @@
   "anchor": "step-0-4",
   "title": "Open the project and check R",
   "source": "lessons/module_00_preparation.Rmd",
-  "source_sha256": "2986ae658713e60f7dbc4e8f6403ffe4117373bb62c95443f2523ff59a8d0860",
+  "source_sha256": "7d51ac0c935abf29c2171838e9b18128d4391caa73e75f8f079e6ba2d87cc328",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Open the project, then open this notebook. Follow these actions:\n\n1. In the folder you extracted or cloned at step 0.3, double-click `GWAS_course.Rproj`. RStudio opens with the project. You should usually see the project name `GWAS_course` at the top right.\n2. In the Files pane, click the folder `notebooks`. Then click `module_00_preparation.qmd`. It opens in the editor. The file `gwas_course_complete.qmd` holds all modules in one notebook, if you prefer one file. The folder `lessons` holds the source files for the author. You do not need it.\n3. Run commands in the console. Always work from the [project root](docs/glossary.md#working-directory), which is the main folder of the project.",

@@ -28,12 +28,12 @@ cfg <- guided_init()
 
 ## Module 7 at a glance {#module-7-overview}
 
-**What you will do.** You will turn the results of the association test into plots and tables. You will check that the results are trustworthy. Then you will find the strong signals and write a short report.
+**What you will do.** You will turn the results of the association test into plots and tables. You will check that the results are trustworthy. Then you will find the results with very small p-values and write a short report.
 
 **What you will learn.**
 
-- How to draw and read the two main GWAS plots.
-- How to check if the test results are too strong overall.
+- How to draw and read the two main genome-wide association study (GWAS) plots.
+- How to check if the p-values are too small overall.
 - How to choose a p-value threshold when you run many tests.
 - How to group nearby signals and look closely at one region.
 - How to report results honestly, including their limits.
@@ -43,18 +43,20 @@ cfg <- guided_init()
 ## 7.1 QQ plot {#step-7-1}
 
 
-<!-- step_meta: {"success_line":"Most points are close to the diagonal line.","student_summary":"We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.","student_plink_options":[]} -->
+<!-- step_meta: {"success_line":"Most points are close to the diagonal line.","student_summary":"We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the results with the smallest p-values stand out.","student_plink_options":[]} -->
 ### What we do
 
-Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
+Draw a quantile-quantile (QQ) plot. It compares the p-values we observed with the p-values we would expect if no variant were associated with the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
 
 The plot reads the [summary statistics file](../docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.
 
 ### Why
 
-A [QQ plot](../docs/glossary.md#qq-plot) puts the observed p-values in order and pairs each one with the value that we expect by chance. If no variant is linked to the disease, the [p-values](../docs/glossary.md#p-value) are spread evenly between 0 and 1. The plot shows -log10 of each p-value. This turns small p-values into large positive numbers, so strong results appear high on the plot.
+A [QQ plot](../docs/glossary.md#qq-plot) puts the observed p-values in order and pairs each one with the value that we expect by chance. If no variant is associated with the disease, the [p-values](../docs/glossary.md#p-value) are spread evenly between 0 and 1. The plot shows -log10 of each p-value. This turns small p-values into large positive numbers, so very small p-values appear high on the plot.
 
-If the tests behave well, the points follow the diagonal line. A few strong associations lift only the highest points at the right end. A wider departure along the whole line can have several causes: [confounding](../docs/glossary.md#confounding), technical problems, a wrong model or many true small effects. The picture alone cannot tell these causes apart. Nearby variants can be correlated through [linkage disequilibrium (LD)](../docs/glossary.md#ld), so the points are not fully independent.
+If the tests behave well, the points follow the diagonal line. A few associations with very small p-values lift only the highest points at the right end. A wider departure along the whole line can have several causes: [confounding](../docs/glossary.md#confounding), technical problems, a wrong model or many true small effects. The picture alone cannot tell these causes apart. Nearby variants can be correlated through [linkage disequilibrium (LD)](../docs/glossary.md#ld), so the points are not fully independent.
+
+The top left corner of the plot shows a number called lambda. Lambda summarises how far the middle of the p-values departs from what chance predicts. We only read it as a first hint here. We explain it and calculate it in step 7.2.
 
 ### You need
 
@@ -79,7 +81,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+Most points are close to the diagonal line. The highest points at the right end leave the line by a wide margin. Missing, zero or invalid p-values are not drawn as if they were very small p-values. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
@@ -100,7 +102,7 @@ Stop at the first error. Check the input file that R names and the previous step
 
 ### Quick check
 
-Does a strong departure only at the highest points always mean confounding across the whole genome?
+Does a large departure only at the highest points always mean confounding across the whole genome?
 
 <details><summary>Show the answer</summary>
 
@@ -185,14 +187,16 @@ No. Lambda summarises the middle of all the tests. It does not show that one sin
 ## 7.3 Manhattan plot {#step-7-3}
 
 
-<!-- step_meta: {"success_line": "There are three strong regions, on chromosomes 3, 9 and 12.", "student_summary": "We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "There are three regions with very small p-values, on chromosomes 3, 9 and 12.", "student_summary": "We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22, and label the lead variant of each region. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of results with very small p-values.", "student_plink_options": []} -->
 ### What we do
 
 Draw a Manhattan plot of the association results along the autosomes. The plot reads the summary statistics file made at step 6.8.
 
 ### Why
 
-A [Manhattan plot](../docs/glossary.md#manhattan-plot) shows every tested variant as one point. The horizontal axis shows the chromosome and the position. The vertical axis shows -log10(p), so stronger results are higher. Nearby high points are often correlated through LD, so they may be one single signal. The position tells us where the evidence is, not which gene causes the effect.
+A [Manhattan plot](../docs/glossary.md#manhattan-plot) shows every tested variant as one point. The horizontal axis shows the chromosome and the position. The vertical axis shows -log10(p), so smaller p-values are higher. Nearby high points are often correlated through LD, so they may be one single signal. The position tells us where the evidence is, not which gene causes the effect.
+
+The red dashed line marks the usual genome-wide threshold of 5e-8, which is -log10(p) of about 7.30. The plot can also show a dotted line at 5e-5, which is -log10(p) of about 4.30. Results between the two lines are called suggestive. A suggestive result is worth a second look, but it is not solid evidence. With so many tests, many results reach 5e-5 by chance alone. Only results above the red line count as genome-wide significant. The plot labels the lead variant of each region above the red line with its rs number. An rs number is the public name of a variant in the dbSNP database. The lead variant is the one with the smallest p-value in its region.
 
 All positions use the [GRCh38](../docs/glossary.md#grch38) genome build. The plot gives alternate chromosomes different colours. The chromosome labels and the order of the positions give the same information, so colour is not the only clue.
 
@@ -208,9 +212,19 @@ stats <- guided_summary_stats(cfg)
 # 2. Prepare the chromosome, position and p-value columns.
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),
   POS = stats$base_pair_location, P = stats$p_value)
-# 3. Save the plot of results along the chromosomes.
-save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))
-# 4. Check that eight variants have p-values below 0.00000005.
+# 3. Find the lead variant of each region below 5e-8 and look up its rs number.
+leads <- region_leads(plot_data$CHROM, plot_data$POS, plot_data$P)
+plot_data$LABEL <- NA_character_
+plot_data$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, stats$variant_id[leads$index])
+# 4. Save the plot of results along the chromosomes.
+# Optional: suggestive = TRUE adds a dotted line at 5e-5. label_leads = FALSE hides the rs numbers.
+# max_labels sets how many regions get a label (the regions with the smallest p-values come first).
+save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",
+  suggestive = FALSE, label_leads = TRUE, max_labels = 3))
+# 5. Save a second picture with the optional suggestive line switched on.
+save_plot(guided_path(cfg, "7.3", "manhattan_suggestive.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",
+  suggestive = TRUE, label_leads = TRUE, max_labels = 3))
+# 6. Check that eight variants have p-values below 0.00000005.
 stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 ```
 
@@ -222,14 +236,20 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+There are three regions with very small p-values, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The lead variants carry the labels rs1994750 on chromosome 3, rs10820598 on chromosome 9 and rs7953249 on chromosome 12. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves two pictures as PNG files and prints the path of each one. The second picture is the same plot with the dotted suggestive line at 5e-5 switched on. It does not show the pictures in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
 
-```{r s7-3_expected_figure, echo=FALSE, fig.alt="Autosomal association peaks exceed the conventional threshold on chromosomes 3, 9 and 12."}
+```{r s7-3_expected_figure, echo=FALSE, fig.alt="Autosomal association peaks exceed the genome-wide threshold of 5e-8 on chromosomes 3, 9 and 12. The lead variant of each peak is labelled with its rs number."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "7.3", "manhattan.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+```
+
+```{r s7-3_expected_figure_suggestive, echo=FALSE, fig.alt="The same autosomal Manhattan plot with two horizontal lines: the dashed genome-wide threshold at 5e-8 and the dotted suggestive threshold at 5e-5. Peaks on chromosomes 3, 9 and 12 rise above both lines and carry rs number labels."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.3", "manhattan_suggestive.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -253,7 +273,7 @@ No. Because of LD, several tested variants can point to the same single signal.
 
 ### Files created
 
-`s7-3_manhattan.png`.
+`s7-3_manhattan.png` and `s7-3_manhattan_suggestive.png`.
 
 <!-- Figure placeholder. Gemini prompt: Draw a schematic Manhattan plot with clearly labelled chromosomes and the conventional 5e-8 line. Mark a group of correlated points as one region, and state that a peak does not identify a causal gene. Do not invent gene annotations. -->
 
@@ -284,7 +304,7 @@ The valid additive results from the summary statistics file made at step 6.8. Do
 stats <- guided_summary_stats(cfg)
 # 2. Keep only valid p-values.
 p <- stats$p_value[valid_p(stats$p_value)]
-# 3. Compare three rules for deciding which results are strong enough.
+# 3. Compare three rules for deciding which results are convincing enough.
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
@@ -331,7 +351,7 @@ No. The rate describes the whole set of discoveries on average. It is not a prob
 ## 7.5 Clump correlated results {#step-7-5}
 
 
-<!-- step_meta: {"success_line": "There are three clumps.", "student_summary": "We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.", "student_plink_options": [{"label": "group correlated results", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--clump", "explanation": "Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples."}, {"name": "--clump-id-field", "explanation": "Uses the ID column of the association report to identify variants."}, {"name": "--clump-p-field", "explanation": "Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect."}, {"name": "--clump-p1", "explanation": "Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005)."}, {"name": "--clump-p2", "explanation": "Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001)."}, {"name": "--clump-r2", "explanation": "Adds variants whose squared correlation with the group's strongest variant exceeds 0.1."}, {"name": "--clump-kb", "explanation": "Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant."}, {"name": "--clump-unphased", "explanation": "Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes."}, {"name": "--out", "explanation": "Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps."}]}]} -->
+<!-- step_meta: {"success_line": "There are three clumps.", "student_summary": "We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.", "student_plink_options": [{"label": "group correlated results", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--clump", "explanation": "Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples."}, {"name": "--clump-id-field", "explanation": "Uses the ID column of the association report to identify variants."}, {"name": "--clump-p-field", "explanation": "Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect."}, {"name": "--clump-p1", "explanation": "Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005)."}, {"name": "--clump-p2", "explanation": "Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001)."}, {"name": "--clump-r2", "explanation": "Adds variants whose squared correlation with the group's lead variant exceeds 0.1."}, {"name": "--clump-kb", "explanation": "Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its lead variant."}, {"name": "--clump-unphased", "explanation": "Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes."}, {"name": "--out", "explanation": "Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps."}]}]} -->
 ### What we do
 
 Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.
@@ -371,7 +391,7 @@ bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_associa
 
 <details><summary>Show the expected result</summary>
 
-There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
+There are three clumps. They describe the regions with very small p-values on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
 
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
@@ -401,77 +421,94 @@ Yes. The clumps depend on these settings and on the samples used to measure LD.
 ## 7.6 Regional plot {#step-7-6}
 
 
-<!-- step_meta: {"success_line":"L2 has four genome-wide significant variants.","student_summary":"We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.","student_plink_options":[{"label":"measure correlation around the chromosome 9 lead","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."},{"name":"--chr","explanation":"Selects chromosome 9 for the regional comparison."},{"name":"--from-bp","explanation":"Starts the selected GRCh38 interval at DNA position 95926973."},{"name":"--to-bp","explanation":"Ends the selected GRCh38 interval at DNA position 96926973."},{"name":"--r2-unphased","explanation":"Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."},{"name":"--ld-snp","explanation":"Pairs variant 9:96426973:A:G with the other selected variants to measure their correlation with it."},{"name":"--ld-window-kb","explanation":"Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 9:96426973:A:G."},{"name":"--ld-window-r2","explanation":"Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."},{"name":"--out","explanation":"Starts output file names with s7-6_ld, including the correlation table s7-6_ld.vcor."}]}]} -->
+<!-- step_meta: {"success_line":"L2 has four genome-wide significant variants.","student_summary":"We draw three detailed regional plots, one for each region with genome-wide significant variants, on chromosomes 3, 9 and 12. Each plot shows the strength of each association and how closely its DNA pattern follows the lead variant, using a continuous colour scale.","student_plink_options":[{"label":"measure correlation around the chromosome 3 lead","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."},{"name":"--chr","explanation":"Selects chromosome 3 for the regional comparison."},{"name":"--from-bp","explanation":"Starts the selected GRCh38 interval at DNA position 162724115."},{"name":"--to-bp","explanation":"Ends the selected GRCh38 interval at DNA position 163724115."},{"name":"--r2-unphased","explanation":"Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."},{"name":"--ld-snp","explanation":"Pairs variant 3:163224115:T:C with the other selected variants to measure their correlation with it."},{"name":"--ld-window-kb","explanation":"Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 3:163224115:T:C."},{"name":"--ld-window-r2","explanation":"Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."},{"name":"--out","explanation":"Starts output file names with s7-6_ld_chr3, including the correlation table s7-6_ld_chr3.vcor."}]},{"label":"measure correlation around the chromosome 9 lead","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."},{"name":"--chr","explanation":"Selects chromosome 9 for the regional comparison."},{"name":"--from-bp","explanation":"Starts the selected GRCh38 interval at DNA position 95926973."},{"name":"--to-bp","explanation":"Ends the selected GRCh38 interval at DNA position 96926973."},{"name":"--r2-unphased","explanation":"Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."},{"name":"--ld-snp","explanation":"Pairs variant 9:96426973:A:G with the other selected variants to measure their correlation with it."},{"name":"--ld-window-kb","explanation":"Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 9:96426973:A:G."},{"name":"--ld-window-r2","explanation":"Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."},{"name":"--out","explanation":"Starts output file names with s7-6_ld, including the correlation table s7-6_ld.vcor."}]},{"label":"measure correlation around the chromosome 12 lead","options":[{"name":"--pfile","explanation":"Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."},{"name":"--chr","explanation":"Selects chromosome 12 for the regional comparison."},{"name":"--from-bp","explanation":"Starts the selected GRCh38 interval at DNA position 120465921."},{"name":"--to-bp","explanation":"Ends the selected GRCh38 interval at DNA position 121465921."},{"name":"--r2-unphased","explanation":"Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes."},{"name":"--ld-snp","explanation":"Pairs variant 12:120965921:G:A with the other selected variants to measure their correlation with it."},{"name":"--ld-window-kb","explanation":"Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 12:120965921:G:A."},{"name":"--ld-window-r2","explanation":"Sets the minimum reported squared correlation to 0 so weak correlations remain in the report."},{"name":"--out","explanation":"Starts output file names with s7-6_ld_chr12, including the correlation table s7-6_ld_chr12.vcor."}]}]} -->
 ### What we do
 
-Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.
+Look closely at the three regions with genome-wide significant variants: L1 on chromosome 3, L2 on chromosome 9 and L3 on chromosome 12. We draw one plot for each region. Each variant is coloured by its LD with the lead variant of its region.
 
 ### Why
 
-A [regional plot](../docs/glossary.md#regional-plot) shows a small part of the genome. It shows three things together: the position, the strength of the association and the LD. We use L2, on chromosome 9. We do not use L1, because L1 has only one genome-wide significant variant in this set of array variants.
+A [regional plot](../docs/glossary.md#regional-plot) shows a small part of the genome. It shows three things together: the position, the strength of the association and the LD. L1 has only one genome-wide significant variant in this set of array variants, so its plot shows one isolated high point. L2 and L3 have several.
 
 Nearby points with a high r^2 to the lead variant can carry the same association signal. Low LD, or several separate peaks, do not by themselves show several causal effects. We do not name genes and we do not add any other annotation here.
 
+The colour scale is continuous. It runs from pale yellow, where r^2 is 0 and the two variants share no information, to dark purple, where r^2 is 1 and the genotypes are the same. Darker means more similar, so the plot is also readable in grey. The lead variant is a black diamond with its rs number. A grey cross means that PLINK gave no LD value for that variant. The value is not silently set to zero.
+
 ### You need
 
-The summary statistics file from step 6.8, the final cohort and the lead variant 9:96426973:A:G from the clump on chromosome 9.
+The summary statistics file from step 6.8, the final cohort and the three lead variants 3:163224115:T:C, 9:96426973:A:G and 12:120965921:G:A from the clumps.
 
 ### Command
 
 ```{r s7-6}
-# 1. Choose the chromosome 9 variant and the output name.
-lead <- "9:96426973:A:G"
-report <- guided_path(cfg, "7.6", "ld")
-# 2. Measure correlations with the chosen variant within 500,000 DNA positions.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",
-  "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
-# 3. Read the correlation table and select the regional association results.
-ld <- guided_table(paste0(report, ".vcor"))
+# 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
+regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),
+  position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
+  ld = c("ld_chr3", "ld", "ld_chr12"), picture = c("regional_chr3.png", "regional.png", "regional_chr12.png"),
+  expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)
+# 2. Read the association results once and look up the rs number of each lead variant.
 stats <- guided_summary_stats(cfg)
-region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
-# 4. Find and check the column holding squared correlations.
-r2_column <- grep("R2$", names(ld), value = TRUE)
-stopifnot(length(r2_column) == 1L)
-# 5. Match each regional variant to its correlation with the chosen variant.
-r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
-r2[region$variant_id == lead] <- 1
-# 6. Choose symbols and colours for the correlation ranges.
-bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)
-colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
-shapes <- c(1, 2, 3, 4, 16)
-# 7. Draw and save the regional plot with a legend and significance line.
-png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)
-plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
-  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
-abline(h = -log10(5e-8), lty = 2)
-legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
-  pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
-invisible(dev.off())
-cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
-# 8. Check that four regional variants have p-values below 0.00000005.
-stopifnot(sum(region$p_value < 5e-8) == 4L)
+regions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)
+# 3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.
+for (i in seq_len(nrow(regions))) {
+  report <- guided_path(cfg, "7.6", regions$ld[i])
+  run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", regions$chromosome[i],
+    "--from-bp", format(regions$position[i] - 500000, scientific = FALSE), "--to-bp", format(regions$position[i] + 500000, scientific = FALSE),
+    "--r2-unphased", "--ld-snp", regions$lead[i], "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+  # 4. Read the correlation table and select the regional association results.
+  ld <- guided_table(paste0(report, ".vcor"))
+  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
+  # 5. Find and check the column holding squared correlations.
+  r2_column <- grep("R2$", names(ld), value = TRUE)
+  stopifnot(length(r2_column) == 1L)
+  # 6. Match each regional variant to its correlation with the lead variant.
+  r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
+  r2[region$variant_id == regions$lead[i]] <- 1
+  # 7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.
+  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = 900, res = 150)
+  plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],
+    paste0(regions$label[i], ": association and LD to the lead"))
+  invisible(dev.off())
+  cat("The plot was saved to ", guided_path(cfg, "7.6", regions$picture[i]), "\n", sep = "")
+  # 8. Check the number of regional variants with p-values below 0.00000005.
+  stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])
+}
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 ```
 
-Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows). The three commands are for L1, L2 and L3:
 
 ```sh
+bin/plink2 --pfile results/guided/s5-7_state --chr 3 --from-bp 162724115 --to-bp 163724115 --r2-unphased --ld-snp 3:163224115:T:C --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr3 --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --chr 12 --from-bp 120465921 --to-bp 121465921 --r2-unphased --ld-snp 12:120965921:G:A --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr12 --threads 2 --memory 2048
 ```
 
-`--chr 9`, `--from-bp` and `--to-bp` define an interval of one megabase on chromosome 9 in GRCh38. `--r2-unphased` reports the squared correlation of the genotype dosages. `--ld-snp` makes the lead variant the first member of every pair. `--ld-window-kb 500` limits the distance from the lead to 500 kilobases. `--ld-window-r2 0` keeps low correlations as well as high ones; without it, points with low LD could disappear from the report. `--out`, threads and memory have the meanings given earlier.
+`--chr`, `--from-bp` and `--to-bp` define an interval of one megabase around each lead variant in GRCh38. `--r2-unphased` reports the squared correlation of the genotype dosages. `--ld-snp` makes the lead variant the first member of every pair. `--ld-window-kb 500` limits the distance from the lead to 500 kilobases. `--ld-window-r2 0` keeps low correlations as well as high ones; without it, points with low LD could disappear from the report. `--out`, threads and memory have the meanings given earlier.
 
 <details><summary>Show the expected result</summary>
 
-L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose "View File").
 
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
 
-```{r s7-6_expected_figure, echo=FALSE, fig.alt="Four L2 variants pass the genome-wide threshold; symbol and colour indicate LD with the chromosome 9 lead."}
+```{r s7-6_expected_figure, echo=FALSE, fig.alt="Four L2 variants on chromosome 9 pass the genome-wide threshold, and the lead variant rs10820598 is labelled. Colour from pale yellow to dark purple shows LD with the lead."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+```
+
+```{r s7-6_expected_figure_chr3, echo=FALSE, fig.alt="One L1 variant on chromosome 3 passes the genome-wide threshold. It is the lead variant, rs1994750, and it stands alone above the other points. Colour from pale yellow to dark purple shows LD with the lead."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional_chr3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+```
+
+```{r s7-6_expected_figure_chr12, echo=FALSE, fig.alt="Three L3 variants on chromosome 12 pass the genome-wide threshold, and the lead variant rs7953249 is labelled. Colour from pale yellow to dark purple shows LD with the lead."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.6", "regional_chr12.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -489,13 +526,13 @@ Does the highest point always identify the causal variant?
 
 <details><summary>Show the answer</summary>
 
-No. The lead variant is the strongest association among the sites that we tested. It may only mark a cause that we did not measure.
+No. The lead variant is the association with the smallest p-value among the sites that we tested. It may only mark a cause that we did not measure.
 
 </details>
 
 ### Files created
 
-`s7-6_ld.vcor`, `s7-6_regional.png` and the regional analysis checkpoint.
+`s7-6_ld.vcor`, `s7-6_ld_chr3.vcor`, `s7-6_ld_chr12.vcor`, `s7-6_regional.png` (L2), `s7-6_regional_chr3.png` (L1), `s7-6_regional_chr12.png` (L3) and the regional analysis checkpoint.
 
 ## 7.7 Compare without PCs and without QC {#step-7-7}
 
@@ -507,9 +544,9 @@ Compare the main analysis, which we planned in advance, with two analyses that w
 
 ### Why
 
-In the first comparison, we leave out the [PCs](../docs/glossary.md#pca-pc). PCs are the numbers that summarise ancestry. We keep the same cleaned cohort and the same [covariates](../docs/glossary.md#covariate), age and sex. This shows the effect of the PC adjustment alone.
+In the first comparison, we leave out the [principal components (PCs)](../docs/glossary.md#pca-pc). PCs are the numbers that summarise ancestry. We keep the same cleaned cohort and the same [covariates](../docs/glossary.md#covariate), age and sex. This shows the effect of the PC adjustment alone.
 
-In the second comparison, we start from the state saved at module 2. It has the case and control labels and the corrected strands. We use no sample [QC](../docs/glossary.md#qc), no variant QC and no PCs. This comparison changes the samples and the variants as well as the QC. We cannot give its differences to one single cause. The label "no QC" does not mean that we undid the strand correction or the case and control labels. When you interpret the differences, compare the shared variants and the number of samples for each variant.
+In the second comparison, we start from the state saved at module 2. It has the case and control labels and the corrected strands. We use no sample [quality control (QC)](../docs/glossary.md#qc), no variant QC and no PCs. This comparison changes the samples and the variants as well as the QC. We cannot give its differences to one single cause. The label "no QC" does not mean that we undid the strand correction or the case and control labels. When you interpret the differences, compare the shared variants and the number of samples for each variant.
 
 ### You need
 
@@ -540,7 +577,7 @@ b <- guided_standardise_scan(guided_association(no_qc))
 # 6. Check that the main and cleaned comparison analyses use the same samples per variant.
 k <- match(main$variant_id, a$variant_id)
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
-# 7. Count valid tests and strong results and calculate lambda for each analysis.
+# 7. Count valid tests and results below the genome-wide threshold and calculate lambda for each analysis.
 autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
@@ -549,15 +586,34 @@ print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
 # 8. Save the comparison table.
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
-# 9. Save three plots with the same scale to compare the analyses.
+# 9. Save three QQ plots with the same scale to compare the analyses.
+# The order goes from the least adjusted analysis to the most adjusted one.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {
   par(mfrow = c(1, 3))
-  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
+  plotted <- list(autosomal_p(b), autosomal_p(a), autosomal_p(main))
   limits <- c(0, max(-log10(unlist(plotted))))
-  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
-  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
   plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
 }, width = 2100, height = 750)
+# 10. Prepare the same three analyses for Manhattan plots. Each lead variant gets its rs number as a label.
+manhattan_data <- function(x) {
+  d <- data.frame(CHROM = suppressWarnings(as.numeric(x$chromosome)), POS = x$base_pair_location, P = x$p_value, LABEL = NA_character_)
+  leads <- region_leads(d$CHROM, d$POS, d$P)
+  d$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, x$variant_id[leads$index])
+  d
+}
+panels <- list(b = manhattan_data(b), a = manhattan_data(a), main = manhattan_data(main))
+# 11. Use one vertical scale for all three Manhattan plots, so that the heights can be compared.
+top <- max(8, -log10(unlist(lapply(panels, function(d) d$P[valid_p(d$P)]))))
+# 12. Save the Manhattan comparison, again from the least to the most adjusted analysis.
+# Optional: suggestive = TRUE adds the dotted line at 5e-5 to every panel. max_labels sets how many regions get a label.
+save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {
+  par(mfrow = c(3, 1), mar = c(4, 4.5, 3, 1))
+  plot_manhattan(panels$b, "No sample/variant QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$a, "QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$main, "QC + ten PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+}, width = 1800, height = 2400)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -573,12 +629,28 @@ bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s
 
 Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
+The plots follow the order from the least adjusted analysis to the most adjusted one. All QQ plots share one vertical scale. All three Manhattan plots also share one vertical scale, so you can compare the heights of the peaks. Each plot has the genome-wide line at 5e-8, and the labels show the rs number of the lead variant of each region. The table below summarises the same numbers in that order.
+
+| Analysis | Hits below 5e-8 | Lambda |
+| --- | --- | --- |
+| No sample or variant QC, no PCs | 19 | about 1.655 |
+| QC, no PCs | 15 | about 1.546 |
+| QC and ten PCs (main analysis) | 8 | about 1.016 |
+
+Without PCs, the same three peaks stay and some points reach a little higher. Without any QC, the plot also shows peaks on chromosomes 2 and 15 just above the line, and the lead variant on chromosome 12 changes to rs7310409. The label exm2265352 is an array name, because that variant has no rs number. A lead variant that appears only in the weaker analyses is a warning sign, not a discovery.
+
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
 
-```{r s7-7_expected_figure, echo=FALSE, fig.alt="QQ plots share a vertical scale; removing PCs and then sample and variant QC increases median inflation."}
+```{r s7-7_expected_figure, echo=FALSE, fig.alt="Three QQ plots share a vertical scale, from the least adjusted analysis on the left to the most adjusted on the right. Removing PCs and then sample and variant QC increases median inflation."}
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "qq_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+```
+
+```{r s7-7_expected_figure_manhattan, echo=FALSE, fig.alt="Three stacked Manhattan plots with the same vertical scale, from the least adjusted analysis at the top to the most adjusted at the bottom. All three show the genome-wide line at 5e-8. The peaks on chromosomes 3, 9 and 12 are labelled with the rs number of their lead variant. The top plot, without QC and without PCs, has extra peaks on chromosomes 2 and 15 just above the line."}
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "7.7", "manhattan_comparison.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 ```
 
@@ -602,12 +674,12 @@ Yes. The first comparison keeps the same samples and the same number of samples 
 
 ### Files created
 
-Two comparison association outputs, the age table, `s7-7_comparison.tsv` and `s7-7_qq_comparison.png`.
+Two comparison association outputs, the age table, `s7-7_comparison.tsv`, `s7-7_qq_comparison.png` and `s7-7_manhattan_comparison.png`.
 
 ## 7.8 Final summary and reporting {#step-7-8}
 
 
-<!-- step_meta: {"success_line":"A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures.","student_summary":"We save a final report and a table of the strongest variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.","student_plink_options":[]} -->
+<!-- step_meta: {"success_line":"A final summary, three rows for the lead variants with alleles, odds ratios and intervals, and all main figures.","student_summary":"We save a final report and a table of the lead variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.","student_plink_options":[]} -->
 ### What we do
 
 Write a clear summary of the whole simulated main path. Save the final results and figures so that others can check them.
@@ -630,11 +702,11 @@ psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-# 2. Select the strongest variant in each group and calculate its uncertainty interval.
+# 2. Select the lead variant in each group and calculate its uncertainty interval.
 lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
-# 3. Save the table of the three strongest variants.
+# 3. Save the table of the three lead variants.
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 # 4. Prepare the report describing the analysis, results and limitations.
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
@@ -645,7 +717,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
-  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",

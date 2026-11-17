@@ -20,7 +20,9 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e"
+editor_options:
+  chunk_output_type: console
+course_source_sha256: "de606f5ba9e6e4e393faa4ded7f7cfc494d077cd55f6b126a4871acb2cf82dba"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -81,7 +83,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before quality control (QC). Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
 
 :::
 
@@ -149,7 +151,7 @@ samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))  # <1>
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)  # <2>
 head(variants)
-check_ids(samples, "Laboratory samples")  # <3>
+check_ids(samples, "Laboratory samples", verbose = TRUE)  # <3>
 ```
 
 1. Read the sample and variant tables from the converted files.
@@ -162,7 +164,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
+The last line printed is `Laboratory samples: no ID problems found.` A check that prints nothing can leave you unsure whether it ran, so this message confirms that it ran and passed. The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 :::
 
@@ -351,7 +353,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
 :::

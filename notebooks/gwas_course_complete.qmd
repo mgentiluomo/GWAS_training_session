@@ -20,6 +20,8 @@ format:
         });
         </script>
 editor: visual
+editor_options:
+  chunk_output_type: console
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -167,7 +169,7 @@ We download and extract the complete course project. Keeping its files together 
 
 ::: {.callout-note title="What you do"}
 
-No R code runs in this step. Download [GWAS_course-2026.3.3.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.3.3/GWAS_course-2026.3.3.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
+No R code runs in this step. Download [GWAS_course-2026.4.zip](https://github.com/mgentiluomo/GWAS_training_session/releases/download/project-2026.4/GWAS_course-2026.4.zip). Extract it under C:/ on Windows or your home folder on macOS or Linux, using your system's extraction tool. Open the supplied GWAS_course folder and check that it contains config.R, GWAS_course.Rproj, R, lessons, notebooks and scripts.
 
 :::
 
@@ -733,7 +735,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before quality control (QC). Each well has its own [FID/IID](#glossary-fid-iid) pair, the two identifiers that name a sample in the files.
 
 :::
 
@@ -801,7 +803,7 @@ samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))  # <1>
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)  # <2>
 head(variants)
-check_ids(samples, "Laboratory samples")  # <3>
+check_ids(samples, "Laboratory samples", verbose = TRUE)  # <3>
 ```
 
 1. Read the sample and variant tables from the converted files.
@@ -814,7 +816,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
+The last line printed is `Laboratory samples: no ID problems found.` A check that prints nothing can leave you unsure whether it ran, so this message confirms that it ran and passed. The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 :::
 
@@ -1003,7 +1005,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
 :::
@@ -1191,6 +1193,68 @@ bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out res
 
 :::
 
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The step makes a rough first clean. `--mind` is the largest share of missing calls that a sample may have. `--geno` is the same limit for a variant. A low value is strict and removes more. A high value is generous. At 0.10 only wells and sites that are clearly broken are removed. The finer checks come later, at steps 3.2 and 4.1, so this first clean can be generous. Each trial below starts from the same input as the step and changes one threshold only.
+
+```{r}
+#| label: s3-1_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only. Your results folder is not changed.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+samples <- threshold_counts(cfg, guided_path(cfg, "2.8"), "--mind", thresholds)  # <1>
+samples$course_value <- samples$threshold == 0.10
+samples
+variants <- threshold_counts(cfg, guided_path(cfg, "3.1", "samples"), "--geno", thresholds)  # <2>
+variants$course_value <- variants$threshold == 0.10
+variants
+par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_threshold_trials(variants, "Variants removed")  # <3>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+1. Samples: --mind on the cohort saved at 2.8.
+2. Variants: --geno on the samples that remain after --mind 0.10.
+3. Plot the removed numbers. The course value is the large diamond.
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s2-8_state --mind 0.05 --make-just-psam --out results/trials/s3-1_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s3-1_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name. For variants, use `--geno` and `--make-just-pvar`, and start from `results/guided/s3-1_samples`. PLINK 2 treats a dosage without a hard call as missing by default (the `dosage` modifier changes this). The course data have hard calls only, so this makes no difference here.
+
+The expected result of the trials:
+
+Samples removed by `--mind`:
+
+| Threshold | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.01 | 121 | 1,895 |
+| 0.02 | 45 | 1,971 |
+| 0.05 | 3 | 2,013 |
+| **0.1 (course value)** | 3 | 2,013 |
+| 0.2 | 3 | 2,013 |
+
+Variants removed by `--geno`, after `--mind 0.10`:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.01 | 3,705 | 292,805 |
+| 0.02 | 958 | 295,552 |
+| 0.05 | 735 | 295,775 |
+| **0.1 (course value)** | 150 | 296,360 |
+| 0.2 | 130 | 296,380 |
+
+How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
 ## Step 3.2 · Sample call rate {#step-3-2}
 
 We remove samples with more than 2% of their genotype calls missing. This keeps samples with enough information for the later analysis.
@@ -1232,6 +1296,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 ```sh
 bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out results/guided/s3-2_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The call rate of a sample is the share of its calls that are not missing. `--mind 0.02` removes samples with more than 2% missing calls, which is a call rate below 98%. A lower limit keeps more samples but lets in samples with poor DNA. A higher limit removes more samples and may throw away good data. A call rate of 95% to 98% is a common choice in genome-wide studies, and 98% is the stricter end of it. Each trial starts from the cohort saved at 3.1 and changes the limit only.
+
+```{r}
+#| label: s3-2_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+trial <- threshold_counts(cfg, guided_path(cfg, "3.1"), "--mind", thresholds)
+trial$course_value <- trial$threshold == 0.02
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-1_state --mind 0.05 --make-just-psam --out results/trials/s3-2_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s3-2_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name.
+
+The expected result of the trials:
+
+| Threshold | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.01 | 118 | 1,895 |
+| **0.02 (course value)** | 42 | 1,971 |
+| 0.05 | 0 | 2,013 |
+| 0.1 | 0 | 2,013 |
+| 0.2 | 0 | 2,013 |
+
+How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
+
+Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1334,7 +1442,7 @@ cat(length(pruned), "variants kept by LD pruning\n")
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
-1. Write the list of regions where nearby variants are strongly linked.
+1. Write the list of regions where nearby variants are strongly correlated.
 2. Select variants with less similar patterns of DNA letters.
 3. Check and print how many variants were selected.
 
@@ -1388,7 +1496,8 @@ high <- het$IID[f > mean_f + 3 * sd_f]
 guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)  # <5>
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))  # <6>
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))  # <7>
+print(c(mean_F = mean_f, SD_F = sd_f))  # <7>
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
@@ -1400,7 +1509,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 4. Find samples with unusually low or high F values.
 5. Save the high F review list and the low F removal list.
 6. Save the dataset without the low F samples.
-7. Print the average, spread and numbers of flagged samples.
+7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
 
 ### What each option does
 
@@ -1439,6 +1548,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/guided/s3-5_het --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove.txt --make-pgen --out results/guided/s3-5_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The statistic F compares the homozygosity that we see in a sample with the homozygosity that we expect from the allele frequencies. A very low F means too many heterozygous calls, which can come from contamination. A very high F means too few, which can come from related parents or a different ancestry. The course removes samples with F more than 3 standard deviations (SD) below the mean. It only flags, and keeps, samples with F more than 3 SD above the mean. The trials change the number of SD from 2 to 4. They use the same F values.
+
+```{r}
+#| label: s3-5_thresholds
+#| eval: false
+# Optional. The trials use the table of F values that the step wrote. No PLINK run is needed.
+multipliers <- c(2, 2.5, 3, 3.5, 4)
+trial <- het_counts(guided_table(paste0(guided_path(cfg, "3.5", "het"), ".het")), multipliers)
+trial$course_value <- trial$threshold == 3
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/trials/s3-5_trial --threads 2 --memory 2048
+```
+
+This command writes the F table (`results/trials/s3-5_trial.het`). The limit itself is not a PLINK option: the course calculates it in R from the table. To repeat a trial in R, change the number 3 in the rule for `low` and `high` at the step.
+
+The expected result of the trials:
+
+| SD from the mean | Samples removed | Samples remaining | Samples flagged |
+| --- | --- | --- | --- |
+| 2 | 13 | 1,950 | 13 |
+| 2.5 | 13 | 1,950 | 11 |
+| **3 (course value)** | 13 | 1,950 | 8 |
+| 3.5 | 13 | 1,950 | 5 |
+| 4 | 13 | 1,950 | 0 |
+
+How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
+
+Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1528,6 +1681,50 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The kinship coefficient estimates how much DNA two samples share. The usual KING cutoffs are 0.354 for repeated samples and identical twins, 0.177 for first-degree relatives, 0.0884 for second-degree relatives and 0.0442 for third-degree relatives (Manichaikul et al. 2010, doi:10.1093/bioinformatics/btq559). This step does not use `--king-cutoff`. It writes the table of pairs with `--make-king-table` and `--king-table-filter 0.0442`, and a rule in R decides who to remove. The trials change the cutoff for relatives. Pairs above 0.354 are always treated as repeats.
+
+```{r}
+#| label: s3-6_thresholds
+#| eval: false
+# Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
+cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
+kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
+trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs))
+trial$course_value <- trial$threshold == 0.177
+trial
+# Plot the removed samples. The course value is the large diamond.
+plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --king-cutoff 0.177 --out results/trials/s3-6_trial --threads 2 --memory 2048
+```
+
+`--king-cutoff` removes one member of each pair above the cutoff with a greedy rule, and it writes two lists of sample IDs (`.king.cutoff.in.id` and `.king.cutoff.out.id`). Its count can differ a little from the course rule, which also treats repeats separately. To repeat the trial, change the number after `--king-cutoff`.
+
+The expected result of the trials:
+
+| Kinship cutoff | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.0442 | 30 | 1,920 |
+| 0.0884 | 30 | 1,920 |
+| **0.177 (course value)** | 30 | 1,920 |
+| 0.354 | 20 | 1,930 |
+
+How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed samples. In this simulated cohort no extra pair lies between 0.0442 and 0.177. At 0.354 only repeated samples are removed (20), and the ten first-degree pairs stay in the data. Real cohorts usually have many more distant relatives, so the counts would then differ.
+
+Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1712,9 +1909,53 @@ bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out resul
 
 :::
 
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+At this step `--geno 0.02` removes variants with more than 2% missing calls in the samples that remain. A strict limit removes more variants, but each variant that stays has more complete data. A generous limit keeps more variants with more missing calls. Missing calls that depend on the disease status can create false associations, which is why a clear limit matters. Each trial starts from the cohort saved at 3.8 and changes the limit only.
+
+```{r}
+#| label: s4-1_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+trial <- threshold_counts(cfg, guided_path(cfg, "3.8"), "--geno", thresholds)
+trial$course_value <- trial$threshold == 0.02
+trial
+# Plot the removed variants. The course value is the large diamond.
+plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-8_state --geno 0.05 --make-just-pvar --out results/trials/s4-1_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s4-1_trial.log` states how many variants were removed. To repeat the trial, change the number after `--geno` and use a new `--out` name.
+
+The expected result of the trials:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.01 | 1,053 | 295,307 |
+| **0.02 (course value)** | 801 | 295,559 |
+| 0.05 | 561 | 295,799 |
+| 0.1 | 0 | 296,360 |
+| 0.2 | 0 | 296,360 |
+
+How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 561 to 1,053. The course value of 0.02 removes 801.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.02), where 801 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
 ## Step 4.2 · Differential missingness {#step-4-2}
 
-We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
+We compare missing results in people with and without the disease to reduce false associations with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 
@@ -1818,6 +2059,50 @@ bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out result
 
 :::
 
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The minor allele frequency (MAF) is how often the less common version of a variant occurs. `--maf 0.01` removes variants with a MAF below 1%. A rare variant has few carriers, so its test has little power and gives unstable estimates. A higher limit removes more rare variants and keeps a cleaner set. A very high limit also removes real, common signals and shrinks the data a lot. Each trial starts from the cohort saved at 4.2 and changes the limit only.
+
+```{r}
+#| label: s4-3_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.001, 0.005, 0.01, 0.02, 0.05)
+trial <- threshold_counts(cfg, guided_path(cfg, "4.2"), "--maf", thresholds)
+trial$course_value <- trial$threshold == 0.01
+trial
+# Plot the removed variants. The course value is the large diamond.
+plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s4-2_state --maf 0.02 --make-just-pvar --out results/trials/s4-3_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s4-3_trial.log` states how many variants were removed. To repeat the trial, change the number after `--maf` and use a new `--out` name. PLINK 2 uses the founders to calculate the frequency when the sample table has family information. Our samples are all founders, so this makes no difference here.
+
+The expected result of the trials:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.001 | 33,951 | 261,488 |
+| 0.005 | 47,184 | 248,255 |
+| **0.01 (course value)** | 56,420 | 239,019 |
+| 0.02 | 89,204 | 206,235 |
+| 0.05 | 156,235 | 139,204 |
+
+How to read it. At 0.01 the course removes 56,420 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,420 minus 33,951). Many of them have only a handful of carriers.
+
+Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,420 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
 ## Step 4.4 · Hardy-Weinberg and sample size {#step-4-4}
 
 We test whether DNA letter combinations on chromosomes 1 to 22 follow expected proportions in people without the disease. We remove variants that fail a rule based on the number of people tested, to reduce possible measurement errors.
@@ -1889,6 +2174,52 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hardy midp --out results/guided/s4-4_hardy --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclude.txt --make-pgen --out results/guided/s4-4_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The Hardy-Weinberg test gives a p-value for each variant in the controls. A smaller cutoff removes fewer variants. A larger cutoff removes more variants, including some that are only unusual. The course does not use one fixed cutoff. It uses the rule 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control is the number of controls tested at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. Here there are 920 controls, so the course rule is the same as the fixed cutoff 1e-6. The trials below compare fixed cutoffs and the course rule.
+
+```{r}
+#| label: s4-4_thresholds
+#| eval: false
+# Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
+cutoffs <- c(1e-3, 1e-4, 1e-6, 1e-8, 1e-10)
+trial <- hwe_counts(guided_table(paste0(guided_path(cfg, "4.4", "hardy"), ".hardy")), cutoffs)
+# The last row is the course rule. Its threshold is NA, so it is the course value.
+trial$course_value <- is.na(trial$threshold)
+trial
+# Plot the removed variants for the fixed cutoffs. The course rule equals 1e-6 here.
+plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hwe 1e-6 midp --make-just-pvar --out results/trials/s4-4_trial --threads 2 --memory 2048
+```
+
+The course does not use `--hwe`. It filters the table from `--hardy midp` in R, because its cutoff depends on the number of controls. The terminal command above uses a fixed cutoff. PLINK 2 can stop with an error when a cutoff is very strict for the sample size, unless you add a value `k` or the modifier `keep-fewhet` (read the `--hwe` entry of the PLINK 2 manual). PLINK 2 tests only founders by default.
+
+The expected result of the trials:
+
+| HWE p-value cutoff | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 1e-3 | 700 | 238,319 |
+| 1e-4 | 273 | 238,746 |
+| 1e-6 | 167 | 238,852 |
+| 1e-8 | 150 | 238,869 |
+| 1e-10 | 127 | 238,892 |
+| **course rule (course value)** | 167 | 238,852 |
+
+How to read it. At 1e-3 the number removed is 700, and at 1e-4 it is 273. At 1e-6 it is 167, and at 1e-10 it is 127. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
+
+Expected plot. For `HWE p-value cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (course rule), where 167 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2257,7 +2588,7 @@ bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_commo
 
 ## Step 5.5 · Plot the reference and projected study {#step-5-5}
 
-We plot the first two principal components, each a number summarising one pattern of genetic variation. We show reference groups with labels and symbols and add the study samples to see how their genetic backgrounds compare.
+We plot the first three principal components, each a number summarising one pattern of genetic variation, in three pairs. We show reference groups with labels and symbols and add the study samples to see how their genetic backgrounds compare.
 
 [Read step 5.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-5).
 
@@ -2269,20 +2600,29 @@ metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch
 group <- metadata$SuperPop[match(ref$IID, metadata$IID)]  # <2>
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
-png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)  # <3>
-plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
-  xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
-points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")  # <4>
-legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-invisible(dev.off())  # <5>
-cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
+plot_components <- function(x, y, file) {  # <3>
+  png(file, width = 1400, height = 850, res = 140)
+  par(mar = c(5, 4.5, 4, 9))
+  plot(as.numeric(ref[[paste0("PC", x, "_AVG")]]), as.numeric(ref[[paste0("PC", y, "_AVG")]]), col = colours[code], pch = code,
+    xlab = paste0("Reference PC", x, " score"), ylab = paste0("Reference PC", y, " score"),
+    main = paste0("GRCh38 reference and projected simulated study: PC", x, " and PC", y))
+  # Add the study samples and a key for the groups. The key sits outside the plot, on the right, so it hides no points.
+  points(as.numeric(study[[paste0("PC", x, "_AVG")]]), as.numeric(study[[paste0("PC", y, "_AVG")]]), pch = 20, cex = 0.4, col = "#333333")
+  legend("topright", inset = c(-0.21, 0), xpd = TRUE, legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+  invisible(dev.off())
+}
+files <- c(guided_path(cfg, "5.5", "reference_projection.png"),  # <4>
+  guided_path(cfg, "5.5", "reference_projection_pc1_pc3.png"),
+  guided_path(cfg, "5.5", "reference_projection_pc2_pc3.png"))
+plot_components(1, 2, files[1]); plot_components(1, 3, files[2]); plot_components(2, 3, files[3])
+for (file in files) cat("The plot was saved to ", file, "\n", sep = "")  # <5>
 ```
 
 1. Read both score tables and the reference group labels.
 2. Match the reference labels to samples and choose group symbols and colours.
-3. Open a picture file and plot the first two reference components.
-4. Add the study samples and a key for the groups.
-5. Finish saving the picture and print its location.
+3. Define one plotting function, so that all pictures use the same symbols, colours and key.
+4. Save the picture for PC1 and PC2, then the two extra pictures for PC1 and PC3 and for PC2 and PC3.
+5. Print the location of each picture.
 
 ### What each option does
 
@@ -2290,7 +2630,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+A labelled plot of the reference with the projected study. Most study samples fall on the European reference pattern. A small number extend elsewhere. The key is outside the plot, on the right, so it hides no points. A PC can flip its sign (its direction on the axis) without changing its meaning. R saves three pictures as PNG files and prints the path of each one. The first picture shows PC1 and PC2. The other two show PC1 with PC3 and PC2 with PC3, with the same colours and symbols. It does not show the pictures in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -2362,7 +2702,7 @@ bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove
 
 ## Step 5.7 · Cohort PCs and how many to include {#step-5-7}
 
-We select common sites with weaker links and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
+We select common sites with weaker correlations and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
 
 [Read step 5.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7).
 
@@ -2386,14 +2726,14 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
 1. Prepare the regions to exclude and the site selection output name.
-2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+2. Select common sites on chromosomes 1 to 22 with weaker correlations with each other.
 3. Calculate ten components within the retained study group using the selected sites.
 4. Read how much variation each component explains and plot these values.
 5. Finish saving the picture and print its location.
 
 ### What each option does
 
-**Command 1: select common sites with weaker links**
+**Command 1: select common sites with weaker correlations**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -2402,7 +2742,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
 | `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
+| `--indep-pairwise` | Selects sites with weaker correlations within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
 **Command 2: calculate components within the retained study group**
@@ -2410,7 +2750,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
-| `--extract` | Uses only the sites listed in s5-7_prune.prune.in, selected to have weaker links to each other. |
+| `--extract` | Uses only the sites listed in s5-7_prune.prune.in, selected to have weaker correlations with each other. |
 | `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation in the retained study group. |
 | `--out` | Starts the component output file names with s5-7_pca. |
 
@@ -2663,7 +3003,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 
 ## Step 6.5 · Read association output {#step-6-5}
 
-We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
+We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this extreme if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.
 
 [Read step 6.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-5).
 
@@ -2891,7 +3231,7 @@ source("R/guided.R"); guided_check_module(7)
 
 ## Step 7.1 · QQ plot {#step-7-1}
 
-We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.
+We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the results with the smallest p-values stand out.
 
 [Read step 7.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-1).
 
@@ -2912,7 +3252,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+Most points are close to the diagonal line. The highest points at the right end leave the line by a wide margin. Missing, zero or invalid p-values are not drawn as if they were very small p-values. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -2961,7 +3301,7 @@ No PLINK equivalent
 
 ## Step 7.3 · Manhattan plot {#step-7-3}
 
-We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.
+We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22, and label the lead variant of each region. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of results with very small p-values.
 
 [Read step 7.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-3).
 
@@ -2970,14 +3310,24 @@ We draw a Manhattan plot, which shows the strength of each result at its positio
 stats <- guided_summary_stats(cfg)  # <1>
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),  # <2>
   POS = stats$base_pair_location, P = stats$p_value)
-save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs"))  # <3>
-stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)  # <4>
+leads <- region_leads(plot_data$CHROM, plot_data$POS, plot_data$P)  # <3>
+plot_data$LABEL <- NA_character_
+plot_data$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, stats$variant_id[leads$index])
+# Optional: suggestive = TRUE adds a dotted line at 5e-5. label_leads = FALSE hides the rs numbers.
+# max_labels sets how many regions get a label (the regions with the smallest p-values come first).
+save_plot(guided_path(cfg, "7.3", "manhattan.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",  # <4>
+  suggestive = FALSE, label_leads = TRUE, max_labels = 3))
+save_plot(guided_path(cfg, "7.3", "manhattan_suggestive.png"), function() plot_manhattan(plot_data, "Simulated GWAS: age, sex and ten PCs",  # <5>
+  suggestive = TRUE, label_leads = TRUE, max_labels = 3))
+stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)  # <6>
 ```
 
 1. Read the saved association summary table.
 2. Prepare the chromosome, position and p-value columns.
-3. Save the plot of results along the chromosomes.
-4. Check that eight variants have p-values below 0.00000005.
+3. Find the lead variant of each region below 5e-8 and look up its rs number.
+4. Save the plot of results along the chromosomes.
+5. Save a second picture with the optional suggestive line switched on.
+6. Check that eight variants have p-values below 0.00000005.
 
 ### What each option does
 
@@ -2985,7 +3335,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+There are three regions with very small p-values, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The lead variants carry the labels rs1994750 on chromosome 3, rs10820598 on chromosome 9 and rs7953249 on chromosome 12. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves two pictures as PNG files and prints the path of each one. The second picture is the same plot with the dotted suggestive line at 5e-5 switched on. It does not show the pictures in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -3014,7 +3364,7 @@ guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))  # <4>
 
 1. Read the saved association summary table.
 2. Keep only valid p-values.
-3. Compare three rules for deciding which results are strong enough.
+3. Compare three rules for deciding which results are convincing enough.
 4. Save the threshold comparison table.
 
 ### What each option does
@@ -3064,8 +3414,8 @@ stopifnot(nrow(clumps) == 3L)
 | `--clump-p-field` | Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect. |
 | `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005). |
 | `--clump-p2` | Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001). |
-| `--clump-r2` | Adds variants whose squared correlation with the group's strongest variant exceeds 0.1. |
-| `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant. |
+| `--clump-r2` | Adds variants whose squared correlation with the group's lead variant exceeds 0.1. |
+| `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its lead variant. |
 | `--clump-unphased` | Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes. |
 | `--out` | Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps. |
 
@@ -3073,7 +3423,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
+There are three clumps. They describe the regions with very small p-values on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
 
 :::
 
@@ -3090,49 +3440,66 @@ bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_associa
 
 ## Step 7.6 · Regional plot {#step-7-6}
 
-We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.
+We draw three detailed regional plots, one for each region with genome-wide significant variants, on chromosomes 3, 9 and 12. Each plot shows the strength of each association and how closely its DNA pattern follows the lead variant, using a continuous colour scale.
 
 [Read step 7.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-6).
 
 ```{r}
 #| label: s7-6
-lead <- "9:96426973:A:G"  # <1>
-report <- guided_path(cfg, "7.6", "ld")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", "9", "--from-bp", "95926973", "--to-bp", "96926973",  # <2>
-  "--r2-unphased", "--ld-snp", lead, "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
-ld <- guided_table(paste0(report, ".vcor"))  # <3>
-stats <- guided_summary_stats(cfg)
-region <- stats[stats$chromosome == "9" & abs(stats$base_pair_location - 96426973) <= 500000 & valid_p(stats$p_value), ]
-r2_column <- grep("R2$", names(ld), value = TRUE)  # <4>
-stopifnot(length(r2_column) == 1L)
-r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])  # <5>
-r2[region$variant_id == lead] <- 1
-bin <- cut(r2, breaks = c(-0.01, 0.2, 0.4, 0.6, 0.8, 1.01), include.lowest = TRUE, labels = FALSE)  # <6>
-colours <- c("#0072B2", "#56B4E9", "#009E73", "#E69F00", "#D55E00")
-shapes <- c(1, 2, 3, 4, 16)
-png(guided_path(cfg, "7.6", "regional.png"), width = 1400, height = 900, res = 150)  # <7>
-plot(region$base_pair_location / 1e6, -log10(region$p_value), col = ifelse(is.na(bin), "#666666", colours[bin]),
-  pch = ifelse(is.na(bin), 8, shapes[bin]), xlab = "GRCh38 chromosome 9 position (Mb)", ylab = "-log10(p)", main = "L2: association and LD to the lead")
-abline(h = -log10(5e-8), lty = 2)
-legend("topright", legend = c("r2: 0 to 0.2", "0.2 to 0.4", "0.4 to 0.6", "0.6 to 0.8", "0.8 to 1", "LD unavailable"),
-  pch = c(shapes, 8), col = c(colours, "#666666"), cex = 0.8)
-invisible(dev.off())
-cat("The plot was saved to ", guided_path(cfg, "7.6", "regional.png"), "\n", sep = "")
-stopifnot(sum(region$p_value < 5e-8) == 4L)  # <8>
+regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),  # <1>
+  position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
+  ld = c("ld_chr3", "ld", "ld_chr12"), picture = c("regional_chr3.png", "regional.png", "regional_chr12.png"),
+  expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)
+stats <- guided_summary_stats(cfg)  # <2>
+regions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)
+for (i in seq_len(nrow(regions))) {  # <3>
+  report <- guided_path(cfg, "7.6", regions$ld[i])
+  run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", regions$chromosome[i],
+    "--from-bp", format(regions$position[i] - 500000, scientific = FALSE), "--to-bp", format(regions$position[i] + 500000, scientific = FALSE),
+    "--r2-unphased", "--ld-snp", regions$lead[i], "--ld-window-kb", "500", "--ld-window-r2", "0", "--out", report))
+  ld <- guided_table(paste0(report, ".vcor"))  # <4>
+  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
+  r2_column <- grep("R2$", names(ld), value = TRUE)  # <5>
+  stopifnot(length(r2_column) == 1L)
+  r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])  # <6>
+  r2[region$variant_id == regions$lead[i]] <- 1
+  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = 900, res = 150)  # <7>
+  plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],
+    paste0(regions$label[i], ": association and LD to the lead"))
+  invisible(dev.off())
+  cat("The plot was saved to ", guided_path(cfg, "7.6", regions$picture[i]), "\n", sep = "")
+  stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])  # <8>
+}
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
 ```
 
-1. Choose the chromosome 9 variant and the output name.
-2. Measure correlations with the chosen variant within 500,000 DNA positions.
-3. Read the correlation table and select the regional association results.
-4. Find and check the column holding squared correlations.
-5. Match each regional variant to its correlation with the chosen variant.
-6. Choose symbols and colours for the correlation ranges.
-7. Draw and save the regional plot with a legend and significance line.
-8. Check that four regional variants have p-values below 0.00000005.
+1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
+2. Read the association results once and look up the rs number of each lead variant.
+3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.
+4. Read the correlation table and select the regional association results.
+5. Find and check the column holding squared correlations.
+6. Match each regional variant to its correlation with the lead variant.
+7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.
+8. Check the number of regional variants with p-values below 0.00000005.
 
 ### What each option does
+
+**Command 1: measure correlation around the chromosome 3 lead**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
+| `--chr` | Selects chromosome 3 for the regional comparison. |
+| `--from-bp` | Starts the selected GRCh38 interval at DNA position 162724115. |
+| `--to-bp` | Ends the selected GRCh38 interval at DNA position 163724115. |
+| `--r2-unphased` | Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes. |
+| `--ld-snp` | Pairs variant 3:163224115:T:C with the other selected variants to measure their correlation with it. |
+| `--ld-window-kb` | Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 3:163224115:T:C. |
+| `--ld-window-r2` | Sets the minimum reported squared correlation to 0 so weak correlations remain in the report. |
+| `--out` | Starts output file names with s7-6_ld_chr3, including the correlation table s7-6_ld_chr3.vcor. |
+
+**Command 2: measure correlation around the chromosome 9 lead**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -3146,11 +3513,25 @@ guided_artifact_checkpoint(cfg, "7.6", c(paste0(report, ".vcor"), guided_path(cf
 | `--ld-window-r2` | Sets the minimum reported squared correlation to 0 so weak correlations remain in the report. |
 | `--out` | Starts output file names with s7-6_ld, including the correlation table s7-6_ld.vcor. |
 
+**Command 3: measure correlation around the chromosome 12 lead**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
+| `--chr` | Selects chromosome 12 for the regional comparison. |
+| `--from-bp` | Starts the selected GRCh38 interval at DNA position 120465921. |
+| `--to-bp` | Ends the selected GRCh38 interval at DNA position 121465921. |
+| `--r2-unphased` | Reports squared correlations between the numbers of copies of DNA versions at pairs of variants, without assigning copies to individual chromosomes. |
+| `--ld-snp` | Pairs variant 12:120965921:G:A with the other selected variants to measure their correlation with it. |
+| `--ld-window-kb` | Limits pairs to variants within 500 kilobases, or 500,000 DNA positions, of variant 12:120965921:G:A. |
+| `--ld-window-r2` | Sets the minimum reported squared correlation to 0 so weak correlations remain in the report. |
+| `--out` | Starts output file names with s7-6_ld_chr12, including the correlation table s7-6_ld_chr12.vcor. |
+
 Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-L2 has four genome-wide significant variants. The plot shows LD by both symbol and colour. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -3160,7 +3541,9 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
+bin/plink2 --pfile results/guided/s5-7_state --chr 3 --from-bp 162724115 --to-bp 163724115 --r2-unphased --ld-snp 3:163224115:T:C --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr3 --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --chr 12 --from-bp 120465921 --to-bp 121465921 --r2-unphased --ld-snp 12:120965921:G:A --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr12 --threads 2 --memory 2048
 ```
 
 :::
@@ -3196,14 +3579,30 @@ comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_
 print(comparison)
 stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))  # <8>
+# The order goes from the least adjusted analysis to the most adjusted one.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
   par(mfrow = c(1, 3))
-  plotted <- list(autosomal_p(main), autosomal_p(a), autosomal_p(b))
+  plotted <- list(autosomal_p(b), autosomal_p(a), autosomal_p(main))
   limits <- c(0, max(-log10(unlist(plotted))))
-  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
-  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
   plot_qq(autosomal_p(b), "No sample/variant QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(a), "QC, no PCs", ylim = limits)
+  plot_qq(autosomal_p(main), "QC + ten PCs", ylim = limits)
 }, width = 2100, height = 750)
+manhattan_data <- function(x) {  # <10>
+  d <- data.frame(CHROM = suppressWarnings(as.numeric(x$chromosome)), POS = x$base_pair_location, P = x$p_value, LABEL = NA_character_)
+  leads <- region_leads(d$CHROM, d$POS, d$P)
+  d$LABEL[leads$index] <- guided_variant_labels(cfg, leads$chromosome, leads$position, x$variant_id[leads$index])
+  d
+}
+panels <- list(b = manhattan_data(b), a = manhattan_data(a), main = manhattan_data(main))
+top <- max(8, -log10(unlist(lapply(panels, function(d) d$P[valid_p(d$P)]))))  # <11>
+# Optional: suggestive = TRUE adds the dotted line at 5e-5 to every panel. max_labels sets how many regions get a label.
+save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {  # <12>
+  par(mfrow = c(3, 1), mar = c(4, 4.5, 3, 1))
+  plot_manhattan(panels$b, "No sample/variant QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$a, "QC, no PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+  plot_manhattan(panels$main, "QC + ten PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
+}, width = 1800, height = 2400)
 ```
 
 1. Repeat the final cohort analysis using age and sex without genetic components.
@@ -3212,9 +3611,12 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
 4. Test the cohort before sample and variant quality checks using age and sex.
 5. Read the main results and put the comparison results into matching columns.
 6. Check that the main and cleaned comparison analyses use the same samples per variant.
-7. Count valid tests and strong results and calculate lambda for each analysis.
+7. Count valid tests and results below the genome-wide threshold and calculate lambda for each analysis.
 8. Save the comparison table.
-9. Save three plots with the same scale to compare the analyses.
+9. Save three QQ plots with the same scale to compare the analyses.
+10. Prepare the same three analyses for Manhattan plots. Each lead variant gets its rs number as a label.
+11. Use one vertical scale for all three Manhattan plots, so that the heights can be compared.
+12. Save the Manhattan comparison, again from the least to the most adjusted analysis.
 
 ### What each option does
 
@@ -3254,6 +3656,16 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
+The plots follow the order from the least adjusted analysis to the most adjusted one. All QQ plots share one vertical scale. All three Manhattan plots also share one vertical scale, so you can compare the heights of the peaks. Each plot has the genome-wide line at 5e-8, and the labels show the rs number of the lead variant of each region. The table below summarises the same numbers in that order.
+
+| Analysis | Hits below 5e-8 | Lambda |
+| --- | --- | --- |
+| No sample or variant QC, no PCs | 19 | about 1.655 |
+| QC, no PCs | 15 | about 1.546 |
+| QC and ten PCs (main analysis) | 8 | about 1.016 |
+
+Without PCs, the same three peaks stay and some points reach a little higher. Without any QC, the plot also shows peaks on chromosomes 2 and 15 just above the line, and the lead variant on chromosome 12 changes to rs7310409. The label exm2265352 is an array name, because that variant has no rs number. A lead variant that appears only in the weaker analyses is a warning sign, not a discovery.
+
 :::
 
 ::: {.callout-note title="PLINK terminal equivalent"}
@@ -3270,7 +3682,7 @@ bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s
 
 ## Step 7.8 · Final summary and reporting {#step-7-8}
 
-We save a final report and a table of the strongest variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
+We save a final report and a table of the lead variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
 
 [Read step 7.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-8).
 
@@ -3292,7 +3704,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
-  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
@@ -3311,8 +3723,8 @@ cat(paste(summary, collapse = "\n"), "\n")  # <6>
 ```
 
 1. Read the final sample counts, comparison table, variant groups and association results.
-2. Select the strongest variant in each group and calculate its uncertainty interval.
-3. Save the table of the three strongest variants.
+2. Select the lead variant in each group and calculate its uncertainty interval.
+3. Save the table of the three lead variants.
 4. Prepare the report describing the analysis, results and limitations.
 5. Save the report as a text file.
 6. Print the final report.
