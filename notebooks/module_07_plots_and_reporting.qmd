@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "682a07921020eecefc0cac7b2ea4541983dcb3c326bcc501d85098c7814d44f8"
+course_source_sha256: "772110cbf04a9d75fff87b65d3792b4dc99b7852cd6a17388385281894c80b57"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -206,7 +206,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
+There are 236,820 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
 
 :::
 
@@ -410,7 +410,7 @@ summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
-stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+stopifnot(comparison[2, "hits"] == 17L, comparison[3, "hits"] == 19L)
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))  # <8>
 # The order goes from the least adjusted analysis to the most adjusted one.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
@@ -487,14 +487,14 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
+Main analysis: 236,820 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,820 tests, 17 hits, lambda about 1.527. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
 The plots follow the order from the least adjusted analysis to the most adjusted one. All QQ plots share one vertical scale. All three Manhattan plots also share one vertical scale, so you can compare the heights of the peaks. Each plot has the genome-wide line at 5e-8, and the labels show the rs number of the lead variant of each region. The table below summarises the same numbers in that order.
 
 | Analysis | Hits below 5e-8 | Lambda |
 | --- | --- | --- |
 | No sample or variant QC, no PCs | 19 | about 1.655 |
-| QC, no PCs | 15 | about 1.546 |
+| QC, no PCs | 17 | about 1.527 |
 | QC and ten PCs (main analysis) | 8 | about 1.016 |
 
 Without PCs, the same three peaks stay and some points reach a little higher. Without any QC, the plot also shows peaks on chromosomes 2 and 15 just above the line, and the lead variant on chromosome 12 changes to rs7310409. The label exm2265352 is an array name, because that variant has no rs number. A lead variant that appears only in the weaker analyses is a warning sign, not a discovery.
@@ -533,7 +533,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
   paste("Final cohort:", nrow(psam), "samples; cases:", sum(psam$Disease == "2"), "; controls:", sum(psam$Disease == "1")),
-  "After QC: 238,513 variants; 236,815 finite additive association tests.",
+  "After QC: 238,513 variants; 236,820 finite additive association tests.",
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",

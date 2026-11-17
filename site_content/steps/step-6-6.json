@@ -6,14 +6,14 @@
   "anchor": "step-6-6",
   "title": "First look and association checkpoint",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6",
+  "source_sha256": "d6c12bc5238aa7e11c281ef684b8d560057f3d5c49c3c9fcbd9feedc1a97903e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Summarise the valid tests. Save the key association files so that you can restart from here.",
     "why": "A list of small p-values is not yet an interpretation. Before you plot, write down the model, the cohort, the number of tests and the fitting status. The next module explains [multiple testing](docs/glossary.md#multiple-testing), correlated peaks and confounding. Never call a simulated top result a clinical finding. Never assume that the nearest gene is the cause.",
     "you_need": "The association output from 6.3 and the table you reviewed at 6.4.",
     "command": "```{r s6-6}\n# 1. Read the results and summarise the study size and test values.\nresults <- guided_association(guided_path(cfg, \"6.3\", \"association\"))\nsummary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),\n  genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),\n  lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))\n# 2. Save and print the summary table.\nguided_write(summary, guided_path(cfg, \"6.6\", \"summary.tsv\"))\nprint(summary)\n# Course bookkeeping: records the counts for the next step. Do not change.\nfiles <- c(paste0(guided_path(cfg, \"6.3\", \"association\"), \".Disease.glm.logistic.hybrid\"),\n  guided_path(cfg, \"6.2\", \"covariates.tsv\"), guided_path(cfg, \"6.4\", \"top20.tsv\"), guided_path(cfg, \"6.6\", \"summary.tsv\"))\nguided_artifact_checkpoint(cfg, \"6.6\", files)\ncheck_step(\"6.6\", data_dir = cfg$out, work_dir = cfg$out)\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable. This step needs no PLINK operation. The R chunk is the complete command.\n\nR reads or calculates the values it shows. It does not change the genotype files.",
-    "expected_result": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](docs/glossary.md#sha-256) checksums.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "expected_result": "1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](docs/glossary.md#sha-256) checksums.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "quick_check": "Do eight significant variants always mean eight independent association signals?\n\n<details><summary>Show the answer</summary>\n\nNo. Nearby variants can share one signal because of [linkage disequilibrium (LD)](docs/glossary.md#ld). Clumping at 7.5 groups the correlated associations.\n\n</details>",
     "files_created": "`s6-6_summary.tsv`, the association checkpoint files and `checkpoints/6.6/MANIFEST.tsv`."
@@ -35,9 +35,9 @@
   "figures": [],
   "student_summary": "We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.",
   "student_plink_options": [],
-  "success_line": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values.",
+  "success_line": "1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values.",
   "verification_notes": [
     "\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.\n"
   ],
-  "student_expected_result": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](docs/glossary.md#sha-256) checksums."
+  "student_expected_result": "1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](docs/glossary.md#sha-256) checksums."
 }

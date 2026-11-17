@@ -60,6 +60,7 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 "expected_result": record.get("student_expected_result", ""),
                 "terminal_commands": record["plink"]["commands"],
                 "thresholds": (record.get("blocks") or {}).get("try_other_thresholds", ""),
+                "approach": (record.get("blocks") or {}).get("another_approach", ""),
             })
         models.append({"module": number, "title": module["title"], "prerequisites": spec,
                        "time": re.match(r"[^.]*\.", time_line[1])[0] if time_line else "",
@@ -176,6 +177,8 @@ def render_steps_rmd(model: dict) -> list[str]:
             lines.extend(["No PLINK equivalent", ""])
         if record.get("thresholds"):
             lines.extend(["### Try other thresholds (optional)", "", notebook_links(record["thresholds"]), ""])
+        if record.get("approach"):
+            lines.extend(["### Another approach (optional)", "", notebook_links(record["approach"]), ""])
     return lines
 
 
@@ -405,6 +408,9 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
         if record.get("thresholds"):
             lines.extend(['::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}', "",
                           qmd_thresholds(record["thresholds"], used), "", ":::", ""])
+        if record.get("approach"):
+            lines.extend(['::: {.callout-tip title="Another approach (optional)" collapse="true"}', "",
+                          qmd_thresholds(record["approach"], used), "", ":::", ""])
     return lines
 
 

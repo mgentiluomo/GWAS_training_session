@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "4f92a08dc761f7a6c69c0cdf8e6ce7c33022abbc319096193c43fc06e767e7c5"
+course_source_sha256: "517f5cb5e9bcfb4ba0ae3e6a5f22c88a0a2504d174a37d400ce4bab93560b436"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -366,7 +366,7 @@ regions <- guided_high_ld(cfg)  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",  # <2>
   "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))  # <3>
-stopifnot(length(pruned) == 69539L)
+stopifnot(length(pruned) == 68800L)
 cat(length(pruned), "variants kept by LD pruning\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
@@ -393,7 +393,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
+The `.prune.in` file lists 68,800 sites. The complete analysis state still has 296,360 variants.
 
 :::
 
@@ -642,7 +642,7 @@ The kinship coefficient estimates how much DNA two samples share. The usual KING
 # Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
 cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
-trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs))
+trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs, guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))))
 trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.

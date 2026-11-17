@@ -32,7 +32,7 @@ images, download data, publish a website or create an encrypted release.
 
 The block keys are `what_we_do`, `why`, `you_need`, `command`,
 `expected_result`, `troubleshooting`, optional `what_this_check_can_reveal`,
-`quick_check`, `files_created`, optional `try_other_thresholds` and optional `under_the_hood`. Preserve this order. Expected results and
+`quick_check`, `files_created`, optional `try_other_thresholds`, optional `another_approach` and optional `under_the_hood`. Preserve this order. Expected results and
 troubleshooting are collapsed by default; quick-check answers retain their
 native `<details>` markup. Keep step numbers visible and provide previous/next
 navigation when the approved website design is implemented.
@@ -166,6 +166,10 @@ The author tool checks the 2,013 input wells and the 42 exclusions at 98%.
 It compares integer cross-products to avoid rounding `F_MISS` at boundaries.
 The source report uses PLINK 2.0 b.1.4 (7 November 2026), on the verified Windows
 main-path state. It stays external alongside its PLINK command and log.
+
+## Optional block: Another approach
+
+`blocks.another_approach` is present only for steps with an optional alternative method (5.6, 5.7 and 7.6). It comes after `try_other_thresholds` and before `under_the_hood`. It has the same shape: text, a chunk that is not run by default, the expected result and a reference. Alternatives write to separate prefixes and never change the main path or the checkpoints.
 
 ## Optional block: Try other thresholds
 

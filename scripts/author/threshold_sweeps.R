@@ -73,7 +73,7 @@ add("3.5", "Heterozygosity", "F cutoff (standard deviations)", c(s33$samples, s3
 s36 <- counts_at("3.6")
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
 add("3.6", "Relatedness", "KING kinship cutoff", c(s35$samples, s35$variants),
-    data.frame(threshold = levels_king, samples_removed = kinship_counts(kin, metadata, levels_king)),
+    data.frame(threshold = levels_king, samples_removed = kinship_counts(kin, metadata, levels_king, guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss")))),
     expected_samples = s36$samples, course_value = same(levels_king, 0.177))
 # 4.1: --geno 0.02 on the cohort saved at 3.8.
 s38 <- counts_at("3.8"); s41 <- counts_at("4.1")

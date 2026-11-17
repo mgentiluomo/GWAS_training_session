@@ -203,7 +203,7 @@ The rows must belong to the correct sample IDs. Each row must match its own samp
 ## 6.3 Run the association scan {#step-6-3}
 
 
-<!-- step_meta: {"success_line": "The frequency check in the final cohort removes another 1,698 variants.", "student_summary": "We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.", "student_plink_options": [{"label": "test variants with the adjusted model", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the final study group."}, {"name": "--covar", "explanation": "Reads s6-2_covariates.tsv, matching age and genetic component scores to samples by their IDs."}, {"name": "--covar-name", "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."}, {"name": "--covar-variance-standardize", "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."}, {"name": "hide-covar", "explanation": "Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s6-3_association, including s6-3_association.Disease.glm.logistic.hybrid."}]}]} -->
+<!-- step_meta: {"success_line": "The frequency check in the final cohort removes another 1,693 variants.", "student_summary": "We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.", "student_plink_options": [{"label": "test variants with the adjusted model", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the final study group."}, {"name": "--covar", "explanation": "Reads s6-2_covariates.tsv, matching age and genetic component scores to samples by their IDs."}, {"name": "--covar-name", "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."}, {"name": "--covar-variance-standardize", "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."}, {"name": "hide-covar", "explanation": "Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s6-3_association, including s6-3_association.Disease.glm.logistic.hybrid."}]}]} -->
 ### What we do
 
 Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.
@@ -226,7 +226,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar",
 results <- guided_association(out)
 # 2. Check the number of valid tests and results below the course significance threshold.
 valid <- valid_p(results$P)
-stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+stopifnot(sum(valid) == 236820L, sum(results$P[valid] < 5e-8) == 8L)
 # 3. Save a table of the association results.
 guided_write(results, guided_path(cfg, "6.3", "results.tsv"))
 # Course bookkeeping: records the counts for the next step. Do not change.
@@ -243,7 +243,7 @@ bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s
 
 <details><summary>Show the expected result</summary>
 
-The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
+The frequency check in the final cohort removes another 1,693 variants. This leaves 236,820 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
 <!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
@@ -438,7 +438,7 @@ The chosen variant ID, the forced Firth report and the log files.
 ## 6.6 First look and association checkpoint {#step-6-6}
 
 
-<!-- step_meta: {"success_line": "1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values.", "student_summary": "We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values.", "student_summary": "We summarise the sample and variant counts, valid tests and results below the course significance threshold of 5 × 10⁻⁸ (0.00000005). We also measure whether test values are generally larger than expected without effects and save the key files in a checked checkpoint for restarting.", "student_plink_options": []} -->
 ### What we do
 
 Summarise the valid tests. Save the key association files so that you can restart from here.
@@ -477,7 +477,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 <details><summary>Show the expected result</summary>
 
-1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
+1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](../docs/glossary.md#lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](../docs/glossary.md#sha-256) checksums.
 
 <!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
@@ -509,7 +509,7 @@ No. Nearby variants can share one signal because of [linkage disequilibrium (LD)
 ## 6.7 Create the summary statistics file {#step-6-7}
 
 
-<!-- step_meta: {"success_line": "The summary statistics file has 236,815 rows, one for each tested variant.", "student_summary": "We save the scan results in a standard table with one row per tested variant and a separate file explaining its columns. We read the saved table back and check its values and counts so the next plots use a verified file.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "The summary statistics file has 236,820 rows, one for each tested variant.", "student_summary": "We save the scan results in a standard table with one row per tested variant and a separate file explaining its columns. We read the saved table back and check its values and counts so the next plots use a verified file.", "student_plink_options": []} -->
 ### What we do
 
 Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.
@@ -580,7 +580,7 @@ R reads or calculates the values it shows. It does not change the genotype files
 
 <details><summary>Show the expected result</summary>
 
-The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
+The summary statistics file has 236,820 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
@@ -615,7 +615,7 @@ In the folder `results/guided/`: `s6-7_gwas_summary_statistics.tsv` (the summary
 
 - You calculated a carrier odds ratio by hand and compared it with the odds ratio per allele from a logistic regression.
 - You built a covariate table for 1,811 samples with age and PC1 to PC10, and checked it.
-- You ran the association scan. The frequency check removed another 1,698 variants, which left 236,815 tests with finite p-values.
+- You ran the association scan. The frequency check removed another 1,693 variants, which left 236,820 tests with finite p-values.
 - Eight variants had a p-value below 0.00000005. The leading regions are on chromosomes 9, 3 and 12.
 - The autosomal lambda is about 1.016.
 - You saved the results in a summary statistics file with eleven columns and a file that explains each column.

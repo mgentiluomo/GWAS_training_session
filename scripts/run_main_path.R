@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 4f92a08dc761f7a6c69c0cdf8e6ce7c33022abbc319096193c43fc06e767e7c5
+# SHA-256: 517f5cb5e9bcfb4ba0ae3e6a5f22c88a0a2504d174a37d400ce4bab93560b436
 
 # Chunk: setup
 source("R/guided.R")
@@ -296,7 +296,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "
   "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 # 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
-stopifnot(length(pruned) == 69539L)
+stopifnot(length(pruned) == 68800L)
 cat(length(pruned), "variants kept by LD pruning\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
@@ -406,7 +406,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 590070cd5b754eb36f8d6fc9676a68e9bde1ea6bbab901085bdfa496a35008cd
+# SHA-256: 6377fa0203aeb7f2bb8c5731581a3f5e418eec13d351905f94e0277d0eca053c
 
 # Chunk: setup
 source("R/guided.R")
@@ -441,7 +441,7 @@ guided_register(cfg, "4.2", "4.1", 1844, 295439, operations = ops)
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
-guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
+guided_register(cfg, "4.3", "4.2", 1844, 239018, operations = ops)
 
 
 # Chunk: s4-4
@@ -509,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 230374052c3854b3611b1885d6267b4f78cc768508f552037b70cac019551757
+# SHA-256: 19435a24308be81a0c49b994134a9277f709bb72f64232e7702c0381417d2eaf
 
 # Chunk: setup
 source("R/guided.R")
@@ -533,7 +533,7 @@ reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
 # 3. Save the shared site names and check their number.
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
-stopifnot(length(common) == 48614L)
+stopifnot(length(common) == 48615L)
 cat(length(common), "shared autosomal sites kept\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
@@ -678,7 +678,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6
+# SHA-256: d6c12bc5238aa7e11c281ef684b8d560057f3d5c49c3c9fcbd9feedc1a97903e
 
 # Chunk: setup
 source("R/guided.R")
@@ -739,7 +739,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar",
 results <- guided_association(out)
 # 2. Check the number of valid tests and results below the course significance threshold.
 valid <- valid_p(results$P)
-stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+stopifnot(sum(valid) == 236820L, sum(results$P[valid] < 5e-8) == 8L)
 # 3. Save a table of the association results.
 guided_write(results, guided_path(cfg, "6.3", "results.tsv"))
 # Course bookkeeping: records the counts for the next step. Do not change.
@@ -824,7 +824,7 @@ guided_artifact_checkpoint(cfg, "6.7", c(stats_file, dictionary_file), parent = 
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 682a07921020eecefc0cac7b2ea4541983dcb3c326bcc501d85098c7814d44f8
+# SHA-256: 772110cbf04a9d75fff87b65d3792b4dc99b7852cd6a17388385281894c80b57
 
 # Chunk: setup
 source("R/guided.R")
@@ -1004,7 +1004,7 @@ summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
-stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+stopifnot(comparison[2, "hits"] == 17L, comparison[3, "hits"] == 19L)
 # 8. Save the comparison table.
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))
 # 9. Save three QQ plots with the same scale to compare the analyses.
@@ -1066,7 +1066,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
   paste("Final cohort:", nrow(psam), "samples; cases:", sum(psam$Disease == "2"), "; controls:", sum(psam$Disease == "1")),
-  "After QC: 238,513 variants; 236,815 finite additive association tests.",
+  "After QC: 238,513 variants; 236,820 finite additive association tests.",
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",

@@ -476,7 +476,7 @@ The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_
 ## 3.4 LD pruning {#step-3-4}
 
 
-<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly correlated variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed0", "explanation": "Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
+<!-- step_meta: {"success_line": "The `.prune.in` file lists 68,800 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly correlated variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed0", "explanation": "Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Removing correlated variants is called pruning for [linkage disequilibrium](../docs/glossary.md#ld) (LD). Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [principal component analysis](../docs/glossary.md#pca-pc) (PCA). PCA is a method that summarises the genetic differences between people.
@@ -505,7 +505,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "
   "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 # 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
-stopifnot(length(pruned) == 69539L)
+stopifnot(length(pruned) == 68800L)
 cat(length(pruned), "variants kept by LD pruning\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
@@ -521,7 +521,7 @@ bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 -
 
 <details><summary>Show the expected result</summary>
 
-The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
+The `.prune.in` file lists 68,800 sites. The complete analysis state still has 296,360 variants.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows. Your numbers should be the same.<!-- verification_note:end -->
@@ -556,7 +556,7 @@ No. We use pruning only for specific checks and for the PCA. The association sca
 
 **What the tool computes.** `--indep-pairwise 200kb 0.2` moves a 200 kb window along each chromosome one variant at a time. In each window it calculates r^2, the squared correlation between the genotype counts (0, 1 or 2) of two variants, from unphased hard calls. For every pair above 0.2 it drops one of the two. `.prune.in` lists the kept variants and `.prune.out` the dropped ones. No genotype is deleted.
 
-**Why these values.** The window, the limit of 0.2 and the 5% frequency filter are conventions, not laws. A looser limit such as 0.5 keeps more variants. Windows counted in variants, with a step above 1, are also widely used. Here the filter leaves 69,539 sites, enough for the checks that follow.
+**Why these values.** The window, the limit of 0.2 and the 5% frequency filter are conventions, not laws. A looser limit such as 0.5 keeps more variants. Windows counted in variants, with a step above 1, are also widely used. Here the filter leaves 68,800 sites, enough for the checks that follow.
 
 **Pitfalls.** Some regions, such as the HLA region on chromosome 6, are correlated over very long distances. Pruning thins them but does not remove their pull on principal components, so the course excludes listed regions first. The list belongs to one genome build and is not complete. In this dataset, the list excludes about 9,500 array variants (before the frequency and call-rate filters), compared with about 5,700 for the short list that earlier versions of the course used. The pruned set also depends on the samples, the frequency filter and the scan order, so another cohort gives another list. Never use it for the association scan.
 
@@ -846,7 +846,7 @@ The kinship coefficient estimates how much DNA two samples share. The usual KING
 # Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
 cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
-trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs))
+trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs, guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))))
 trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.
@@ -1050,7 +1050,7 @@ The full checkpoint `checkpoints/3.8/state.*`, the working files `s3-8_state.*` 
 
 - Rough cleaning removed three wells and 150 variants. The 98% call-rate rule then removed 42 more wells, leaving 1,971 samples.
 - The sex check removed eight flagged wells, leaving 1,963 samples.
-- The pruned subset has 69,539 sites. The heterozygosity check removed 13 low-F wells and flagged eight high-F wells, which we kept. 1,950 samples remained.
+- The pruned subset has 68,800 sites. The heterozygosity check removed 13 low-F wells and flagged eight high-F wells, which we kept. 1,950 samples remained.
 - The kinship check found 19 duplicate-class pairs and ten first-degree pairs. We removed 30 records, leaving 1,920 samples.
 - Plate P14 had a lower call rate than the other plates. We removed its 76 remaining wells.
 - The module ends with 1,844 samples and 296,360 variants, saved as the checkpoint at step 3.8.

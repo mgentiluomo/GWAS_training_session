@@ -6,7 +6,7 @@
   "anchor": "step-6-5",
   "title": "Sparse genotypes and Firth correction",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6",
+  "source_sha256": "d6c12bc5238aa7e11c281ef684b8d560057f3d5c49c3c9fcbd9feedc1a97903e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Compare an ordinary fit with a Firth fit that we force at one low-frequency autosomal variant. The variant is one of the retained variants.",

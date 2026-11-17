@@ -1435,7 +1435,7 @@ regions <- guided_high_ld(cfg)  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",  # <2>
   "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))  # <3>
-stopifnot(length(pruned) == 69539L)
+stopifnot(length(pruned) == 68800L)
 cat(length(pruned), "variants kept by LD pruning\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
@@ -1462,7 +1462,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The `.prune.in` file lists 69,539 sites. The complete analysis state still has 296,360 variants.
+The `.prune.in` file lists 68,800 sites. The complete analysis state still has 296,360 variants.
 
 :::
 
@@ -1711,7 +1711,7 @@ The kinship coefficient estimates how much DNA two samples share. The usual KING
 # Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
 cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
-trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs))
+trial <- data.frame(threshold = cutoffs, removed = kinship_counts(kin, guided_metadata(cfg), cutoffs, guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))))
 trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.
@@ -2041,7 +2041,7 @@ We keep variants whose less common DNA version appears in at least 1% of the chr
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))  # <1>
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
-guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
+guided_register(cfg, "4.3", "4.2", 1844, 239018, operations = ops)
 ```
 
 1. Remove variants whose less common DNA version occurs in fewer than 1% of copies.
@@ -2059,7 +2059,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
+56,421 variants are removed because of their observed frequencies. 239,018 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
 :::
 
@@ -2108,13 +2108,13 @@ The expected result of the trials:
 | --- | --- | --- |
 | 0.001 | 33,951 | 261,488 |
 | 0.005 | 47,184 | 248,255 |
-| **0.01 (course value)** | 56,420 | 239,019 |
+| **0.01 (course value)** | 56,421 | 239,018 |
 | 0.02 | 89,204 | 206,235 |
 | 0.05 | 156,235 | 139,204 |
 
-How to read it. At 0.01 the course removes 56,420 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,420 minus 33,951). Many of them have only a handful of carriers.
+How to read it. At 0.01 the course removes 56,421 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,421 minus 33,951). Many of them have only a handful of carriers.
 
-Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,420 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,421 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2432,7 +2432,7 @@ No PLINK equivalent
 
 ## Step 5.2 · Prepare variants for reference PCA {#step-5-2}
 
-We find and save the 48,614 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
+We find and save the 48,615 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
 
 [Read step 5.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-2).
 
@@ -2443,7 +2443,7 @@ study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))  # <2>
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))  # <3>
-stopifnot(length(common) == 48614L)
+stopifnot(length(common) == 48615L)
 cat(length(common), "shared autosomal sites kept\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
@@ -2459,7 +2459,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-48,614 shared sites are kept for the reference PCA and the projection.
+48,615 shared sites are kept for the reference PCA and the projection.
 
 :::
 
@@ -2498,7 +2498,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
+All 48,615 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
 
 :::
 
@@ -2546,7 +2546,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--freq` | Saves how common each allele is in the reference to s5-4_reference.afreq. |
 | `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation. |
 | &nbsp;&nbsp;&rarr; `allele-wts` | Saves how much each allele contributes to each component in s5-4_reference.eigenvec.allele. |
@@ -2557,7 +2557,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
@@ -2571,7 +2571,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
@@ -2942,7 +2942,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar",
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
 valid <- valid_p(results$P)  # <2>
-stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+stopifnot(sum(valid) == 236820L, sum(results$P[valid] < 5e-8) == 8L)
 guided_write(results, guided_path(cfg, "6.3", "results.tsv"))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.3", "results.tsv")), parent = "6.2")
@@ -2971,7 +2971,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
+The frequency check in the final cohort removes another 1,693 variants. This leaves 236,820 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
 :::
 
@@ -3116,7 +3116,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
+1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
 
 :::
 
@@ -3168,7 +3168,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
+The summary statistics file has 236,820 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 
@@ -3358,7 +3358,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are 236,815 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
+There are 236,820 finite tests, so the Bonferroni threshold for this scan is approximately 2.11e-7. The usual threshold gives eight discoveries. BH answers a different question about errors, so it can return more.
 
 :::
 
@@ -3562,7 +3562,7 @@ summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$
   lambda = lambda_gc(autosomal_p(x)))
 comparison <- rbind(main = summarise(main), no_PCs = summarise(a), no_sample_or_variant_QC_no_PCs = summarise(b))
 print(comparison)
-stopifnot(comparison[2, "hits"] == 15L, comparison[3, "hits"] == 19L)
+stopifnot(comparison[2, "hits"] == 17L, comparison[3, "hits"] == 19L)
 guided_write(data.frame(model = rownames(comparison), comparison, row.names = NULL), guided_path(cfg, "7.7", "comparison.tsv"))  # <8>
 # The order goes from the least adjusted analysis to the most adjusted one.
 save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
@@ -3639,14 +3639,14 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Main analysis: 236,815 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,815 tests, 15 hits, lambda about 1.546. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
+Main analysis: 236,820 tests, eight hits, lambda about 1.016. Without PCs after QC: 236,820 tests, 17 hits, lambda about 1.527. Without sample or variant QC and without PCs: 239,647 tests, 19 hits, lambda about 1.655. The extra peaks do not show that worse QC finds more true causes.
 
 The plots follow the order from the least adjusted analysis to the most adjusted one. All QQ plots share one vertical scale. All three Manhattan plots also share one vertical scale, so you can compare the heights of the peaks. Each plot has the genome-wide line at 5e-8, and the labels show the rs number of the lead variant of each region. The table below summarises the same numbers in that order.
 
 | Analysis | Hits below 5e-8 | Lambda |
 | --- | --- | --- |
 | No sample or variant QC, no PCs | 19 | about 1.655 |
-| QC, no PCs | 15 | about 1.546 |
+| QC, no PCs | 17 | about 1.527 |
 | QC and ten PCs (main analysis) | 8 | about 1.016 |
 
 Without PCs, the same three peaks stay and some points reach a little higher. Without any QC, the plot also shows peaks on chromosomes 2 and 15 just above the line, and the lead variant on chromosome 12 changes to rs7310409. The label exm2265352 is an array name, because that variant has no rs number. A lead variant that appears only in the weaker analyses is a warning sign, not a discovery.
@@ -3685,7 +3685,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   paste("Software:", paste(cfg$version, collapse = "; ")),
   "Initial: 2,016 measured wells, 2,000 people, 299,523 variant entries.",
   paste("Final cohort:", nrow(psam), "samples; cases:", sum(psam$Disease == "2"), "; controls:", sum(psam$Disease == "1")),
-  "After QC: 238,513 variants; 236,815 finite additive association tests.",
+  "After QC: 238,513 variants; 236,820 finite additive association tests.",
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",

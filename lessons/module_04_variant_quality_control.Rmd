@@ -270,7 +270,7 @@ The `.missing` file, the reviewed exclusion list and `s4-2_state.*`.
 ## 4.3 Allele frequency {#step-4-3}
 
 
-<!-- step_meta: {"success_line": "56,420 variants are removed because of their observed frequencies. 239,019 variants remain.", "student_summary": "We keep variants whose less common DNA version appears in at least 1% of the chromosome copies. This removes variants with too little information for the main disease analysis.", "student_plink_options": [{"label": "remove rare variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-2_state."}, {"name": "--maf", "explanation": "Removes variants whose less common allele, or DNA version, appears in fewer than 1% of chromosome copies."}, {"name": "--make-pgen", "explanation": "Saves the remaining data as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Starts the output file names with results/guided/s4-3_state."}]}]} -->
+<!-- step_meta: {"success_line": "56,421 variants are removed because of their observed frequencies. 239,018 variants remain.", "student_summary": "We keep variants whose less common DNA version appears in at least 1% of the chromosome copies. This removes variants with too little information for the main disease analysis.", "student_plink_options": [{"label": "remove rare variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-2_state."}, {"name": "--maf", "explanation": "Removes variants whose less common allele, or DNA version, appears in fewer than 1% of chromosome copies."}, {"name": "--make-pgen", "explanation": "Saves the remaining data as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Starts the output file names with results/guided/s4-3_state."}]}]} -->
 ### What we do
 
 We keep variants with a minor allele frequency of at least 1%. We use this rule for the main array scan.
@@ -294,7 +294,7 @@ The dataset from step 4.2, which we call state 4.2.
 run_plink(cfg, c("--pfile", guided_path(cfg, "4.2"), "--maf", "0.01", "--make-pgen", "--out", guided_path(cfg, "4.3")))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "4.3", "4.2")
-guided_register(cfg, "4.3", "4.2", 1844, 239019, operations = ops)
+guided_register(cfg, "4.3", "4.2", 1844, 239018, operations = ops)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -317,7 +317,7 @@ bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out result
 
 <details><summary>Show the expected result</summary>
 
-56,420 variants are removed because of their observed frequencies. 239,019 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
+56,421 variants are removed because of their observed frequencies. 239,018 variants remain. The simulation did not plant a special list of rare artefacts (errors caused by the technology).
 
 <!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
@@ -381,13 +381,13 @@ The expected result of the trials:
 | --- | --- | --- |
 | 0.001 | 33,951 | 261,488 |
 | 0.005 | 47,184 | 248,255 |
-| **0.01 (course value)** | 56,420 | 239,019 |
+| **0.01 (course value)** | 56,421 | 239,018 |
 | 0.02 | 89,204 | 206,235 |
 | 0.05 | 156,235 | 139,204 |
 
-How to read it. At 0.01 the course removes 56,420 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,420 minus 33,951). Many of them have only a handful of carriers.
+How to read it. At 0.01 the course removes 56,421 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,421 minus 33,951). Many of them have only a handful of carriers.
 
-Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,420 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,421 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -747,7 +747,7 @@ Population structure, which means differences in ancestry between cases and cont
 
 - Step 4.1 removed 801 variants with a call rate below 98%.
 - Step 4.2 removed 120 variants whose missing calls differed between cases and controls.
-- Step 4.3 removed 56,420 variants with a minor allele frequency below 1%.
+- Step 4.3 removed 56,421 variants with a minor allele frequency below 1%.
 - Step 4.4 removed 167 variants that failed the Hardy–Weinberg test in the controls.
 - Step 4.5 removed 33 variants with impossible calls on X, Y or MT, and 306 duplicate entries.
 - You saved the module 4 checkpoint: 1,844 samples and 238,513 variants.

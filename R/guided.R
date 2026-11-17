@@ -397,3 +397,101 @@ guided_liftover <- function(chromosome, position, chain_file) {
   }
   result
 }
+
+# Optional alternatives for the ancestry outlier check of step 5.6 (they never change the main path).
+# ref and study are the score tables of step 5.4. group gives the 1000 Genomes group of each reference sample.
+# The first four PC scores are used, as in the main rule.
+ancestry_outliers <- function(ref, study, group, sd_limit = 6, mcd_quantile = 0.999, n_pcs = 4L) {
+  columns <- paste0("PC", seq_len(n_pcs), "_AVG")
+  r <- sapply(ref[, columns, drop = FALSE], as.numeric)
+  s <- sapply(study[columns], as.numeric)
+  european <- group == "EUR"
+  # Main rule: distance from the European mean, in standard deviations, on each component
+  centre <- colMeans(r[european, , drop = FALSE])
+  spread <- sqrt(colMeans(sweep(r[european, , drop = FALSE], 2, centre, "-")^2))
+  z <- sweep(sweep(s, 2, centre, "-"), 2, spread, "/")
+  # Alternative 1: robust Mahalanobis distance (minimum covariance determinant, package MASS)
+  set.seed(20261117)
+  robust <- MASS::cov.rob(r[european, , drop = FALSE], method = "mcd", nsamp = "best")
+  mahalanobis_d2 <- mahalanobis(s, robust$center, robust$cov)
+  # Alternative 2: assign each study sample to the nearest 1000 Genomes group (smallest Mahalanobis distance to the group centre)
+  groups <- sort(unique(group))
+  distance <- sapply(groups, function(g) mahalanobis(s, colMeans(r[group == g, , drop = FALSE]), cov(r[group == g, , drop = FALSE])))
+  nearest <- groups[max.col(-distance, ties.method = "first")]
+  data.frame(IID = study$IID, PC1 = s[, 1], PC2 = s[, 2], max_abs_z = apply(abs(z), 1, max), mahalanobis_d2 = mahalanobis_d2,
+             nearest_group = nearest,
+             flag_sd = apply(abs(z), 1, max) > sd_limit,
+             flag_mcd = mahalanobis_d2 > qchisq(mcd_quantile, df = n_pcs),
+             flag_reference = nearest != "EUR", stringsAsFactors = FALSE)
+}
+
+# Table of how many samples each method removes and how many they remove together.
+outlier_method_table <- function(result) {
+  flags <- result[c("flag_sd", "flag_mcd", "flag_reference")]
+  names(flags) <- c("6 SD rule (course)", "Robust Mahalanobis (MCD)", "Nearest 1000 Genomes group")
+  both <- crossprod(as.matrix(flags))
+  data.frame(method = names(flags), removed = diag(both), row.names = NULL, check.names = FALSE,
+             `in common with the 6 SD rule` = both[, 1], `only this method` = vapply(seq_along(flags), function(i) sum(flags[[i]] & !flags[[1]]), numeric(1)),
+             `missed by this method` = vapply(seq_along(flags), function(i) sum(!flags[[i]] & flags[[1]]), numeric(1)))
+}
+
+# PCA plot of the study samples. A different symbol marks the samples removed by each method, so colour is not needed.
+plot_outlier_methods <- function(result, file) {
+  png(file, width = 1600, height = 850, res = 140)
+  par(mar = c(5, 4.5, 4, 13))
+  plot(result$PC1, result$PC2, pch = 16, cex = 0.5, col = "#999999", xlab = "Reference PC1 score", ylab = "Reference PC2 score",
+       main = "Study samples removed by each outlier method")
+  with(result[result$flag_sd, ], points(PC1, PC2, pch = 2, cex = 2.2, lwd = 2, col = "#D55E00"))
+  with(result[result$flag_mcd, ], points(PC1, PC2, pch = 0, cex = 1.6, lwd = 2, col = "#0072B2"))
+  with(result[result$flag_reference, ], points(PC1, PC2, pch = 4, cex = 1.1, lwd = 2, col = "#000000"))
+  legend("topright", inset = c(-0.42, 0), xpd = TRUE, bty = "n", cex = 0.8, pch = c(16, 2, 0, 4), pt.lwd = 2,
+         col = c("#999999", "#D55E00", "#0072B2", "#000000"),
+         legend = c("Kept by all", "Removed by 6 SD", "Removed by MCD", "Removed by nearest group"))
+  invisible(dev.off())
+  invisible(file)
+}
+
+# Optional box of step 5.7: how many PCs? The box runs its own 20-component PCA with a separate prefix (alt_), so no file of the
+# main path changes. Each trial repeats the association scan of step 6.3 with the first k PCs.
+guided_pc_trials <- function(cfg, ks = c(0, 1, 2, 3, 5, 10, 15, 20)) {
+  state <- guided_path(cfg, "5.7")
+  prune_in <- paste0(guided_path(cfg, "5.7", "prune"), ".prune.in")
+  pca_prefix <- guided_path(cfg, "5.7", "alt_pca20")
+  run_plink(cfg, c("--pfile", state, "--extract", prune_in, "--pca", "20", "--out", pca_prefix), quiet = TRUE)
+  vectors <- guided_table(paste0(pca_prefix, ".eigenvec"))
+  psam <- guided_table(paste0(state, ".psam"))
+  metadata <- guided_metadata(cfg)
+  rows <- lapply(ks, function(k) {
+    covar <- data.frame(`#FID` = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[match(psam$IID, metadata$IID)]), check.names = FALSE)
+    for (i in seq_len(k)) covar[[paste0("PC", i)]] <- as.numeric(vectors[[paste0("PC", i)]][match(psam$IID, vectors$IID)])
+    covar_file <- guided_path(cfg, "5.7", paste0("alt_covar_k", k, ".tsv"))
+    guided_write(covar, covar_file)
+    prefix <- guided_path(cfg, "5.7", paste0("alt_assoc_k", k))
+    names_arg <- if (k == 0) "Age" else if (k == 1) "Age,PC1" else paste0("Age,PC1-PC", k)
+    run_plink(cfg, c("--pfile", state, "--maf", "0.01", "--covar", covar_file, "--covar-name", names_arg, "--covar-variance-standardize",
+                     "--glm", "sex", "hide-covar", "firth-fallback", "--out", prefix), quiet = TRUE)
+    results <- guided_association(prefix)
+    autosomal <- results$P[results$CHROM %in% as.character(1:22)]
+    data.frame(k = k, hits = sum(results$P[valid_p(results$P)] < 5e-8), lambda = round(lambda_gc(autosomal), 4))
+  })
+  list(trials = do.call(rbind, rows), eigenvalues = scan(paste0(pca_prefix, ".eigenval"), quiet = TRUE),
+       outcome_p = vapply(seq_len(20), function(i) {
+         pc <- as.numeric(vectors[[paste0("PC", i)]])
+         summary(glm((as.numeric(psam$Disease[match(vectors$IID, psam$IID)]) == 2) ~ pc, family = binomial))$coefficients[2, 4]
+       }, numeric(1)))
+}
+
+# Optional box of step 7.6: a Bayesian credible set for one region, from the association results only.
+# Wakefield's approximate Bayes factor (ABF) assumes one causal variant in the region. beta is the log odds ratio, se its standard error.
+# prior_sd is the standard deviation of the effect under the alternative (0.2 gives the prior variance W = 0.04).
+credible_set <- function(ids, beta, se, prior_sd = 0.2, level = 0.95) {
+  keep <- is.finite(beta) & is.finite(se) & se > 0
+  ids <- ids[keep]; beta <- beta[keep]; se <- se[keep]
+  w <- prior_sd^2; v <- se^2; z <- beta / se; r <- w / (v + w)
+  log_abf <- 0.5 * (log(1 - r) + r * z^2)          # Bayes factor of "this variant is causal" against "no effect"
+  pip <- exp(log_abf - max(log_abf)); pip <- pip / sum(pip)
+  ordered <- order(pip, decreasing = TRUE)
+  size <- which(cumsum(pip[ordered]) >= level)[1]
+  list(table = data.frame(id = ids[ordered], pip = pip[ordered], cumulative = cumsum(pip[ordered]))[seq_len(size), ],
+       size = size, lead = ids[ordered][1], lead_pip = pip[ordered][1])
+}

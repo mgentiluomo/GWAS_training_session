@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "230374052c3854b3611b1885d6267b4f78cc768508f552037b70cac019551757"
+course_source_sha256: "19435a24308be81a0c49b994134a9277f709bb72f64232e7702c0381417d2eaf"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -95,7 +95,7 @@ No PLINK equivalent
 
 ## Step 5.2 · Prepare variants for reference PCA {#step-5-2}
 
-We find and save the 48,614 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
+We find and save the 48,615 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
 
 [Read step 5.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-2).
 
@@ -106,7 +106,7 @@ study_sites <- guided_table(paste0(guided_path(cfg, "4.6"), ".pvar"))
 reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))  # <2>
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))  # <3>
-stopifnot(length(common) == 48614L)
+stopifnot(length(common) == 48615L)
 cat(length(common), "shared autosomal sites kept\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
@@ -122,7 +122,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-48,614 shared sites are kept for the reference PCA and the projection.
+48,615 shared sites are kept for the reference PCA and the projection.
 
 :::
 
@@ -161,7 +161,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
+All 48,615 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
 
 :::
 
@@ -209,7 +209,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--freq` | Saves how common each allele is in the reference to s5-4_reference.afreq. |
 | `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation. |
 | &nbsp;&nbsp;&rarr; `allele-wts` | Saves how much each allele contributes to each component in s5-4_reference.eigenvec.allele. |
@@ -220,7 +220,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |
@@ -234,7 +234,7 @@ guided_artifact_checkpoint(cfg, "5.4", c(paste0(fit, c(".afreq", ".eigenvec", ".
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder. |
-| `--extract` | Uses only the 48,614 shared sites listed in s5-2_common.txt. |
+| `--extract` | Uses only the 48,615 shared sites listed in s5-2_common.txt. |
 | `--read-freq` | Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale. |
 | `--score` | Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5. |
 | &nbsp;&nbsp;&rarr; `header-read` | Reads the first row of the allele weight file as column names. |

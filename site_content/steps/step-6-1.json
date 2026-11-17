@@ -6,7 +6,7 @@
   "anchor": "step-6-1",
   "title": "One variant by hand",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6",
+  "source_sha256": "d6c12bc5238aa7e11c281ef684b8d560057f3d5c49c3c9fcbd9feedc1a97903e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate a simple carrier odds ratio for one variant on an [autosome](docs/glossary.md#autosome) (a non-sex chromosome). The variant passed all quality control. Then fit the [logistic regression](docs/glossary.md#logistic-regression) that the rest of the module uses, for the same variant, and connect its odds ratio to the carrier odds ratio.",

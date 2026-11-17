@@ -108,7 +108,7 @@ None.
 ## 5.2 Prepare variants for reference PCA {#step-5-2}
 
 
-<!-- step_meta: {"success_line": "48,614 shared sites are kept for the reference PCA and the projection.", "student_summary": "We find and save the 48,614 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "48,615 shared sites are kept for the reference PCA and the projection.", "student_summary": "We find and save the 48,615 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.", "student_plink_options": []} -->
 ### What we do
 
 Find the sites that are present in both the reference subset and the cleaned study. Only common sites on the [autosomes](../docs/glossary.md#autosome) (chromosomes 1 to 22) are used.
@@ -134,7 +134,7 @@ reference_sites <- guided_table(paste0(reference, ".pvar"))
 common <- sort(intersect(study_sites$ID, reference_sites$ID))
 # 3. Save the shared site names and check their number.
 guided_list(common, guided_path(cfg, "5.2", "common.txt"))
-stopifnot(length(common) == 48614L)
+stopifnot(length(common) == 48615L)
 cat(length(common), "shared autosomal sites kept\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "5.2", guided_path(cfg, "5.2", "common.txt"), parent = "4.6")
@@ -148,7 +148,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-48,614 shared sites are kept for the reference PCA and the projection.
+48,615 shared sites are kept for the reference PCA and the projection.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->
@@ -178,7 +178,7 @@ No. The comparison with the reference uses only the study sites that passed QC.
 ## 5.3 Match build, position and alleles {#step-5-3}
 
 
-<!-- step_meta: {"success_line": "All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair.", "student_summary": "We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "All 48,615 shared IDs agree on chromosome, GRCh38 position and allele pair.", "student_summary": "We check that each shared site has the same chromosome, DNA position and the two DNA letters that can occur at that site, in both files. This prevents us from comparing different sites that happen to share a name.", "student_plink_options": []} -->
 ### What we do
 
 Check that the shared variants are really the same variants in both files, before the projection.
@@ -218,7 +218,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-All 48,614 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
+All 48,615 shared IDs agree on chromosome, GRCh38 position and allele pair. This checks that the two supplied files are compatible. It is not an independent check against a reference genome sequence file (a FASTA file).
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->
@@ -233,7 +233,7 @@ Stop at the first error message. Check the input file named in the message and t
 
 ### Quick check
 
-Is it safe to match variants only by row position if both `.pvar` files contain 48,614 rows?
+Is it safe to match variants only by row position if both `.pvar` files contain 48,615 rows?
 
 <details><summary>Show the answer</summary>
 
@@ -248,7 +248,7 @@ None. If a variant does not match, the code stops before the projection.
 ## 5.4 Reference PCA and study projection {#step-5-4}
 
 
-<!-- step_meta: {"success_line": "The study projection contains 1,844 samples.", "student_summary": "We calculate ten principal components in the reference, each a number summarising one pattern of genetic variation. We then project both groups onto these fixed reference axes, meaning we place them on the same scale so we can compare them.", "student_plink_options": [{"label": "calculate reference components and allele weights", "options": [{"name": "--pfile", "explanation": "Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder."}, {"name": "--extract", "explanation": "Uses only the 48,614 shared sites listed in s5-2_common.txt."}, {"name": "--freq", "explanation": "Saves how common each allele is in the reference to s5-4_reference.afreq."}, {"name": "--pca", "explanation": "Calculates ten principal components, each a number per person summarising one pattern of genetic variation.", "modifiers": [{"name": "allele-wts", "explanation": "Saves how much each allele contributes to each component in s5-4_reference.eigenvec.allele."}]}, {"name": "--out", "explanation": "Starts the reference output file names with s5-4_reference."}]}, {"label": "place reference samples on the fixed axes", "options": [{"name": "--pfile", "explanation": "Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder."}, {"name": "--extract", "explanation": "Uses only the 48,614 shared sites listed in s5-2_common.txt."}, {"name": "--read-freq", "explanation": "Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale."}, {"name": "--score", "explanation": "Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5.", "modifiers": [{"name": "header-read", "explanation": "Reads the first row of the allele weight file as column names."}, {"name": "no-mean-imputation", "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."}, {"name": "variance-standardize", "explanation": "Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale."}]}, {"name": "--score-col-nums", "explanation": "Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10."}, {"name": "--out", "explanation": "Starts the reference score output file names with s5-4_ref_scores."}]}, {"label": "place study samples on the fixed axes", "options": [{"name": "--pfile", "explanation": "Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder."}, {"name": "--extract", "explanation": "Uses only the 48,614 shared sites listed in s5-2_common.txt."}, {"name": "--read-freq", "explanation": "Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale."}, {"name": "--score", "explanation": "Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5.", "modifiers": [{"name": "header-read", "explanation": "Reads the first row of the allele weight file as column names."}, {"name": "no-mean-imputation", "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."}, {"name": "variance-standardize", "explanation": "Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale."}]}, {"name": "--score-col-nums", "explanation": "Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10."}, {"name": "--out", "explanation": "Starts the study score output file names with s5-4_study_scores."}]}]} -->
+<!-- step_meta: {"success_line": "The study projection contains 1,844 samples.", "student_summary": "We calculate ten principal components in the reference, each a number summarising one pattern of genetic variation. We then project both groups onto these fixed reference axes, meaning we place them on the same scale so we can compare them.", "student_plink_options": [{"label": "calculate reference components and allele weights", "options": [{"name": "--pfile", "explanation": "Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder."}, {"name": "--extract", "explanation": "Uses only the 48,615 shared sites listed in s5-2_common.txt."}, {"name": "--freq", "explanation": "Saves how common each allele is in the reference to s5-4_reference.afreq."}, {"name": "--pca", "explanation": "Calculates ten principal components, each a number per person summarising one pattern of genetic variation.", "modifiers": [{"name": "allele-wts", "explanation": "Saves how much each allele contributes to each component in s5-4_reference.eigenvec.allele."}]}, {"name": "--out", "explanation": "Starts the reference output file names with s5-4_reference."}]}, {"label": "place reference samples on the fixed axes", "options": [{"name": "--pfile", "explanation": "Reads the reference genotype files pca_reference/ref1000g_grch38.pgen, .pvar and .psam from the course data folder."}, {"name": "--extract", "explanation": "Uses only the 48,615 shared sites listed in s5-2_common.txt."}, {"name": "--read-freq", "explanation": "Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale."}, {"name": "--score", "explanation": "Uses s5-4_reference.eigenvec.allele to calculate reference scores, matching variant names in column 2 and counted alleles in column 5.", "modifiers": [{"name": "header-read", "explanation": "Reads the first row of the allele weight file as column names."}, {"name": "no-mean-imputation", "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."}, {"name": "variance-standardize", "explanation": "Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale."}]}, {"name": "--score-col-nums", "explanation": "Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10."}, {"name": "--out", "explanation": "Starts the reference score output file names with s5-4_ref_scores."}]}, {"label": "place study samples on the fixed axes", "options": [{"name": "--pfile", "explanation": "Reads the cleaned study genotype files s4-6_state.pgen, .pvar and .psam from the results folder."}, {"name": "--extract", "explanation": "Uses only the 48,615 shared sites listed in s5-2_common.txt."}, {"name": "--read-freq", "explanation": "Reads the reference allele frequencies from s5-4_reference.afreq so both groups use the same scale."}, {"name": "--score", "explanation": "Uses s5-4_reference.eigenvec.allele to calculate study scores, matching variant names in column 2 and counted alleles in column 5.", "modifiers": [{"name": "header-read", "explanation": "Reads the first row of the allele weight file as column names."}, {"name": "no-mean-imputation", "explanation": "A missing genotype adds nothing to a person's score, instead of being filled in from the allele frequency."}, {"name": "variance-standardize", "explanation": "Rescales genotypes using the reference allele frequencies so common and rare alleles contribute on a comparable scale."}]}, {"name": "--score-col-nums", "explanation": "Uses columns 6 to 15 of the allele weight file to calculate scores for PC1 to PC10."}, {"name": "--out", "explanation": "Starts the study score output file names with s5-4_study_scores."}]}]} -->
 ### What we do
 
 Calculate the PCs in the reference only. Then place the reference samples and the study samples on the same axes.
@@ -655,7 +655,7 @@ Pruning lists, eigenvectors and eigenvalues, the scree plot (PNG), the working s
 ## Module 5 recap {#module-5-recap}
 
 - You compared the study with a GRCh38 reference subset of 1,062 samples.
-- You kept 48,614 shared sites, and all of them matched on chromosome, position and alleles.
+- You kept 48,615 shared sites, and all of them matched on chromosome, position and alleles.
 - You placed 1,844 study samples on the reference axes and drew the plot.
 - You applied the six-standard-deviation rule and excluded 33 outlier records.
 - 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.

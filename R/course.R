@@ -1067,9 +1067,15 @@ hwe_counts <- function(hardy, thresholds, course_rule = TRUE) {
 }
 
 # Count the samples that the relatedness rule of step 3.6 removes when the first-degree cutoff changes.
-# kin is the PLINK .kin0 table and metadata is the table from guided_metadata(). Pairs above 0.354 are always treated as repeats.
-kinship_counts <- function(kin, metadata, cutoffs) {
+# kin is the PLINK .kin0 table, metadata is the table from guided_metadata() and sample_missing is the PLINK .smiss table.
+# Pairs above 0.354 are always treated as repeats.
+kinship_counts <- function(kin, metadata, cutoffs, sample_missing) {
   kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+  # Of two related samples, remove the one with the higher share of missing calls. A tie goes to the alphabetical rule.
+  lower_call_rate <- function(a, b) {
+    fa <- as.numeric(sample_missing$F_MISS[match(a, sample_missing$IID)]); fb <- as.numeric(sample_missing$F_MISS[match(b, sample_missing$IID)])
+    if (fa > fb) a else if (fb > fa) b else max(a, b)
+  }
   vapply(cutoffs, function(cutoff) {
     remove <- character()
     for (i in seq_len(nrow(kin))) {
@@ -1080,9 +1086,9 @@ kinship_counts <- function(kin, metadata, cutoffs) {
         } else {
           ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
           same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])), unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
-          remove <- union(remove, if (same) max(a, b) else c(a, b))
+          remove <- union(remove, if (same) lower_call_rate(a, b) else c(a, b))
         }
-      } else if (value > cutoff && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+      } else if (value > cutoff && !a %in% remove && !b %in% remove) remove <- union(remove, lower_call_rate(a, b))
     }
     length(remove)
   }, numeric(1))

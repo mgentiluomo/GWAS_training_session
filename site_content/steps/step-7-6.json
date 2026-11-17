@@ -6,7 +6,7 @@
   "anchor": "step-7-6",
   "title": "Regional plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "682a07921020eecefc0cac7b2ea4541983dcb3c326bcc501d85098c7814d44f8",
+  "source_sha256": "772110cbf04a9d75fff87b65d3792b4dc99b7852cd6a17388385281894c80b57",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Look closely at the three regions with genome-wide significant variants: L1 on chromosome 3, L2 on chromosome 9 and L3 on chromosome 12. We draw one plot for each region. Each variant is coloured by its LD with the lead variant of its region.",

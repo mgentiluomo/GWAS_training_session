@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6"
+course_source_sha256: "d6c12bc5238aa7e11c281ef684b8d560057f3d5c49c3c9fcbd9feedc1a97903e"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -181,7 +181,7 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar",
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
 valid <- valid_p(results$P)  # <2>
-stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
+stopifnot(sum(valid) == 236820L, sum(results$P[valid] < 5e-8) == 8L)
 guided_write(results, guided_path(cfg, "6.3", "results.tsv"))  # <3>
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.3", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.3", "results.tsv")), parent = "6.2")
@@ -210,7 +210,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
+The frequency check in the final cohort removes another 1,693 variants. This leaves 236,820 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.
 
 :::
 
@@ -355,7 +355,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-1,811 retained samples, 238,513 retained variants and 236,815 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
+1,811 retained samples, 238,513 retained variants and 236,820 tests with finite p-values. Eight variants are genome-wide significant. The autosomal [lambda](#glossary-lambda-gc) is about 1.016. The key analysis files get a manifest: a list of files with their [SHA-256](#glossary-sha-256) checksums.
 
 :::
 
@@ -407,7 +407,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The summary statistics file has 236,815 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
+The summary statistics file has 236,820 rows, one for each tested variant. It has the eleven columns in the order of the table above. The checks stop the step with an error if a column name, a p-value or an odds ratio breaks the rules. The first row is `1:858952:G:A`, with effect allele `A`, other allele `G`, odds ratio 1.03471, `beta` about 0.034 and n = 1807. `beta` is calculated from the odds ratio that PLINK writes, so it is the logarithm of that rounded value. No p-value is missing in this dataset. Eight p-values are below 0.00000005, as at 6.6. The file is about 22 MB. The column file has one row for each of the eleven columns. The last table shows `matches` for both files in the 6.7 checkpoint.
 
 If PLINK could not calculate a p-value, the file would show `NA`. It would never show 0 or 1.
 

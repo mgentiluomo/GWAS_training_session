@@ -6,7 +6,7 @@
   "anchor": "step-4-1",
   "title": "Variant call rate",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "590070cd5b754eb36f8d6fc9676a68e9bde1ea6bbab901085bdfa496a35008cd",
+  "source_sha256": "6377fa0203aeb7f2bb8c5731581a3f5e418eec13d351905f94e0277d0eca053c",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We remove variants with a call rate below 98%. We do this after sample [quality control](docs/glossary.md#quality-control) (QC), which already removed the poor samples in module 3.",
