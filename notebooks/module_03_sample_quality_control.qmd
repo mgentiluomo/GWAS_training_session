@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "0be4ed19e34851640ad3d10de7f039aee2ee3431a271c458a01b8c1826818193"
+course_source_sha256: "f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -141,6 +141,7 @@ variants <- threshold_counts(cfg, guided_path(cfg, "3.1", "samples"), "--geno", 
 variants$course_value <- variants$threshold == 0.10
 variants
 par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_threshold_trials(variants, "Variants removed")  # <3>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 1. Samples: --mind on the cohort saved at 2.8.
@@ -179,6 +180,8 @@ Variants removed by `--geno`, after `--mind 0.10`:
 | 0.2 | 130 | 296,380 |
 
 How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -242,6 +245,7 @@ trial$course_value <- trial$threshold == 0.02
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -264,6 +268,8 @@ The expected result of the trials:
 | 0.2 | 0 | 2,013 |
 
 How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
+
+Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -491,6 +497,7 @@ trial$course_value <- trial$threshold == 3
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -622,6 +629,7 @@ trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 

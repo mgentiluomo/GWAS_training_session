@@ -140,6 +140,7 @@ variants$course_value <- variants$threshold == 0.10
 variants
 # 3. Plot the removed numbers. The course value is the large diamond.
 par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_threshold_trials(variants, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
@@ -173,6 +174,8 @@ Variants removed by `--geno`, after `--mind 0.10`:
 | 0.2 | 130 | 296,380 |
 
 How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -354,6 +357,7 @@ trial$course_value <- trial$threshold == 0.02
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
@@ -375,6 +379,8 @@ The expected result of the trials:
 | 0.2 | 0 | 2,013 |
 
 How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
+
+Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -666,6 +672,7 @@ trial$course_value <- trial$threshold == 3
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
@@ -704,6 +711,8 @@ How to read the two numbers. "Removed" counts wells with an F value below the me
 2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
 3. Yang J et al. (2011) GCTA: a tool for genome-wide complex trait analysis. Am J Hum Genet 88:76-82. PMID 21167468.
 4. Jun G et al. (2012) Detecting and estimating contamination of human DNA samples in sequencing and array-based genotype data. Am J Hum Genet 91:839-848. PMID 23103226.
+
+Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -831,6 +840,7 @@ trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
@@ -868,6 +878,8 @@ How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed sa
 2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
 3. Conomos MP et al. (2015) Robust inference of population structure for ancestry prediction and correction of stratification in the presence of relatedness. Genet Epidemiol 39:276-293. PMID 25810074.
 4. Purcell S et al. (2007) PLINK: a tool set for whole-genome association and population-based linkage analyses. Am J Hum Genet 81:559-575. PMID 17701901.
+
+Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 

@@ -1211,6 +1211,7 @@ variants <- threshold_counts(cfg, guided_path(cfg, "3.1", "samples"), "--geno", 
 variants$course_value <- variants$threshold == 0.10
 variants
 par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_threshold_trials(variants, "Variants removed")  # <3>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 1. Samples: --mind on the cohort saved at 2.8.
@@ -1249,6 +1250,8 @@ Variants removed by `--geno`, after `--mind 0.10`:
 | 0.2 | 130 | 296,380 |
 
 How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1312,6 +1315,7 @@ trial$course_value <- trial$threshold == 0.02
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -1334,6 +1338,8 @@ The expected result of the trials:
 | 0.2 | 0 | 2,013 |
 
 How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
+
+Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1561,6 +1567,7 @@ trial$course_value <- trial$threshold == 3
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -1692,6 +1699,7 @@ trial$course_value <- trial$threshold == 0.177
 trial
 # Plot the removed samples. The course value is the large diamond.
 plot_threshold_trials(trial, "Samples removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -1913,6 +1921,7 @@ trial$course_value <- trial$threshold == 0.02
 trial
 # Plot the removed variants. The course value is the large diamond.
 plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -1935,6 +1944,8 @@ The expected result of the trials:
 | 0.2 | 0 | 296,360 |
 
 How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 561 to 1,053. The course value of 0.02 removes 801.
+
+Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.02), where 801 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2060,6 +2071,7 @@ trial$course_value <- trial$threshold == 0.01
 trial
 # Plot the removed variants. The course value is the large diamond.
 plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -2082,6 +2094,8 @@ The expected result of the trials:
 | 0.05 | 156,235 | 139,204 |
 
 How to read it. At 0.01 the course removes 56,420 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,420 minus 33,951). Many of them have only a handful of carriers.
+
+Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,420 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2176,6 +2190,7 @@ trial$course_value <- is.na(trial$threshold)
 trial
 # Plot the removed variants for the fixed cutoffs. The course rule equals 1e-6 here.
 plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
 
 
@@ -2199,6 +2214,8 @@ The expected result of the trials:
 | **course rule (course value)** | 167 | 238,852 |
 
 How to read it. At 1e-3 the number removed is 700, and at 1e-4 it is 273. At 1e-6 it is 167, and at 1e-10 it is 127. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
+
+Expected plot. For `HWE p-value cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (course rule), where 167 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

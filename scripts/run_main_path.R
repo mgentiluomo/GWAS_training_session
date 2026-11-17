@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 0be4ed19e34851640ad3d10de7f039aee2ee3431a271c458a01b8c1826818193
+# SHA-256: f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f
 
 # Chunk: setup
 source("R/guided.R")
@@ -400,7 +400,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: a800bfe1eca3cf3890c307dbfe378792d6f64129877c6af56a1da5bceebf483b
+# SHA-256: 590070cd5b754eb36f8d6fc9676a68e9bde1ea6bbab901085bdfa496a35008cd
 
 # Chunk: setup
 source("R/guided.R")

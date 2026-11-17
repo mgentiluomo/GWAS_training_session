@@ -6,7 +6,7 @@
   "anchor": "step-3-4",
   "title": "LD pruning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "0be4ed19e34851640ad3d10de7f039aee2ee3431a271c458a01b8c1826818193",
+  "source_sha256": "f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We select a smaller set of [autosomal](docs/glossary.md#autosome) variants that are less correlated with each other. Removing correlated variants is called pruning for [linkage disequilibrium](docs/glossary.md#ld) (LD). Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [principal component analysis](docs/glossary.md#pca-pc) (PCA). PCA is a method that summarises the genetic differences between people.",

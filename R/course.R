@@ -1090,7 +1090,24 @@ kinship_counts <- function(kin, metadata, cutoffs) {
 
 # Plot the result of a threshold trial: the number removed at each threshold. The course value is a large diamond with a label.
 # trial needs the columns threshold and removed. course_value (TRUE for one row) marks the course threshold.
-plot_threshold_trials <- function(trial, ylab = "Removed", log_x = TRUE, course_label = "course value") {
+chr_quote <- intToUtf8(34)
+plot_threshold_trials <- function(trial, ylab = "Removed", log_x = TRUE, course_label = "course value", engine = "base") {
+  if (engine == "ggplot2") {
+    if (!requireNamespace("ggplot2", quietly = TRUE)) {
+      message("The ggplot2 package is not installed, so the base R plot is drawn. To install it once: install.packages(", chr_quote, "ggplot2", chr_quote, ")")
+    } else {
+      shown <- trial[!is.na(trial$threshold), , drop = FALSE]
+      course <- shown[shown$course_value, , drop = FALSE]
+      plot <- ggplot2::ggplot(shown, ggplot2::aes(x = threshold, y = removed)) +
+        ggplot2::geom_line() + ggplot2::geom_point(size = 2) +
+        ggplot2::geom_point(data = course, shape = 18, size = 5, colour = "#B91C1C") +
+        ggplot2::geom_text(data = course, ggplot2::aes(label = course_label), vjust = -1.2, colour = "#B91C1C") +
+        ggplot2::scale_x_continuous(trans = if (log_x) "log10" else "identity", breaks = shown$threshold, labels = function(x) format(x, scientific = FALSE, drop0trailing = TRUE)) +
+        ggplot2::labs(x = "Threshold", y = ylab, title = "Trials with other thresholds") + ggplot2::theme_minimal()
+      print(plot)
+      return(invisible(trial))
+    }
+  }
   fixed <- !is.na(trial$threshold)
   x <- trial$threshold[fixed]; y <- trial$removed[fixed]
   mark <- trial$course_value[fixed]
