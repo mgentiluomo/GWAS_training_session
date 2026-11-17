@@ -923,7 +923,49 @@ plot_qq <- function(p, title = "QQ plot", xlim = NULL, ylim = NULL) {
   legend("topleft", legend = paste("lambda GC =", round(lambda_gc(p), 3)), bty = "n")
 }
 
-plot_manhattan <- function(x, title = "Manhattan plot") {
+# Find the lead variant of each region that passes a p-value threshold.
+# Significant variants closer than `window` base pairs on the same chromosome form one region.
+# The lead variant of a region is the one with the smallest p-value. Rows are ordered by p-value.
+region_leads <- function(chromosome, position, p, threshold = 5e-8, window = 500000) {
+  chromosome <- as.character(chromosome); position <- as.numeric(position)
+  hits <- which(valid_p(p) & p < threshold & is.finite(position))
+  if (!length(hits)) return(data.frame(index = integer(0), chromosome = character(0), position = numeric(0), p = numeric(0)))
+  chr_number <- suppressWarnings(as.numeric(chromosome[hits]))
+  hits <- hits[order(chr_number, position[hits])]
+  new_region <- c(TRUE, chromosome[hits][-1] != chromosome[hits][-length(hits)] | diff(position[hits]) > window)
+  region <- cumsum(new_region)
+  lead <- vapply(split(hits, region), function(i) i[which.min(p[i])], integer(1))
+  leads <- data.frame(index = as.integer(lead), chromosome = chromosome[lead], position = position[lead], p = p[lead],
+                      stringsAsFactors = FALSE)
+  leads[order(leads$p), , drop = FALSE]
+}
+
+# Place text labels above their points without overlap. Call this after plot().
+# Each label is moved up in small steps until it no longer touches an earlier label.
+place_labels <- function(x, y, labels, step = 0.06) {
+  if (!length(x)) return(invisible(NULL))
+  usr <- par("usr"); height <- strheight("A", cex = 0.8); width <- strwidth(labels, cex = 0.8)
+  boxes <- list(); order_x <- order(x)
+  for (i in order_x) {
+    ly <- y[i] + step * (usr[4] - usr[3])
+    repeat {
+      clash <- any(vapply(boxes, function(b) abs(b$x - x[i]) < (b$w + width[i]) / 2 + 0.01 * (usr[2] - usr[1]) &&
+        abs(b$y - ly) < height * 1.4, logical(1)))
+      if (!clash || ly > usr[4]) break
+      ly <- ly + height * 1.5
+    }
+    boxes[[length(boxes) + 1L]] <- list(x = x[i], y = ly, w = width[i])
+    segments(x[i], y[i], x[i], ly - height * 0.9, col = "#444444", lwd = 0.8)
+    text(x[i], ly, labels[i], cex = 0.8, col = "#111111")
+  }
+  invisible(NULL)
+}
+
+# x needs the columns CHROM, POS and P. An optional column LABEL holds the text for the lead variants.
+# suggestive = TRUE adds the dotted line for suggestive results at 5e-5.
+# label_leads = TRUE labels the lead variant of each region below 5e-8. max_labels sets how many regions get a label.
+# ylim lets several plots share one vertical scale.
+plot_manhattan <- function(x, title = "Manhattan plot", suggestive = FALSE, label_leads = FALSE, max_labels = 3, ylim = NULL) {
   x <- x[valid_p(x$P) & is.finite(x$CHROM) & x$CHROM %in% 1:22 & is.finite(x$POS), ]
   if (!nrow(x)) stop("No valid autosomal association results to plot.")
   x <- x[order(x$CHROM, x$POS), ]
@@ -932,13 +974,50 @@ plot_manhattan <- function(x, title = "Manhattan plot") {
   offsets <- c(0, head(cumsum(lengths), -1))
   positions <- x$POS + offsets[match(x$CHROM, chrs)]
   centers <- vapply(chrs, function(chr) mean(range(positions[x$CHROM == chr])), numeric(1))
+  if (is.null(ylim)) ylim <- c(0, max(8, -log10(x$P)))
+  if (label_leads) ylim[2] <- ylim[2] * 1.15
   plot(positions, -log10(x$P), pch = 16, cex = 0.5, xaxt = "n",
        col = c("#174A67", "#A34B18")[1 + match(x$CHROM, chrs) %% 2],
-       xlab = "Chromosome", ylab = "-log10(p)", main = title,
-       ylim = c(0, max(8, -log10(x$P))))
+       xlab = "Chromosome", ylab = "-log10(p)", main = title, ylim = ylim)
   axis(1, at = centers, labels = chrs, las = 2, cex.axis = 0.8, gap.axis = 0)
   abline(h = -log10(5e-8), col = "#B91C1C", lty = 2)
-  legend("topright", "Conventional GWAS threshold: 5e-8", lty = 2, col = "#B91C1C", bty = "n", cex = 0.8)
+  legend_text <- "Genome-wide threshold: 5e-8"; legend_lty <- 2; legend_col <- "#B91C1C"
+  if (suggestive) {
+    abline(h = -log10(5e-5), col = "#444444", lty = 3)
+    legend_text <- c(legend_text, "Suggestive threshold: 5e-5"); legend_lty <- c(legend_lty, 3); legend_col <- c(legend_col, "#444444")
+  }
+  legend("topright", legend_text, lty = legend_lty, col = legend_col, bty = "n", cex = 0.8)
+  if (label_leads) {
+    leads <- head(region_leads(x$CHROM, x$POS, x$P), max_labels)
+    if (nrow(leads)) {
+      text_labels <- if ("LABEL" %in% names(x)) x$LABEL[leads$index] else paste0(leads$chromosome, ":", leads$position)
+      place_labels(positions[leads$index], -log10(x$P[leads$index]), text_labels)
+    }
+  }
+}
+
+# Regional plot: association strength with the squared correlation (r2) to the lead as a continuous colour scale.
+# region needs base_pair_location and p_value. r2 has one value per row of region (NA when unavailable).
+plot_regional <- function(region, r2, lead_row, chromosome, lead_label, title) {
+  scale_colours <- hcl.colors(101, "viridis", rev = TRUE)
+  layout(matrix(1:2, nrow = 1), widths = c(6, 1)); on.exit(layout(1), add = TRUE)
+  par(mar = c(5, 4.5, 4, 1))
+  colour <- ifelse(is.na(r2), "#666666", scale_colours[1 + round(100 * pmin(pmax(r2, 0), 1))])
+  draw <- order(!is.na(r2), r2, na.last = FALSE)
+  x <- region$base_pair_location / 1e6; y <- -log10(region$p_value)
+  plot(x[draw], y[draw], col = colour[draw], pch = ifelse(is.na(r2[draw]), 4, 16), cex = 1.1,
+       xlab = paste0("GRCh38 chromosome ", chromosome, " position (Mb)"), ylab = "-log10(p)", main = title,
+       ylim = c(0, max(y) * 1.2))
+  abline(h = -log10(5e-8), lty = 2, col = "#B91C1C")
+  points(x[lead_row], y[lead_row], pch = 18, cex = 2.4, col = "#111111")
+  text(x[lead_row], y[lead_row], lead_label, pos = 3, offset = 1, cex = 0.9, font = 2)
+  legend("topleft", legend = c("Lead variant", "Genome-wide threshold: 5e-8", if (anyNA(r2)) "LD unavailable"),
+         pch = c(18, NA, if (anyNA(r2)) 4), lty = c(NA, 2, if (anyNA(r2)) NA), col = c("#111111", "#B91C1C", if (anyNA(r2)) "#666666"),
+         bty = "n", cex = 0.8)
+  par(mar = c(5, 0.5, 4, 4.5))
+  image(x = 1, y = seq(0, 1, length.out = 101), z = matrix(seq(0, 1, length.out = 101), nrow = 1), col = scale_colours,
+        axes = FALSE, xlab = "", ylab = "")
+  axis(4, at = seq(0, 1, 0.2), las = 1); mtext("r2 with the lead", side = 4, line = 3, cex = 0.8); box()
 }
 
 save_plot <- function(path, draw, width = 1800, height = 1200) {
