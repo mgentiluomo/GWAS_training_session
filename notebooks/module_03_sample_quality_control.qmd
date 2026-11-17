@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8"
+course_source_sha256: "52bcc2a142d2acc6894497c8bd944ba911f202a4e39fbf6f38ae6e9bf98a06de"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -318,7 +318,8 @@ high <- het$IID[f > mean_f + 3 * sd_f]
 guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)  # <5>
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))  # <6>
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))  # <7>
+print(c(mean_F = mean_f, SD_F = sd_f))  # <7>
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
@@ -330,7 +331,7 @@ guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
 4. Find samples with unusually low or high F values.
 5. Save the high F review list and the low F removal list.
 6. Save the dataset without the low F samples.
-7. Print the average, spread and numbers of flagged samples.
+7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
 
 ### What each option does
 

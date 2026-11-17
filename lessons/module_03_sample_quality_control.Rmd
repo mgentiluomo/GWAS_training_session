@@ -505,8 +505,9 @@ guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 # 6. Save the dataset without the low F samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
-# 7. Print the average, spread and numbers of flagged samples.
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+# 7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
+print(c(mean_F = mean_f, SD_F = sd_f))
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)

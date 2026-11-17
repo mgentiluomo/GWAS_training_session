@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 3ac8183ce7f3ef4b65911eb305ffd4f0ab854004d1ff302c9cb3d6d8fb9b28c8
+# SHA-256: 52bcc2a142d2acc6894497c8bd944ba911f202a4e39fbf6f38ae6e9bf98a06de
 
 # Chunk: setup
 source("R/guided.R")
@@ -319,8 +319,9 @@ guided_list(high, guided_path(cfg, "3.5", "flag_high.txt"), TRUE)
 remove_file <- guided_list(low, guided_path(cfg, "3.5", "remove.txt"), TRUE)
 # 6. Save the dataset without the low F samples.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.5")))
-# 7. Print the average, spread and numbers of flagged samples.
-print(c(mean_F = mean_f, SD_F = sd_f, low_removed = length(low), high_flagged = length(high)))
+# 7. Print the average and spread of F, then the numbers of flagged samples as whole numbers.
+print(c(mean_F = mean_f, SD_F = sd_f))
+print(c(low_removed = length(low), high_flagged = length(high)))
 # Course bookkeeping: records the counts for the next step. Do not change.
 ops <- guided_replay_lists(cfg, "3.5", "3.3")
 guided_register(cfg, "3.5", "3.4", 1950, 296360, operations = ops)
