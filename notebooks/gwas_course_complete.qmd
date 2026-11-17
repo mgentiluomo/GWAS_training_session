@@ -1582,7 +1582,7 @@ The expected result of the trials:
 | 3.5 | 13 | 1,950 | 5 |
 | 4 | 13 | 1,950 | 0 |
 
-How to read it. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
+How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
 
 :::
 
