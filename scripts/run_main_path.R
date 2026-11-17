@@ -503,7 +503,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: f1d0a5b38fa4bc6626af4e22391053e51ddd4b0663dd3b34e4e03c1200632995
+# SHA-256: 5f2b005a6106d9f5af12f950ce05ebbf4d16ac0a9f3c0b4ed96d2f1808dcc844
 
 # Chunk: setup
 source("R/guided.R")
@@ -580,21 +580,42 @@ metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch
 group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
 levels <- sort(unique(group)); code <- match(group, levels)
 colours <- c("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00")
-# 3. Open a picture file and plot the first two reference components.
-png(guided_path(cfg, "5.5", "reference_projection.png"), width = 1200, height = 850, res = 140)
-plot(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), col = colours[code], pch = code,
-  xlab = "Reference PC1 score", ylab = "Reference PC2 score", main = "GRCh38 reference and projected simulated study")
-# 4. Add the study samples and a key for the groups.
-points(as.numeric(study$PC1_AVG), as.numeric(study$PC2_AVG), pch = 20, cex = 0.4, col = "#333333")
-legend("topright", legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
-# 5. Finish saving the picture and print its location.
-invisible(dev.off())
-cat("The plot was saved to ", guided_path(cfg, "5.5", "reference_projection.png"), "\n", sep = "")
+# 3. Define one plotting function, so that all pictures use the same symbols, colours and key.
+plot_components <- function(x, y, file) {
+  png(file, width = 1400, height = 850, res = 140)
+  par(mar = c(5, 4.5, 4, 9))
+  plot(as.numeric(ref[[paste0("PC", x, "_AVG")]]), as.numeric(ref[[paste0("PC", y, "_AVG")]]), col = colours[code], pch = code,
+    xlab = paste0("Reference PC", x, " score"), ylab = paste0("Reference PC", y, " score"),
+    main = paste0("GRCh38 reference and projected simulated study: PC", x, " and PC", y))
+  # Add the study samples and a key for the groups. The key sits outside the plot, on the right, so it hides no points.
+  points(as.numeric(study[[paste0("PC", x, "_AVG")]]), as.numeric(study[[paste0("PC", y, "_AVG")]]), pch = 20, cex = 0.4, col = "#333333")
+  legend("topright", inset = c(-0.21, 0), xpd = TRUE, legend = c(levels, "Study projection"), col = c(colours[seq_along(levels)], "#333333"), pch = c(seq_along(levels), 20), cex = 0.8)
+  invisible(dev.off())
+}
+# 4. Save the picture for PC1 and PC2, then the two extra pictures for PC1 and PC3 and for PC2 and PC3.
+files <- c(guided_path(cfg, "5.5", "reference_projection.png"),
+  guided_path(cfg, "5.5", "reference_projection_pc1_pc3.png"),
+  guided_path(cfg, "5.5", "reference_projection_pc2_pc3.png"))
+plot_components(1, 2, files[1]); plot_components(1, 3, files[2]); plot_components(2, 3, files[3])
+# 5. Print the location of each picture.
+for (file in files) cat("The plot was saved to ", file, "\n", sep = "")
 
 
 # Chunk: s5-5_expected_figure
 if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
   knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s5-5_expected_figure_pc1_pc3
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection_pc1_pc3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
+}
+
+
+# Chunk: s5-5_expected_figure_pc2_pc3
+if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
+  knitr::include_graphics(normalizePath(guided_path(cfg, "5.5", "reference_projection_pc2_pc3.png"), winslash = "/", mustWork = FALSE), rel_path = FALSE)
 }
 
 
