@@ -2,7 +2,7 @@
 
 ## Session of 17 November, Riccardo's review
 
-Written for the author. Status at the last push: Parts 1 and 2 and the Manhattan options (Part C) are done on `notebooks/all-modules`. The threshold trials (Part A), the interactive charts (Part B), the analysis trials (Part 3), the step 6.2 renumbering (Part 4) and release 2026.4 are not done. Nothing was released.
+Written for the author. Status at the last push: Parts 1 and 2, the Manhattan options (Part C) and the threshold trials in the lessons and notebooks (Part A) are done on `notebooks/all-modules`. The interactive charts on the website (Part B), the analysis trials (Part 3), the step 6.2 renumbering (Part 4) and release 2026.4 are not done. Nothing was released.
 
 Working folder: `C:\GWAS_course`, branch `notebooks/all-modules` (it now tracks `origin/notebooks/all-modules`). R: `C:\Program Files\R\R-4.5.2\bin\Rscript.exe` (R 4.5.2). PLINK: `bin/plink2.exe`. Data: the staging folder `classroom-stage-2026.1-final`. All 108 files match `MANIFEST.tsv` (SHA-256), and the manifest hash equals the pin in `config.R`. The date of every run is 17 November 2026.
 
@@ -49,9 +49,42 @@ Commits: 557d8a4 (helpers) and 1e42909 (lessons).
 - One test (`test_conditional_liftover_option_is_required_in_r_order`) expected `--flip` to be absent from the 2.6 terminal command. It was updated in commit 369ab6b. The commit d988eb5 alone leaves that test failing.
 - Not done: `quarto render` of the nine `.qmd` files. Quarto is not installed on this computer.
 
+### Threshold trials and interactive charts, Manhattan options
+
+Threshold trials (Part A). Each of the steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4 has a collapsed, optional box "Try other thresholds". The box has 3 to 5 sentences of explanation, an R chunk that is not run by default, a PLINK 2 terminal example, a table of expected counts and a note on how to read it. The trials start from the same input as the step and change one threshold at a time. Step 3.1 has two tables (`--mind` and `--geno`).
+
+| Step | Option | Values tried | Course value | Removed at the course value |
+| --- | --- | --- | --- | --- |
+| 3.1 | `--mind` | 0.01, 0.02, 0.05, 0.10, 0.20 | 0.10 | 3 samples |
+| 3.1 | `--geno` | 0.01, 0.02, 0.05, 0.10, 0.20 | 0.10 | 150 variants |
+| 3.2 | `--mind` | 0.01, 0.02, 0.05, 0.10, 0.20 | 0.02 | 42 samples |
+| 3.5 | F, SD from the mean | 2, 2.5, 3, 3.5, 4 | 3 | 13 samples (8 more flagged) |
+| 3.6 | KING cutoff | 0.0442, 0.0884, 0.177, 0.354 | 0.177 | 30 samples |
+| 4.1 | `--geno` | 0.01, 0.02, 0.05, 0.10, 0.20 | 0.02 | 801 variants |
+| 4.3 | `--maf` | 0.001, 0.005, 0.01, 0.02, 0.05 | 0.01 | 56,420 variants |
+| 4.4 | HWE p-value | 1e-3, 1e-4, 1e-6, 1e-8, 1e-10 and the course rule | course rule | 167 variants |
+
+Full count tables, with samples and variants removed and remaining, are in `docs/review/threshold_sweeps.md`. The same numbers are in `site_content/threshold_sweeps.json` (versioned) and `docs/review/threshold_sweeps.tsv`. `scripts/author/threshold_sweeps.R` writes them from a main-path run and stops if a course value differs from `step_counts.tsv`. `scripts/tests/test_threshold_sweeps.py` repeats the check on the saved file. All eight course values matched exactly.
+
+Decisions and differences:
+
+- 3.6 uses `--make-king-table` with `--king-table-filter 0.0442` and an R rule, not `--king-cutoff`. The trial changes the relatives cutoff inside the course rule. The box also shows a `--king-cutoff` command and says that its count can differ. The degrees for 0.0884 and 0.0442 come from the KING paper (Manichaikul et al. 2010, doi:10.1093/bioinformatics/btq559), not from the PLINK 2 page.
+- 4.4 does not use `--hwe`. The cutoff depends on the number of controls (920 here, so the rule equals 1e-6 and gives 167). The trials filter the `--hardy midp` table in R. The terminal example uses `--hwe 1e-6 midp`, and the box warns that PLINK 2 `--hwe` can stop with an error for strict cutoffs.
+- 3.5: the same 13 wells are removed at every limit from 2 to 4 SD. Only the number of flagged wells changes (13, 11, 8, 5, 0).
+- The pruning thresholds (3.4 and 5.7) were left out, as decided.
+- A PLINK 2 run without `--make-just-psam` or `--make-just-pvar` stops with "No output requested" and applies no filter, so the trials use those two options and read the counts from the PLINK output. In R they write into a temporary folder that is deleted. In the terminal examples they write a small file into `results/trials/`.
+- The notebooks and the step JSON carry the boxes through a new optional block `try_other_thresholds` (see `docs/site_content_schema.md`). The schema version stays 1.1.
+- Plots in the notebooks use base R graphics, as the rest of the course does (`plot_threshold_trials()` in `R/course.R`). `ggplot2` is not installed and not required.
+
+PLINK 2 sources, read on 17 November 2026: https://www.cog-genomics.org/plink/2.0/filter (`--mind`, `--geno`, `--maf`, `--hwe`) and https://www.cog-genomics.org/plink/2.0/distance (KING). The page on filters does not state the order of the filters, so each trial uses one filter only. PLINK 2 treats a dosage without a hard call as missing by default, and `--maf` ignores non-founders by default. Both make no difference for these data.
+
+Commits: 04afcd7 and ceb970f (helpers, script, results, test), 0d9e38e (exporter and notebooks), 6341d95 (lessons). Checks: the notebook check, the text check, the Python tests, and a full main-path run after the change gave the same files as the 2026.3.3 run (`step_counts.tsv`, lambda, comparison, clump, leads, summary statistics, top 20, thresholds).
+
+Interactive charts on the website (Part B): not done. See the list below.
+
 ### Still to do and to decide
 
-Part A, Part B, Part 3, Part 4, the release and the website merge. Decision for the author: whether to accept the key outside the plot instead of the bottom left.
+Part B (interactive charts in `C:\WEB_site\sito`: SVG or React component reading `site_content/threshold_sweeps.json`, table fallback, axe, 360 px check, ggplot-like static versions already exist as base R plots in the notebooks), Part 3 (trials in `C:\GWAS_trials`; the file `highLD_b38.bed` is in the project root, untracked), Part 4 (branch `course/remove-step-6-2`), the render of the nine notebooks with Quarto (Quarto is not installed here), release 2026.4 and the website merge. Decisions for the author: whether to accept the key outside the plot instead of the bottom left, and whether the box text for steps 3.1 to 4.4 is at the right level.
 
 ## Session of 16 November, release 2026.3.3
 
