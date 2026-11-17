@@ -563,6 +563,60 @@ A difference that is weak or invisible on the first two axes can appear on later
 
 `s5-6_remove.txt`, `s5-6_state.*` and replay metadata.
 
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The course removes a study sample when it lies more than six standard deviations (SD) from the mean of the European reference on any of the first four PCs. The first table changes the number of SD. The second table is an alternative method (see the box "Another approach"): the robust Mahalanobis distance with a cutoff at a quantile of the chi-squared distribution. It has no course value. Each trial starts from the 1,844 study samples of step 4.6.
+
+```{r s5-6_thresholds, eval=FALSE}
+# Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
+# 1. Read the scores of step 5.4 and apply the methods to the same samples.
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+result <- ancestry_outliers(ref, study, metadata$SuperPop[match(ref$IID, metadata$IID)])
+# 2. Change the number of SD of the course rule.
+sd_trial <- outlier_sd_counts(result, c(4, 5, 6, 7, 8))
+sd_trial$course_value <- sd_trial$threshold == 6
+# 3. Change the chi-squared quantile of the robust Mahalanobis distance.
+mcd_trial <- outlier_mcd_counts(result, c(0.99, 0.999, 0.9999))
+mcd_trial$course_value <- FALSE
+sd_trial
+mcd_trial
+# 4. Plot the removed samples.
+par(mfrow = c(1, 2)); plot_threshold_trials(sd_trial, "Samples removed", log_x = FALSE); plot_threshold_trials(mcd_trial, "Samples removed", log_x = FALSE)
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances.
+
+The expected result of the trials:
+
+Study samples removed by the course rule when the number of SD changes:
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 4 | 34 | 1,810 |
+| 5 | 33 | 1,811 |
+| **6 (course value)** | 33 | 1,811 |
+| 7 | 33 | 1,811 |
+| 8 | 33 | 1,811 |
+
+Study samples removed by the robust Mahalanobis distance (alternative method):
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.99 | 86 | 1,758 |
+| 0.999 | 39 | 1,805 |
+| 0.9999 | 34 | 1,810 |
+
+How to read it. The number of SD hardly matters. From 5 to 8 SD the rule removes the same 33 samples, and 4 SD adds one. The 33 samples are far from the European cluster, so any sensible limit finds them. The distance method depends much more on its cutoff. At the 99% point it removes 86 samples, at 99.9% it removes 39 and at 99.99% it removes 34. The extra samples are at the edge of the European cluster, so a loose cutoff removes people of European ancestry. At 99.99% the method nearly agrees with the course rule.
+
+Expected plot. For `SD limit`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. A red diamond marks the course value (6), where 33 samples are removed. For `MCD chi-squared quantile`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. This is an alternative method, so the plot has no course value. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
+
+</details>
+
 <details><summary>Another approach (optional)</summary>
 
 This box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
@@ -703,6 +757,43 @@ Pruning lists, eigenvectors and eigenvalues, the scree plot (PNG), the working s
 - 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.
 
 **Next:** module 6, where you run the association test and use these PCs as covariates.
+
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The course keeps ten PCs as covariates. This box repeats the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs and shows how many hits and which lambda each choice gives. It runs its own 20-component PCA and writes only to files that start with `s5-7_alt_`. The box takes about three minutes, because it runs PLINK eight times. See also the box "Another approach", which shows the scree plot and the PCs that are associated with the outcome.
+
+```{r s5-7_thresholds, eval=FALSE}
+# Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
+trials <- guided_pc_trials(cfg)
+trials$trials
+# Plot lambda and the number of hits against the number of PCs.
+par(mfrow = c(1, 2))
+plot(trials$trials$k, trials$trials$lambda, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Lambda", main = "Lambda"); abline(h = 1, lty = 2)
+plot(trials$trials$k, trials$trials$hits, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Hits below 5e-8", main = "Hits")
+```
+
+Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3.
+
+The expected result of the trials:
+
+| Number of PCs | Hits below 5e-8 | Lambda |
+| --- | --- | --- |
+| 0 | 17 | 1.5273 |
+| 1 | 8 | 1.0101 |
+| 2 | 8 | 1.0136 |
+| 3 | 8 | 1.0137 |
+| 5 | 8 | 1.0150 |
+| **10 (course value)** | 8 | 1.0157 |
+| 15 | 8 | 1.0185 |
+| 20 | 8 | 1.0183 |
+
+How to read it. Without PCs, there are 17 hits and lambda is 1.527, so the correction is needed. One PC already brings lambda to 1.010. Ten PCs give 1.016, and 15 and 20 PCs give 1.018. The number of hits stays at eight from one PC on. In this dataset only PC1 carries ancestry, so more PCs add only a little noise.
+
+Expected plot. The horizontal axis shows the number of PCs. The left plot shows lambda, which falls from 1.53 to about 1.01 with one PC and then rises slowly to 1.02. The right plot shows the number of hits, which falls from 17 to 8 with one PC and then stays at 8. The course value is ten PCs, with 8 hits and lambda 1.016.
+
+</details>
 
 <details><summary>Another approach (optional)</summary>
 

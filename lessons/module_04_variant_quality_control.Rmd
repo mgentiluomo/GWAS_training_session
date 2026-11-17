@@ -267,6 +267,48 @@ Yes. Its few missing calls can all fall in one group, for example only in the ca
 
 The `.missing` file, the reviewed exclusion list and `s4-2_state.*`.
 
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The missingness test compares the share of missing calls of every variant in cases and in controls. A small p-value means that the missing calls depend on the disease status. Such a variant can give a false association, because the missing calls are not random. The course removes the variants with p below 0.00001 (1e-5). A looser cutoff removes more variants and some of them are only unusual. A stricter cutoff keeps variants whose missing data may still depend on the disease status. Each trial starts from the cohort saved at 4.1 and applies a different cutoff to the same test results.
+
+```{r s4-2_thresholds, eval=FALSE}
+# Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
+missing_table <- guided_table(paste0(guided_path(cfg, "4.2", "missing"), ".missing"))
+cutoffs <- c(1e-3, 1e-4, 1e-5, 1e-6, 1e-8)
+trial <- missing_test_counts(missing_table, cutoffs)
+trial$course_value <- trial$threshold == 1e-5
+trial
+# Plot the removed variants. The course value is the large diamond.
+plot_threshold_trials(trial, "Variants removed")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s4-1_state --test-missing --out results/trials/s4-2_trial --threads 2 --memory 2048
+```
+
+The cutoff is not a PLINK option. PLINK writes the table `results/trials/s4-2_trial.missing`, and the cutoff is applied to its column `P`. To repeat a trial, count the rows of the column `P` that are below another number.
+
+The expected result of the trials:
+
+| Setting | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 1e-03 | 126 | 295,433 |
+| 1e-04 | 121 | 295,438 |
+| **1e-05 (course value)** | 120 | 295,439 |
+| 1e-06 | 106 | 295,453 |
+| 1e-08 | 3 | 295,556 |
+
+How to read it. At the course cutoff of 1e-5, 120 variants are removed. Most of the flagged variants have very small p-values: 106 variants are below 1e-6, and 103 of them lie between 1e-8 and 1e-6. Only 3 are below 1e-8. Looser cutoffs add only a few variants: 121 at 1e-4 and 126 at 1e-3. This means that the choice between 1e-3 and 1e-6 changes the result by a few variants, and almost all flagged variants are found at every cutoff.
+
+Expected plot. For `test-missing p-value cutoff`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (1e-05), where 120 variants are removed. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
+
+</details>
+
 ## 4.3 Allele frequency {#step-4-3}
 
 

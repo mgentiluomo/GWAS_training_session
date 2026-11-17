@@ -6,7 +6,7 @@
   "anchor": "step-4-4",
   "title": "Hardy-Weinberg and sample size",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "fd3bdced0b04c21d6f87a2e1c859c1a45d31ac4e4d879082c0569033119a9956",
+  "source_sha256": "37e5cf864578ae7705fa68c180a2600e9a7a098425a967f9c056f01f8db6f1e1",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We run an exact Hardy–Weinberg test in the controls only, using the mid-p version. Then we apply a threshold that depends on the sample size.",

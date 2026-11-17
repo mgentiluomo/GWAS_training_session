@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "517f5cb5e9bcfb4ba0ae3e6a5f22c88a0a2504d174a37d400ce4bab93560b436"
+course_source_sha256: "29a046391b888d3412bc9e260cbdb871b6a4612c5aee5d7eb6ee64cdd1252268"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -354,6 +354,65 @@ bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.t
 
 :::
 
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The sex check compares the recorded sex with the X chromosome. The X inbreeding coefficient F is close to 0 in females, who have two X chromosomes, and close to 1 in males, who have one. `max-female-xf` is the highest F that a recorded female may have. `min-male-xf` is the lowest F that a recorded male may have. A sample outside its limit is flagged and removed. The course values are 0.2 and 0.8. The Y chromosome limits do not change here. Each trial changes one limit and starts from the cohort saved at 3.2.
+
+```{r}
+#| label: s3-3_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one limit only. Your results folder is not changed.
+females <- sexcheck_counts(cfg, guided_path(cfg, "3.3", "par"), "max-female-xf", c(0.1, 0.2, 0.3, 0.4))  # <1>
+females$course_value <- females$threshold == 0.2
+males <- sexcheck_counts(cfg, guided_path(cfg, "3.3", "par"), "min-male-xf", c(0.6, 0.7, 0.8, 0.9))  # <2>
+males$course_value <- males$threshold == 0.8
+females
+males
+par(mfrow = c(1, 2)); plot_threshold_trials(females, "Samples flagged", log_x = FALSE); plot_threshold_trials(males, "Samples flagged", log_x = FALSE)  # <3>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+1. Change the female limit, with the other limits at their course values.
+2. Change the male limit.
+3. Plot the flagged samples. The course value is the large diamond.
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.3 min-male-xf=0.8 max-female-ycount=100 min-male-ycount=1000 --out results/trials/s3-3_trial --threads 2 --memory 2048
+```
+
+The file `results/trials/s3-3_trial.sexcheck` lists every sample. Count the rows whose `STATUS` is not `OK`. To repeat the trial, change one number and use a new `--out` name. PLINK 2 also checks the Y chromosome counts that you give. They stay the same here.
+
+The expected result of the trials:
+
+Samples flagged when the female limit changes:
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.1 | 14 | 1,957 |
+| **0.2 (course value)** | 8 | 1,963 |
+| 0.3 | 8 | 1,963 |
+| 0.4 | 8 | 1,963 |
+
+Samples flagged when the male limit changes:
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.6 | 8 | 1,963 |
+| 0.7 | 8 | 1,963 |
+| **0.8 (course value)** | 8 | 1,963 |
+| 0.9 | 8 | 1,963 |
+
+How to read it. At the course values, 8 samples are flagged. The male limit makes no difference from 0.6 to 0.9, so the recorded males are clearly separate from the limit. The female limit matters only at the strict end: at 0.1, 6 more samples are flagged (14 in total), which means that 6 recorded females have an X inbreeding coefficient between 0.1 and 0.2. From 0.2 to 0.4 the count does not change. The course value of 0.2 flags the clear cases and leaves the borderline ones for review.
+
+Expected plot. For `max-female-xf`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.2), where 8 samples are removed. For `min-male-xf`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.8), where 8 samples are removed. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
 ## Step 3.4 · LD pruning {#step-3-4}
 
 We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.
@@ -405,6 +464,66 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 ```sh
 bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+LD pruning keeps a subset of variants that are not strongly correlated. It looks at pairs of variants inside a window. When the squared correlation (r^2) of a pair is above the limit, it drops one variant of the pair. A lower r^2 limit drops more variants. A wider window finds more pairs and drops more variants. The course uses r^2 0.2 and a window of 200 kb. This box only counts the variants that stay. Here "removed" means pruned out. Each trial starts from the same 125,061 variants (autosomal, frequency at least 5%, call rate at least 98%, outside the long-range LD regions) and changes one setting.
+
+```{r}
+#| label: s3-4_thresholds
+#| eval: false
+# Optional. Each trial starts from the same input and changes one setting only. It writes no file in your results folder.
+regions <- guided_high_ld(cfg)
+r2_limits <- c(0.1, 0.2, 0.5)  # <1>
+by_r2 <- sapply(r2_limits, function(r) prune_counts(cfg, guided_path(cfg, "3.3"), regions, r2 = r, window_kb = 200))
+windows <- c(50, 200, 1000)  # <2>
+by_window <- sapply(windows, function(w) prune_counts(cfg, guided_path(cfg, "3.3"), regions, r2 = 0.2, window_kb = w))
+data.frame(r2 = r2_limits, kept = by_r2["kept", ], pruned = by_r2["pruned", ])
+data.frame(window_kb = windows, kept = by_window["kept", ], pruned = by_window["pruned", ])
+par(mfrow = c(1, 2))  # <3>
+plot_threshold_trials(data.frame(threshold = r2_limits, removed = by_r2["pruned", ], course_value = r2_limits == 0.2), "Variants pruned out", log_x = FALSE)
+plot_threshold_trials(data.frame(threshold = windows, removed = by_window["pruned", ], course_value = windows == 200), "Variants pruned out")
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+1. Change the r2 limit, with a window of 200 kb.
+2. Change the window, with an r2 limit of 0.2.
+3. Plot the pruned variants. The course value is the large diamond.
+
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.5 --out results/trials/s3-4_trial --threads 2 --memory 2048
+```
+
+The number of lines of `results/trials/s3-4_trial.prune.in` is the number of variants kept. To repeat the trial, change `200kb` or `0.5` and use a new `--out` name.
+
+The expected result of the trials:
+
+Variants pruned out and kept when the r^2 limit changes (window 200 kb):
+
+| Setting | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.1 | 76,459 | 48,602 |
+| **0.2 (course value)** | 56,261 | 68,800 |
+| 0.5 | 24,308 | 100,753 |
+
+Variants pruned out and kept when the window changes (r^2 limit 0.2):
+
+| Setting | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 50 | 46,961 | 78,100 |
+| **200 (course value)** | 56,261 | 68,800 |
+| 1000 | 57,375 | 67,686 |
+
+How to read it. The r^2 limit has a large effect. At 0.1 the pruning keeps 48,602 variants, at 0.2 it keeps 68,800 and at 0.5 it keeps 100,753. The window has a smaller effect: 50 kb keeps 78,100, 200 kb keeps 68,800 and 1,000 kb keeps 67,686. More variants are not better for the checks that use this list. A larger set contains more correlated variants, which count several times. A smaller set carries less information. The course value is a middle choice that leaves enough sites for the heterozygosity check, the relatedness check and the PCA.
+
+Expected plot. For `r2 limit`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.2), where 56,261 variants are removed. For `window (kb)`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (200), where 56,261 variants are removed. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

@@ -1127,6 +1127,49 @@ plot_threshold_trials <- function(trial, ylab = "Removed", log_x = TRUE, course_
   invisible(trial)
 }
 
+
+# More threshold trials (optional boxes of steps 3.3, 3.4, 4.2 and 5.6). Each trial changes one setting and starts from the same input.
+
+# Step 3.3: count the samples that the sex check flags when one limit changes. The other limits keep the course values.
+# input is the PGEN prefix after --split-par. option is "max-female-xf" or "min-male-xf".
+sexcheck_counts <- function(cfg, input, option, values) {
+  course <- c("max-female-xf" = 0.2, "min-male-xf" = 0.8, "max-female-ycount" = 100, "min-male-ycount" = 1000)
+  folder <- tempfile("sexcheck-"); dir.create(folder)
+  on.exit(unlink(folder, recursive = TRUE), add = TRUE)
+  rows <- lapply(seq_along(values), function(i) {
+    limits <- course; limits[option] <- values[i]
+    prefix <- file.path(folder, paste0("trial", i))
+    run_plink(cfg, c("--pfile", input, "--check-sex", paste0(names(limits), "=", format(limits, scientific = FALSE, trim = TRUE)), "--out", prefix), quiet = TRUE)
+    report <- read.delim(paste0(prefix, ".sexcheck"), check.names = FALSE, stringsAsFactors = FALSE)
+    data.frame(threshold = values[i], removed = sum(report$STATUS != "OK"))
+  })
+  do.call(rbind, rows)
+}
+
+# Step 4.2: count the variants that the differential missingness test flags below each p-value. missing_table is the PLINK .missing table.
+missing_test_counts <- function(missing_table, thresholds) {
+  p <- as.numeric(missing_table$P)
+  data.frame(threshold = thresholds, removed = vapply(thresholds, function(x) sum(!is.na(p) & p < x), numeric(1)))
+}
+
+# Step 5.6: count the study samples more than k standard deviations away (result comes from ancestry_outliers()).
+outlier_sd_counts <- function(result, limits) data.frame(threshold = limits, removed = vapply(limits, function(k) sum(result$max_abs_z > k), numeric(1)))
+
+# Step 5.6: count the samples that the robust Mahalanobis distance flags at several chi-squared quantiles (four degrees of freedom).
+outlier_mcd_counts <- function(result, quantiles, n_pcs = 4L) {
+  data.frame(threshold = quantiles, removed = vapply(quantiles, function(q) sum(result$mahalanobis_d2 > qchisq(q, df = n_pcs)), numeric(1)))
+}
+
+# Step 3.4: count the variants that LD pruning keeps for an r2 limit and a window (in kb). Only the list of kept variants is written.
+prune_counts <- function(cfg, input, regions, r2 = 0.2, window_kb = 200) {
+  folder <- tempfile("prune-"); dir.create(folder)
+  on.exit(unlink(folder, recursive = TRUE), add = TRUE)
+  prefix <- file.path(folder, "trial")
+  run_plink(cfg, c("--pfile", input, "--chr", "1-22", "--maf", "0.05", "--geno", "0.02", "--exclude", "bed0", regions,
+                   "--indep-pairwise", paste0(window_kb, "kb"), format(r2, scientific = FALSE), "--out", prefix), quiet = TRUE)
+  c(kept = length(readLines(paste0(prefix, ".prune.in"))), pruned = length(readLines(paste0(prefix, ".prune.out"))))
+}
+
 save_plot <- function(path, draw, width = 1800, height = 1200) {
   png(path, width = width, height = height, res = 180)
   on.exit(dev.off())

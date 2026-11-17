@@ -44,7 +44,7 @@ def copy_tree(source: Path, destination: Path) -> None:
             raise ValueError("A staged copy failed verification.")
 
 
-def stage(student: Path, run: Path, chain: Path, destination: Path) -> dict:
+def stage(student: Path, run: Path, chain: Path, destination: Path, ld_list: Path | None = None) -> dict:
     student, run, chain = student.resolve(strict=True), run.resolve(strict=True), chain.resolve(strict=True)
     destination = destination.resolve()
     destination.relative_to(WORK.resolve())
@@ -62,6 +62,9 @@ def stage(student: Path, run: Path, chain: Path, destination: Path) -> dict:
         copy_tree(student / name, destination / name)
     copy_tree(run / "checkpoints", destination / "checkpoints")
     shutil.copyfile(chain, destination / "grch37_exercise" / "hg19ToHg38.over.chain.gz")
+    # The GRCh38 long-range LD regions (BED, zero-based start) used at steps 3.4 and 5.7 travel with the course data, not with the project.
+    if ld_list is not None:
+        shutil.copyfile(ld_list.resolve(strict=True), destination / "pca_reference" / "highLD_b38.bed")
     (destination / "README_simulated.txt").write_text(
         "Simulated guided GWAS course: modules 0 to 7. Genome assembly GRCh38.\n"
         "Full genotype boundaries: 2.8, 3.8, 4.6, 5.7. Intermediate steps replay stored lists.\n"
@@ -85,12 +88,13 @@ def main() -> None:
     parser.add_argument("--student", type=Path, default=STUDENT)
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--chain", type=Path, default=os.environ.get("COURSE_CHAIN_FILE"))
-    parser.add_argument("--destination", type=Path, default=WORK / "classroom-stage-2026.1")
+    parser.add_argument("--destination", type=Path, default=WORK / "classroom-stage-2026.2")
+    parser.add_argument("--ld-list", type=Path, default=None, help="BED file with the long-range LD regions (GRCh38).")
     args = parser.parse_args()
     if args.chain is None:
         parser.error("Supply --chain or COURSE_CHAIN_FILE for the official hg19-to-hg38 chain.")
     import json
-    print(json.dumps(stage(args.student, args.run, Path(args.chain), args.destination), indent=2))
+    print(json.dumps(stage(args.student, args.run, Path(args.chain), args.destination, args.ld_list), indent=2))
 
 
 if __name__ == "__main__":

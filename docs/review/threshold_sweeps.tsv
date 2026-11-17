@@ -1,41 +1,68 @@
-step	title	option	threshold	label	input_samples	input_variants	samples_removed	variants_removed	samples_remaining	variants_remaining	samples_flagged	course_value
-3.1	Rough clean: samples	--mind	0.01	0.01	2016	296510	121	0	1895	296510		FALSE
-3.1	Rough clean: samples	--mind	0.02	0.02	2016	296510	45	0	1971	296510		FALSE
-3.1	Rough clean: samples	--mind	0.05	0.05	2016	296510	3	0	2013	296510		FALSE
-3.1	Rough clean: samples	--mind	0.1	0.1	2016	296510	3	0	2013	296510		TRUE
-3.1	Rough clean: samples	--mind	0.2	0.2	2016	296510	3	0	2013	296510		FALSE
-3.1	Rough clean: variants	--geno	0.01	0.01	2013	296510	0	3705	2013	292805		FALSE
-3.1	Rough clean: variants	--geno	0.02	0.02	2013	296510	0	958	2013	295552		FALSE
-3.1	Rough clean: variants	--geno	0.05	0.05	2013	296510	0	735	2013	295775		FALSE
-3.1	Rough clean: variants	--geno	0.1	0.1	2013	296510	0	150	2013	296360		TRUE
-3.1	Rough clean: variants	--geno	0.2	0.2	2013	296510	0	130	2013	296380		FALSE
-3.2	Call rate of samples	--mind	0.01	0.01	2013	296360	118	0	1895	296360		FALSE
-3.2	Call rate of samples	--mind	0.02	0.02	2013	296360	42	0	1971	296360		TRUE
-3.2	Call rate of samples	--mind	0.05	0.05	2013	296360	0	0	2013	296360		FALSE
-3.2	Call rate of samples	--mind	0.1	0.1	2013	296360	0	0	2013	296360		FALSE
-3.2	Call rate of samples	--mind	0.2	0.2	2013	296360	0	0	2013	296360		FALSE
-3.5	Heterozygosity	F cutoff (standard deviations)	2	2	1963	296360	13	0	1950	296360	14	FALSE
-3.5	Heterozygosity	F cutoff (standard deviations)	2.5	2.5	1963	296360	13	0	1950	296360	11	FALSE
-3.5	Heterozygosity	F cutoff (standard deviations)	3	3	1963	296360	13	0	1950	296360	8	TRUE
-3.5	Heterozygosity	F cutoff (standard deviations)	3.5	3.5	1963	296360	13	0	1950	296360	5	FALSE
-3.5	Heterozygosity	F cutoff (standard deviations)	4	4	1963	296360	13	0	1950	296360	0	FALSE
-3.6	Relatedness	KING kinship cutoff	0.0442	0.0442	1950	296360	30	0	1920	296360		FALSE
-3.6	Relatedness	KING kinship cutoff	0.0884	0.0884	1950	296360	30	0	1920	296360		FALSE
-3.6	Relatedness	KING kinship cutoff	0.177	0.177	1950	296360	30	0	1920	296360		TRUE
-3.6	Relatedness	KING kinship cutoff	0.354	0.354	1950	296360	20	0	1930	296360		FALSE
-4.1	Call rate of variants	--geno	0.01	0.01	1844	296360	0	1052	1844	295308		FALSE
-4.1	Call rate of variants	--geno	0.02	0.02	1844	296360	0	801	1844	295559		TRUE
-4.1	Call rate of variants	--geno	0.05	0.05	1844	296360	0	560	1844	295800		FALSE
-4.1	Call rate of variants	--geno	0.1	0.1	1844	296360	0	0	1844	296360		FALSE
-4.1	Call rate of variants	--geno	0.2	0.2	1844	296360	0	0	1844	296360		FALSE
-4.3	Allele frequency	--maf	0.001	0.001	1844	295439	0	33941	1844	261498		FALSE
-4.3	Allele frequency	--maf	0.005	0.005	1844	295439	0	47187	1844	248252		FALSE
-4.3	Allele frequency	--maf	0.01	0.01	1844	295439	0	56421	1844	239018		TRUE
-4.3	Allele frequency	--maf	0.02	0.02	1844	295439	0	89210	1844	206229		FALSE
-4.3	Allele frequency	--maf	0.05	0.05	1844	295439	0	156222	1844	139217		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	0.001	1e-03	1844	239018	0	701	1844	238317		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-04	1e-04	1844	239018	0	274	1844	238744		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-06	1e-06	1844	239018	0	166	1844	238852		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-08	1e-08	1844	239018	0	149	1844	238869		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-10	1e-10	1844	239018	0	124	1844	238894		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff		course rule	1844	239018	0	166	1844	238852		TRUE
+step	title	option	threshold	label	input_samples	input_variants	samples_removed	variants_removed	samples_remaining	variants_remaining	samples_flagged	course_value	alternative
+3.1	Rough clean: samples	--mind	0.01	0.01	2016	296510	121	0	1895	296510		FALSE	FALSE
+3.1	Rough clean: samples	--mind	0.02	0.02	2016	296510	45	0	1971	296510		FALSE	FALSE
+3.1	Rough clean: samples	--mind	0.05	0.05	2016	296510	3	0	2013	296510		FALSE	FALSE
+3.1	Rough clean: samples	--mind	0.1	0.1	2016	296510	3	0	2013	296510		TRUE	FALSE
+3.1	Rough clean: samples	--mind	0.2	0.2	2016	296510	3	0	2013	296510		FALSE	FALSE
+3.1	Rough clean: variants	--geno	0.01	0.01	2013	296510	0	3705	2013	292805		FALSE	FALSE
+3.1	Rough clean: variants	--geno	0.02	0.02	2013	296510	0	958	2013	295552		FALSE	FALSE
+3.1	Rough clean: variants	--geno	0.05	0.05	2013	296510	0	735	2013	295775		FALSE	FALSE
+3.1	Rough clean: variants	--geno	0.1	0.1	2013	296510	0	150	2013	296360		TRUE	FALSE
+3.1	Rough clean: variants	--geno	0.2	0.2	2013	296510	0	130	2013	296380		FALSE	FALSE
+3.2	Call rate of samples	--mind	0.01	0.01	2013	296360	118	0	1895	296360		FALSE	FALSE
+3.2	Call rate of samples	--mind	0.02	0.02	2013	296360	42	0	1971	296360		TRUE	FALSE
+3.2	Call rate of samples	--mind	0.05	0.05	2013	296360	0	0	2013	296360		FALSE	FALSE
+3.2	Call rate of samples	--mind	0.1	0.1	2013	296360	0	0	2013	296360		FALSE	FALSE
+3.2	Call rate of samples	--mind	0.2	0.2	2013	296360	0	0	2013	296360		FALSE	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	2	2	1963	296360	13	0	1950	296360	14	FALSE	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	2.5	2.5	1963	296360	13	0	1950	296360	11	FALSE	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	3	3	1963	296360	13	0	1950	296360	8	TRUE	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	3.5	3.5	1963	296360	13	0	1950	296360	5	FALSE	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	4	4	1963	296360	13	0	1950	296360	0	FALSE	FALSE
+3.6	Relatedness	KING kinship cutoff	0.0442	0.0442	1950	296360	30	0	1920	296360		FALSE	FALSE
+3.6	Relatedness	KING kinship cutoff	0.0884	0.0884	1950	296360	30	0	1920	296360		FALSE	FALSE
+3.6	Relatedness	KING kinship cutoff	0.177	0.177	1950	296360	30	0	1920	296360		TRUE	FALSE
+3.6	Relatedness	KING kinship cutoff	0.354	0.354	1950	296360	20	0	1930	296360		FALSE	FALSE
+4.1	Call rate of variants	--geno	0.01	0.01	1844	296360	0	1052	1844	295308		FALSE	FALSE
+4.1	Call rate of variants	--geno	0.02	0.02	1844	296360	0	801	1844	295559		TRUE	FALSE
+4.1	Call rate of variants	--geno	0.05	0.05	1844	296360	0	560	1844	295800		FALSE	FALSE
+4.1	Call rate of variants	--geno	0.1	0.1	1844	296360	0	0	1844	296360		FALSE	FALSE
+4.1	Call rate of variants	--geno	0.2	0.2	1844	296360	0	0	1844	296360		FALSE	FALSE
+4.3	Allele frequency	--maf	0.001	0.001	1844	295439	0	33941	1844	261498		FALSE	FALSE
+4.3	Allele frequency	--maf	0.005	0.005	1844	295439	0	47187	1844	248252		FALSE	FALSE
+4.3	Allele frequency	--maf	0.01	0.01	1844	295439	0	56421	1844	239018		TRUE	FALSE
+4.3	Allele frequency	--maf	0.02	0.02	1844	295439	0	89210	1844	206229		FALSE	FALSE
+4.3	Allele frequency	--maf	0.05	0.05	1844	295439	0	156222	1844	139217		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	0.001	1e-03	1844	239018	0	701	1844	238317		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-04	1e-04	1844	239018	0	274	1844	238744		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-06	1e-06	1844	239018	0	166	1844	238852		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-08	1e-08	1844	239018	0	149	1844	238869		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-10	1e-10	1844	239018	0	124	1844	238894		FALSE	FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff		course rule	1844	239018	0	166	1844	238852		TRUE	FALSE
+3.3	Sex check: female limit	max-female-xf	0.1	0.1	1971	296360	14	0	1957	296360		FALSE	FALSE
+3.3	Sex check: female limit	max-female-xf	0.2	0.2	1971	296360	8	0	1963	296360		TRUE	FALSE
+3.3	Sex check: female limit	max-female-xf	0.3	0.3	1971	296360	8	0	1963	296360		FALSE	FALSE
+3.3	Sex check: female limit	max-female-xf	0.4	0.4	1971	296360	8	0	1963	296360		FALSE	FALSE
+3.3	Sex check: male limit	min-male-xf	0.6	0.6	1971	296360	8	0	1963	296360		FALSE	FALSE
+3.3	Sex check: male limit	min-male-xf	0.7	0.7	1971	296360	8	0	1963	296360		FALSE	FALSE
+3.3	Sex check: male limit	min-male-xf	0.8	0.8	1971	296360	8	0	1963	296360		TRUE	FALSE
+3.3	Sex check: male limit	min-male-xf	0.9	0.9	1971	296360	8	0	1963	296360		FALSE	FALSE
+3.4	LD pruning: r2 limit	r2 limit	0.1	0.1	1963	125061	0	76459	1963	48602		FALSE	FALSE
+3.4	LD pruning: r2 limit	r2 limit	0.2	0.2	1963	125061	0	56261	1963	68800		TRUE	FALSE
+3.4	LD pruning: r2 limit	r2 limit	0.5	0.5	1963	125061	0	24308	1963	100753		FALSE	FALSE
+3.4	LD pruning: window	window (kb)	50	  50	1963	125061	0	46961	1963	78100		FALSE	FALSE
+3.4	LD pruning: window	window (kb)	200	 200	1963	125061	0	56261	1963	68800		TRUE	FALSE
+3.4	LD pruning: window	window (kb)	1000	1000	1963	125061	0	57375	1963	67686		FALSE	FALSE
+4.2	Differential missingness	test-missing p-value cutoff	0.001	1e-03	1844	295559	0	126	1844	295433		FALSE	FALSE
+4.2	Differential missingness	test-missing p-value cutoff	1e-04	1e-04	1844	295559	0	121	1844	295438		FALSE	FALSE
+4.2	Differential missingness	test-missing p-value cutoff	1e-05	1e-05	1844	295559	0	120	1844	295439		TRUE	FALSE
+4.2	Differential missingness	test-missing p-value cutoff	1e-06	1e-06	1844	295559	0	106	1844	295453		FALSE	FALSE
+4.2	Differential missingness	test-missing p-value cutoff	1e-08	1e-08	1844	295559	0	3	1844	295556		FALSE	FALSE
+5.6	Ancestry outliers	SD limit	4	4	1844	238513	34	0	1810	238513		FALSE	FALSE
+5.6	Ancestry outliers	SD limit	5	5	1844	238513	33	0	1811	238513		FALSE	FALSE
+5.6	Ancestry outliers	SD limit	6	6	1844	238513	33	0	1811	238513		TRUE	FALSE
+5.6	Ancestry outliers	SD limit	7	7	1844	238513	33	0	1811	238513		FALSE	FALSE
+5.6	Ancestry outliers	SD limit	8	8	1844	238513	33	0	1811	238513		FALSE	FALSE
+5.6	Ancestry outliers: robust Mahalanobis (alternative)	MCD chi-squared quantile	0.99	0.99	1844	238513	86	0	1758	238513		FALSE	TRUE
+5.6	Ancestry outliers: robust Mahalanobis (alternative)	MCD chi-squared quantile	0.999	0.999	1844	238513	39	0	1805	238513		FALSE	TRUE
+5.6	Ancestry outliers: robust Mahalanobis (alternative)	MCD chi-squared quantile	0.9999	0.9999	1844	238513	34	0	1810	238513		FALSE	TRUE

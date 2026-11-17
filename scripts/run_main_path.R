@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 517f5cb5e9bcfb4ba0ae3e6a5f22c88a0a2504d174a37d400ce4bab93560b436
+# SHA-256: 29a046391b888d3412bc9e260cbdb871b6a4612c5aee5d7eb6ee64cdd1252268
 
 # Chunk: setup
 source("R/guided.R")
@@ -406,7 +406,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: fd3bdced0b04c21d6f87a2e1c859c1a45d31ac4e4d879082c0569033119a9956
+# SHA-256: 37e5cf864578ae7705fa68c180a2600e9a7a098425a967f9c056f01f8db6f1e1
 
 # Chunk: setup
 source("R/guided.R")
@@ -509,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 9b5582684fc1850b5519813528aaae4377c720a6437e05b585dd70c5c1f18c2a
+# SHA-256: df91b6df3d381f33946f26f35f3bbb1b82e409b4eb9245d70e447f19a1abc7ca
 
 # Chunk: setup
 source("R/guided.R")

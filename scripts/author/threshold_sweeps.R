@@ -17,11 +17,11 @@ metadata <- guided_metadata(cfg)
 
 rows <- list()
 add <- function(step, title, option, input, trial, expected_samples = NA, expected_variants = NA, course_value, unit_label = NULL,
-                flagged = NULL, label = NULL) {
+                flagged = NULL, label = NULL, alternative = FALSE) {
   frame <- data.frame(
     step = step, title = title, option = option,
     threshold = trial$threshold,
-    label = if (is.null(label)) format(trial$threshold, scientific = FALSE, drop0trailing = TRUE) else label,
+    label = if (is.null(label)) format(trial$threshold, scientific = FALSE, drop0trailing = TRUE, trim = TRUE) else trimws(label),
     input_samples = input[1], input_variants = input[2],
     samples_removed = if ("samples_removed" %in% names(trial)) trial$samples_removed else 0,
     variants_removed = if ("variants_removed" %in% names(trial)) trial$variants_removed else 0,
@@ -31,8 +31,11 @@ add <- function(step, title, option, input, trial, expected_samples = NA, expect
   frame$samples_flagged <- if (is.null(flagged)) NA_real_ else flagged
   frame$course_value <- course_value
   # The course value must give exactly the counts of the main path.
+  frame$alternative <- alternative
   course <- frame[frame$course_value, ]
-  if (nrow(course) != 1L) stop("Step ", step, ": exactly one trial must be the course value.")
+  if (!alternative && nrow(course) != 1L) stop("Step ", step, ": exactly one trial must be the course value.")
+  if (alternative && nrow(course) != 0L) stop("Step ", step, ": an alternative method has no course value.")
+  if (alternative) { rows[[length(rows) + 1L]] <<- frame; return(invisible(NULL)) }
   if (!is.na(expected_samples) && course$samples_remaining != expected_samples)
     stop("Step ", step, " ", option, ": the course value leaves ", course$samples_remaining, " samples, the main path ", expected_samples, ".")
   if (!is.na(expected_variants) && course$variants_remaining != expected_variants)
@@ -93,18 +96,69 @@ add("4.4", "Hardy-Weinberg equilibrium", "HWE p-value cutoff", c(s43$samples, s4
     course_value = is.na(hardy$threshold),
     label = ifelse(is.na(hardy$threshold), "course rule", format(hardy$threshold, scientific = TRUE, digits = 1)))
 
+# 3.3: the sex check. One limit changes, the others keep the course values.
+split_state <- guided_path(cfg, "3.3", "par")
+add("3.3", "Sex check: female limit", "max-female-xf", c(s32$samples, s32$variants),
+    sample_trial(sexcheck_counts(cfg, split_state, "max-female-xf", c(0.1, 0.2, 0.3, 0.4))),
+    expected_samples = s33$samples, course_value = same(c(0.1, 0.2, 0.3, 0.4), 0.2))
+add("3.3", "Sex check: male limit", "min-male-xf", c(s32$samples, s32$variants),
+    sample_trial(sexcheck_counts(cfg, split_state, "min-male-xf", c(0.6, 0.7, 0.8, 0.9))),
+    expected_samples = s33$samples, course_value = same(c(0.6, 0.7, 0.8, 0.9), 0.8))
+# 3.4: LD pruning. The result is the number of variants kept, so "removed" is the number pruned out.
+regions_file <- guided_high_ld(cfg)
+course_prune <- length(readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in")))
+prune_row <- function(r2, window) { x <- prune_counts(cfg, guided_path(cfg, "3.3"), regions_file, r2, window); c(x[["kept"]], x[["pruned"]]) }
+r2_levels <- c(0.1, 0.2, 0.5); window_levels <- c(50, 200, 1000)
+r2_runs <- sapply(r2_levels, function(r) prune_row(r, 200)); window_runs <- sapply(window_levels, function(w) prune_row(0.2, w))
+eligible <- sum(r2_runs[, 2])
+add("3.4", "LD pruning: r2 limit", "r2 limit", c(s33$samples, eligible), data.frame(threshold = r2_levels, variants_removed = r2_runs[2, ]),
+    expected_variants = course_prune, course_value = same(r2_levels, 0.2))
+add("3.4", "LD pruning: window", "window (kb)", c(s33$samples, eligible), data.frame(threshold = window_levels, variants_removed = window_runs[2, ]),
+    expected_variants = course_prune, course_value = same(window_levels, 200))
+# 4.2: differential missingness.
+s41b <- counts_at("4.1"); s42b <- counts_at("4.2")
+levels_diff <- c(1e-3, 1e-4, 1e-5, 1e-6, 1e-8)
+add("4.2", "Differential missingness", "test-missing p-value cutoff", c(s41b$samples, s41b$variants),
+    variant_trial(missing_test_counts(guided_table(paste0(guided_path(cfg, "4.2", "missing"), ".missing")), levels_diff)),
+    expected_variants = s42b$variants, course_value = same(levels_diff, 1e-5),
+    label = format(levels_diff, scientific = TRUE, digits = 1))
+# 5.6: ancestry outliers. The course rule counts standard deviations. The MCD sweep is an alternative method and has no course value.
+s46 <- counts_at("4.6"); s56 <- counts_at("5.6")
+ref_scores <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore")); study_scores <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+ref_meta <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+outliers <- ancestry_outliers(ref_scores, study_scores, ref_meta$SuperPop[match(ref_scores$IID, ref_meta$IID)])
+levels_sd <- c(4, 5, 6, 7, 8)
+add("5.6", "Ancestry outliers", "SD limit", c(s46$samples, s46$variants), sample_trial(outlier_sd_counts(outliers, levels_sd)),
+    expected_samples = s56$samples, course_value = same(levels_sd, 6))
+levels_q <- c(0.99, 0.999, 0.9999)
+add("5.6", "Ancestry outliers: robust Mahalanobis (alternative)", "MCD chi-squared quantile", c(s46$samples, s46$variants),
+    sample_trial(outlier_mcd_counts(outliers, levels_q)), course_value = rep(FALSE, length(levels_q)), alternative = TRUE)
+
 result <- do.call(rbind, rows)
 rownames(result) <- NULL
 dir.create("docs/review", showWarnings = FALSE, recursive = TRUE)
 write.table(result, "docs/review/threshold_sweeps.tsv", sep = "\t", quote = FALSE, row.names = FALSE, na = "")
 json <- lapply(split(result, paste(result$step, result$option, sep = "|")), function(x) list(
   step = x$step[1], title = x$title[1], option = x$option[1], input_samples = x$input_samples[1], input_variants = x$input_variants[1],
+  alternative = isTRUE(x$alternative[1]),
   trials = lapply(seq_len(nrow(x)), function(i) list(
     threshold = if (is.na(x$threshold[i])) NULL else x$threshold[i], label = x$label[i],
     samples_removed = x$samples_removed[i], variants_removed = x$variants_removed[i],
     samples_remaining = x$samples_remaining[i], variants_remaining = x$variants_remaining[i],
     samples_flagged = if (is.na(x$samples_flagged[i])) NULL else x$samples_flagged[i], course_value = x$course_value[i]))))
 json <- unname(json[order(vapply(json, function(x) paste(x$step, x$option), character(1)))])
+# 5.7: number of PCs. The trials run their own 20-component PCA (files s5-7_alt_*). The course value (ten PCs) must give the main-path hits and lambda.
+pc_run <- guided_pc_trials(cfg)
+main_row <- read.delim(file.path(cfg$out, "s7-7_comparison.tsv"), stringsAsFactors = FALSE)
+main_row <- main_row[main_row$model == "main", ]
+ten <- pc_run$trials[pc_run$trials$k == 10, ]
+if (ten$hits != main_row$hits || abs(ten$lambda - round(main_row$lambda, 4)) > 1e-9) stop("The ten-PC trial does not match the main path.")
+pcs_json <- list(step = "5.7", title = "Number of principal components", option = "Number of PCs", kind = "pcs",
+  input_samples = counts_at("5.7")$samples, input_variants = counts_at("5.7")$variants,
+  trials = lapply(seq_len(nrow(pc_run$trials)), function(i) list(threshold = pc_run$trials$k[i], label = as.character(pc_run$trials$k[i]),
+    hits = pc_run$trials$hits[i], lambda = pc_run$trials$lambda[i], course_value = pc_run$trials$k[i] == 10)))
+
+json <- c(json, list(pcs_json))
 jsonlite::write_json(list(schema_version = "1.0", note = "Each trial starts from the same input as its step and changes one threshold.",
   sweeps = json), "site_content/threshold_sweeps.json", auto_unbox = TRUE, pretty = TRUE, digits = NA, null = "null")
 cat("Wrote ", nrow(result), " trials. Every course value matches step_counts.tsv.", sep = "")

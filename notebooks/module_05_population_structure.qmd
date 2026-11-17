@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "9b5582684fc1850b5519813528aaae4377c720a6437e05b585dd70c5c1f18c2a"
+course_source_sha256: "df91b6df3d381f33946f26f35f3bbb1b82e409b4eb9245d70e447f19a1abc7ca"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -375,6 +375,64 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 ```sh
 bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The course removes a study sample when it lies more than six standard deviations (SD) from the mean of the European reference on any of the first four PCs. The first table changes the number of SD. The second table is an alternative method (see the box "Another approach"): the robust Mahalanobis distance with a cutoff at a quantile of the chi-squared distribution. It has no course value. Each trial starts from the 1,844 study samples of step 4.6.
+
+```{r}
+#| label: s5-6_thresholds
+#| eval: false
+# Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))  # <1>
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+result <- ancestry_outliers(ref, study, metadata$SuperPop[match(ref$IID, metadata$IID)])
+sd_trial <- outlier_sd_counts(result, c(4, 5, 6, 7, 8))  # <2>
+sd_trial$course_value <- sd_trial$threshold == 6
+mcd_trial <- outlier_mcd_counts(result, c(0.99, 0.999, 0.9999))  # <3>
+mcd_trial$course_value <- FALSE
+sd_trial
+mcd_trial
+par(mfrow = c(1, 2)); plot_threshold_trials(sd_trial, "Samples removed", log_x = FALSE); plot_threshold_trials(mcd_trial, "Samples removed", log_x = FALSE)  # <4>
+# Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
+```
+
+1. Read the scores of step 5.4 and apply the methods to the same samples.
+2. Change the number of SD of the course rule.
+3. Change the chi-squared quantile of the robust Mahalanobis distance.
+4. Plot the removed samples.
+
+
+Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances.
+
+The expected result of the trials:
+
+Study samples removed by the course rule when the number of SD changes:
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 4 | 34 | 1,810 |
+| 5 | 33 | 1,811 |
+| **6 (course value)** | 33 | 1,811 |
+| 7 | 33 | 1,811 |
+| 8 | 33 | 1,811 |
+
+Study samples removed by the robust Mahalanobis distance (alternative method):
+
+| Setting | Samples removed | Samples remaining |
+| --- | --- | --- |
+| 0.99 | 86 | 1,758 |
+| 0.999 | 39 | 1,805 |
+| 0.9999 | 34 | 1,810 |
+
+How to read it. The number of SD hardly matters. From 5 to 8 SD the rule removes the same 33 samples, and 4 SD adds one. The 33 samples are far from the European cluster, so any sensible limit finds them. The distance method depends much more on its cutoff. At the 99% point it removes 86 samples, at 99.9% it removes 39 and at 99.99% it removes 34. The extra samples are at the edge of the European cluster, so a loose cutoff removes people of European ancestry. At 99.99% the method nearly agrees with the course rule.
+
+Expected plot. For `SD limit`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. A red diamond marks the course value (6), where 33 samples are removed. For `MCD chi-squared quantile`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. This is an alternative method, so the plot has no course value. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

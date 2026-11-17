@@ -8,6 +8,7 @@
       "option": "--geno",
       "input_samples": 2013,
       "input_variants": 296510,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.01,
@@ -67,6 +68,7 @@
       "option": "--mind",
       "input_samples": 2016,
       "input_variants": 296510,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.01,
@@ -126,6 +128,7 @@
       "option": "--mind",
       "input_samples": 2013,
       "input_variants": 296360,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.01,
@@ -180,11 +183,192 @@
       ]
     },
     {
+      "step": "3.3",
+      "title": "Sex check: female limit",
+      "option": "max-female-xf",
+      "input_samples": 1971,
+      "input_variants": 296360,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 14,
+          "variants_removed": 0,
+          "samples_remaining": 1957,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.3,
+          "label": "0.3",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.4,
+          "label": "0.4",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.3",
+      "title": "Sex check: male limit",
+      "option": "min-male-xf",
+      "input_samples": 1971,
+      "input_variants": 296360,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 0.6,
+          "label": "0.6",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.7,
+          "label": "0.7",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.8,
+          "label": "0.8",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.9,
+          "label": "0.9",
+          "samples_removed": 8,
+          "variants_removed": 0,
+          "samples_remaining": 1963,
+          "variants_remaining": 296360,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.4",
+      "title": "LD pruning: r2 limit",
+      "option": "r2 limit",
+      "input_samples": 1963,
+      "input_variants": 125061,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 0.1,
+          "label": "0.1",
+          "samples_removed": 0,
+          "variants_removed": 76459,
+          "samples_remaining": 1963,
+          "variants_remaining": 48602,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.2,
+          "label": "0.2",
+          "samples_removed": 0,
+          "variants_removed": 56261,
+          "samples_remaining": 1963,
+          "variants_remaining": 68800,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 0.5,
+          "label": "0.5",
+          "samples_removed": 0,
+          "variants_removed": 24308,
+          "samples_remaining": 1963,
+          "variants_remaining": 100753,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "3.4",
+      "title": "LD pruning: window",
+      "option": "window (kb)",
+      "input_samples": 1963,
+      "input_variants": 125061,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 50,
+          "label": "50",
+          "samples_removed": 0,
+          "variants_removed": 46961,
+          "samples_remaining": 1963,
+          "variants_remaining": 78100,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 200,
+          "label": "200",
+          "samples_removed": 0,
+          "variants_removed": 56261,
+          "samples_remaining": 1963,
+          "variants_remaining": 68800,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 1000,
+          "label": "1000",
+          "samples_removed": 0,
+          "variants_removed": 57375,
+          "samples_remaining": 1963,
+          "variants_remaining": 67686,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
       "step": "3.5",
       "title": "Heterozygosity",
       "option": "F cutoff (standard deviations)",
       "input_samples": 1963,
       "input_variants": 296360,
+      "alternative": false,
       "trials": [
         {
           "threshold": 2,
@@ -244,6 +428,7 @@
       "option": "KING kinship cutoff",
       "input_samples": 1950,
       "input_variants": 296360,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.0442,
@@ -293,6 +478,7 @@
       "option": "--geno",
       "input_samples": 1844,
       "input_variants": 296360,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.01,
@@ -347,11 +533,72 @@
       ]
     },
     {
+      "step": "4.2",
+      "title": "Differential missingness",
+      "option": "test-missing p-value cutoff",
+      "input_samples": 1844,
+      "input_variants": 295559,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 0.001,
+          "label": "1e-03",
+          "samples_removed": 0,
+          "variants_removed": 126,
+          "samples_remaining": 1844,
+          "variants_remaining": 295433,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.0001,
+          "label": "1e-04",
+          "samples_removed": 0,
+          "variants_removed": 121,
+          "samples_remaining": 1844,
+          "variants_remaining": 295438,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 1e-05,
+          "label": "1e-05",
+          "samples_removed": 0,
+          "variants_removed": 120,
+          "samples_remaining": 1844,
+          "variants_remaining": 295439,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 1e-06,
+          "label": "1e-06",
+          "samples_removed": 0,
+          "variants_removed": 106,
+          "samples_remaining": 1844,
+          "variants_remaining": 295453,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 1e-08,
+          "label": "1e-08",
+          "samples_removed": 0,
+          "variants_removed": 3,
+          "samples_remaining": 1844,
+          "variants_remaining": 295556,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
       "step": "4.3",
       "title": "Allele frequency",
       "option": "--maf",
       "input_samples": 1844,
       "input_variants": 295439,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.001,
@@ -411,6 +658,7 @@
       "option": "HWE p-value cutoff",
       "input_samples": 1844,
       "input_variants": 239018,
+      "alternative": false,
       "trials": [
         {
           "threshold": 0.001,
@@ -471,6 +719,172 @@
           "variants_remaining": 238852,
           "samples_flagged": null,
           "course_value": true
+        }
+      ]
+    },
+    {
+      "step": "5.6",
+      "title": "Ancestry outliers: robust Mahalanobis (alternative)",
+      "option": "MCD chi-squared quantile",
+      "input_samples": 1844,
+      "input_variants": 238513,
+      "alternative": true,
+      "trials": [
+        {
+          "threshold": 0.99,
+          "label": "0.99",
+          "samples_removed": 86,
+          "variants_removed": 0,
+          "samples_remaining": 1758,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.999,
+          "label": "0.999",
+          "samples_removed": 39,
+          "variants_removed": 0,
+          "samples_remaining": 1805,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 0.9999,
+          "label": "0.9999",
+          "samples_removed": 34,
+          "variants_removed": 0,
+          "samples_remaining": 1810,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "5.6",
+      "title": "Ancestry outliers",
+      "option": "SD limit",
+      "input_samples": 1844,
+      "input_variants": 238513,
+      "alternative": false,
+      "trials": [
+        {
+          "threshold": 4,
+          "label": "4",
+          "samples_removed": 34,
+          "variants_removed": 0,
+          "samples_remaining": 1810,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 5,
+          "label": "5",
+          "samples_removed": 33,
+          "variants_removed": 0,
+          "samples_remaining": 1811,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 6,
+          "label": "6",
+          "samples_removed": 33,
+          "variants_removed": 0,
+          "samples_remaining": 1811,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": true
+        },
+        {
+          "threshold": 7,
+          "label": "7",
+          "samples_removed": 33,
+          "variants_removed": 0,
+          "samples_remaining": 1811,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        },
+        {
+          "threshold": 8,
+          "label": "8",
+          "samples_removed": 33,
+          "variants_removed": 0,
+          "samples_remaining": 1811,
+          "variants_remaining": 238513,
+          "samples_flagged": null,
+          "course_value": false
+        }
+      ]
+    },
+    {
+      "step": "5.7",
+      "title": "Number of principal components",
+      "option": "Number of PCs",
+      "kind": "pcs",
+      "input_samples": 1811,
+      "input_variants": 238513,
+      "trials": [
+        {
+          "threshold": 0,
+          "label": "0",
+          "hits": 17,
+          "lambda": 1.5273,
+          "course_value": false
+        },
+        {
+          "threshold": 1,
+          "label": "1",
+          "hits": 8,
+          "lambda": 1.0101,
+          "course_value": false
+        },
+        {
+          "threshold": 2,
+          "label": "2",
+          "hits": 8,
+          "lambda": 1.0136,
+          "course_value": false
+        },
+        {
+          "threshold": 3,
+          "label": "3",
+          "hits": 8,
+          "lambda": 1.0137,
+          "course_value": false
+        },
+        {
+          "threshold": 5,
+          "label": "5",
+          "hits": 8,
+          "lambda": 1.015,
+          "course_value": false
+        },
+        {
+          "threshold": 10,
+          "label": "10",
+          "hits": 8,
+          "lambda": 1.0157,
+          "course_value": true
+        },
+        {
+          "threshold": 15,
+          "label": "15",
+          "hits": 8,
+          "lambda": 1.0185,
+          "course_value": false
+        },
+        {
+          "threshold": 20,
+          "label": "20",
+          "hits": 8,
+          "lambda": 1.0183,
+          "course_value": false
         }
       ]
     }
