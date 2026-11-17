@@ -6,7 +6,7 @@
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe",
+  "source_sha256": "b86ecfaf62121628c40b5fef939470dedd5187362fb5c6df40d70d0b5bb0a72e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We test whether missing calls differ between cases and controls.",
@@ -66,7 +66,7 @@
     ]
   },
   "figures": [],
-  "student_summary": "We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.",
+  "student_summary": "We compare missing results in people with and without the disease to reduce false associations with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.",
   "student_plink_options": [
     {
       "label": "compare missing results",

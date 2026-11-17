@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "e3ba8af064cc27ccfe6ba075cf4423f25a7c6221a345e3d551d1a34c3f456e41"
+course_source_sha256: "f1d0a5b38fa4bc6626af4e22391053e51ddd4b0663dd3b34e4e03c1200632995"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -369,7 +369,7 @@ bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove
 
 ## Step 5.7 · Cohort PCs and how many to include {#step-5-7}
 
-We select common sites with weaker links and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
+We select common sites with weaker correlations and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
 
 [Read step 5.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-5/step-5-7).
 
@@ -393,14 +393,14 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 ```
 
 1. Prepare the regions to exclude and the site selection output name.
-2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+2. Select common sites on chromosomes 1 to 22 with weaker correlations with each other.
 3. Calculate ten components within the retained study group using the selected sites.
 4. Read how much variation each component explains and plot these values.
 5. Finish saving the picture and print its location.
 
 ### What each option does
 
-**Command 1: select common sites with weaker links**
+**Command 1: select common sites with weaker correlations**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -409,7 +409,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
 | `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
 | &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
-| `--indep-pairwise` | Selects sites with weaker links within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
+| `--indep-pairwise` | Selects sites with weaker correlations within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
 **Command 2: calculate components within the retained study group**
@@ -417,7 +417,7 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
-| `--extract` | Uses only the sites listed in s5-7_prune.prune.in, selected to have weaker links to each other. |
+| `--extract` | Uses only the sites listed in s5-7_prune.prune.in, selected to have weaker correlations with each other. |
 | `--pca` | Calculates ten principal components, each a number per person summarising one pattern of genetic variation in the retained study group. |
 | `--out` | Starts the component output file names with s5-7_pca. |
 

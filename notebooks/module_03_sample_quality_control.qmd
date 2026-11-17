@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "6cb90b5eceb3ed8ba405d26e78da22e89ca6f5c89f39ca52cf4abdbea372af38"
+course_source_sha256: "29e3385f348996f1d938547e91ed297a77696ee3218c42ffeeffb7b1bc939f5a"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -264,7 +264,7 @@ cat(length(pruned), "variants kept by LD pruning\n")
 guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune"), c(".prune.in", ".prune.out")), regions), parent = "3.3")
 ```
 
-1. Write the list of regions where nearby variants are strongly linked.
+1. Write the list of regions where nearby variants are strongly correlated.
 2. Select variants with less similar patterns of DNA letters.
 3. Check and print how many variants were selected.
 

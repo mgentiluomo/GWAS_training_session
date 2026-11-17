@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe"
+course_source_sha256: "b86ecfaf62121628c40b5fef939470dedd5187362fb5c6df40d70d0b5bb0a72e"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -104,7 +104,7 @@ bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out resul
 
 ## Step 4.2 · Differential missingness {#step-4-2}
 
-We compare missing results in people with and without the disease to reduce false links with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
+We compare missing results in people with and without the disease to reduce false associations with disease. We remove variants with p-values below 1 × 10⁻⁵ (0.00001), which indicate differences that are very unlikely if missing results occur equally in both groups.
 
 [Read step 4.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-4/step-4-2).
 

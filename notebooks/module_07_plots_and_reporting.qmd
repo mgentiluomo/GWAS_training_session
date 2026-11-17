@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544"
+course_source_sha256: "8493afb1318eec061754622f13a7f5738409efb59fc218e6f707af0ec1293369"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -62,7 +62,7 @@ cfg <- guided_init()
 
 ## Step 7.1 · QQ plot {#step-7-1}
 
-We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.
+We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the results with the smallest p-values stand out.
 
 [Read step 7.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-1).
 
@@ -83,7 +83,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-Most points are close to the diagonal line. The highest points at the right end leave the line strongly. Missing, zero or invalid p-values are not drawn as if they were strong results. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+Most points are close to the diagonal line. The highest points at the right end leave the line by a wide margin. Missing, zero or invalid p-values are not drawn as if they were very small p-values. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -132,7 +132,7 @@ No PLINK equivalent
 
 ## Step 7.3 · Manhattan plot {#step-7-3}
 
-We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of strong results.
+We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of results with very small p-values.
 
 [Read step 7.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-3).
 
@@ -156,7 +156,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+There are three regions with very small p-values, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 
@@ -185,7 +185,7 @@ guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))  # <4>
 
 1. Read the saved association summary table.
 2. Keep only valid p-values.
-3. Compare three rules for deciding which results are strong enough.
+3. Compare three rules for deciding which results are convincing enough.
 4. Save the threshold comparison table.
 
 ### What each option does
@@ -235,8 +235,8 @@ stopifnot(nrow(clumps) == 3L)
 | `--clump-p-field` | Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect. |
 | `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005). |
 | `--clump-p2` | Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001). |
-| `--clump-r2` | Adds variants whose squared correlation with the group's strongest variant exceeds 0.1. |
-| `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its strongest variant. |
+| `--clump-r2` | Adds variants whose squared correlation with the group's lead variant exceeds 0.1. |
+| `--clump-kb` | Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its lead variant. |
 | `--clump-unphased` | Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes. |
 | `--out` | Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps. |
 
@@ -244,7 +244,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are three clumps. They describe the strong regions on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
+There are three clumps. They describe the regions with very small p-values on chromosomes 3, 9 and 12. The report gives the ID and the p-value of each lead variant. This does not show that there are three causal variants.
 
 :::
 
@@ -261,7 +261,7 @@ bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_associa
 
 ## Step 7.6 · Regional plot {#step-7-6}
 
-We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the strongest variant, using symbols and colours.
+We draw a detailed plot of the chromosome 9 region around variant 9:96426973:A:G. We show both the strength of each association and how closely its DNA pattern follows the lead variant, using symbols and colours.
 
 [Read step 7.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-6).
 
@@ -383,7 +383,7 @@ save_plot(guided_path(cfg, "7.7", "qq_comparison.png"), function() {  # <9>
 4. Test the cohort before sample and variant quality checks using age and sex.
 5. Read the main results and put the comparison results into matching columns.
 6. Check that the main and cleaned comparison analyses use the same samples per variant.
-7. Count valid tests and strong results and calculate lambda for each analysis.
+7. Count valid tests and results below the genome-wide threshold and calculate lambda for each analysis.
 8. Save the comparison table.
 9. Save three plots with the same scale to compare the analyses.
 
@@ -441,7 +441,7 @@ bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s
 
 ## Step 7.8 · Final summary and reporting {#step-7-8}
 
-We save a final report and a table of the strongest variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
+We save a final report and a table of the lead variant in each of the three groups. We calculate intervals that describe uncertainty in the estimated effects and check the saved report, tables and main figures so others can review the analysis.
 
 [Read step 7.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-7/step-7-8).
 
@@ -463,7 +463,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
-  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
@@ -482,8 +482,8 @@ cat(paste(summary, collapse = "\n"), "\n")  # <6>
 ```
 
 1. Read the final sample counts, comparison table, variant groups and association results.
-2. Select the strongest variant in each group and calculate its uncertainty interval.
-3. Save the table of the three strongest variants.
+2. Select the lead variant in each group and calculate its uncertainty interval.
+3. Save the table of the three lead variants.
 4. Prepare the report describing the analysis, results and limitations.
 5. Save the report as a text file.
 6. Print the final report.

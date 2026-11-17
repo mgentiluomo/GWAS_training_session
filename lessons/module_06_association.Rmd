@@ -333,7 +333,7 @@ No. The p-value depends on the effect, the uncertainty and the sample size. Also
 ## 6.5 Read association output {#step-6-5}
 
 
-<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12.", "student_summary": "We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this strong if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "The leading regions are on chromosomes 9, 3 and 12.", "student_summary": "We check model failure codes and calculate intervals that describe uncertainty in the estimated effects. We sort valid results by p-value, the chance of a result at least this extreme if the variant had no effect, and save the first 20 with their tested DNA letters and sample counts.", "student_plink_options": []} -->
 ### What we do
 
 Find the effect allele, the sample count, the uncertainty, the type of test and the fitting status in the output.

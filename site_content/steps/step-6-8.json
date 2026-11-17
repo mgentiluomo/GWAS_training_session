@@ -6,7 +6,7 @@
   "anchor": "step-6-8",
   "title": "Create the summary statistics file",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "4b5bb4405771e59abb3ce995c0f87ffe52ab0308d7219aef80180cf2f9be48e8",
+  "source_sha256": "105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Save the results of the association scan in one clearly named file with standard columns. Write a second file that explains every column in plain words.",

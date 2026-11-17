@@ -133,7 +133,7 @@ We keep only samples with a call rate of at least 98%. We apply this rule after 
 
 The call rate of a sample is the share of its sites that were read successfully. A threshold (cut-off value) of 98% means at most 2% missing results. It does not mean 98% missing results.
 
-A sample with a low call rate gives less information. This reduces the effective sample size, which is the amount of usable data. A low call rate can also be linked to a laboratory group or a recruitment group.
+A sample with a low call rate gives less information. This reduces the effective sample size, which is the amount of usable data. A low call rate can also be associated with a laboratory group or a recruitment group.
 
 In another study, look at the distribution of call rates before you choose a threshold.
 
@@ -267,7 +267,7 @@ Stop at the first error. Check the input file named in the message and the previ
 
 ### What this check can reveal
 
-Moderate sample failures that the rough screen did not catch. Missingness can be linked to the [phenotype](../docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be linked to a [batch](../docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.
+Moderate sample failures that the rough screen did not catch. Missingness can be associated with the [phenotype](../docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be associated with a [batch](../docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.
 
 ### Quick check
 
@@ -373,7 +373,7 @@ The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_
 ## 3.4 LD pruning {#step-3-4}
 
 
-<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly linked variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed1", "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
+<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly correlated variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed1", "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Removing correlated variants is called pruning for [linkage disequilibrium](../docs/glossary.md#ld) (LD). Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [principal component analysis](../docs/glossary.md#pca-pc) (PCA). PCA is a method that summarises the genetic differences between people.
@@ -393,7 +393,7 @@ State 3.3.
 ### Command
 
 ```{r s3-4}
-# 1. Write the list of regions where nearby variants are strongly linked.
+# 1. Write the list of regions where nearby variants are strongly correlated.
 regions <- guided_high_ld(cfg)
 # 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",

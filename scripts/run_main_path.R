@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 6cb90b5eceb3ed8ba405d26e78da22e89ca6f5c89f39ca52cf4abdbea372af38
+# SHA-256: 29e3385f348996f1d938547e91ed297a77696ee3218c42ffeeffb7b1bc939f5a
 
 # Chunk: setup
 source("R/guided.R")
@@ -289,7 +289,7 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 
 
 # Chunk: s3-4
-# 1. Write the list of regions where nearby variants are strongly linked.
+# 1. Write the list of regions where nearby variants are strongly correlated.
 regions <- guided_high_ld(cfg)
 # 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
@@ -400,7 +400,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 1695bf56706a7dd9f97191add46ea85b17de60713ea2f09879cea241c1b3d9fe
+# SHA-256: b86ecfaf62121628c40b5fef939470dedd5187362fb5c6df40d70d0b5bb0a72e
 
 # Chunk: setup
 source("R/guided.R")
@@ -503,7 +503,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: e3ba8af064cc27ccfe6ba075cf4423f25a7c6221a345e3d551d1a34c3f456e41
+# SHA-256: f1d0a5b38fa4bc6626af4e22391053e51ddd4b0663dd3b34e4e03c1200632995
 
 # Chunk: setup
 source("R/guided.R")
@@ -626,7 +626,7 @@ guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 # 1. Prepare the regions to exclude and the site selection output name.
 regions <- guided_high_ld(cfg)
 prune <- guided_path(cfg, "5.7", "prune")
-# 2. Select common sites on chromosomes 1 to 22 with weaker links to each other.
+# 2. Select common sites on chromosomes 1 to 22 with weaker correlations with each other.
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
 # 3. Calculate ten components within the retained study group using the selected sites.
@@ -651,7 +651,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 4b5bb4405771e59abb3ce995c0f87ffe52ab0308d7219aef80180cf2f9be48e8
+# SHA-256: 105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b
 
 # Chunk: setup
 source("R/guided.R")
@@ -802,7 +802,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544
+# SHA-256: 8493afb1318eec061754622f13a7f5738409efb59fc218e6f707af0ec1293369
 
 # Chunk: setup
 source("R/guided.R")
@@ -860,7 +860,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 stats <- guided_summary_stats(cfg)
 # 2. Keep only valid p-values.
 p <- stats$p_value[valid_p(stats$p_value)]
-# 3. Compare three rules for deciding which results are strong enough.
+# 3. Compare three rules for deciding which results are convincing enough.
 threshold <- data.frame(rule = c("Conventional GWAS", "Bonferroni for this scan", "BH adjusted p at 0.05"),
   threshold = c(5e-8, 0.05 / length(p), 0.05),
   discoveries = c(sum(p < 5e-8), sum(p < 0.05 / length(p)), sum(p.adjust(p, method = "BH") < 0.05)))
@@ -947,7 +947,7 @@ b <- guided_standardise_scan(guided_association(no_qc))
 # 6. Check that the main and cleaned comparison analyses use the same samples per variant.
 k <- match(main$variant_id, a$variant_id)
 stopifnot(!anyNA(k), all(main$n == a$n[k]))
-# 7. Count valid tests and strong results and calculate lambda for each analysis.
+# 7. Count valid tests and results below the genome-wide threshold and calculate lambda for each analysis.
 autosomal_p <- function(x) x$p_value[x$chromosome %in% as.character(1:22)]
 summarise <- function(x) c(finite_tests = sum(valid_p(x$p_value)), hits = sum(x$p_value[valid_p(x$p_value)] < 5e-8),
   lambda = lambda_gc(autosomal_p(x)))
@@ -979,11 +979,11 @@ psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 comparison <- read.delim(guided_path(cfg, "7.7", "comparison.tsv"))
 clumps <- guided_table(paste0(guided_path(cfg, "7.5", "clump"), ".clumps"))
 stats <- guided_summary_stats(cfg)
-# 2. Select the strongest variant in each group and calculate its uncertainty interval.
+# 2. Select the lead variant in each group and calculate its uncertainty interval.
 lead <- stats[match(clumps$ID, stats$variant_id), c("chromosome", "base_pair_location", "variant_id", "effect_allele", "odds_ratio", "beta", "standard_error", "p_value", "n")]
 lead$ci_low <- exp(lead$beta - 1.96 * lead$standard_error)
 lead$ci_high <- exp(lead$beta + 1.96 * lead$standard_error)
-# 3. Save the table of the three strongest variants.
+# 3. Save the table of the three lead variants.
 guided_write(lead, guided_path(cfg, "7.8", "leads.tsv"))
 # 4. Prepare the report describing the analysis, results and limitations.
 summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38. Simulated data, seed 20261111.",
@@ -994,7 +994,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Model: additive logistic regression, adjusted for age, recorded sex and ten within-cohort PCs; Firth fallback enabled.",
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
-  "Interpretation: the three strong simulated regions are recovered; the moderate region is subthreshold. No causal gene is established.",
+  "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
   "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",

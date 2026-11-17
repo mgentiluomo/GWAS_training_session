@@ -86,7 +86,7 @@ A problem that occurs when one column of a table can be predicted exactly from t
 
 ### Confounding {#confounding}
 
-A mix-up that happens when a hidden factor is linked to both the group (for example case or control) and the result. The factor can create a false association. Ancestry is a common example.
+A mix-up that happens when a hidden factor is associated with both the group (for example case or control) and the result. The factor can create a false association. Ancestry is a common example.
 
 ### Console {#console}
 
@@ -222,7 +222,7 @@ Estimating unobserved genotypes using observed data and a reference panel.
 
 ### Inflation {#inflation}
 
-Inflation means that the p-values are smaller overall than they should be if no variant were linked to the trait. It can come from confounding or from technical problems. The genomic inflation factor lambda measures it.
+Inflation means that the p-values are smaller overall than they should be if no variant were associated with the trait. It can come from confounding or from technical problems. The genomic inflation factor lambda measures it.
 
 ### Intensity cluster {#intensity-cluster}
 
@@ -254,7 +254,7 @@ Selecting an approximately independent variant subset.
 
 ### Lead variant {#lead-variant}
 
-The variant with the smallest p-value in a region or clump. Other names are index variant and top variant. It is the strongest signal that was measured, not necessarily the cause.
+The variant with the smallest p-value in a region or clump. Other names are index variant and top variant. It is the signal with the smallest p-value that was measured, not necessarily the cause.
 
 ### Lift-over {#lift-over}
 
@@ -266,7 +266,7 @@ The language, number format and character settings of your computer. For example
 
 ### Logistic regression {#logistic-regression}
 
-A statistical method that tests whether a variant is linked to a yes or no outcome, such as case or control.
+A statistical method that tests whether a variant is associated with a yes or no outcome, such as case or control.
 
 ### MAF {#maf}
 
@@ -314,7 +314,7 @@ A file that mixes explanatory text with R commands. Each lesson in this course i
 
 ### Null hypothesis {#null-hypothesis}
 
-The statement that there is no effect. In a GWAS test, it says that the variant has no link with the disease, so beta = 0 and the odds ratio is 1.
+The statement that there is no effect. In a GWAS test, it says that the variant is not associated with the disease, so beta = 0 and the odds ratio is 1.
 
 ### Odds {#odds}
 

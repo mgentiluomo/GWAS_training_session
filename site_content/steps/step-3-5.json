@@ -6,7 +6,7 @@
   "anchor": "step-3-5",
   "title": "Heterozygosity",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "6cb90b5eceb3ed8ba405d26e78da22e89ca6f5c89f39ca52cf4abdbea372af38",
+  "source_sha256": "29e3385f348996f1d938547e91ed297a77696ee3218c42ffeeffb7b1bc939f5a",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We look for samples with too many or too few heterozygous calls. We use only the pruned subset of sites for this.",
