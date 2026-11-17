@@ -695,6 +695,8 @@ The expected result of the trials:
 
 How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
 
+Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
 </details>
 
 <details><summary>Under the hood & literature</summary>
@@ -711,8 +713,6 @@ How to read the two numbers. "Removed" counts wells with an F value below the me
 2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
 3. Yang J et al. (2011) GCTA: a tool for genome-wide complex trait analysis. Am J Hum Genet 88:76-82. PMID 21167468.
 4. Jun G et al. (2012) Detecting and estimating contamination of human DNA samples in sequencing and array-based genotype data. Am J Hum Genet 91:839-848. PMID 23103226.
-
-Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -862,6 +862,8 @@ The expected result of the trials:
 
 How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed samples. In this simulated cohort no extra pair lies between 0.0442 and 0.177. At 0.354 only repeated samples are removed (20), and the ten first-degree pairs stay in the data. Real cohorts usually have many more distant relatives, so the counts would then differ.
 
+Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
 </details>
 
 <details><summary>Under the hood & literature</summary>
@@ -878,8 +880,6 @@ How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed sa
 2. Anderson CA et al. (2010) Data quality control in genetic case-control association studies. Nat Protoc 5:1564-1573. PMID 21085122.
 3. Conomos MP et al. (2015) Robust inference of population structure for ancestry prediction and correction of stratification in the presence of relatedness. Genet Epidemiol 39:276-293. PMID 25810074.
 4. Purcell S et al. (2007) PLINK: a tool set for whole-genome association and population-based linkage analyses. Am J Hum Genet 81:559-575. PMID 17701901.
-
-Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 

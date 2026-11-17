@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f"
+course_source_sha256: "f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -521,6 +521,8 @@ The expected result of the trials:
 
 How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
 
+Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+
 :::
 
 ## Step 3.6 · Relatedness and duplicates {#step-3-6}
@@ -651,6 +653,8 @@ The expected result of the trials:
 | 0.354 | 20 | 1,930 |
 
 How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed samples. In this simulated cohort no extra pair lies between 0.0442 and 0.177. At 0.354 only repeated samples are removed (20), and the ten first-degree pairs stay in the data. Real cohorts usually have many more distant relatives, so the counts would then differ.
+
+Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f
+# SHA-256: f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7
 
 # Chunk: setup
 source("R/guided.R")

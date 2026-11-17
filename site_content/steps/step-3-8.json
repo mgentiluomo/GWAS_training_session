@@ -6,7 +6,7 @@
   "anchor": "step-3-8",
   "title": "Sample QC summary and checkpoint",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "f06e6c1416fc71d5a9ec1662fa96cd4e2ad830b6828e51897ecc0f16ec088c9f",
+  "source_sha256": "f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We save the complete fileset that remains after all sample QC. This saved fileset is a [checkpoint](docs/glossary.md#checkpoint). Then we review how many samples each step removed.",
