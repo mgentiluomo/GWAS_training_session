@@ -1,5 +1,94 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 17-18 November, night
+
+Written for the author. Phase 1 is published (project release 2026.4 and the website). Phases 2 to 4 are on branches and are NOT published. No password was asked for, read or written. No encrypted archive was made.
+
+### Phase 1: release project-2026.4 (published)
+
+- `highLD_b38.bed` and `exclude_b38.txt` are in `.git/info/exclude` and were never committed. They were moved out of the folder only while `npm run sync:gwas` ran, so that the synced index says "clean".
+- Course: version 2026.4 named in the README, step 0.3, the packager defaults, the release checklist and the changelog (commit b8121b4). Merge without squash of `notebooks/all-modules` into `course/2026-guided-training` (1e05565). All Python and R tests passed, including `test_main_path_recovery.R` (seven restarts).
+- ZIP: `GWAS_course-2026.4.zip`, 75 files, 21,549,856 bytes, with the four pinned PLINK 2 programs (Windows, macOS Apple Silicon, macOS Intel, Linux). SHA-256 `dba5184b686cd841a1a9d93559819671aaf845577015541f22d87c5e5e0facaa`. The package check (fresh-folder test, 426 local links) passed. Six UK Biobank pages answer 403 to automated requests, as in earlier releases.
+- Student rehearsal on a new folder: the ZIP was extracted, the PLINK 2 program of the ZIP was used, and `run_main_path.R` ran to the end (exit 0). `step_counts.tsv`, lambda, comparison, clump and summary statistics were byte-identical to the 2026.3.3 run.
+- Annotated tag `project-2026.4` on 1e05565. Release "Project 2026.4" with the ZIP, its `.sha256` and the PLINK source ZIP (copied from release 2026.3.3, same hash and size), marked Latest. The SHA-256 of the file downloaded from the public URL matches.
+- Website: `main` was merged into `course/notebook-style` first (the logo fix e6aeb74c/e1e73c8 came in without a conflict, and `NavbarClient.tsx` was not touched by hand). `sync:gwas`, `tsc`, lint (0 errors) and both builds (review and production) passed. axe-core 4.14.1 on the home page, /teaching and steps 0.3, 3.1, 3.5, 4.4, 5.5, 7.3 and 7.7, light and dark, 360 and 1280 px: 36 runs, 0 violations. Merge into `main` (9c6abb9), push, live check: step 0.3 links `GWAS_course-2026.4.zip` (11 times) and axe on the live site gave 36 runs and 0 violations. No revert was needed.
+- Temporary folders that I created for the release (`release_2026.4`, `student_2026.4`, the download and source-asset folders) were deleted. `C:\GWAS_trials\plink_cache` and the trial folders stay.
+
+### Phase 2: course 2026.5 (branch `course/2026.5`, not published)
+
+Commits (all on `course/2026.5`, pushed): 8e19f1d (renumbering), 1bce457 (LD list and call-rate rule), 2262653 (numbers and helpers), the commit with the three alternative-method boxes, 7872c5c (numbers and tables), 0a9e8f5 (new trials, stager, notes), 81bc5d3 (reports) and 88d9cd7 (step 5.7 boxes).
+
+- **2a. Renumbering.** Step 6.2 is removed and merged into 6.1 (definition of the odds ratio, the logistic model, the glm in the 6.1 chunk). Steps 6.3 to 6.8 are 6.2 to 6.7 in the lessons, chunk labels, file prefixes, `R/guided.R`, `R/course.R`, tests, notebooks, JSON, `run_main_path.R`, `CLAUDE.md`. The main path has 63 steps. Impact outside the repository: `docs/review/remove_step_6_2_impact.md`. Decision (cautious): the old and new addresses overlap, so a redirect for old `/module-6/step-6-N` would hide the new pages. Only `step-6-8`, which no longer exists, has a permanent redirect (308) to `step-6-7`, set in `next.config.ts`. I made one slip: a first renumbering script ran twice and shifted the numbers twice. I found it at once, rebuilt every affected file from the committed text and repeated one correct pass (no pushed commit was affected).
+- **2b. Long-range LD list.** The GRCh38 list of 18 regions replaces the six course intervals at 3.4 and 5.7. Decision: BED file read with `bed0` (the start is counted from 0, which is the BED convention, so no conversion is needed). The text explains why (MHC, the 8p23 and 17q21 inversions), the sources (DOIs verified) and that nine centromeric regions could not be converted from build 36. Licence check: the repository GrindeLab/PCA declares no licence, and the file comes from the review notes. Decision: the file is not in the repository. It is in the data (`pca_reference/highLD_b38.bed`).
+- **2c. Relatives.** The sample with the lower call rate is removed (`--missing sample-only` on the 3.5 state, a third PLINK command at 3.6). Four samples change. The text explains why.
+- **2d. Ancestry outliers (5.6).** Main method unchanged (6 SD). The "Another approach" box has the robust Mahalanobis distance (MCD, package MASS, 99.9% chi-squared cutoff) and the nearest 1000 Genomes group, a comparison table and a PCA plot with a different symbol for each method. On the new data: the 6 SD rule removes 33 samples, the nearest-group method the same 33, the MCD method 39 (6 more at the edge of the European cluster, with squared distances between 18.8 and 24.6 against a cutoff of 18.47, and a largest single-PC distance of 4.3 SD). About 1.8 false flags are expected at the 99.9% point among 1,811 samples. This is why the course keeps 6 SD.
+- **2e. Number of PCs (5.7).** Ten PCs stay. The box explains the scree plot, the PCs associated with the outcome and lambda; it has the table for 0, 1, 2, 3, 5, 10, 15 and 20 PCs (hits 17, 8, 8, 8, 8, 8, 8, 8; lambda 1.5273, 1.0101, 1.0136, 1.0137, 1.0150, 1.0157, 1.0185, 1.0183) and one sentence on the Tracy-Widom test (not run).
+- **2f. Threshold trials.** All sweeps were recomputed. New sweeps: 3.3 (female limits 0.1 to 0.4 and male limits 0.6 to 0.9), 3.4 (r2 0.1, 0.2, 0.5 and windows 50, 200, 1000 kb, counts only), 4.2 (p-value 1e-3 to 1e-8), 5.6 (4 to 8 SD, and the MCD at the 0.99, 0.999 and 0.9999 quantiles, an alternative with no course value) and 5.7 (hits and lambda for 0 to 20 PCs). Script, JSON, TSV and the test were extended. All 15 course values (14 counts and the ten-PC trial) match the main path (`step_counts.tsv`, the kept variants of 3.4, and hits and lambda of 7.7). The site chart handles the new kinds (alternative sweeps without course value, and a hits and lambda switch for the PCs).
+- **2g. Fine-mapping.** A box in step 7.6 (not a new step, to avoid another renumbering). Wakefield's approximate Bayes factor in base R (`credible_set()`), prior standard deviation 0.2 on the log odds ratio (W = 0.04), 95% credible sets. Results: L1 (chromosome 3) has 42 variants, a set of 1 variant, PIP 1.000 for rs1994750. L2 (chromosome 9) has 66 variants, a set of 1, PIP 0.994 for rs10820598. L3 (chromosome 12) has 94 variants, a set of 2, PIP 0.918 for rs7953249. The text covers what a credible set is, the single-causal-variant limit and SuSiE (not run).
+- **2h. Genes near the lead variants: skipped.** I could not verify the GENCODE licence terms tonight from a source I can cite, and I did not want to add an unverified file to the data. The text would also need your review, because the positions are real and the signals are simulated. Suggestion for later: a small extract of protein-coding genes in the three windows from GENCODE for GRCh38, in the data release, with the licence and release number named in the text.
+- **2i.** `docs/review/future_content_proposals.md` (survival analysis, and a second dataset).
+- **Checks.** Regenerated exports, JSON, `run_main_path.R` and notebooks after each change; the notebook check and text check pass (0 errors, 0 warnings). Python tests all pass. R tests all pass with the new data (`test_main_path_recovery.R`, `test_guided_modules.R`, `test_checkpoints.R`, `test_checkpoint_replay.R`, `test_guided_module_check.R`, `test_summary_stats.R`, `test_file_comparison.R`, `test_course_setup.R`, the preflight, locale, Unicode and PLINK setup tests and `check_course.R`). The author test `test_checkpoint_restarts.R` passed for all five checkpoints. A complete `run_main_path.R` on `classroom-stage-2026.2` ended with exit 0, with all expected-count checks passing. All 15 optional chunks (the threshold boxes, the outlier methods, the number of PCs and the credible sets) ran at least once without error.
+- Quarto: the nine `.qmd` files render with `--no-execute` (Quarto 1.10.18 from RStudio, exit 0). The complete notebook `gwas_course_complete.qmd` also rendered WITH execution on `classroom-stage-2026.2` (copy of the branch outside the repository, exit 0 in 124 seconds, 161 cells, 0 error cells). When executed, module 7 shows 10 Quarto warnings ("List item N has no corresponding annotation in the code cell"). The same 10 warnings appear when the 2026.4 notebook of module 7 is executed, so they are not new. They are cosmetic (code annotations of the 12-step chunk of step 7.7) and I did not change them.
+
+New expected numbers next to the 2026.4 numbers. The counts after each step are identical except at step 4.3, where one variant fewer remains. The cohorts differ in four samples (step 3.6), so the composition of the final cohort changed.
+
+| Step | 2026.4 samples | 2026.4 variants | 2026.5 samples | 2026.5 variants |
+| --- | --- | --- | --- | --- |
+| 2.2 | 2,016 | 299,523 | 2,016 | 299,523 |
+| 2.5 | 2,016 | 296,510 | 2,016 | 296,510 |
+| 2.7 | 2,016 | 296,510 | 2,016 | 296,510 |
+| 2.8 | 2,016 | 296,510 | 2,016 | 296,510 |
+| 3.1 | 2,013 | 296,360 | 2,013 | 296,360 |
+| 3.2 | 1,971 | 296,360 | 1,971 | 296,360 |
+| 3.3 | 1,963 | 296,360 | 1,963 | 296,360 |
+| 3.4 | 1,963 | 296,360 | 1,963 | 296,360 |
+| 3.5 | 1,950 | 296,360 | 1,950 | 296,360 |
+| 3.6 | 1,920 | 296,360 | 1,920 | 296,360 |
+| 3.7 | 1,844 | 296,360 | 1,844 | 296,360 |
+| 3.8 | 1,844 | 296,360 | 1,844 | 296,360 |
+| 4.1 | 1,844 | 295,559 | 1,844 | 295,559 |
+| 4.2 | 1,844 | 295,439 | 1,844 | 295,439 |
+| 4.3 | 1,844 | 239,019 | **1,844** | **239,018** |
+| 4.4 | 1,844 | 238,852 | 1,844 | 238,852 |
+| 4.5 | 1,844 | 238,513 | 1,844 | 238,513 |
+| 4.6 | 1,844 | 238,513 | 1,844 | 238,513 |
+| 5.2 | 1,844 | 238,513 | 1,844 | 238,513 |
+| 5.4 | 1,844 | 238,513 | 1,844 | 238,513 |
+| 5.6 | 1,811 | 238,513 | 1,811 | 238,513 |
+| 5.7 | 1,811 | 238,513 | 1,811 | 238,513 |
+
+| Result | 2026.4 | 2026.5 |
+| --- | --- | --- |
+| Final cohort | 1,811 samples (900 cases, 911 controls), 238,513 variants | 1,811 samples (898 cases, 913 controls), 238,513 variants |
+| Pruned sites at 3.4 and 5.7 | 69,539 and 68,622 | 68,800 and 67,905 |
+| Shared sites with the reference (5.2) | 48,614 | 48,615 |
+| Removed at 4.3 (frequency) and 4.4 (Hardy-Weinberg) | 56,420 and 167 | 56,421 and 166 |
+| Finite tests, hits, clumps | 236,815, 8, 3 | 236,820, 8, 3 |
+| Lambda (main, no PCs, no QC and no PCs) | 1.0165, 1.546, 1.655 | 1.0157, 1.527, 1.655 |
+| Hits without PCs, without QC and PCs | 15 and 19 | 17 and 19 |
+
+### Phase 3: new data (staging, not encrypted)
+
+- `C:\WEB_site\data_sources\codex_work\classroom-stage-2026.2`: 109 files, 656,290,527 bytes, made by `scripts/author/stage_main_path.py` (new option `--ld-list`) from a complete run of the 2026.5 course. Checkpoints are renumbered and recomputed (`6.1`, `6.2`, `6.3`, `6.4`, `6.6`, `6.7`, `7.6`, `7.8` in module 6 and 7; full boundaries 2.8, 3.8, 4.6 and 5.7). The folder `classroom-stage-2026.1-final` was not touched. No instructor file is in the folder (checked by name).
+- Manifest `classroom-stage-2026.2.MANIFEST.tsv` and its SHA-256 `classroom-stage-2026.2.MANIFEST.tsv.sha256` (`3acbf3788b0a6f3b6c011ec7aaa3ba915a631a56df288afa194f0883e2444539`). All 109 files were checked against the manifest (0 differences).
+- New instructor files beside the old ones, which are unchanged: `sim2026\instructor\answer_key_2026.2.json` and `build_report_2026.2.md`. They are not in the repository.
+- Verification with the course functions: the restart, checkpoint, replay, module check and summary-statistics tests above all ran on this folder. I did not build an unencrypted ZIP: the download function is written for encrypted archives, so I verified the folder against its manifest and ran the restore tests instead.
+- `docs/release_packaging.md` has the exact commands for `data-2026.2` (password typed by you, packager call with the new `--version` option, `gh release create`) and the list of what to update afterwards (`config.R`, steps 0.4 and 0.7, README, docs, the site). The packager now takes `--version` (default 2026.2).
+
+### Phase 4: website preview (not merged)
+
+- Branch `course/2026.5-preview` from `main` (after phase 1). Commits 575bc78 (code), 2d95ff6 (synced content). Preview: https://personal-site-6n2muil6h-mgentiluomos-projects.vercel.app
+- `sync:gwas` (63 steps), `tsc`, lint (0 errors), review and production builds pass. axe-core 4.14.1 on 16 pages (home, /teaching and steps 0.3, 3.1, 3.3, 3.4, 3.6, 4.2, 5.5, 5.6, 5.7, 6.1, 6.2, 6.7, 7.6 and 7.7), light and dark, 360 and 1280 px: 64 runs, 0 violations, no page wider than the screen. Keyboard: ArrowRight on the slider of the PC chart moves from "Number of PCs 10: 8 hits below 5e-8 (course value)." to "Number of PCs 15: 8 hits below 5e-8." and the live region follows. The redirect `/teaching/gwas/module-6/step-6-8` answers 308 to `step-6-7`.
+- Pages to look at: steps 3.3, 3.4, 4.2, 5.6 and 5.7 (chart and "Try other thresholds"), 5.6 and 5.7 and 7.6 ("Another approach"), 6.1 (odds ratio and model together), 6.2 to 6.7 (new numbers) and 7.3 to 7.7.
+
+### Still to do and to decide
+
+- Encrypt and publish `data-2026.2` (commands in `docs/release_packaging.md`), then release the project 2026.5 with it, and merge the preview into `main`.
+- Review of the preview and of the new boxes (the text is long, so check the level).
+- Decide the redirect question for module 6 (see 2a) and whether to keep the optional boxes in the notebooks as callouts (they are).
+- Genes near the leads (2h) if you want them. The GENCODE licence must be checked first.
+- Quarto with execution: see the Quarto line above.
+
 ## Session of 17 November, Riccardo's review
 
 Written for the author. Status at the last push: Parts 1, 2, A, B, C and 3 are done. The course is on `notebooks/all-modules` and the website preview is on `course/notebook-style`. Release 2026.4 and the website merge into `main` are NOT done: they wait for your review of the preview. Part 4 (renumbering of module 6) comes after the release.
