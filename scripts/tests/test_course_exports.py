@@ -20,8 +20,8 @@ class CourseExportsTests(unittest.TestCase):
         cls.records = exports.export_steps()
 
     def test_complete_main_path(self):
-        self.assertEqual(len(self.records), 64)
-        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 11, 8, 8, 6, 7, 8, 8])
+        self.assertEqual(len(self.records), 63)
+        self.assertEqual([sum(r["module"] == i for r in self.records) for i in range(8)], [8, 11, 8, 8, 6, 7, 7, 8])
         self.assertEqual(self.records[0]["id"], "0.1")
         self.assertEqual(self.records[-1]["id"], "7.8")
 
@@ -130,7 +130,7 @@ class CourseExportsTests(unittest.TestCase):
         self.assertGreater(checked, 300)
 
     def test_under_the_hood_block_is_optional_last_and_sourced(self):
-        pilot = {"3.4", "3.5", "3.6", "5.4", "6.6"}
+        pilot = {"3.4", "3.5", "3.6", "5.4", "6.5"}
         for record in self.records:
             blocks = record["blocks"]
             if record["id"] not in pilot:
@@ -164,7 +164,7 @@ class CourseExportsTests(unittest.TestCase):
 
     def test_committed_json_matches_canonical_sources(self):
         paths = list((ROOT / "site_content" / "steps").glob("*.json"))
-        self.assertEqual(len(paths), 64)
+        self.assertEqual(len(paths), 63)
         for record in self.records:
             with self.subTest(step=record["id"]):
                 saved = json.loads((ROOT / "site_content" / "steps" / (record["anchor"] + ".json")).read_text(encoding="utf-8"))

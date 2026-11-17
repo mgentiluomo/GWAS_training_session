@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "94a3f68425ce2db95dcf1358d11ea06a28892921f8c0c41858e8fce1908d0d41"
+course_source_sha256: "d8c2ba51985a65588d8ec5d464bf3667801226b21ad532873b80005469831136"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.

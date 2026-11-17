@@ -52,19 +52,19 @@ local({
 
   # 6. check_step() on an indexed artifacts checkpoint: three messages, and "complete" only without differences.
   data <- file.path(root, "data")
-  dir.create(file.path(data, "checkpoints", "6.8"), recursive = TRUE)
-  write.table(data.frame(step = "6.8", kind = "artifacts", parent = "", samples = 2, variants = 2),
+  dir.create(file.path(data, "checkpoints", "6.7"), recursive = TRUE)
+  write.table(data.frame(step = "6.7", kind = "artifacts", parent = "", samples = 2, variants = 2),
               file.path(data, "checkpoints", "index.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
-  reference <- file.path(data, "checkpoints", "6.8", "s6-8_gwas_summary_statistics.tsv")
+  reference <- file.path(data, "checkpoints", "6.7", "s6-7_gwas_summary_statistics.tsv")
   file.copy(crlf, reference)
-  manifest <- data.frame(path = "s6-8_gwas_summary_statistics.tsv", bytes = file.info(reference)$size,
+  manifest <- data.frame(path = "s6-7_gwas_summary_statistics.tsv", bytes = file.info(reference)$size,
                          sha256 = digest::digest(reference, algo = "sha256", file = TRUE))
-  write.table(manifest, file.path(data, "checkpoints", "6.8", "MANIFEST.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
+  write.table(manifest, file.path(data, "checkpoints", "6.7", "MANIFEST.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
   run_check <- function(file) {
     work <- tempfile("work-", tmpdir = root)
     dir.create(work)
-    file.copy(file, file.path(work, "s6-8_gwas_summary_statistics.tsv"))
-    suppressMessages(check_step("6.8", data, work, quiet = TRUE))
+    file.copy(file, file.path(work, "s6-7_gwas_summary_statistics.tsv"))
+    suppressMessages(check_step("6.7", data, work, quiet = TRUE))
   }
   same <- run_check(lf)
   stopifnot(identical(as.character(same$status), "matches"), isTRUE(attr(same, "complete")))
@@ -72,11 +72,11 @@ local({
   stopifnot(identical(as.character(near$status), "matches within rounding"), isTRUE(attr(near, "complete")))
   far <- run_check(changed)
   stopifnot(identical(as.character(far$status), "different contents"), !isTRUE(attr(far, "complete")))
-  shown <- capture.output(check_step("6.8", data, file.path(root, "none"), quiet = FALSE), type = "message")
+  shown <- capture.output(check_step("6.7", data, file.path(root, "none"), quiet = FALSE), type = "message")
   rounding_note <- paste(capture.output({
     work <- tempfile("work-", tmpdir = root); dir.create(work)
-    file.copy(rounded, file.path(work, "s6-8_gwas_summary_statistics.tsv"))
-    check_step("6.8", data, work)
+    file.copy(rounded, file.path(work, "s6-7_gwas_summary_statistics.tsv"))
+    check_step("6.7", data, work)
   }, type = "message"), collapse = " ")
   stopifnot(grepl("last digits", rounding_note, fixed = TRUE), grepl("not a mistake", rounding_note, fixed = TRUE))
   cat("File comparison tests passed: line endings, rounding, real differences, binary files and messages.\n")

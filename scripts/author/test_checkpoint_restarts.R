@@ -1,6 +1,6 @@
 # Author test: every course checkpoint can be restored, and the rest of the course then runs to the end.
 #
-# For each of the five checkpoints (2.8, 3.8, 4.6, 5.7, 6.8) the test
+# For each of the five checkpoints (2.8, 3.8, 4.6, 5.7, 6.7) the test
 #   1. restores it into a NEW empty output folder with restore_checkpoint(<restart id>),
 #   2. runs guided_check_module() for each later module, and then the chunks of that module
 #      (taken from scripts/run_main_path.R),
@@ -29,7 +29,7 @@ root <- normalizePath(root, winslash = "/")
 
 # The five checkpoints, the restart id of each, and the module that follows.
 cases <- data.frame(
-  checkpoint = c("2.8", "3.8", "4.6", "5.7", "6.8"),
+  checkpoint = c("2.8", "3.8", "4.6", "5.7", "6.7"),
   restart = c("3.1", "4.1", "5.1", "6.1", "7.1"),
   first_module = 3:7, stringsAsFactors = FALSE)
 
@@ -58,8 +58,8 @@ run <- function(label, lines, output) {
   invisible(log)
 }
 
-key_files <- c("step_counts.tsv", "checkpoints/index.tsv", "s6-4_association.Disease.glm.logistic.hybrid",
-               "s6-8_gwas_summary_statistics.tsv", "s5-7_pca.eigenvec", "s7-2_lambda.tsv", "s7-8_leads.tsv", "s7-5_clump.clumps")
+key_files <- c("step_counts.tsv", "checkpoints/index.tsv", "s6-3_association.Disease.glm.logistic.hybrid",
+               "s6-7_gwas_summary_statistics.tsv", "s5-7_pca.eigenvec", "s7-2_lambda.tsv", "s7-8_leads.tsv", "s7-5_clump.clumps")
 
 # Compare each key file of a run with the same file of the complete run, as check_step() does.
 compare_key_files <- function(output) {

@@ -42,7 +42,7 @@ Passes:
 
 | Pass | Where | Result |
 | --- | --- | --- |
-| 0 | First student copy | Discarded. The copy was behind the branch and had no step 6.8. |
+| 0 | First student copy | Discarded. The copy was behind the branch and had no step 6.7. |
 | 1 | First student copy, after `git pull`, clean `data/` and `results/` | Ran without errors. Reading the outputs and testing the Knit button gave most of the findings below. |
 | 2 | Same copy, after fixes | Ran without errors. A second Knit test then found the setup chunk problem. |
 | 3 | New clone, empty package library, new `plink2.exe` | Ran without errors. |
@@ -60,12 +60,12 @@ Passes:
 | 0.8 | The expected result described an older 55-file test package. A student never has it. | Removed. | 6748dc1 |
 | 2.6 | The text mentioned `COURSE_CHAIN_FILE` and a chain file that "the final package must include". The chain file is in the data folder. | The text says where the file is. The code no longer reads an environment variable. | abe6f43 |
 | 2.6 | PLINK printed a warning about unsorted positions. The expected result did not say it is normal. | The expected result now mentions the warning. | abe6f43 |
-| 1.1, 3.4, 5.2, 5.3, 6.3 | The step checked a number silently. The expected result quoted it, so the student could not compare. | Each chunk now prints the number (299,523 rows, 69,539 variants, 48,614 sites, 1,811 rows). | f16649e |
+| 1.1, 3.4, 5.2, 5.3, 6.2 | The step checked a number silently. The expected result quoted it, so the student could not compare. | Each chunk now prints the number (299,523 rows, 69,539 variants, 48,614 sites, 1,811 rows). | f16649e |
 | 5.5, 5.7, 7.6 | A stray `png 2` line appeared after the plot. | `dev.off()` is now hidden and the path of the file is printed. | f16649e |
 | 5.5, 5.7, 7.1, 7.3, 7.6, 7.7 | The plot is saved to a file and nothing appears on screen. The student did not know where the picture was. | `save_plot()` prints the path. The expected results say how to open the PNG from the Files pane. | f16649e |
 | All expected figures | When the student clicked Knit, the expected figures were missing (pandoc could not find the relative path). | The figure chunks now use an absolute path. | f16649e |
 | All modules | The validation notes mentioned "instructor reference counts" that a student cannot see. Step 7.2 mentioned "the reference run". | Reworded to "expected counts". | f16649e |
-| 0.8, 6.8 | No text said that all output files are in `results/guided/`. | One sentence in 0.8 and the full folder in the 6.8 file list. | af302d2 |
+| 0.8, 6.7 | No text said that all output files are in `results/guided/`. | One sentence in 0.8 and the full folder in the 6.7 file list. | af302d2 |
 | 1 to 7 | The hidden chunk `moduleN_setup` sourced `R/guided.R` before the working directory was the project root. Knit failed with "cannot open the connection". Running the first chunk from `lessons/` would fail the same way. | The chunk moves to the project root first, restores the old directory at the end, and is named `setup` so RStudio runs it before the first chunk. | 3e71144, 9702220 |
 | 0.4 | The official PLINK ZIP holds four programs. The student copy showed three unknown `.exe` files in `git status`. | The text and `bin/README.md` say to copy only `plink2.exe`. `.gitignore` ignores everything in `bin/` except its README. | 54e39b8 |
 
@@ -99,9 +99,9 @@ later count, are the same.
 
 End products, checked in the clean run:
 
-- `results/guided/s6-8_gwas_summary_statistics.tsv` has 236,815 rows and the eleven columns
+- `results/guided/s6-7_gwas_summary_statistics.tsv` has 236,815 rows and the eleven columns
   in the documented order. It is about 22 MB.
-- `results/guided/s6-8_gwas_summary_statistics_columns.tsv` has one row for each of the eleven columns.
+- `results/guided/s6-7_gwas_summary_statistics_columns.tsv` has one row for each of the eleven columns.
 - `s7-3_manhattan.png`: three peaks above the dashed 5e-8 line, on chromosomes 3 (one variant),
   9 (four) and 12 (three). The vertical axis reaches about 16 and the colours alternate by chromosome.
 - `s7-1_qq.png`: points follow the diagonal, a tail lifts at the right end, and the label

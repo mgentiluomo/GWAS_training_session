@@ -950,7 +950,7 @@ plink2 --bgen invented_example.bgen ref-first --sample invented_example.sample -
 
 #### Summary statistics
 
-Open [the summary table](../examples/formats/invented_example_summary_statistics.tsv). Its effects and uncertainties are invented. Step 6.8 creates the classroom table.
+Open [the summary table](../examples/formats/invented_example_summary_statistics.tsv). Its effects and uncertainties are invented. Step 6.7 creates the classroom table.
 
 | Field | Meaning |
 | --- | --- |

@@ -158,8 +158,8 @@ differences were found.
 `scripts/tests/test_main_path_recovery.R` passed all seven restart targets
 against the final staging folder and the new canonical run. Metadata matched
 and PLINK reported zero genotype differences at each target. The 7.7 restart
-included the 6.8 summary file. An additional independent restore at 7.1 verified
-the completed 6.8 checkpoint. Its manifest hashes, 236,815 summary rows, eleven
+included the 6.7 summary file. An additional independent restore at 7.1 verified
+the completed 6.7 checkpoint. Its manifest hashes, 236,815 summary rows, eleven
 columns, column dictionary and `beta = log(odds_ratio)` checks all passed.
 No test or helper correction was needed.
 

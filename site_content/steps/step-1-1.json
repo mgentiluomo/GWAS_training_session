@@ -6,7 +6,7 @@
   "anchor": "step-1-1",
   "title": "SNPs and genotypes",
   "source": "lessons/module_01_from_dna_to_array_data.Rmd",
-  "source_sha256": "94a3f68425ce2db95dcf1358d11ea06a28892921f8c0c41858e8fce1908d0d41",
+  "source_sha256": "d8c2ba51985a65588d8ec5d464bf3667801226b21ad532873b80005469831136",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Learn the difference between a DNA site, an allele and a genotype.",

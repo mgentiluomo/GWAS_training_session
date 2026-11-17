@@ -117,7 +117,7 @@ the external program and records its printed command.
 For the guided 2026 course, the id that you give to `restore_checkpoint()` is the
 first step that you will run. To continue after a saved checkpoint, use the first
 step of the next module: `restore_checkpoint("3.1")` after 2.8, `"4.1"` after 3.8,
-`"5.1"` after 4.6, `"6.1"` after 5.7 and `"7.1"` after 6.8. If you give the id of a
+`"5.1"` after 4.6, `"6.1"` after 5.7 and `"7.1"` after 6.7. If you give the id of a
 checkpoint itself (for example `"2.8"`), R stops and tells you which id to use.
 The restore also writes `checkpoints/index.tsv` and `step_counts.tsv` in the work
 folder, so the next module runs to the end. Use an empty work folder.
@@ -143,7 +143,7 @@ parent states. Intermediate folders store replay operations rather than another
 full genotype copy. `check_step` verifies counts; at full boundaries it also
 compares SHA-256. Intermediate count agreement is not a byte-level genotype
 comparison. The published package includes this checkpoint tree and the summary
-statistics checkpoint at 6.8.
+statistics checkpoint at 6.7.
 
 1. Keep the failed run and record its first error.
 2. For demo data, regenerate checkpoints by running the preceding notebooks,

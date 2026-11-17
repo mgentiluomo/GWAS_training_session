@@ -87,10 +87,10 @@ manifest provenance are not inferred from filenames.
 
 ## Summary statistics file
 
-Step 6.8 writes `results/guided/s6-8_gwas_summary_statistics.tsv`, a tab-separated
+Step 6.7 writes `results/guided/s6-7_gwas_summary_statistics.tsv`, a tab-separated
 file with one row per tested variant and these eleven columns, in this order. A second
-file, `s6-8_gwas_summary_statistics_columns.tsv`, explains each column in plain words.
-The Manhattan and QQ plots of module 7 are built from the first file. Step 6.8 of
+file, `s6-7_gwas_summary_statistics_columns.tsv`, explains each column in plain words.
+The Manhattan and QQ plots of module 7 are built from the first file. Step 6.7 of
 the lessons describes the columns in detail.
 
 | Column | Meaning |

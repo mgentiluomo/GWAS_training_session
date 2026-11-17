@@ -1,4 +1,4 @@
-# Synthetic checks for the GWAS summary statistics helpers (step 6.8). No real data are used.
+# Synthetic checks for the GWAS summary statistics helpers (step 6.7). No real data are used.
 source("R/guided.R")
 source("R/course.R")
 local({
@@ -45,7 +45,7 @@ local({
   # The dictionary covers every column once, in order.
   dictionary <- guided_summary_dictionary()
   stopifnot(identical(dictionary$column, guided_summary_columns()), !anyNA(dictionary), all(nzchar(unlist(dictionary))))
-  guided_write(dictionary, guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv"))
+  guided_write(dictionary, guided_path(cfg, "6.7", "gwas_summary_statistics_columns.tsv"))
 
   # Validation failures.
   expect_error(guided_check_summary(stats[rev(names(stats))]), "eleven standard columns")
@@ -67,24 +67,24 @@ local({
   expect_error(guided_standardise_scan(scan[setdiff(names(scan), "P")]), "lacks columns")
 
   # Reader messages.
-  expect_error(guided_summary_stats(list(out = file.path(root, "none"))), "Run step 6.8 first")
+  expect_error(guided_summary_stats(list(out = file.path(root, "none"))), "Run step 6.7 first")
   wrong <- file.path(root, "wrong"); dir.create(wrong)
   guided_write(stats[rev(names(stats))], guided_summary_path(list(out = wrong)))
   expect_error(guided_summary_stats(list(out = wrong)), "unexpected columns")
 
-  # Checkpoint: the 6.8 artifact needs parent 6.7 and passes check_step.
-  stopifnot("6.8" %in% course_step_order(), which(course_step_order() == "6.8") == which(course_step_order() == "6.7") + 1L,
+  # Checkpoint: the 6.7 artifact needs parent 6.6 and passes check_step.
+  stopifnot("6.7" %in% course_step_order(), which(course_step_order() == "6.7") == which(course_step_order() == "6.6") + 1L,
     length(course_step_order()) == 64L,
     identical(course_step_order()[16:20], c("1.8", "1.9", "1.10", "1.11", "2.1")))
   dir.create(file.path(root, "checkpoints"))
-  guided_write(data.frame(step = c("5.7", "6.7"), kind = c("full", "artifacts"), parent = c("", "5.7"),
+  guided_write(data.frame(step = c("5.7", "6.6"), kind = c("full", "artifacts"), parent = c("", "5.7"),
     samples = 1811, variants = 238513), file.path(root, "checkpoints", "index.tsv"))
-  guided_artifact_checkpoint(cfg, "6.8", c(path, guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")), parent = "6.7")
+  guided_artifact_checkpoint(cfg, "6.7", c(path, guided_path(cfg, "6.7", "gwas_summary_statistics_columns.tsv")), parent = "6.6")
   index <- read.delim(file.path(root, "checkpoints", "index.tsv"), colClasses = "character")
-  row <- index[index$step == "6.8", ]
-  stopifnot(row$kind == "artifacts", row$parent == "6.7", row$samples == "1811")
-  stopifnot(isTRUE(attr(check_step("6.8", data_dir = root, work_dir = root, quiet = TRUE), "complete")))
+  row <- index[index$step == "6.7", ]
+  stopifnot(row$kind == "artifacts", row$parent == "6.6", row$samples == "1811")
+  stopifnot(isTRUE(attr(check_step("6.7", data_dir = root, work_dir = root, quiet = TRUE), "complete")))
   writeLines("changed", path)
-  stopifnot(!isTRUE(attr(check_step("6.8", data_dir = root, work_dir = root, quiet = TRUE), "complete")))
-  cat("Summary statistics helpers, file validation and the 6.8 checkpoint passed.\n")
+  stopifnot(!isTRUE(attr(check_step("6.7", data_dir = root, work_dir = root, quiet = TRUE), "complete")))
+  cat("Summary statistics helpers, file validation and the 6.7 checkpoint passed.\n")
 })

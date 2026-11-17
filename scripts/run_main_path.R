@@ -38,7 +38,7 @@ cfg <- guided_init()
 where_am_i(data_dir = cfg$data_dir, work_dir = cfg$out)
 
 # Source: lessons/module_01_from_dna_to_array_data.Rmd
-# SHA-256: 94a3f68425ce2db95dcf1358d11ea06a28892921f8c0c41858e8fce1908d0d41
+# SHA-256: d8c2ba51985a65588d8ec5d464bf3667801226b21ad532873b80005469831136
 
 # Chunk: setup
 source("R/guided.R")
@@ -672,7 +672,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b
+# SHA-256: 205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6
 
 # Chunk: setup
 source("R/guided.R")
@@ -693,22 +693,17 @@ tab <- table(case = case, carrier = dose > 0)
 print(tab)
 carrier_or <- tab["TRUE", "TRUE"] * tab["FALSE", "FALSE"] / (tab["FALSE", "TRUE"] * tab["TRUE", "FALSE"])
 print(c(counted_allele_column = names(x)[7], carrier_odds_ratio = carrier_or))
+# 4. Fit the additive logistic model with the number of copies as the predictor.
+example <- data.frame(case = as.numeric(case), dosage = dose)
+fit <- glm(case ~ dosage, data = example, family = binomial())
+# 5. Show the coefficients and the odds ratio per extra copy of the allele.
+print(summary(fit))
+print(exp(coef(fit)["dosage"]))
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "6.1", paste0(report, ".raw"), parent = "5.7")
 
 
 # Chunk: s6-2
-# 1. Read the exported variant and match each sample to its case or control status.
-x <- read.table(paste0(guided_path(cfg, "6.1", "example"), ".raw"), header = TRUE, check.names = FALSE)
-psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
-example <- data.frame(case = as.numeric(psam$Disease[match(x$IID, psam$IID)] == "2"), dosage = as.numeric(x[[7]]))
-# 2. Fit the model and show how each extra copy changes the odds of disease.
-fit <- glm(case ~ dosage, data = example, family = binomial())
-summary(fit)
-exp(coef(fit)["dosage"])
-
-
-# Chunk: s6-3
 # 1. Read sample details, genetic component scores and age records.
 psam <- guided_table(paste0(guided_path(cfg, "5.7"), ".psam"))
 pcs <- guided_table(paste0(guided_path(cfg, "5.7", "pca"), ".eigenvec"))
@@ -724,30 +719,30 @@ design <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[
 stopifnot(qr(design)$rank == ncol(design))
 names(covar)[1] <- "#FID"
 # 4. Save the covariate table and print its number of rows.
-guided_write(covar, guided_path(cfg, "6.3", "covariates.tsv"))
+guided_write(covar, guided_path(cfg, "6.2", "covariates.tsv"))
 cat(nrow(covar), "complete covariate rows written\n")
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "6.3", guided_path(cfg, "6.3", "covariates.tsv"), parent = "6.1")
+guided_artifact_checkpoint(cfg, "6.2", guided_path(cfg, "6.2", "covariates.tsv"), parent = "6.1")
 
 
-# Chunk: s6-4
+# Chunk: s6-3
 # 1. Test variants with the frequency rule and the chosen adjustment factors.
-out <- guided_path(cfg, "6.4", "association")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+out <- guided_path(cfg, "6.3", "association")
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", out))
 results <- guided_association(out)
 # 2. Check the number of valid tests and results below the course significance threshold.
 valid <- valid_p(results$P)
 stopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)
 # 3. Save a table of the association results.
-guided_write(results, guided_path(cfg, "6.4", "results.tsv"))
+guided_write(results, guided_path(cfg, "6.3", "results.tsv"))
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "6.4", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.4", "results.tsv")), parent = "6.3")
+guided_artifact_checkpoint(cfg, "6.3", c(paste0(out, ".Disease.glm.logistic.hybrid"), guided_path(cfg, "6.3", "results.tsv")), parent = "6.2")
 
 
-# Chunk: s6-5
+# Chunk: s6-4
 # 1. Read the scan results and count the model status codes.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+results <- guided_association(guided_path(cfg, "6.3", "association"))
 print(table(results$ERRCODE, useNA = "ifany"))
 # 2. Keep valid tests and calculate intervals describing uncertainty in their effects.
 valid <- results[valid_p(results$P), ]
@@ -757,54 +752,54 @@ valid$CI_HIGH <- exp(log(valid$OR) + 1.96 * valid[["LOG(OR)_SE"]])
 top <- valid[order(valid$P), c("CHROM", "POS", "ID", "A1", "OBS_CT", "OR", "CI_LOW", "CI_HIGH", "P")]
 print(head(top, 10))
 # 4. Save the first 20 results for later review.
-guided_write(head(top, 20), guided_path(cfg, "6.5", "top20.tsv"))
+guided_write(head(top, 20), guided_path(cfg, "6.4", "top20.tsv"))
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "6.5", guided_path(cfg, "6.5", "top20.tsv"), parent = "6.4")
+guided_artifact_checkpoint(cfg, "6.4", guided_path(cfg, "6.4", "top20.tsv"), parent = "6.3")
 
 
-# Chunk: s6-6
+# Chunk: s6-5
 # 1. Choose the least frequent variant among valid tests on chromosomes 1 to 22.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+results <- guided_association(guided_path(cfg, "6.3", "association"))
 minor <- pmin(results$A1_FREQ, 1 - results$A1_FREQ)
 candidates <- which(results$CHROM %in% as.character(1:22) & valid_p(results$P) & minor > 0)
 chosen <- results$ID[candidates[which.min(minor[candidates])]]
 # 2. Save the chosen variant ID and force the Firth model at that variant.
-guided_list(chosen, guided_path(cfg, "6.6", "variant.txt"))
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
-  "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.6", "firth")))
+guided_list(chosen, guided_path(cfg, "6.5", "variant.txt"))
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--snp", chosen, "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
+  "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize", "--glm", "firth", "sex", "hide-covar", "--out", guided_path(cfg, "6.5", "firth")))
 # 3. Print both estimates and check that the Firth test gives one valid result.
-comparison <- guided_association(guided_path(cfg, "6.6", "firth"))
+comparison <- guided_association(guided_path(cfg, "6.5", "firth"))
 print(results[results$ID == chosen, c("ID", "A1", "OR", "P")])
 print(comparison[, c("ID", "A1", "OR", "P")])
 stopifnot(nrow(comparison) == 1L, valid_p(comparison$P))
 
 
-# Chunk: s6-7
+# Chunk: s6-6
 # 1. Read the results and summarise the study size and test values.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+results <- guided_association(guided_path(cfg, "6.3", "association"))
 summary <- data.frame(samples = 1811, retained_variants = 238513, finite_tests = sum(valid_p(results$P)),
   genome_wide = sum(results$P[valid_p(results$P)] < 5e-8),
   lambda_autosomes = lambda_gc(results$P[results$CHROM %in% as.character(1:22)]))
 # 2. Save and print the summary table.
-guided_write(summary, guided_path(cfg, "6.7", "summary.tsv"))
+guided_write(summary, guided_path(cfg, "6.6", "summary.tsv"))
 print(summary)
 # Course bookkeeping: records the counts for the next step. Do not change.
-files <- c(paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
-  guided_path(cfg, "6.3", "covariates.tsv"), guided_path(cfg, "6.5", "top20.tsv"), guided_path(cfg, "6.7", "summary.tsv"))
-guided_artifact_checkpoint(cfg, "6.7", files)
-check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
+files <- c(paste0(guided_path(cfg, "6.3", "association"), ".Disease.glm.logistic.hybrid"),
+  guided_path(cfg, "6.2", "covariates.tsv"), guided_path(cfg, "6.4", "top20.tsv"), guided_path(cfg, "6.6", "summary.tsv"))
+guided_artifact_checkpoint(cfg, "6.6", files)
+check_step("6.6", data_dir = cfg$out, work_dir = cfg$out)
 
 
-# Chunk: s6-8
+# Chunk: s6-7
 # 1. Read the scan and arrange its results in the standard columns.
-results <- guided_association(guided_path(cfg, "6.4", "association"))
+results <- guided_association(guided_path(cfg, "6.3", "association"))
 stats <- guided_standardise_scan(results)
 # 2. Check the columns and values and choose the summary file name.
 guided_check_summary(stats, rows = nrow(results))
 stats_file <- guided_summary_path(cfg)
 # 3. Save the summary table and a file explaining each column.
 guided_write_summary(stats, stats_file)
-dictionary_file <- guided_path(cfg, "6.8", "gwas_summary_statistics_columns.tsv")
+dictionary_file <- guided_path(cfg, "6.7", "gwas_summary_statistics_columns.tsv")
 guided_write(guided_summary_dictionary(), dictionary_file)
 # Read the file back, as the plots will, and check that nothing was lost.
 # 4. Read the saved table and check that it matches the original results.
@@ -812,18 +807,18 @@ saved <- guided_summary_stats(cfg)
 guided_check_summary(saved, rows = nrow(results))
 stopifnot(isTRUE(all.equal(saved, stats)))
 # 5. Compare test counts with the saved scan summary and print the checked results.
-first_summary <- read.delim(guided_path(cfg, "6.7", "summary.tsv"))
+first_summary <- read.delim(guided_path(cfg, "6.6", "summary.tsv"))
 finite <- valid_p(saved$p_value)
 stopifnot(sum(finite) == first_summary$finite_tests, sum(saved$p_value[finite] < 5e-8) == first_summary$genome_wide)
 print(head(saved, 5))
 print(c(rows = nrow(saved), finite_tests = sum(finite), missing_p_values = sum(is.na(saved$p_value)),
   genome_wide = sum(saved$p_value[finite] < 5e-8)))
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = "6.7")
-check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
+guided_artifact_checkpoint(cfg, "6.7", c(stats_file, dictionary_file), parent = "6.6")
+check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 85361cea5bcc0fdaab7b0363d8301e3cf503c9156774ba9ed660a2d5b016a0db
+# SHA-256: 682a07921020eecefc0cac7b2ea4541983dcb3c326bcc501d85098c7814d44f8
 
 # Chunk: setup
 source("R/guided.R")
@@ -910,7 +905,7 @@ guided_write(threshold, guided_path(cfg, "7.4", "thresholds.tsv"))
 # 1. Choose the name for the grouped association results.
 report <- guided_path(cfg, "7.5", "clump")
 # 2. Group nearby correlated variants using the final cohort.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.3", "association"), ".Disease.glm.logistic.hybrid"),
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
 # 3. Read the groups and check that there are three.
@@ -953,7 +948,7 @@ for (i in seq_len(nrow(regions))) {
   stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])
 }
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
 
 
 # Chunk: s7-6_expected_figure
@@ -977,7 +972,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 # Chunk: s7-7
 # 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
 # 2. Read the original sample information and save ages for all wells.
 metadata <- guided_metadata(cfg)
@@ -1083,7 +1078,7 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
   guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
-guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.7")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
 # 6. Print the final report.
 cat(paste(summary, collapse = "\n"), "\n")

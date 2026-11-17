@@ -64,7 +64,7 @@ local({
         if (step != "3.6") stopifnot(setequal(observed, expected))
       }
     }
-    association <- guided_path(list(out = output), "6.4", "association")
+    association <- guided_path(list(out = output), "6.3", "association")
     if (file.exists(paste0(association, ".Disease.glm.logistic.hybrid"))) {
       x <- guided_association(association)
       expected <- reference$association$with_qc_and_pcs

@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "85361cea5bcc0fdaab7b0363d8301e3cf503c9156774ba9ed660a2d5b016a0db"
+course_source_sha256: "682a07921020eecefc0cac7b2ea4541983dcb3c326bcc501d85098c7814d44f8"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -33,7 +33,7 @@ The linked step pages explain the ideas and provide troubleshooting.
 
 **Time.** About 75 minutes.
 
-**Before you start.** You need the full [checkpoint at step 6.8](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-8). The first code chunk checks the files that this module needs.
+**Before you start.** You need the full [checkpoint at step 6.7](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-7). The first code chunk checks the files that this module needs.
 
 **Steps.**
 
@@ -225,7 +225,7 @@ We group nearby variants whose DNA patterns are correlated, meaning they tend to
 ```{r}
 #| label: s7-5
 report <- guided_path(cfg, "7.5", "clump")  # <1>
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),  # <2>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.3", "association"), ".Disease.glm.logistic.hybrid"),  # <2>
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
 clumps <- guided_table(paste0(report, ".clumps"))  # <3>
@@ -242,7 +242,7 @@ stopifnot(nrow(clumps) == 3L)
 | Option or modifier | What it does |
 | --- | --- |
 | `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
-| `--clump` | Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples. |
+| `--clump` | Reads s6-3_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples. |
 | `--clump-id-field` | Uses the ID column of the association report to identify variants. |
 | `--clump-p-field` | Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect. |
 | `--clump-p1` | Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005). |
@@ -266,7 +266,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-3_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
 ```
 
 :::
@@ -304,7 +304,7 @@ for (i in seq_len(nrow(regions))) {  # <3>
   stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])  # <8>
 }
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
 ```
 
 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
@@ -390,7 +390,7 @@ We repeat the association tests without genetic components, the numbers that sum
 ```{r}
 #| label: s7-7
 no_pc <- guided_path(cfg, "7.7", "no_pcs")  # <1>
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
 metadata <- guided_metadata(cfg)  # <2>
 all_covar <- metadata[c("FID", "IID", "Age")]; names(all_covar)[1] <- "#FID"
@@ -459,7 +459,7 @@ save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {  # <
 | --- | --- |
 | `--pfile` | Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information. |
 | `--maf` | Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort. |
-| `--covar` | Reads s6-3_covariates.tsv and matches adjustment values to samples by their identifiers. |
+| `--covar` | Reads s6-2_covariates.tsv and matches adjustment values to samples by their identifiers. |
 | `--covar-name` | Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry. |
 | `--covar-variance-standardize` | Rescales age to have a mean of zero and a variance of one so the model calculation remains stable. |
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it. |
@@ -507,7 +507,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_pcs --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_pcs --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s7-7_all_ages.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_qc_no_pcs --threads 2 --memory 2048
 ```
 
@@ -550,7 +550,7 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
   guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
-guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.7")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
 cat(paste(summary, collapse = "\n"), "\n")  # <6>
 ```

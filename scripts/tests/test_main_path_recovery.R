@@ -9,7 +9,7 @@ local({
   root <- tempfile("main-path-recovery-")
   dir.create(root)
   on.exit(unlink(root, recursive = TRUE))
-  targets <- c("2.6", "3.2", "3.5", "4.5", "5.6", "6.4", "7.7")
+  targets <- c("2.6", "3.2", "3.5", "4.5", "5.6", "6.3", "7.7")
   states <- c("2.5", "3.1", "3.3", "4.4", "4.6", "5.7", "5.7")
   for (i in seq_along(targets)) {
     output <- file.path(root, paste0("restart-", targets[i]))
@@ -36,11 +36,11 @@ local({
     stopifnot(length(readLines(paste0(diff, ".pdiff"), n = 2L)) <= 1L)
     if (targets[i] == "3.5") stopifnot(file.exists(file.path(output, "s3-4_prune.prune.in")))
     if (targets[i] == "5.6") stopifnot(file.exists(file.path(output, "s5-4_study_scores.sscore")))
-    if (targets[i] == "6.4") stopifnot(file.exists(file.path(output, "s6-3_covariates.tsv")),
+    if (targets[i] == "6.3") stopifnot(file.exists(file.path(output, "s6-2_covariates.tsv")),
                                       file.exists(file.path(output, "s5-7_pca.eigenvec")))
-    if (targets[i] == "7.7") stopifnot(file.exists(file.path(output, "s6-4_association.Disease.glm.logistic.hybrid")))
-    if (targets[i] == "7.7" && file.exists(file.path(data, "checkpoints", "6.8", "MANIFEST.tsv"))) {
-      stopifnot(file.exists(file.path(output, "s6-8_gwas_summary_statistics.tsv")))
+    if (targets[i] == "7.7") stopifnot(file.exists(file.path(output, "s6-3_association.Disease.glm.logistic.hybrid")))
+    if (targets[i] == "7.7" && file.exists(file.path(data, "checkpoints", "6.7", "MANIFEST.tsv"))) {
+      stopifnot(file.exists(file.path(output, "s6-7_gwas_summary_statistics.tsv")))
     }
     cat("PASS: restart", targets[i], "with matching metadata and no genotype differences.\n")
   }

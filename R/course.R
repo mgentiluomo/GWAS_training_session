@@ -493,7 +493,7 @@ course_index_check <- function(step, data_dir, work_dir, quiet = FALSE) {
 
 # The restart id is the first step that you will run again. The five course
 # checkpoints are saved states, not restart steps, so each one has a matching restart id.
-course_checkpoint_restart_ids <- c("2.8" = "3.1", "3.8" = "4.1", "4.6" = "5.1", "5.7" = "6.1", "6.8" = "7.1")
+course_checkpoint_restart_ids <- c("2.8" = "3.1", "3.8" = "4.1", "4.6" = "5.1", "5.7" = "6.1", "6.7" = "7.1")
 
 course_index_restore <- function(step, data_dir, work_dir) {
   order <- course_step_order()

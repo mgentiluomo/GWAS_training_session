@@ -34,9 +34,9 @@ guided_module_inputs <- list(
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv"),
   output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s5-7_pca.eigenvec")),
 `7` = list(
-  checkpoint = "6.8", restart_step = "7.1",
+  checkpoint = "6.7", restart_step = "7.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv", "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam"),
-  output = c("s6-4_association.Disease.glm.logistic.hybrid", "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv"))
+  output = c("s6-3_association.Disease.glm.logistic.hybrid", "s6-7_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-2_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv"))
 )
 guided_check_project_root <- function() {
   if (!file.exists("config.R") || !file.exists("R/guided.R")) {
@@ -237,7 +237,7 @@ guided_variant_labels <- function(cfg, chromosome, position, variant_id) {
   label
 }
 
-guided_summary_path <- function(cfg) guided_path(cfg, "6.8", "gwas_summary_statistics.tsv")
+guided_summary_path <- function(cfg) guided_path(cfg, "6.7", "gwas_summary_statistics.tsv")
 
 # Convert a parsed PLINK scan (from guided_association) into the standard summary statistics columns.
 guided_standardise_scan <- function(results) {
@@ -312,16 +312,16 @@ guided_write_summary <- function(x, path) {
   invisible(path)
 }
 
-# Read the summary statistics file made at step 6.8.
+# Read the summary statistics file made at step 6.7.
 guided_summary_stats <- function(cfg) {
   path <- guided_summary_path(cfg)
-  if (!file.exists(path)) stop("The summary statistics file is missing. Run step 6.8 first: ", path, call. = FALSE)
+  if (!file.exists(path)) stop("The summary statistics file is missing. Run step 6.7 first: ", path, call. = FALSE)
   classes <- c(chromosome = "character", base_pair_location = "integer", variant_id = "character",
     effect_allele = "character", other_allele = "character", effect_allele_frequency = "numeric",
     odds_ratio = "numeric", beta = "numeric", standard_error = "numeric", p_value = "numeric", n = "integer")
   x <- read.delim(path, colClasses = classes, na.strings = "NA", quote = "", comment.char = "", check.names = FALSE)
   if (!identical(names(x), guided_summary_columns())) {
-    stop("The summary statistics file has unexpected columns. Run step 6.8 again.", call. = FALSE)
+    stop("The summary statistics file has unexpected columns. Run step 6.7 again.", call. = FALSE)
   }
   x
 }

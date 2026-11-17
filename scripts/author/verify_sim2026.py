@@ -412,7 +412,7 @@ def run_all(run: Run) -> dict:
     (run.ck / "5.6").mkdir(parents=True, exist_ok=True)
     run.p(["--pfile", v + "s5-6", "--make-pgen", "--out", run.ck / "5.6" / "sim2026_after_ancestry"])
 
-    # 5.7 / 6.3 principal components of the cohort, then the association
+    # 5.7 / 6.2 principal components of the cohort, then the association
     run.p(["--pfile", run.cur, "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", v + "high_ld.bed1",
            "--indep-pairwise", "200kb", "0.2", "--out", v + "s5-7"])
     run.p(["--pfile", run.cur, "--extract", v + "s5-7.prune.in", "--pca", "10", "--out", v + "s5-7"], "5.7 cohort PCA")
@@ -427,8 +427,8 @@ def run_all(run: Run) -> dict:
         for iid in original:
             fh.write(f"{iid}\t{iid}\t{pheno[original[iid]][1]}\t" + "\t".join(pcs.get(iid, ["0"] * 10)) + "\n")
     results = {
-        "with_qc_and_pcs": association(run, run.cur, Path(v + "covar.tsv"), "Age,PC1-PC10", v + "s6-4", "6.4 glm, QC and 10 PCs"),
-        "with_qc_no_pcs": association(run, run.cur, Path(v + "covar.tsv"), "Age", v + "s6-3_nopc", "glm, QC, no PCs"),
+        "with_qc_and_pcs": association(run, run.cur, Path(v + "covar.tsv"), "Age,PC1-PC10", v + "s6-3", "6.3 glm, QC and 10 PCs"),
+        "with_qc_no_pcs": association(run, run.cur, Path(v + "covar.tsv"), "Age", v + "s6-2_nopc", "glm, QC, no PCs"),
         "no_qc_no_pcs": association(run, v + "s2-7", Path(v + "covar.tsv"), "Age", v + "s7-7", "7.7 glm, no QC, no PCs"),
     }
     king = table(Path(v + "s3-6.kin0"))

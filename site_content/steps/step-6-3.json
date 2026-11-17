@@ -4,40 +4,127 @@
   "module": 6,
   "step": 3,
   "anchor": "step-6-3",
-  "title": "Prepare covariates",
+  "title": "Run the association scan",
   "source": "lessons/module_06_association.Rmd",
-  "source_sha256": "105baffbef1a47293aacf3402fae6fa75924b3c3ae633e4ed322128cc2e5d54b",
+  "source_sha256": "205d95c081cc288910abf00408dafbf1273e026fd6ee16572490eb25d31b22f6",
   "verification": "windows_executed",
   "blocks": {
-    "what_we_do": "Join age and ten principal components ([PCs](docs/glossary.md#pca-pc)) to the IDs of the retained samples. Then check that no value is missing and that the table has full rank (explained below).",
-    "why": "Covariates are extra measured factors, such as age. They adjust the comparison between cases and controls. PCs describe ancestry differences between people. If the covariates belong to the wrong samples, every test is wrong, yet the output still looks normal. A sample with a missing covariate is dropped from the model. [Collinearity](docs/glossary.md#collinearity) means that one column can be predicted exactly from the other columns. Then the model cannot give a single answer. Full rank means that no column has this problem. We check the IDs and the rank before the scan. PLINK reads sex from the PSAM file and adds it to the model.",
-    "you_need": "The state saved at 5.7, the cohort eigenvectors (the PC values of each sample) from 5.7 and the metadata from 2.7.",
-    "command": "```{r s6-3}\n# 1. Read sample details, genetic component scores and age records.\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\npcs <- guided_table(paste0(guided_path(cfg, \"5.7\", \"pca\"), \".eigenvec\"))\nmetadata <- guided_metadata(cfg)\n# 2. Match sample IDs and make a complete table of age and ten component scores.\na <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)\nstopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))\ncovar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))\nfor (name in paste0(\"PC\", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])\nstopifnot(!anyNA(covar))\n# 3. Check that no model column repeats information from the other columns.\ndesign <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))\nstopifnot(qr(design)$rank == ncol(design))\nnames(covar)[1] <- \"#FID\"\n# 4. Save the covariate table and print its number of rows.\nguided_write(covar, guided_path(cfg, \"6.3\", \"covariates.tsv\"))\ncat(nrow(covar), \"complete covariate rows written\\n\")\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"6.3\", guided_path(cfg, \"6.3\", \"covariates.tsv\"), parent = \"6.1\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\nNot applicable. This step needs no PLINK operation. The R chunk is the complete command.\n\nR reads or calculates the values it shows. It does not change the genotype files.",
-    "expected_result": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
+    "what_we_do": "Fit the additive logistic model, planned in advance, at every retained variant that PLINK can analyse. The model includes age, sex and ten PCs.",
+    "why": "The scan tests one variant at a time. The covariates stay the same for every test. The [null hypothesis](docs/glossary.md#null-hypothesis) of the additive test is beta = 0, which means no effect. A small p-value is evidence against the null hypothesis, if the model and its assumptions are right. It does not measure the size of the effect. It does not prove a cause. It is not the probability that the null hypothesis is true. Firth fallback means that PLINK switches to Firth correction when the ordinary fit fails, which gives a more stable result. The ordinary fit can fail because of [separation](docs/glossary.md#separation). We never choose the covariates after we look at the peaks in the results.",
+    "you_need": "The final genotype files from 5.7 and the covariates from 6.2.",
+    "command": "```{r s6-3}\n# 1. Test variants with the frequency rule and the chosen adjustment factors.\nout <- guided_path(cfg, \"6.3\", \"association\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--maf\", \"0.01\", \"--covar\", guided_path(cfg, \"6.2\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"sex\", \"hide-covar\", \"firth-fallback\", \"--out\", out))\nresults <- guided_association(out)\n# 2. Check the number of valid tests and results below the course significance threshold.\nvalid <- valid_p(results$P)\nstopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)\n# 3. Save a table of the association results.\nguided_write(results, guided_path(cfg, \"6.3\", \"results.tsv\"))\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"6.3\", c(paste0(out, \".Disease.glm.logistic.hybrid\"), guided_path(cfg, \"6.3\", \"results.tsv\")), parent = \"6.2\")\n```\n\nPlain PLINK 2 command (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-3_association --threads 2 --memory 2048\n```\n\n`--maf 0.01` checks the frequency rule again in the final cohort. `--covar` loads the covariate table, which is keyed by sample ID. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales the numerical covariates so that the fit is stable. It does not change the genetic hypothesis that is tested. `--glm sex` adds the recorded sex to the model. `hide-covar` reports only the genetic tests, not the coefficient of every covariate. `firth-fallback` uses Firth correction when it is needed. `--pfile` reads the final genotype files. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.",
+    "expected_result": "The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero.\n\n\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.",
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console log. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
-    "quick_check": "Why is a complete covariate table with the right number of rows not enough by itself?\n\n<details><summary>Show the answer</summary>\n\nThe rows must belong to the correct sample IDs. Each row must match its own sample.\n\n</details>",
-    "files_created": "`s6-3_covariates.tsv`."
+    "quick_check": "Does a tiny p-value imply a large odds ratio?\n\n<details><summary>Show the answer</summary>\n\nNo. The p-value depends on the effect, the uncertainty and the sample size. Also report the effect estimate and its interval.\n\n</details>",
+    "files_created": "`s6-3_association.Disease.glm.logistic.hybrid`, the log files and `s6-3_results.tsv`, a cleaned copy of the results."
   },
   "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "s6-3",
-      "code": "# 1. Read sample details, genetic component scores and age records.\npsam <- guided_table(paste0(guided_path(cfg, \"5.7\"), \".psam\"))\npcs <- guided_table(paste0(guided_path(cfg, \"5.7\", \"pca\"), \".eigenvec\"))\nmetadata <- guided_metadata(cfg)\n# 2. Match sample IDs and make a complete table of age and ten component scores.\na <- match(psam$IID, metadata$IID); b <- match(psam$IID, pcs$IID)\nstopifnot(!anyNA(a), !anyNA(b), !anyDuplicated(pcs$IID))\ncovar <- data.frame(FID = psam$FID, IID = psam$IID, Age = as.numeric(metadata$Age[a]))\nfor (name in paste0(\"PC\", 1:10)) covar[[name]] <- as.numeric(pcs[[name]][b])\nstopifnot(!anyNA(covar))\n# 3. Check that no model column repeats information from the other columns.\ndesign <- model.matrix(~ ., data = data.frame(SEX = as.numeric(psam$SEX), covar[, -(1:2)]))\nstopifnot(qr(design)$rank == ncol(design))\nnames(covar)[1] <- \"#FID\"\n# 4. Save the covariate table and print its number of rows.\nguided_write(covar, guided_path(cfg, \"6.3\", \"covariates.tsv\"))\ncat(nrow(covar), \"complete covariate rows written\\n\")\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"6.3\", guided_path(cfg, \"6.3\", \"covariates.tsv\"), parent = \"6.1\")",
+      "code": "# 1. Test variants with the frequency rule and the chosen adjustment factors.\nout <- guided_path(cfg, \"6.3\", \"association\")\nrun_plink(cfg, c(\"--pfile\", guided_path(cfg, \"5.7\"), \"--maf\", \"0.01\", \"--covar\", guided_path(cfg, \"6.2\", \"covariates.tsv\"),\n  \"--covar-name\", \"Age,PC1-PC10\", \"--covar-variance-standardize\", \"--glm\", \"sex\", \"hide-covar\", \"firth-fallback\", \"--out\", out))\nresults <- guided_association(out)\n# 2. Check the number of valid tests and results below the course significance threshold.\nvalid <- valid_p(results$P)\nstopifnot(sum(valid) == 236815L, sum(results$P[valid] < 5e-8) == 8L)\n# 3. Save a table of the association results.\nguided_write(results, guided_path(cfg, \"6.3\", \"results.tsv\"))\n# Course bookkeeping: records the counts for the next step. Do not change.\nguided_artifact_checkpoint(cfg, \"6.3\", c(paste0(out, \".Disease.glm.logistic.hybrid\"), guided_path(cfg, \"6.3\", \"results.tsv\")), parent = \"6.2\")",
       "run_by_default": true
     }
   ],
   "notebook_only_expected_code": [],
   "plink": {
-    "applicable": false,
-    "commands": [],
-    "options": []
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s6-3_association --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--covar",
+        "explanation_markdown": "`--covar` loads the covariate table, which is keyed by sample ID."
+      },
+      {
+        "name": "--covar-name",
+        "explanation_markdown": "`--covar-name` selects Age and PC1 to PC10."
+      },
+      {
+        "name": "--covar-variance-standardize",
+        "explanation_markdown": "`--covar-variance-standardize` rescales the numerical covariates so that the fit is stable."
+      },
+      {
+        "name": "--glm",
+        "explanation_markdown": "`--glm sex` adds the recorded sex to the model."
+      },
+      {
+        "name": "--maf",
+        "explanation_markdown": "`--maf 0.01` checks the frequency rule again in the final cohort."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--out` sets the prefix of the report files."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--pfile` reads the final genotype files."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
+      }
+    ]
   },
   "figures": [],
-  "student_summary": "We prepare covariates, extra factors used to adjust the disease comparison: age and ten numbers describing patterns of genetic variation. We match them to sample IDs and check for missing values and columns that repeat information from other columns.",
-  "student_plink_options": [],
-  "success_line": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10.",
+  "student_summary": "We test variants whose less common DNA version occurs at a frequency of at least 1% in the final study group. We adjust for age, sex and ten numbers describing genetic variation, then check and save the results.",
+  "student_plink_options": [
+    {
+      "label": "test variants with the adjusted model",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."
+        },
+        {
+          "name": "--maf",
+          "explanation": "Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the final study group."
+        },
+        {
+          "name": "--covar",
+          "explanation": "Reads s6-2_covariates.tsv, matching age and genetic component scores to samples by their IDs."
+        },
+        {
+          "name": "--covar-name",
+          "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."
+        },
+        {
+          "name": "--covar-variance-standardize",
+          "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."
+        },
+        {
+          "name": "--glm",
+          "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.",
+          "modifiers": [
+            {
+              "name": "sex",
+              "explanation": "Adds the recorded sex from s5-7_state.psam as an adjustment factor in the model."
+            },
+            {
+              "name": "hide-covar",
+              "explanation": "Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores."
+            },
+            {
+              "name": "firth-fallback",
+              "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."
+            }
+          ]
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with s6-3_association, including s6-3_association.Disease.glm.logistic.hybrid."
+        }
+      ]
+    }
+  ],
+  "success_line": "The frequency check in the final cohort removes another 1,698 variants.",
   "verification_notes": [
     "\nThe tested PLINK version is defined in `config.R` and recorded in\n`software_versions.txt`. Validation: executable chunks passed on Windows; main test counts and significance match the expected values.\n"
   ],
-  "student_expected_result": "1,811 complete covariate rows that match the samples, with Age and PC1 to PC10. There are no duplicate or unmatched IDs. The design has full column rank."
+  "student_expected_result": "The frequency check in the final cohort removes another 1,698 variants. This leaves 236,815 additive p-values that are finite numbers. Eight of them are below 0.00000005. A variant kept before the scan can still fail the frequency check after the cohort changes. Read the output and the log. Never replace a missing result with zero."
 }

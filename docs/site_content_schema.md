@@ -207,7 +207,7 @@ rejects a step where the block is not last. The block has four to six paragraphs
 student: what the tool computes, why the course uses its values, edge cases and pitfalls, and
 two to four primary references, each with a PMID or DOI checked against PubMed or the DOI
 resolver. It stays between 150 and 350 words and adds no command. It is currently written for
-steps 3.4, 3.5, 3.6, 5.4 and 6.6 only.
+steps 3.4, 3.5, 3.6, 5.4 and 6.5 only.
 
 ## Links in exported text
 

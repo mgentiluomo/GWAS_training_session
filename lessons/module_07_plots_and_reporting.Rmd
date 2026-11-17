@@ -24,7 +24,7 @@ source("R/guided.R")
 cfg <- guided_init()
 ```
 
-<!-- module_meta: {"prerequisites":{"checkpoint":"6.8","restart_step":"7.1","files":[{"base":"output","path":"s6-4_association.Disease.glm.logistic.hybrid"},{"base":"output","path":"s6-8_gwas_summary_statistics.tsv"},{"base":"output","path":"s5-7_state.pgen"},{"base":"output","path":"s5-7_state.pvar"},{"base":"output","path":"s5-7_state.psam"},{"base":"output","path":"s6-3_covariates.tsv"},{"base":"output","path":"step_counts.tsv"},{"base":"output","path":"checkpoints/index.tsv"},{"base":"data","path":"lab_export/sample_sheet.csv"},{"base":"data","path":"phenotypes/sim2026_phenotypes.tsv"},{"base":"data","path":"checkpoints/2.8/state.pgen"},{"base":"data","path":"checkpoints/2.8/state.pvar"},{"base":"data","path":"checkpoints/2.8/state.psam"}]}} -->
+<!-- module_meta: {"prerequisites":{"checkpoint":"6.7","restart_step":"7.1","files":[{"base":"output","path":"s6-3_association.Disease.glm.logistic.hybrid"},{"base":"output","path":"s6-7_gwas_summary_statistics.tsv"},{"base":"output","path":"s5-7_state.pgen"},{"base":"output","path":"s5-7_state.pvar"},{"base":"output","path":"s5-7_state.psam"},{"base":"output","path":"s6-2_covariates.tsv"},{"base":"output","path":"step_counts.tsv"},{"base":"output","path":"checkpoints/index.tsv"},{"base":"data","path":"lab_export/sample_sheet.csv"},{"base":"data","path":"phenotypes/sim2026_phenotypes.tsv"},{"base":"data","path":"checkpoints/2.8/state.pgen"},{"base":"data","path":"checkpoints/2.8/state.pvar"},{"base":"data","path":"checkpoints/2.8/state.psam"}]}} -->
 
 ## Module 7 at a glance {#module-7-overview}
 
@@ -48,7 +48,7 @@ cfg <- guided_init()
 
 Draw a quantile-quantile (QQ) plot. It compares the p-values we observed with the p-values we would expect if no variant were associated with the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
 
-The plot reads the [summary statistics file](../docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.
+The plot reads the [summary statistics file](../docs/glossary.md#summary-statistics) that we made at step 6.7. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.
 
 ### Why
 
@@ -60,7 +60,7 @@ The top left corner of the plot shows a number called lambda. Lambda summarises 
 
 ### You need
 
-The summary statistics file from step 6.8. If R says that the file is missing, run step 6.8 first.
+The summary statistics file from step 6.7. If R says that the file is missing, run step 6.7 first.
 
 ### Command
 
@@ -132,7 +132,7 @@ A lambda near one means that the middle of the results looks as expected. It doe
 
 ### You need
 
-The same autosomal p-values that we used at 7.1. R reads them from the summary statistics file made at step 6.8.
+The same autosomal p-values that we used at 7.1. R reads them from the summary statistics file made at step 6.7.
 
 ### Command
 
@@ -190,7 +190,7 @@ No. Lambda summarises the middle of all the tests. It does not show that one sin
 <!-- step_meta: {"success_line": "There are three regions with very small p-values, on chromosomes 3, 9 and 12.", "student_summary": "We draw a Manhattan plot, which shows the strength of each result at its position along chromosomes 1 to 22, and label the lead variant of each region. We also check that eight variants have p-values below 5 × 10⁻⁸ (0.00000005) to confirm the count of results with very small p-values.", "student_plink_options": []} -->
 ### What we do
 
-Draw a Manhattan plot of the association results along the autosomes. The plot reads the summary statistics file made at step 6.8.
+Draw a Manhattan plot of the association results along the autosomes. The plot reads the summary statistics file made at step 6.7.
 
 ### Why
 
@@ -202,7 +202,7 @@ All positions use the [GRCh38](../docs/glossary.md#grch38) genome build. The plo
 
 ### You need
 
-The summary statistics file from step 6.8. If R says that the file is missing, run step 6.8 first.
+The summary statistics file from step 6.7. If R says that the file is missing, run step 6.7 first.
 
 ### Command
 
@@ -295,7 +295,7 @@ The Benjamini-Hochberg (BH) method controls a different quantity. This quantity 
 
 ### You need
 
-The valid additive results from the summary statistics file made at step 6.8. Do not replace p-values that failed with other values.
+The valid additive results from the summary statistics file made at step 6.7. Do not replace p-values that failed with other values.
 
 ### Command
 
@@ -351,7 +351,7 @@ No. The rate describes the whole set of discoveries on average. It is not a prob
 ## 7.5 Clump correlated results {#step-7-5}
 
 
-<!-- step_meta: {"success_line": "There are three clumps.", "student_summary": "We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.", "student_plink_options": [{"label": "group correlated results", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--clump", "explanation": "Reads s6-4_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples."}, {"name": "--clump-id-field", "explanation": "Uses the ID column of the association report to identify variants."}, {"name": "--clump-p-field", "explanation": "Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect."}, {"name": "--clump-p1", "explanation": "Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005)."}, {"name": "--clump-p2", "explanation": "Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001)."}, {"name": "--clump-r2", "explanation": "Adds variants whose squared correlation with the group's lead variant exceeds 0.1."}, {"name": "--clump-kb", "explanation": "Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its lead variant."}, {"name": "--clump-unphased", "explanation": "Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes."}, {"name": "--out", "explanation": "Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps."}]}]} -->
+<!-- step_meta: {"success_line": "There are three clumps.", "student_summary": "We group nearby variants whose DNA patterns are correlated, meaning they tend to vary together across people. We use the final cohort to measure this similarity and check that the significant results form three groups.", "student_plink_options": [{"label": "group correlated results", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--clump", "explanation": "Reads s6-3_association.Disease.glm.logistic.hybrid and groups nearby association results whose DNA patterns are correlated across samples."}, {"name": "--clump-id-field", "explanation": "Uses the ID column of the association report to identify variants."}, {"name": "--clump-p-field", "explanation": "Uses the P column of the association report for p-values, which measure how unusual each result would be without an effect."}, {"name": "--clump-p1", "explanation": "Allows a variant to lead a group when its p-value is at most 5 × 10⁻⁸ (0.00000005)."}, {"name": "--clump-p2", "explanation": "Lists other variants in a group when their p-values are at most 1 × 10⁻⁵ (0.00001)."}, {"name": "--clump-r2", "explanation": "Adds variants whose squared correlation with the group's lead variant exceeds 0.1."}, {"name": "--clump-kb", "explanation": "Limits each group to variants within 250 kilobases, or 250,000 DNA positions, on either side of its lead variant."}, {"name": "--clump-unphased", "explanation": "Calculates correlation from the number of copies of a DNA version at each variant, without assigning those copies to individual chromosomes."}, {"name": "--out", "explanation": "Starts output file names with s7-5_clump, including the grouped results in s7-5_clump.clumps."}]}]} -->
 ### What we do
 
 Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.
@@ -364,7 +364,7 @@ Clumping is not [fine-mapping](../docs/glossary.md#fine-mapping). It does not sh
 
 ### You need
 
-The full genotype set from step 5.7 and the PLINK association report from step 6.4, unchanged. This step still reads the PLINK report and not the summary statistics file. The reason is that the `--clump` option of PLINK expects the format of its own report.
+The full genotype set from step 5.7 and the PLINK association report from step 6.3, unchanged. This step still reads the PLINK report and not the summary statistics file. The reason is that the `--clump` option of PLINK expects the format of its own report.
 
 ### Command
 
@@ -372,7 +372,7 @@ The full genotype set from step 5.7 and the PLINK association report from step 6
 # 1. Choose the name for the grouped association results.
 report <- guided_path(cfg, "7.5", "clump")
 # 2. Group nearby correlated variants using the final cohort.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.4", "association"), ".Disease.glm.logistic.hybrid"),
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--clump", paste0(guided_path(cfg, "6.3", "association"), ".Disease.glm.logistic.hybrid"),
   "--clump-id-field", "ID", "--clump-p-field", "P", "--clump-p1", "5e-8", "--clump-p2", "1e-5",
   "--clump-r2", "0.1", "--clump-kb", "250", "--clump-unphased", "--out", report))
 # 3. Read the groups and check that there are three.
@@ -384,7 +384,7 @@ stopifnot(nrow(clumps) == 3L)
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
-bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-4_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --clump results/guided/s6-3_association.Disease.glm.logistic.hybrid --clump-id-field ID --clump-p-field P --clump-p1 5e-8 --clump-p2 1e-5 --clump-r2 0.1 --clump-kb 250 --clump-unphased --out results/guided/s7-5_clump --threads 2 --memory 2048
 ```
 
 `--clump` reads the association report. `--clump-id-field ID` names the column that holds the variant ID. `--clump-p-field P` names the column that holds the p-value. `--clump-p1 5e-8` sets the p-value that a variant needs to be a lead variant. `--clump-p2 1e-5` sets the p-value that other variants need to be listed in a clump. `--clump-r2 0.1` sets the [r^2](../docs/glossary.md#r-squared) threshold: a variant joins a clump only if its squared correlation with the lead is above 0.1. `--clump-kb 250` sets the distance limit in kilobases (250 kb on each side of the lead). `--clump-unphased` uses the squared correlation of the genotype dosages, so the definition of LD is clear. `--pfile` reads the genotype files in the PLINK 2 format. `--out` names the report. `--threads 2` limits the number of worker threads. `--memory 2048` sets the working memory in MiB.
@@ -436,7 +436,7 @@ The colour scale is continuous. It runs from pale yellow, where r^2 is 0 and the
 
 ### You need
 
-The summary statistics file from step 6.8, the final cohort and the three lead variants 3:163224115:T:C, 9:96426973:A:G and 12:120965921:G:A from the clumps.
+The summary statistics file from step 6.7, the final cohort and the three lead variants 3:163224115:T:C, 9:96426973:A:G and 12:120965921:G:A from the clumps.
 
 ### Command
 
@@ -474,7 +474,7 @@ for (i in seq_len(nrow(regions))) {
   stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])
 }
 # Course bookkeeping: records the counts for the next step. Do not change.
-guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows). The three commands are for L1, L2 and L3:
@@ -537,7 +537,7 @@ No. The lead variant is the association with the smallest p-value among the site
 ## 7.7 Compare without PCs and without QC {#step-7-7}
 
 
-<!-- step_meta: {"success_line": "Main analysis: 236,815 tests, eight hits, lambda about 1.016.", "student_summary": "We repeat the association tests without genetic components, the numbers that summarise ancestry, and then without sample and variant quality checks as well. We compare counts and plots to see how these choices change the results.", "student_plink_options": [{"label": "test the final cohort without genetic components", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--maf", "explanation": "Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort."}, {"name": "--covar", "explanation": "Reads s6-3_covariates.tsv and matches adjustment values to samples by their identifiers."}, {"name": "--covar-name", "explanation": "Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry."}, {"name": "--covar-variance-standardize", "explanation": "Rescales age to have a mean of zero and a variance of one so the model calculation remains stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds recorded sex from the input sample file as an adjustment factor."}, {"name": "hide-covar", "explanation": "Reports genetic tests without separate rows for the effects of age and sex."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s7-7_no_pcs, including s7-7_no_pcs.Disease.glm.logistic.hybrid."}]}, {"label": "test the cohort before sample and variant quality checks", "options": [{"name": "--pfile", "explanation": "Reads the cohort before sample and variant quality checks from s2-8_state.pgen, s2-8_state.pvar and s2-8_state.psam. If the local PGEN file is absent, R uses checkpoints/2.8/state in the course data folder."}, {"name": "--maf", "explanation": "Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort."}, {"name": "--covar", "explanation": "Reads s7-7_all_ages.tsv, which holds ages for all measured wells, and matches them to samples by their identifiers."}, {"name": "--covar-name", "explanation": "Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry."}, {"name": "--covar-variance-standardize", "explanation": "Rescales age to have a mean of zero and a variance of one so the model calculation remains stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds recorded sex from the input sample file as an adjustment factor."}, {"name": "hide-covar", "explanation": "Reports genetic tests without separate rows for the effects of age and sex."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s7-7_no_qc_no_pcs, including s7-7_no_qc_no_pcs.Disease.glm.logistic.hybrid."}]}]} -->
+<!-- step_meta: {"success_line": "Main analysis: 236,815 tests, eight hits, lambda about 1.016.", "student_summary": "We repeat the association tests without genetic components, the numbers that summarise ancestry, and then without sample and variant quality checks as well. We compare counts and plots to see how these choices change the results.", "student_plink_options": [{"label": "test the final cohort without genetic components", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, s5-7_state.pvar and s5-7_state.psam, which hold the final cohort's DNA calls, variant information and sample information."}, {"name": "--maf", "explanation": "Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort."}, {"name": "--covar", "explanation": "Reads s6-2_covariates.tsv and matches adjustment values to samples by their identifiers."}, {"name": "--covar-name", "explanation": "Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry."}, {"name": "--covar-variance-standardize", "explanation": "Rescales age to have a mean of zero and a variance of one so the model calculation remains stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds recorded sex from the input sample file as an adjustment factor."}, {"name": "hide-covar", "explanation": "Reports genetic tests without separate rows for the effects of age and sex."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s7-7_no_pcs, including s7-7_no_pcs.Disease.glm.logistic.hybrid."}]}, {"label": "test the cohort before sample and variant quality checks", "options": [{"name": "--pfile", "explanation": "Reads the cohort before sample and variant quality checks from s2-8_state.pgen, s2-8_state.pvar and s2-8_state.psam. If the local PGEN file is absent, R uses checkpoints/2.8/state in the course data folder."}, {"name": "--maf", "explanation": "Tests only variants whose less common DNA version has a frequency of at least 0.01, or 1%, in the input cohort."}, {"name": "--covar", "explanation": "Reads s7-7_all_ages.tsv, which holds ages for all measured wells, and matches them to samples by their identifiers."}, {"name": "--covar-name", "explanation": "Selects only Age from the adjustment table, leaving out genetic component scores that summarise ancestry."}, {"name": "--covar-variance-standardize", "explanation": "Rescales age to have a mean of zero and a variance of one so the model calculation remains stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. The odds of disease are the chance of having the disease divided by the chance of not having it.", "modifiers": [{"name": "sex", "explanation": "Adds recorded sex from the input sample file as an adjustment factor."}, {"name": "hide-covar", "explanation": "Reports genetic tests without separate rows for the effects of age and sex."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}]}, {"name": "--out", "explanation": "Starts output file names with s7-7_no_qc_no_pcs, including s7-7_no_qc_no_pcs.Disease.glm.logistic.hybrid."}]}]} -->
 ### What we do
 
 Compare the main analysis, which we planned in advance, with two analyses that we deliberately make weaker.
@@ -550,14 +550,14 @@ In the second comparison, we start from the state saved at module 2. It has the 
 
 ### You need
 
-The state from step 5.7, the state from step 2.8, the summary statistics file from step 6.8 for the main analysis, the covariates and the original sample information. The two comparison scans are new PLINK reports. R puts them into the same standard columns in memory. In this way, all three analyses are summarised in the same way.
+The state from step 5.7, the state from step 2.8, the summary statistics file from step 6.7 for the main analysis, the covariates and the original sample information. The two comparison scans are new PLINK reports. R puts them into the same standard columns in memory. In this way, all three analyses are summarised in the same way.
 
 ### Command
 
 ```{r s7-7}
 # 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.3", "covariates.tsv"),
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))
 # 2. Read the original sample information and save ages for all wells.
 metadata <- guided_metadata(cfg)
@@ -619,7 +619,7 @@ save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
-bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_pcs --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-7_state --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_pcs --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s2-8_state --maf 0.01 --covar results/guided/s7-7_all_ages.tsv --covar-name Age --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/guided/s7-7_no_qc_no_pcs --threads 2 --memory 2048
 ```
 
@@ -692,7 +692,7 @@ Keep two differences clear. An association that we observed is not a proof of a 
 
 ### You need
 
-Modules 0 to 6, checked. Also the summary statistics file from step 6.8 and the figures and comparisons from steps 7.1 to 7.7.
+Modules 0 to 6, checked. Also the summary statistics file from step 6.7 and the figures and comparisons from steps 7.1 to 7.7.
 
 ### Command
 
@@ -731,7 +731,7 @@ files <- c(guided_path(cfg, "7.8", "summary.md"), guided_path(cfg, "7.8", "leads
   guided_path(cfg, "7.6", "regional.png"), guided_path(cfg, "7.7", "qq_comparison.png"),
   guided_path(cfg, "7.7", "comparison.tsv"), paste0(guided_path(cfg, "7.5", "clump"), ".clumps"),
   file.path(cfg$out, "step_counts.tsv"), file.path(cfg$out, "software_versions.txt"))
-guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.8")
+guided_artifact_checkpoint(cfg, "7.8", files, parent = "6.7")
 check_step("7.8", data_dir = cfg$out, work_dir = cfg$out)
 # 6. Print the final report.
 cat(paste(summary, collapse = "\n"), "\n")
