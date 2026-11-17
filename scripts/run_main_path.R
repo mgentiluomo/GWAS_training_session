@@ -509,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 19435a24308be81a0c49b994134a9277f709bb72f64232e7702c0381417d2eaf
+# SHA-256: 9b5582684fc1850b5519813528aaae4377c720a6437e05b585dd70c5c1f18c2a
 
 # Chunk: setup
 source("R/guided.R")
@@ -824,7 +824,7 @@ guided_artifact_checkpoint(cfg, "6.7", c(stats_file, dictionary_file), parent = 
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 772110cbf04a9d75fff87b65d3792b4dc99b7852cd6a17388385281894c80b57
+# SHA-256: b401fa7633d51197ebfc9a7e259dc739b428de0dccf605ed3bba44e57820b912
 
 # Chunk: setup
 source("R/guided.R")

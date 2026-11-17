@@ -534,6 +534,45 @@ No. The lead variant is the association with the smallest p-value among the site
 
 `s7-6_ld.vcor`, `s7-6_ld_chr3.vcor`, `s7-6_ld_chr12.vcor`, `s7-6_regional.png` (L2), `s7-6_regional_chr3.png` (L1), `s7-6_regional_chr12.png` (L3) and the regional analysis checkpoint.
 
+<details><summary>Another approach (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It reads the association results only and writes nothing to disk.
+
+A lead variant is the variant with the smallest p-value in a region. It is not always the causal variant, because nearby variants are correlated. Fine-mapping asks which variants could be causal. A 95% credible set is a group of variants that holds the causal variant with a probability of 95%, under the assumptions of the method. The set is not a list of certain causes.
+
+The method here is Wakefield's approximate Bayes factor (ABF). For each variant, it uses the estimate of the effect (the log odds ratio) and its standard error. It compares two ideas: this variant has an effect, or it has none. The effect under the first idea comes from a prior. The prior is a normal distribution with mean 0 and a standard deviation of 0.2 on the log odds ratio. Its variance W is 0.04. This means that most true effects are small, and an odds ratio of about 1.5 (log 0.4, two standard deviations) is already large. The Bayes factors of all variants in a region are then scaled to add up to 1. Each scaled value is the posterior inclusion probability (PIP) of the variant. We add the variants from the highest PIP down until the sum reaches 95%.
+
+There is one important limit. The method assumes that the region holds exactly one causal variant. If a region has two or more, the PIPs are not valid. The method SuSiE removes this limit, because it can fit several causal variants in one region (Wang et al. 2020, [doi:10.1111/rssb.12388](https://doi.org/10.1111/rssb.12388)). We do not run it here.
+
+```{r s7-6_credible_sets, eval=FALSE}
+# Optional. This reads the objects `regions` and `stats` made in the chunk of this step. It writes no file.
+# 1. For each region, take the variants within 500,000 DNA positions of the lead variant.
+credible <- lapply(seq_len(nrow(regions)), function(i) {
+  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
+  # 2. Calculate the credible set with a prior standard deviation of 0.2 on the log odds ratio (W = 0.04).
+  c(list(variants = nrow(region)), credible_set(region$variant_id, region$beta, region$standard_error, prior_sd = 0.2, level = 0.95))
+})
+# 3. Show one row for each region: the size of the set and the PIP of the lead variant.
+data.frame(region = regions$label, lead = regions$rs, variants_in_region = sapply(credible, function(x) x$variants),
+           set_size = sapply(credible, function(x) x$size), lead_pip = round(sapply(credible, function(x) x$lead_pip), 3))
+```
+
+Plain PLINK 2 command: not applicable. R calculates the Bayes factors from the summary statistics.
+
+Expected result.
+
+| Region | Lead variant | Variants in the region | Variants in the 95% set | PIP of the lead variant |
+| --- | --- | --- | --- | --- |
+| L1 (chromosome 3) | rs1994750 | 42 | 1 | 1.000 |
+| L2 (chromosome 9) | rs10820598 | 66 | 1 | 0.994 |
+| L3 (chromosome 12) | rs7953249 | 94 | 2 | 0.918 |
+
+How to read it. In L1 and L2 the set holds only the lead variant. The lead variant has a much smaller p-value than its neighbours, so the method gives it almost all the probability. In L3 the set holds two variants, and the lead variant has a PIP of 0.918. A small set does not prove that the variant is causal. It depends on the prior, on the single-variant assumption and on the variants that the array measured. The causal variant may not be on the array at all. Do not read the set as a gene or a mechanism. The data are simulated, so the loci carry no biology.
+
+References. The approximate Bayes factor: Wakefield 2009, [doi:10.1002/gepi.20359](https://doi.org/10.1002/gepi.20359). Credible sets from Bayes factors in a region: Maller et al. 2012, [doi:10.1038/ng.2435](https://doi.org/10.1038/ng.2435). SuSiE: Wang et al. 2020, [doi:10.1111/rssb.12388](https://doi.org/10.1111/rssb.12388).
+
+</details>
+
 ## 7.7 Compare without PCs and without QC {#step-7-7}
 
 

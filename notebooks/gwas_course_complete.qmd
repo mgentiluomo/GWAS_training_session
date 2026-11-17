@@ -2715,6 +2715,52 @@ bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove
 
 :::
 
+::: {.callout-tip title="Another approach (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
+
+The course rule is simple. A sample is an outlier when it lies more than six standard deviations from the mean of the European reference on any of the first four PCs. Two other methods are common. This box runs all three on the same samples and compares them.
+
+**Robust Mahalanobis distance (MCD).** The Mahalanobis distance measures how far a sample is from the centre of a group, and it takes the shape of the group into account. A plain centre can be pulled away by outliers. The minimum covariance determinant (MCD) method finds the centre and the shape from the most compact part of the group, so the outliers cannot move them. A sample is an outlier when its squared distance is above the 99.9% point of a chi-squared distribution with four degrees of freedom (one degree for each PC), which is 18.47. We use the function `cov.rob` of the package MASS, which is installed with R. When to prefer it: when the reference group is small or its shape is not round, because the distance follows the shape.
+
+**Nearest 1000 Genomes group.** The step 5.4 scores place the study samples in the same space as the reference. This method measures the Mahalanobis distance of each study sample to the centre of each of the four reference groups (AFR, EAS, EUR and SAS) and assigns the sample to the nearest one. A sample is an outlier when its nearest group is not EUR. When to prefer it: when you want to know where each outlier comes from, for example to keep a second ancestry group for a separate analysis.
+
+```{r}
+#| label: s5-6_alternatives
+#| eval: false
+# Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))  # <1>
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
+result <- ancestry_outliers(ref, study, group)  # <2>
+outlier_method_table(result)
+plot_outlier_methods(result, guided_path(cfg, "5.6", "alt_methods.png"))  # <3>
+```
+
+1. Read the scores of step 5.4 and the group of each reference sample.
+2. Apply the three methods to the same samples and compare them.
+3. Save a plot with a different symbol for the samples that each method removes.
+
+
+Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances. It does not change the genotype files.
+
+Expected result. The table has one row for each method.
+
+| Method | Samples removed | In common with the 6 SD rule | Only this method | Missed by this method |
+| --- | --- | --- | --- | --- |
+| 6 SD rule (course) | 33 | 33 | 0 | 0 |
+| Robust Mahalanobis (MCD) | 39 | 33 | 6 | 0 |
+| Nearest 1000 Genomes group | 33 | 33 | 0 | 0 |
+
+The plot shows an orange triangle, a blue square and a black cross around the samples that each method removes. The 33 samples that all three methods remove form three small groups far from the European cluster. The six extra samples of the MCD method are blue squares at the edge of the European cluster.
+
+How to read it. The six extra MCD samples are not ancestry outliers. Their largest distance on a single PC is between 2.3 and 4.3 standard deviations, and their squared Mahalanobis distance is between 18.8 and 24.6, just above the cutoff of 18.47. The real outliers have a squared distance of at least 2,866. With a cutoff at the 99.9% point, we expect about 0.1% of a perfectly normal group to be flagged. Here that is about 1.8 of the 1,811 European-like samples, and the method flags 6. This is why the course keeps the six-SD rule: the European cluster of this dataset is large and homogeneous, and the distance cutoff is too tight for it. The nearest-group method gives the same 33 samples as the course rule, so here it adds a label (where each outlier comes from) and no new samples.
+
+References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847). The MCD estimator: Rousseeuw and Van Driessen 1999, [doi:10.1080/00401706.1999.10485670](https://doi.org/10.1080/00401706.1999.10485670). Outlier detection in PCA of genetic data: Privé et al. 2020, [doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520). Assigning people to ancestry groups with a reference: Privé et al. 2022, [doi:10.1016/j.ajhg.2021.11.008](https://doi.org/10.1016/j.ajhg.2021.11.008).
+
+:::
+
 ## Step 5.7 · Cohort PCs and how many to include {#step-5-7}
 
 We select common sites with weaker correlations and calculate ten principal components, each a number summarising one pattern of genetic variation within the retained study group. We plot the variation each explains and save a complete checked starting point for module 6.
@@ -3530,6 +3576,49 @@ bin/plink2 --pfile results/guided/s5-7_state --chr 3 --from-bp 162724115 --to-bp
 bin/plink2 --pfile results/guided/s5-7_state --chr 9 --from-bp 95926973 --to-bp 96926973 --r2-unphased --ld-snp 9:96426973:A:G --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s5-7_state --chr 12 --from-bp 120465921 --to-bp 121465921 --r2-unphased --ld-snp 12:120965921:G:A --ld-window-kb 500 --ld-window-r2 0 --out results/guided/s7-6_ld_chr12 --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Another approach (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It reads the association results only and writes nothing to disk.
+
+A lead variant is the variant with the smallest p-value in a region. It is not always the causal variant, because nearby variants are correlated. Fine-mapping asks which variants could be causal. A 95% credible set is a group of variants that holds the causal variant with a probability of 95%, under the assumptions of the method. The set is not a list of certain causes.
+
+The method here is Wakefield's approximate Bayes factor (ABF). For each variant, it uses the estimate of the effect (the log odds ratio) and its standard error. It compares two ideas: this variant has an effect, or it has none. The effect under the first idea comes from a prior. The prior is a normal distribution with mean 0 and a standard deviation of 0.2 on the log odds ratio. Its variance W is 0.04. This means that most true effects are small, and an odds ratio of about 1.5 (log 0.4, two standard deviations) is already large. The Bayes factors of all variants in a region are then scaled to add up to 1. Each scaled value is the posterior inclusion probability (PIP) of the variant. We add the variants from the highest PIP down until the sum reaches 95%.
+
+There is one important limit. The method assumes that the region holds exactly one causal variant. If a region has two or more, the PIPs are not valid. The method SuSiE removes this limit, because it can fit several causal variants in one region (Wang et al. 2020, [doi:10.1111/rssb.12388](https://doi.org/10.1111/rssb.12388)). We do not run it here.
+
+```{r}
+#| label: s7-6_credible_sets
+#| eval: false
+# Optional. This reads the objects `regions` and `stats` made in the chunk of this step. It writes no file.
+credible <- lapply(seq_len(nrow(regions)), function(i) {  # <1>
+  region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
+  c(list(variants = nrow(region)), credible_set(region$variant_id, region$beta, region$standard_error, prior_sd = 0.2, level = 0.95))  # <2>
+})
+data.frame(region = regions$label, lead = regions$rs, variants_in_region = sapply(credible, function(x) x$variants),  # <3>
+           set_size = sapply(credible, function(x) x$size), lead_pip = round(sapply(credible, function(x) x$lead_pip), 3))
+```
+
+1. For each region, take the variants within 500,000 DNA positions of the lead variant.
+2. Calculate the credible set with a prior standard deviation of 0.2 on the log odds ratio (W = 0.04).
+3. Show one row for each region: the size of the set and the PIP of the lead variant.
+
+
+Plain PLINK 2 command: not applicable. R calculates the Bayes factors from the summary statistics.
+
+Expected result.
+
+| Region | Lead variant | Variants in the region | Variants in the 95% set | PIP of the lead variant |
+| --- | --- | --- | --- | --- |
+| L1 (chromosome 3) | rs1994750 | 42 | 1 | 1.000 |
+| L2 (chromosome 9) | rs10820598 | 66 | 1 | 0.994 |
+| L3 (chromosome 12) | rs7953249 | 94 | 2 | 0.918 |
+
+How to read it. In L1 and L2 the set holds only the lead variant. The lead variant has a much smaller p-value than its neighbours, so the method gives it almost all the probability. In L3 the set holds two variants, and the lead variant has a PIP of 0.918. A small set does not prove that the variant is causal. It depends on the prior, on the single-variant assumption and on the variants that the array measured. The causal variant may not be on the array at all. Do not read the set as a gene or a mechanism. The data are simulated, so the loci carry no biology.
+
+References. The approximate Bayes factor: Wakefield 2009, [doi:10.1002/gepi.20359](https://doi.org/10.1002/gepi.20359). Credible sets from Bayes factors in a region: Maller et al. 2012, [doi:10.1038/ng.2435](https://doi.org/10.1038/ng.2435). SuSiE: Wang et al. 2020, [doi:10.1111/rssb.12388](https://doi.org/10.1111/rssb.12388).
 
 :::
 

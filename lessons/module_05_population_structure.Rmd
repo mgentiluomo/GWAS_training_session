@@ -563,6 +563,48 @@ A difference that is weak or invisible on the first two axes can appear on later
 
 `s5-6_remove.txt`, `s5-6_state.*` and replay metadata.
 
+<details><summary>Another approach (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
+
+The course rule is simple. A sample is an outlier when it lies more than six standard deviations from the mean of the European reference on any of the first four PCs. Two other methods are common. This box runs all three on the same samples and compares them.
+
+**Robust Mahalanobis distance (MCD).** The Mahalanobis distance measures how far a sample is from the centre of a group, and it takes the shape of the group into account. A plain centre can be pulled away by outliers. The minimum covariance determinant (MCD) method finds the centre and the shape from the most compact part of the group, so the outliers cannot move them. A sample is an outlier when its squared distance is above the 99.9% point of a chi-squared distribution with four degrees of freedom (one degree for each PC), which is 18.47. We use the function `cov.rob` of the package MASS, which is installed with R. When to prefer it: when the reference group is small or its shape is not round, because the distance follows the shape.
+
+**Nearest 1000 Genomes group.** The step 5.4 scores place the study samples in the same space as the reference. This method measures the Mahalanobis distance of each study sample to the centre of each of the four reference groups (AFR, EAS, EUR and SAS) and assigns the sample to the nearest one. A sample is an outlier when its nearest group is not EUR. When to prefer it: when you want to know where each outlier comes from, for example to keep a second ancestry group for a separate analysis.
+
+```{r s5-6_alternatives, eval=FALSE}
+# Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
+# 1. Read the scores of step 5.4 and the group of each reference sample.
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
+# 2. Apply the three methods to the same samples and compare them.
+result <- ancestry_outliers(ref, study, group)
+outlier_method_table(result)
+# 3. Save a plot with a different symbol for the samples that each method removes.
+plot_outlier_methods(result, guided_path(cfg, "5.6", "alt_methods.png"))
+```
+
+Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances. It does not change the genotype files.
+
+Expected result. The table has one row for each method.
+
+| Method | Samples removed | In common with the 6 SD rule | Only this method | Missed by this method |
+| --- | --- | --- | --- | --- |
+| 6 SD rule (course) | 33 | 33 | 0 | 0 |
+| Robust Mahalanobis (MCD) | 39 | 33 | 6 | 0 |
+| Nearest 1000 Genomes group | 33 | 33 | 0 | 0 |
+
+The plot shows an orange triangle, a blue square and a black cross around the samples that each method removes. The 33 samples that all three methods remove form three small groups far from the European cluster. The six extra samples of the MCD method are blue squares at the edge of the European cluster.
+
+How to read it. The six extra MCD samples are not ancestry outliers. Their largest distance on a single PC is between 2.3 and 4.3 standard deviations, and their squared Mahalanobis distance is between 18.8 and 24.6, just above the cutoff of 18.47. The real outliers have a squared distance of at least 2,866. With a cutoff at the 99.9% point, we expect about 0.1% of a perfectly normal group to be flagged. Here that is about 1.8 of the 1,811 European-like samples, and the method flags 6. This is why the course keeps the six-SD rule: the European cluster of this dataset is large and homogeneous, and the distance cutoff is too tight for it. The nearest-group method gives the same 33 samples as the course rule, so here it adds a label (where each outlier comes from) and no new samples.
+
+References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847). The MCD estimator: Rousseeuw and Van Driessen 1999, [doi:10.1080/00401706.1999.10485670](https://doi.org/10.1080/00401706.1999.10485670). Outlier detection in PCA of genetic data: Privé et al. 2020, [doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520). Assigning people to ancestry groups with a reference: Privé et al. 2022, [doi:10.1016/j.ajhg.2021.11.008](https://doi.org/10.1016/j.ajhg.2021.11.008).
+
+</details>
+
 ## 5.7 Cohort PCs and how many to include {#step-5-7}
 
 
@@ -661,3 +703,53 @@ Pruning lists, eigenvectors and eigenvalues, the scree plot (PNG), the working s
 - 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.
 
 **Next:** module 6, where you run the association test and use these PCs as covariates.
+
+<details><summary>Another approach (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It runs its own PCA with 20 components and its own association scans, and it writes only to files that start with `s5-7_alt_`. The files and checkpoints of the main path do not change. The box takes about three minutes, because it runs PLINK eight times.
+
+The course keeps ten PCs. This box shows how to decide how many PCs a study needs. Three ideas help.
+
+- **The scree plot.** The eigenvalue of a PC shows how much variation it carries. PCs that carry real structure stand above a flat tail. The bend between the two parts, the elbow, suggests how many to keep.
+- **PCs associated with the outcome.** A PC that differs between cases and controls can confound the test. We test each PC against the disease with a logistic regression. A PC that is not associated with the outcome adds little to the correction.
+- **The inflation factor.** We repeat the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs, and we read lambda and the number of hits. Lambda should be close to 1.
+
+A formal test also exists. The Tracy-Widom test asks whether an eigenvalue is larger than expected from random noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
+
+```{r s5-7_pc_number, eval=FALSE}
+# Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
+# 1. Run a 20-component PCA and the association scans for 0, 1, 2, 3, 5, 10, 15 and 20 PCs.
+trials <- guided_pc_trials(cfg)
+# 2. Show hits and lambda for each number of PCs.
+trials$trials
+# 3. Show the first eigenvalues and the p-values of the first PCs against the outcome.
+round(trials$eigenvalues[1:5], 3)
+signif(trials$outcome_p[1:5], 3)
+# 4. Plot the eigenvalues (scree plot) and lambda against the number of PCs.
+par(mfrow = c(1, 2))
+plot(1:20, trials$eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = "Eigenvalue", main = "Scree plot")
+plot(trials$trials$k, trials$trials$lambda, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Lambda", main = "Lambda")
+abline(h = 1, lty = 2)
+```
+
+Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3. The covariates are Age and the first k PCs (`--covar-name Age,PC1-PC10` for ten).
+
+Expected result.
+
+| Number of PCs | Hits below 5e-8 | Lambda |
+| --- | --- | --- |
+| 0 | 17 | 1.5273 |
+| 1 | 8 | 1.0101 |
+| 2 | 8 | 1.0136 |
+| 3 | 8 | 1.0137 |
+| 5 | 8 | 1.0150 |
+| **10 (course value)** | 8 | 1.0157 |
+| 15 | 8 | 1.0185 |
+| 20 | 8 | 1.0183 |
+
+The scree plot has one high point and a flat tail. The first eigenvalue is 13.996, and the second is 1.428. The p-values against the outcome are 2.3e-17 for PC1, 0.054 for PC2 and 0.59 for PC3.
+
+How to read it. Only PC1 stands out. Its eigenvalue is ten times larger than the rest, and it is the only PC with a clear association with the outcome. Without any PC, there are 17 hits and lambda is 1.53, so the correction is needed. One PC already brings lambda to 1.010. Ten PCs give 1.016 and 20 give 1.018, so extra PCs do not help and add a little noise. The number of hits stays at eight. The course keeps ten PCs because it is a common default and it is safe, and this dataset shows that fewer would also work. For a real study, choose the number from the scree plot and the lambda, and report it.
+
+</details>
+

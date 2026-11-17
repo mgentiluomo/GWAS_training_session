@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "19435a24308be81a0c49b994134a9277f709bb72f64232e7702c0381417d2eaf"
+course_source_sha256: "9b5582684fc1850b5519813528aaae4377c720a6437e05b585dd70c5c1f18c2a"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -375,6 +375,52 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 ```sh
 bin/plink2 --pfile results/guided/s4-6_state --remove results/guided/s5-6_remove.txt --make-pgen --out results/guided/s5-6_state --threads 2 --memory 2048
 ```
+
+:::
+
+::: {.callout-tip title="Another approach (optional)" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
+
+The course rule is simple. A sample is an outlier when it lies more than six standard deviations from the mean of the European reference on any of the first four PCs. Two other methods are common. This box runs all three on the same samples and compares them.
+
+**Robust Mahalanobis distance (MCD).** The Mahalanobis distance measures how far a sample is from the centre of a group, and it takes the shape of the group into account. A plain centre can be pulled away by outliers. The minimum covariance determinant (MCD) method finds the centre and the shape from the most compact part of the group, so the outliers cannot move them. A sample is an outlier when its squared distance is above the 99.9% point of a chi-squared distribution with four degrees of freedom (one degree for each PC), which is 18.47. We use the function `cov.rob` of the package MASS, which is installed with R. When to prefer it: when the reference group is small or its shape is not round, because the distance follows the shape.
+
+**Nearest 1000 Genomes group.** The step 5.4 scores place the study samples in the same space as the reference. This method measures the Mahalanobis distance of each study sample to the centre of each of the four reference groups (AFR, EAS, EUR and SAS) and assigns the sample to the nearest one. A sample is an outlier when its nearest group is not EUR. When to prefer it: when you want to know where each outlier comes from, for example to keep a second ancestry group for a separate analysis.
+
+```{r}
+#| label: s5-6_alternatives
+#| eval: false
+# Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
+metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))  # <1>
+ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
+study <- guided_table(paste0(guided_path(cfg, "5.4", "study_scores"), ".sscore"))
+group <- metadata$SuperPop[match(ref$IID, metadata$IID)]
+result <- ancestry_outliers(ref, study, group)  # <2>
+outlier_method_table(result)
+plot_outlier_methods(result, guided_path(cfg, "5.6", "alt_methods.png"))  # <3>
+```
+
+1. Read the scores of step 5.4 and the group of each reference sample.
+2. Apply the three methods to the same samples and compare them.
+3. Save a plot with a different symbol for the samples that each method removes.
+
+
+Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances. It does not change the genotype files.
+
+Expected result. The table has one row for each method.
+
+| Method | Samples removed | In common with the 6 SD rule | Only this method | Missed by this method |
+| --- | --- | --- | --- | --- |
+| 6 SD rule (course) | 33 | 33 | 0 | 0 |
+| Robust Mahalanobis (MCD) | 39 | 33 | 6 | 0 |
+| Nearest 1000 Genomes group | 33 | 33 | 0 | 0 |
+
+The plot shows an orange triangle, a blue square and a black cross around the samples that each method removes. The 33 samples that all three methods remove form three small groups far from the European cluster. The six extra samples of the MCD method are blue squares at the edge of the European cluster.
+
+How to read it. The six extra MCD samples are not ancestry outliers. Their largest distance on a single PC is between 2.3 and 4.3 standard deviations, and their squared Mahalanobis distance is between 18.8 and 24.6, just above the cutoff of 18.47. The real outliers have a squared distance of at least 2,866. With a cutoff at the 99.9% point, we expect about 0.1% of a perfectly normal group to be flagged. Here that is about 1.8 of the 1,811 European-like samples, and the method flags 6. This is why the course keeps the six-SD rule: the European cluster of this dataset is large and homogeneous, and the distance cutoff is too tight for it. The nearest-group method gives the same 33 samples as the course rule, so here it adds a label (where each outlier comes from) and no new samples.
+
+References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847). The MCD estimator: Rousseeuw and Van Driessen 1999, [doi:10.1080/00401706.1999.10485670](https://doi.org/10.1080/00401706.1999.10485670). Outlier detection in PCA of genetic data: Privé et al. 2020, [doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520). Assigning people to ancestry groups with a reference: Privé et al. 2022, [doi:10.1016/j.ajhg.2021.11.008](https://doi.org/10.1016/j.ajhg.2021.11.008).
 
 :::
 

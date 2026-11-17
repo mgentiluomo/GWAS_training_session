@@ -6,7 +6,7 @@
   "anchor": "step-7-5",
   "title": "Clump correlated results",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "772110cbf04a9d75fff87b65d3792b4dc99b7852cd6a17388385281894c80b57",
+  "source_sha256": "b401fa7633d51197ebfc9a7e259dc739b428de0dccf605ed3bba44e57820b912",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Group significant variants that are correlated into clumps. Each clump has one top variant. We measure the correlation in our own cohort.",
