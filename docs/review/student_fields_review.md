@@ -1,5 +1,58 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 17 November, Riccardo's review
+
+Written for the author. Status at the last push: Parts 1 and 2 and the Manhattan options (Part C) are done on `notebooks/all-modules`. The threshold trials (Part A), the interactive charts (Part B), the analysis trials (Part 3), the step 6.2 renumbering (Part 4) and release 2026.4 are not done. Nothing was released.
+
+Working folder: `C:\GWAS_course`, branch `notebooks/all-modules` (it now tracks `origin/notebooks/all-modules`). R: `C:\Program Files\R\R-4.5.2\bin\Rscript.exe` (R 4.5.2). PLINK: `bin/plink2.exe`. Data: the staging folder `classroom-stage-2026.1-final`. All 108 files match `MANIFEST.tsv` (SHA-256), and the manifest hash equals the pin in `config.R`. The date of every run is 17 November 2026.
+
+### Rule check: no course number changed
+
+The 2026.3.3 tag was extracted to `C:\GWAS_trials\baseline_3.3.3` and run with `scripts/run_main_path.R` (exit 0, 95 seconds). The final tree was run the same way into a second folder (exit 0, 118 seconds). These files are byte-identical in both runs: `step_counts.tsv`, `s7-2_lambda.tsv` (lambda 1.01646459034426), `s7-7_comparison.tsv` (8, 15 and 19 hits), `s7-5_clump.clumps`, `s7-8_leads.tsv`, `s6-8_gwas_summary_statistics.tsv`, `s6-5_top20.tsv`, `s7-4_thresholds.tsv` and `s6-4_results.tsv`. The only differences are new picture files and the two new PLINK correlation reports for the extra regional plots.
+
+### Part 1: text and code
+
+| Step | What was done | Before and after | Commit |
+| --- | --- | --- | --- |
+| 1.9 | Wording about uBAM and CRAM | See the note below | 80f1d76 |
+| 2.3 (Riccardo wrote 2.4) | `check_ids()` prints "<label>: no ID problems found." when `verbose = TRUE`. The lesson uses it. Other callers stay silent. | Silent success, then a message | 39b46e2 |
+| 2.6 | The terminal command lacked `--flip`. It is now there, in the same place as in R. | R had `--flip`, terminal did not | d988eb5 |
+| 3.5 | Counts print as whole numbers on their own line | `13 8` was mixed with F values | 1f2da8a |
+| Modules 2 to 7 | Acronyms spelled out at first use (QC, LD, PCA, PC, GWAS, QQ, MT, PAR) | Examples: "before QC" became "before quality control (QC)" | 4a737cb |
+| 7.1 and the course | "strong" kept for effects. "associated with" or "correlated" replaces "linked". | See the list below | 606a373 |
+| 7.1 | A sentence says that lambda appears in the plot and is calculated at step 7.2 | Lambda was unexplained | 7f62aad |
+| Notebooks | `editor_options: chunk_output_type: console` in every generated `.qmd`, with a generator test | Only `editor: visual` | 369ab6b |
+
+Note on 1.9. The Dorado page says that the basecaller output "by default is a BAM file". The PacBio page says that HiFi reads are in PacBio BAM files (template name `.hifi_reads.barcode.bam`). Neither page names a `.ubam` file extension. The text now says that both produce an unaligned BAM, that the file name ends in `.bam`, and that "uBAM" describes the content. This differs from the review comment. The sources were the Dorado 1.2.0 documentation, the PacBio file formats 12.0 documentation and the CRAM v3 specification. The `htslib.org/doc/cram.html` address returned 404, and the PDF could not be read as text. The CRAM text rests on the specification link already used in the course.
+
+Terminal against R audit. All 64 steps were compared by script, for options and for literal values. The only difference was `--flip` at step 2.6. `--threads` and `--memory` are added by `run_plink()` and are written in every terminal command. Step 0.8 runs the preflight, not an analysis command.
+
+"strong" changed in the module 7 overview, 7.1, 7.3, 7.4, 7.5, 7.6, 7.8, the step 6.5 p-value definition and the glossary. It stays where it describes correlation strength (3.4 and 4.x) or planted errors. "linked" changed in 3.x, 4.x, 5.x, 7.1, 7.3 and the glossary. It stays in the meaning "connected" (links in a file, report links).
+
+### Part 2 and Part C: figures
+
+- 5.5: PC1 with PC2 (same file name as before), PC1 with PC3 and PC2 with PC3. Same colours, symbols and key. Key position: Riccardo asked for the bottom left. On the real data the bottom left hides the European cluster in the PC2 and PC3 plot, and the top right hides the East Asian cluster in the PC1 and PC2 plot. The key now sits outside the plot, in the right margin. Commit f64a77c.
+- 5.5 optional 3D plot with ellipses: package `rgl`, chunk `eval=FALSE`, not in the step 0.5 list, no error if the package is missing. It could not be tested here, because no `rgl` binary for R 4.5.2 was available from the CRAN mirror. The code uses `rgl::plot3d` and `rgl::ellipse3d` as documented. Commit b0b9a1e.
+- 7.3: dotted suggestive line at 5e-5 (-log10 4.30) as the argument `suggestive`, a second picture with the line on, and rs labels on the lead variant of each region (`label_leads`, `max_labels`). The 5e-8 line is unchanged. Labels: rs1994750 (chr 3), rs10820598 (chr 9), rs7953249 (chr 12). The array name `GSA-rs10820598` is shown as `rs10820598`. Where no rs number exists (for example `exm2265352`), the course name is used and R prints a message.
+- 7.6: regional plots for all three regions (L1 chr 3, L2 chr 9, L3 chr 12). LD is a continuous colour scale from r2 0 to 1 (viridis, reversed, so darker means higher r2). The lead is a labelled diamond. The three counts of variants below 5e-8 are checked (1, 4 and 3, total 8). The existing checkpoint file list for 7.6 is unchanged.
+- 7.7: the QQ plots and the new Manhattan plots run from the least to the most adjusted analysis, on one vertical scale, with the 5e-8 line and rs labels in each panel. A table with hits and lambda follows (19 and 1.655, 15 and 1.546, 8 and 1.016). The optional 5e-5 line is an argument in each panel.
+- Genes near the lead: not added. It would need a gene annotation file for GRCh38 (for example from GENCODE, a few tens of MB), a licence check and a text. On simulated data the positions are real but the genes would suggest a biology that does not exist, so it is of little use.
+- Graphics library: the course uses base R graphics. `ggplot2` and `ggrepel` are not installed and not required, so labels are placed by `place_labels()` in `R/course.R`.
+
+Commits: 557d8a4 (helpers) and 1e42909 (lessons).
+
+### Checks run on Windows
+
+- `python -B scripts/build_tutorial.py --export-notebooks notebooks --check-notebooks` and `scripts/check_text.py`: pass after every commit (0 errors and 0 warnings).
+- Python tests in `scripts/tests`: all pass. R tests in `scripts/tests`: all pass, including `test_main_path_recovery.R` (seven restart integrations, canonical run = the 2026.3.3 run). `scripts/check_course.R`: pass.
+- `scripts/author/prove_comment_only.py --base project-2026.3.3` lists the chunks that changed on purpose: s2-3, s3-4 (comment wording), s3-5, s5-5 (and the new optional 3D chunk), s5-7 (comment wording), s7-3, s7-6 and s7-7. Nothing else changed.
+- One test (`test_conditional_liftover_option_is_required_in_r_order`) expected `--flip` to be absent from the 2.6 terminal command. It was updated in commit 369ab6b. The commit d988eb5 alone leaves that test failing.
+- Not done: `quarto render` of the nine `.qmd` files. Quarto is not installed on this computer.
+
+### Still to do and to decide
+
+Part A, Part B, Part 3, Part 4, the release and the website merge. Decision for the author: whether to accept the key outside the plot instead of the bottom left.
+
 ## Session of 16 November, release 2026.3.3
 
 Written for the author, Manuel Gentiluomo. Status: release 2026.3.3 and website published. History was not rewritten. Choices that I made without asking are marked "Choice".
