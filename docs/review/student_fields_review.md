@@ -2,7 +2,7 @@
 
 ## Session of 17 November, Riccardo's review
 
-Written for the author. Status at the last push: Parts 1 and 2, the Manhattan options (Part C) and the threshold trials in the lessons and notebooks (Part A) are done on `notebooks/all-modules`. The interactive charts on the website (Part B), the analysis trials (Part 3), the step 6.2 renumbering (Part 4) and release 2026.4 are not done. Nothing was released.
+Written for the author. Status at the last push: Parts 1, 2, A, B, C and 3 are done. The course is on `notebooks/all-modules` and the website preview is on `course/notebook-style`. Release 2026.4 and the website merge into `main` are NOT done: they wait for your review of the preview. Part 4 (renumbering of module 6) comes after the release.
 
 Working folder: `C:\GWAS_course`, branch `notebooks/all-modules` (it now tracks `origin/notebooks/all-modules`). R: `C:\Program Files\R\R-4.5.2\bin\Rscript.exe` (R 4.5.2). PLINK: `bin/plink2.exe`. Data: the staging folder `classroom-stage-2026.1-final`. All 108 files match `MANIFEST.tsv` (SHA-256), and the manifest hash equals the pin in `config.R`. The date of every run is 17 November 2026.
 
@@ -82,9 +82,55 @@ Commits: 04afcd7 and ceb970f (helpers, script, results, test), 0d9e38e (exporter
 
 Interactive charts on the website (Part B): not done. See the list below.
 
+### Decisions of the second round and Part B (website)
+
+- Step 1.9: the text now says that ONT and PacBio both produce an unaligned BAM file (the file ends in `.bam`, and people often call it uBAM or `.ubam`). Commit 2583dea.
+- PCA key (5.5): outside the plot, on the right, in the same place in all three plots (one function draws them). Accepted.
+- Quarto: `C:\Program Files\RStudio\resources\app\bin\quarto\bin\quarto.exe`, version 1.10.18. All nine `.qmd` files render with `quarto render --no-execute` (exit 0). The output went to `C:\GWAS_trials\render`, outside the repository. The notebooks are not executed in this check, as in the earlier sessions.
+- rgl (optional 3D plot, 5.5): `install.packages("rgl", type = "binary")` installed rgl 1.3.36 from CRAN binaries (R 4.5.1 into a temporary library, then loaded by R 4.5.2). The chunk ran without error on Windows with R 4.5.2. It also drew in a real rgl window (a snapshot shows the clusters and the translucent ellipses). I did not inspect it interactively. The code in the course is unchanged. The first attempt through R 4.5.2 said that no binary was available. The same install through R 4.5.1 worked.
+- Step 3.5 box: the text now says what the two numbers are. The 13 removed wells have F more than 3 SD below the mean (too many heterozygous calls, so they leave the data). The 8 flagged wells have F more than 3 SD above the mean (too few heterozygous calls, so they stay in the data and are only listed for review). Commit 70316ae.
+- `powercfg` runs from PowerShell from now on.
+
+Interactive charts (Part B). New component `src/components/gwas/ThresholdChart.tsx` and `src/lib/gwas/sweeps.ts` on the site branch `course/notebook-style`. It is plain SVG with React, with no new library (0 KB added to the dependencies). It reads `threshold_sweeps.json` (copied by `npm run sync:gwas`, which now also checks that every sweep has one course value and that the counts add up). The browser runs no PLINK and no heavy calculation.
+
+- x axis: the threshold (log scale for every sweep except the F limit in SD). y axis: the number removed (samples or variants, chosen for each sweep), with a switch to the number remaining. The step 4.4 course rule is a dashed line labelled "course rule: 167".
+- Moving with the mouse or by touch picks the nearest threshold. The slider and its arrow keys do the same. A label under the chart shows the threshold and the numbers. The course value is always marked with a diamond and the words "course value".
+- Accessibility: the SVG has a role and a label. The slider has `aria-valuetext` with the threshold and the numbers. A polite live region announces the selection. The focus ring is visible. No information depends on colour alone. There is no animation, so reduced motion needs nothing. The table with all numbers is always visible below the chart and is in the static HTML, so it shows without JavaScript.
+- axe-core 4.14.1 on 11 pages (steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3, 4.4, 5.5, 7.3, 7.6 and 7.7), light and dark, at 360 px and 1280 px (44 runs). No page is wider than the screen. The chart and the new text have no violation. One violation remains on every page of the site, including pages I did not touch: the header logo link has `aria-label="Home"` but different visible text (`label-content-name-mismatch`, serious). It is in the site header, not in this work. There is a branch `fix/header-logo-name` that may already address it.
+- Keyboard: ArrowRight on the slider moves from "--maf 0.01: 56,420 variants removed (course value)." to "--maf 0.02: 89,204 variants removed.", and the live region follows. At 360 px the chart is readable and the table does not widen the page.
+- The page shows the box as a collapsed block "Try other thresholds (optional)" after "Files created". The chart comes first, then the course text (R code, terminal command, table, how to read it).
+- ggplot2: the notebooks and the guide keep base R plots by default (`plot_threshold_trials()`), because the course does not require ggplot2. Adding `engine = "ggplot2"` draws the same plot with ggplot2 (tested with ggplot2 4.0.4). If the package is missing, R says so and draws the base plot. Each box has an "Expected plot" paragraph that serves as alt text (axes, the course value and its count). The static figures are not stored in the repository.
+- The commits on the site branch: a4c4640 (component and page), 5cd7582 and 03ba8af (synced content). Preview of 5cd7582: https://personal-site-fhch21r6v-mgentiluomos-projects.vercel.app . Preview of 03ba8af (the current one): https://personal-site-7jgruxclw-mgentiluomos-projects.vercel.app .
+
+### Part 3: analysis trials (summary)
+
+Full tables and recommendations are in `docs/review/analysis_change_trials.md`. Nothing in the course or the data was changed.
+
+| Trial | Samples after 3.6 | Samples after 5.7 | Lambda | Hits | Clumps | What changes |
+| --- | --- | --- | --- | --- | --- | --- |
+| base (2026.3.3) | 1,920 | 1,811 | 1.0165 | 8 | 3 | nothing |
+| 3a Riccardo's 18 long-range LD regions | 1,920 | 1,811 | 1.0171 | 8 | 3 | pruned variants 69,539 to 68,800 (3.4) and 68,622 to 67,897 (5.7) |
+| 3b lower call rate removed | 1,920 | 1,811 | 1.0148 | 8 | 3 | 4 samples swapped at 3.6, 1 variant fewer at 4.3 |
+| 3c robust Mahalanobis (MCD) | 1,920 | 1,800 | 1.0160 | 8 | 3 | 11 more samples removed at 5.6 |
+| 3a + 3b + 3c | 1,920 | 1,805 | 1.0142 | 8 | 3 | the three together |
+
+3d (number of PCs, base run): 0 PCs give 15 hits and lambda 1.5464. 1 PC (scree elbow and outcome rule) gives 8 hits and lambda 1.0121. 6 PCs (50% of the first 20) give 1.0154. Ten PCs give 1.0165. Twenty PCs give 1.0231. The first 20 PCs hold 2.25% of the variance (PC1 0.77%, every later PC about 0.078%). Recommendations: use Riccardo's list, use the call-rate rule, keep the six-SD rule (the 11 extra MCD samples are at the edge of the European cluster), keep ten PCs and add a sentence that only PC1 stands out.
+
+### Final checks of this round
+
+- The final tree gave byte-identical `step_counts.tsv`, lambda, comparison, clump, leads, summary statistics and top 20, against the 2026.3.3 run.
+- Python tests: all pass. R tests: all pass (see the list above). The text and notebook checks pass.
+- Slip: while fixing a misplaced paragraph I ran `git commit --amend` once by mistake. It only changed the message of the unpushed tip commit to "x". I restored the message with a second amend before pushing (a0fc14c). No pushed history was changed.
+- Commit d988eb5 leaves one test failing on its own (fixed in 369ab6b). The commits 3.5 and 3.6 of the threshold boxes first put the expected-plot paragraph into the "Under the hood" block. A test caught it, and a0fc14c fixes it.
+
 ### Still to do and to decide
 
-Part B (interactive charts in `C:\WEB_site\sito`: SVG or React component reading `site_content/threshold_sweeps.json`, table fallback, axe, 360 px check, ggplot-like static versions already exist as base R plots in the notebooks), Part 3 (trials in `C:\GWAS_trials`; the file `highLD_b38.bed` is in the project root, untracked), Part 4 (branch `course/remove-step-6-2`), the render of the nine notebooks with Quarto (Quarto is not installed here), release 2026.4 and the website merge. Decisions for the author: whether to accept the key outside the plot instead of the bottom left, and whether the box text for steps 3.1 to 4.4 is at the right level.
+- Your review of the preview. Pages to open: steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4 (the block "Try other thresholds (optional)" and its chart), 5.5 (three PCA plots, optional 3D box), 7.3 (suggestive line and labels), 7.6 (three regional plots) and 7.7 (QQ and Manhattan comparison).
+- Then release `project-2026.4` (ZIP with the four PLINK files, student rehearsal, tag, release, SHA-256, site merge into `main`, live check that 0.3 links the new ZIP, `git revert` if not).
+- Part 4 after the release: branch `course/remove-step-6-2`, not merged.
+- Decisions: use of Riccardo's LD list, of the call-rate rule and of the number of PCs in the course (Part 3 recommendations). Each one changes expected numbers, so each needs a release.
+- The Quarto check did not execute the notebooks (`--no-execute`).
+
 
 ## Session of 16 November, release 2026.3.3
 
