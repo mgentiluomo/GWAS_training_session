@@ -6,7 +6,7 @@
   "anchor": "step-5-6",
   "title": "Define an ancestry-matched cohort",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "df91b6df3d381f33946f26f35f3bbb1b82e409b4eb9245d70e447f19a1abc7ca",
+  "source_sha256": "884b9a5c45a5c83c0cace6e5c6d3111213cd1764a33f32517de227e81419a1ca",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Apply a rule, fixed in advance, to the first four projected PCs. The rule flags samples that are more than six standard deviations from the European reference.",

@@ -748,16 +748,6 @@ No. Fix the main model before you see any association result. Report the sensiti
 
 Pruning lists, eigenvectors and eigenvalues, the scree plot (PNG), the working state and the full 5.7 checkpoint.
 
-## Module 5 recap {#module-5-recap}
-
-- You compared the study with a GRCh38 reference subset of 1,062 samples.
-- You kept 48,615 shared sites, and all of them matched on chromosome, position and alleles.
-- You placed 1,844 study samples on the reference axes and drew the plot.
-- You applied the six-standard-deviation rule and excluded 33 outlier records.
-- 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.
-
-**Next:** module 6, where you run the association test and use these PCs as covariates.
-
 <details><summary>Try other thresholds (optional)</summary>
 
 This box is not part of the main path. No later step uses it. It does not change your results.
@@ -844,3 +834,13 @@ How to read it. Only PC1 stands out. Its eigenvalue is ten times larger than the
 
 </details>
 
+
+## Module 5 recap {#module-5-recap}
+
+- You compared the study with a GRCh38 reference subset of 1,062 samples.
+- You kept 48,615 shared sites, and all of them matched on chromosome, position and alleles.
+- You placed 1,844 study samples on the reference axes and drew the plot.
+- You applied the six-standard-deviation rule and excluded 33 outlier records.
+- 1,811 samples and 238,513 variants remain, with ten cohort PCs ready for the association model.
+
+**Next:** module 6, where you run the association test and use these PCs as covariates.
