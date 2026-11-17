@@ -700,11 +700,12 @@ read_ws <- function(path, header = TRUE) {
 
 id_key <- function(x) paste(x$FID, x$IID, sep = "\t")
 
-check_ids <- function(x, label) {
+check_ids <- function(x, label, verbose = FALSE) {
   if (!all(c("FID", "IID") %in% names(x))) stop(label, ": FID and IID columns are required.")
   if (anyNA(x[c("FID", "IID")]) || any(!nzchar(x$FID)) || any(!nzchar(x$IID)))
     stop(label, ": missing identifiers.")
   if (anyDuplicated(id_key(x))) stop(label, ": duplicate FID/IID pairs. Resolve them before joining.")
+  if (verbose) cat(label, ": no ID problems found.\n", sep = "")
   invisible(x)
 }
 

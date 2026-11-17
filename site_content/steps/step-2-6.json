@@ -6,7 +6,7 @@
   "anchor": "step-2-6",
   "title": "Genome builds and lift-over",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e",
+  "source_sha256": "6f21443ff649fc39ed3afe96924dd6a85b6ae82484f88181dfb1f138c9469653",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We convert the separate GRCh37 exercise to GRCh38 in R. We use a chain file for this one direction. We keep the exercise apart from the main analysis.",

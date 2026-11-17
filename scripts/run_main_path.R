@@ -104,7 +104,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 42a9d1ba3385eb794517d89f8ee3b5bbea149d77578e2dfcc1ceba5645cce38e
+# SHA-256: 6f21443ff649fc39ed3afe96924dd6a85b6ae82484f88181dfb1f138c9469653
 
 # Chunk: setup
 source("R/guided.R")
@@ -137,7 +137,7 @@ variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)
 head(variants)
 # 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples", verbose = TRUE)
 
 
 # Chunk: s2-4

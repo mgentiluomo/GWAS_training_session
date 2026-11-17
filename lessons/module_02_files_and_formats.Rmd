@@ -196,7 +196,7 @@ variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)
 head(variants)
 # 3. Check that the sample identifiers are valid and unique.
-check_ids(samples, "Laboratory samples")
+check_ids(samples, "Laboratory samples", verbose = TRUE)
 ```
 
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
@@ -207,7 +207,7 @@ R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
+The last line printed is `Laboratory samples: no ID problems found.` A check that prints nothing can leave you unsure whether it ran, so this message confirms that it ran and passed. The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->

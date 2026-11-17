@@ -801,7 +801,7 @@ samples <- guided_table(paste0(guided_path(cfg, "2.2"), ".psam"))  # <1>
 variants <- guided_table(paste0(guided_path(cfg, "2.2"), ".pvar"))
 head(samples)  # <2>
 head(variants)
-check_ids(samples, "Laboratory samples")  # <3>
+check_ids(samples, "Laboratory samples", verbose = TRUE)  # <3>
 ```
 
 1. Read the sample and variant tables from the converted files.
@@ -814,7 +814,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
+The last line printed is `Laboratory samples: no ID problems found.` A check that prints nothing can leave you unsure whether it ran, so this message confirms that it ran and passed. The PSAM file has 2,016 rows and the PVAR file has 299,523 rows. Different assay IDs do not prove that every site is unique. Two assays can still test the same place in the genome.
 
 :::
 
