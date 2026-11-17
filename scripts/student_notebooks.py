@@ -335,6 +335,7 @@ def render_qmd(models: list[dict], complete: bool = False) -> str:
              "    toc-depth: 2", '    toc-title: "Contents"', "    toc-location: left", "    toc-expand: true",
              "    anchor-sections: true", "    code-copy: true", "    code-fold: false", "    code-overflow: wrap",
              "    embed-resources: true", "    include-after-body:", "      text: |", *LINK_SCRIPT, "editor: visual",
+             "editor_options:", "  chunk_output_type: console",
              *([] if complete else [f'course_source_sha256: "{module["source_sha256"]}"']), "---", "",
              "Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.",
              "All data are simulated. Read each summary, run its chunk and compare your result with the expected result.",

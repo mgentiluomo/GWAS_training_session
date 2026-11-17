@@ -20,6 +20,8 @@ format:
         });
         </script>
 editor: visual
+editor_options:
+  chunk_output_type: console
 course_source_sha256: "97a47c356cbfd3d90c93557659c2a938a5f079612f57f0969bf3c5e5becbadaa"
 ---
 

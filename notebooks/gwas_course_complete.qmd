@@ -20,6 +20,8 @@ format:
         });
         </script>
 editor: visual
+editor_options:
+  chunk_output_type: console
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
