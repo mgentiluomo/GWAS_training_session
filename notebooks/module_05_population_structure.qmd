@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "a1f5838a8c0bc6bca5b88d0b1d9a54a0e56c9952eac4a84de3fa6feefeb026d5"
+course_source_sha256: "230374052c3854b3611b1885d6267b4f78cc768508f552037b70cac019551757"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -388,7 +388,7 @@ We select common sites with weaker correlations and calculate ten principal comp
 #| label: s5-7
 regions <- guided_high_ld(cfg)  # <1>
 prune <- guided_path(cfg, "5.7", "prune")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,  # <2>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed0", regions,  # <2>
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
 report <- guided_path(cfg, "5.7", "pca")  # <3>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
@@ -418,8 +418,8 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
 | `--chr` | Uses only chromosomes 1 to 22, the autosomes. |
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
-| `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
-| &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
+| `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed0, where distant sites can carry similar genetic information. |
+| &nbsp;&nbsp;&rarr; `bed0` | Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included. |
 | `--indep-pairwise` | Selects sites with weaker correlations within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
@@ -446,7 +446,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
 ```
 

@@ -476,7 +476,7 @@ The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_
 ## 3.4 LD pruning {#step-3-4}
 
 
-<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly correlated variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed1", "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
+<!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly correlated variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed0", "explanation": "Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Removing correlated variants is called pruning for [linkage disequilibrium](../docs/glossary.md#ld) (LD). Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [principal component analysis](../docs/glossary.md#pca-pc) (PCA). PCA is a method that summarises the genetic differences between people.
@@ -487,7 +487,9 @@ We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants th
 
 [LD pruning](../docs/glossary.md#ld-pruning) keeps one representative subset of sites. It does not delete the other sites from the association data.
 
-We also leave out the long-range LD regions, where the correlation reaches over very long distances. The GRCh38 intervals are listed in the helper function. They are not a complete catalogue for all studies.
+We also leave out the long-range LD regions, where the correlation reaches over very long distances. These regions are known to pull principal components towards themselves. Examples are the major histocompatibility complex (MHC) on chromosome 6, the 8p23 inversion on chromosome 8 and the 17q21 inversion on chromosome 17.
+
+The course uses a list of 18 regions on build GRCh38. It collects the regions that were published for genome scans and for principal component analysis (Price et al. 2008, doi:10.1016/j.ajhg.2008.06.005; Anderson et al. 2010, doi:10.1038/nprot.2010.116; Privé et al. 2020, doi:10.1093/bioinformatics/btaa520). Nine regions that sit around centromeres could not be converted from build 36 to GRCh38, so the list does not contain them. The list is a BED file in the course data (`pca_reference/highLD_b38.bed`), not in the project. It is not a complete catalogue for all studies.
 
 ### You need
 
@@ -500,7 +502,7 @@ State 3.3.
 regions <- guided_high_ld(cfg)
 # 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
-  "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+  "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 # 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
@@ -512,10 +514,10 @@ guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune")
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
-bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
 
-`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](../docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed1` leaves out the sites inside the listed regions. The file gives them as one-based inclusive intervals (positions counted from 1, with both ends included). `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](../docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
+`--chr 1-22` keeps only the autosomes. `--maf 0.05` keeps common variants, which means a [minor allele frequency](../docs/glossary.md#maf) (MAF) of at least 5%. `--geno 0.02` removes variants with more than 2% missing genotypes, so this subset has a variant call rate of at least 98%. `--exclude bed0` leaves out the sites inside the listed regions. The file is a BED file: it gives each region as a chromosome, a start counted from 0 and an end that is not included. `--indep-pairwise 200kb 0.2` prunes within windows of 200 kb (200,000 base pairs of DNA), with a limit of 0.2 for the squared correlation, called [r^2](../docs/glossary.md#r-squared). `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
@@ -548,7 +550,7 @@ No. We use pruning only for specific checks and for the PCA. The association sca
 
 ### Files created
 
-`s3-4_high_ld.bed1`, `.prune.in/.prune.out` and the logs.
+`s3-4_high_ld.bed0`, `.prune.in/.prune.out` and the logs.
 
 <details><summary>Under the hood & literature</summary>
 
@@ -556,7 +558,7 @@ No. We use pruning only for specific checks and for the PCA. The association sca
 
 **Why these values.** The window, the limit of 0.2 and the 5% frequency filter are conventions, not laws. A looser limit such as 0.5 keeps more variants. Windows counted in variants, with a step above 1, are also widely used. Here the filter leaves 69,539 sites, enough for the checks that follow.
 
-**Pitfalls.** Some regions, such as the HLA region on chromosome 6, are correlated over very long distances. Pruning thins them but does not remove their pull on principal components, so the course excludes listed regions first. The list belongs to one genome build and is not complete. The pruned set also depends on the samples, the frequency filter and the scan order, so another cohort gives another list. Never use it for the association scan.
+**Pitfalls.** Some regions, such as the HLA region on chromosome 6, are correlated over very long distances. Pruning thins them but does not remove their pull on principal components, so the course excludes listed regions first. The list belongs to one genome build and is not complete. In this dataset, the list excludes about 9,500 array variants (before the frequency and call-rate filters), compared with about 5,700 for the short list that earlier versions of the course used. The pruned set also depends on the samples, the frequency filter and the scan order, so another cohort gives another list. Never use it for the association scan.
 
 **References**
 
@@ -719,7 +721,7 @@ Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows t
 ## 3.6 Relatedness and duplicates {#step-3-6}
 
 
-<!-- step_meta: {"success_line": "There are 19 duplicate-class pairs and ten first-degree pairs.", "student_summary": "We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules so that repeated or closely related people do not distort the later association analysis.", "student_plink_options": [{"label": "compare pairs of samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--extract", "explanation": "Uses only the variants named in the supplied variant list."}, {"name": "--make-king-table", "explanation": "Estimates how closely related each pair of samples is and writes a table."}, {"name": "--king-table-filter", "explanation": "Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove repeated or closely related samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
+<!-- step_meta: {"success_line": "There are 19 duplicate-class pairs and ten first-degree pairs.", "student_summary": "We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules, and keep the person with the better call rate, so that repeated or closely related people do not distort the later association analysis.", "student_plink_options": [{"label": "compare pairs of samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--extract", "explanation": "Uses only the variants named in the supplied variant list."}, {"name": "--make-king-table", "explanation": "Estimates how closely related each pair of samples is and writes a table."}, {"name": "--king-table-filter", "explanation": "Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "measure the missing data of every sample", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--missing", "explanation": "Measures the share of missing genotype calls and writes a table with one row per sample.", "modifiers": [{"name": "sample-only", "explanation": "Writes only the sample table, not the variant table."}]}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}, {"label": "remove repeated or closely related samples", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--remove", "explanation": "Removes the samples named in the supplied sample list."}, {"name": "--make-pgen", "explanation": "Saves a new dataset as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
 We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.
@@ -734,8 +736,10 @@ We apply these rules:
 
 - For a labelled technical repeat, we remove the repeat well.
 - For an unlabelled duplicate with conflicting [metadata](../docs/glossary.md#metadata), we remove both records. Metadata are the facts recorded about a sample, such as sex, age and disease status.
-- For an unlabelled duplicate with matching metadata, we remove one record.
-- For a first-degree pair, we keep one person. We choose by a reproducible rule based on the ID, never by disease status.
+- For an unlabelled duplicate with matching metadata, we remove one record. We keep the record with the better call rate.
+- For a first-degree pair, we keep one person: the one with the better call rate. The call rate is the share of genotype calls that are not missing, so the person with less missing data stays. If the two call rates are equal, we use the alphabetical order of the ID. The rule never uses disease status.
+
+Why this rule? The call rate is a measure of data quality, so the person with the best data stays in the analysis. An earlier version of the course used the ID only, which is reproducible but ignores quality. The call-rate rule is reproducible too, because the same data always give the same choice.
 
 ### You need
 
@@ -752,8 +756,14 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_
 # 3. Read the pairs and put the closest matches first.
 kin <- guided_table(paste0(report, ".kin0"))
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
-# 4. Read the sample details and start an empty removal list.
+# 4. Read the sample details, measure the missing data of every sample and start an empty removal list.
 metadata <- guided_metadata(cfg)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--missing", "sample-only", "--out", guided_path(cfg, "3.6", "missing")))
+sample_missing <- guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))
+lower_call_rate <- function(a, b) {
+  fa <- as.numeric(sample_missing$F_MISS[match(a, sample_missing$IID)]); fb <- as.numeric(sample_missing$F_MISS[match(b, sample_missing$IID)])
+  if (fa > fb) a else if (fb > fa) b else max(a, b)
+}
 remove <- character()
 # 5. Review each pair to decide which samples to remove.
 for (i in seq_len(nrow(kin))) {
@@ -769,10 +779,10 @@ for (i in seq_len(nrow(kin))) {
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
       # 9. Keep one matching record or remove both conflicting records.
-      remove <- union(remove, if (same) max(a, b) else c(a, b))
+      remove <- union(remove, if (same) lower_call_rate(a, b) else c(a, b))
     }
   # 10. Keep one person from each remaining closely related pair.
-  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, lower_call_rate(a, b))
 }
 # 11. Write the removal list.
 remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
@@ -787,10 +797,11 @@ Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
 bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-5_state --missing sample-only --out results/guided/s3-6_missing --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
 
-`--make-king-table` estimates the kinship of pairs of samples. `--king-table-filter 0.0442` reports only the pairs above the approximate boundary of third-degree relatives (such as first cousins). R reviews the duplicate cases and the first-degree cases. Reporting a pair does not remove anyone by itself. `--remove` removes the listed samples. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
+`--make-king-table` estimates the kinship of pairs of samples. `--king-table-filter 0.0442` reports only the pairs above the approximate boundary of third-degree relatives (such as first cousins). `--missing sample-only` measures the share of missing calls of every sample, which R uses as the call rate (one minus that share) to choose between the two samples of a pair. R reviews the duplicate cases and the first-degree cases. Reporting a pair does not remove anyone by itself. `--remove` removes the listed samples. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 

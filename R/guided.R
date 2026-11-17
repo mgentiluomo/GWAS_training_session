@@ -196,15 +196,13 @@ guided_replay_lists <- function(cfg, step, parent, extra = NULL) {
   operations
 }
 
+# The long-range LD regions (GRCh38) come with the course data: pca_reference/highLD_b38.bed.
+# BED files count the start from 0 and do not include the end, so PLINK reads them with the modifier bed0.
 guided_high_ld <- function(cfg) {
-  path <- guided_path(cfg, "3.4", "high_ld.bed1")
-  # GRCh38 intervals, one-based, inclusive. They are excluded from PCA pruning only.
-  intervals <- data.frame(CHROM = c(2, 5, 6, 8, 11, 17),
-    START = c(134000000, 44000000, 25000000, 7000000, 46000000, 45000000),
-    END = c(138000000, 51500000, 34000000, 13000000, 57000000, 48000000))
-  intervals$START <- format(intervals$START, scientific = FALSE, trim = TRUE)
-  intervals$END <- format(intervals$END, scientific = FALSE, trim = TRUE)
-  write.table(intervals, path, sep = "\t", quote = FALSE, row.names = FALSE, col.names = FALSE)
+  source_file <- file.path(cfg$data_dir, "pca_reference", "highLD_b38.bed")
+  if (!file.exists(source_file)) stop("The list of long-range LD regions is missing: ", source_file, ". Download the course data again (step 0.7).", call. = FALSE)
+  path <- guided_path(cfg, "3.4", "high_ld.bed0")
+  if (!file.copy(source_file, path, overwrite = TRUE)) stop("The list of long-range LD regions could not be copied.", call. = FALSE)
   path
 }
 

@@ -1433,7 +1433,7 @@ We select common DNA sites that are less strongly correlated with each other. Th
 #| label: s3-4
 regions <- guided_high_ld(cfg)  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",  # <2>
-  "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+  "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))  # <3>
 stopifnot(length(pruned) == 69539L)
 cat(length(pruned), "variants kept by LD pruning\n")
@@ -1454,7 +1454,7 @@ guided_artifact_checkpoint(cfg, "3.4", c(paste0(guided_path(cfg, "3.4", "prune")
 | `--maf` | Keeps variants whose less common allele has a frequency of at least 5%. |
 | `--geno` | Keeps variants with no more than 2% missing calls. |
 | `--exclude` | Leaves out variants within the listed DNA regions. |
-| &nbsp;&nbsp;&rarr; `bed1` | Reads DNA regions with positions counted from 1 and includes both ends of each region. |
+| &nbsp;&nbsp;&rarr; `bed0` | Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included. |
 | `--indep-pairwise` | Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely. |
 | `--out` | Sets the shared beginning of the output file names. |
 
@@ -1472,7 +1472,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-3_state --chr 1-22 --maf 0.05 --geno 0.02 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.2 --out results/guided/s3-4_prune --threads 2 --memory 2048
 ```
 
 :::
@@ -1596,7 +1596,7 @@ Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows t
 
 ## Step 3.6 · Relatedness and duplicates {#step-3-6}
 
-We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules so that repeated or closely related people do not distort the later association analysis.
+We compare pairs of samples to find repeated measurements and close relatives. We apply the stated removal rules, and keep the person with the better call rate, so that repeated or closely related people do not distort the later association analysis.
 
 [Read step 3.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-3/step-3-6).
 
@@ -1608,6 +1608,12 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_
 kin <- guided_table(paste0(report, ".kin0"))  # <3>
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
 metadata <- guided_metadata(cfg)  # <4>
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--missing", "sample-only", "--out", guided_path(cfg, "3.6", "missing")))
+sample_missing <- guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))
+lower_call_rate <- function(a, b) {
+  fa <- as.numeric(sample_missing$F_MISS[match(a, sample_missing$IID)]); fb <- as.numeric(sample_missing$F_MISS[match(b, sample_missing$IID)])
+  if (fa > fb) a else if (fb > fa) b else max(a, b)
+}
 remove <- character()
 for (i in seq_len(nrow(kin))) {  # <5>
   a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
@@ -1618,9 +1624,9 @@ for (i in seq_len(nrow(kin))) {  # <5>
       ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)  # <8>
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
-      remove <- union(remove, if (same) max(a, b) else c(a, b))  # <9>
+      remove <- union(remove, if (same) lower_call_rate(a, b) else c(a, b))  # <9>
     }
-  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))  # <10>
+  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, lower_call_rate(a, b))  # <10>
 }
 remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)  # <11>
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--remove", remove_file, "--make-pgen", "--out", guided_path(cfg, "3.6")))  # <12>
@@ -1632,7 +1638,7 @@ guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 1. Choose the name for the report comparing pairs of samples.
 2. Compare pairs using the selected variants.
 3. Read the pairs and put the closest matches first.
-4. Read the sample details and start an empty removal list.
+4. Read the sample details, measure the missing data of every sample and start an empty removal list.
 5. Review each pair to decide which samples to remove.
 6. Treat the closest matches as repeated samples.
 7. Remove the labelled repeat when its name ends in _R2.
@@ -1654,7 +1660,16 @@ guided_register(cfg, "3.6", "3.5", 1920, 296360, operations = ops)
 | `--king-table-filter` | Writes only pairs whose kinship score is above 0.0442. The kinship score measures how closely two people are related. This value is an approximate boundary for third-degree relatives such as first cousins. |
 | `--out` | Sets the shared beginning of the output file names. |
 
-**Command 2: remove repeated or closely related samples**
+**Command 2: measure the missing data of every sample**
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads the PGEN, PVAR and PSAM input files that share the given name prefix. |
+| `--missing` | Measures the share of missing genotype calls and writes a table with one row per sample. |
+| &nbsp;&nbsp;&rarr; `sample-only` | Writes only the sample table, not the variant table. |
+| `--out` | Sets the shared beginning of the output file names. |
+
+**Command 3: remove repeated or closely related samples**
 
 | Option or modifier | What it does |
 | --- | --- |
@@ -1678,6 +1693,7 @@ R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.e
 
 ```sh
 bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --make-king-table --king-table-filter 0.0442 --out results/guided/s3-6_king --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s3-5_state --missing sample-only --out results/guided/s3-6_missing --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove.txt --make-pgen --out results/guided/s3-6_state --threads 2 --memory 2048
 ```
 
@@ -2709,7 +2725,7 @@ We select common sites with weaker correlations and calculate ten principal comp
 #| label: s5-7
 regions <- guided_high_ld(cfg)  # <1>
 prune <- guided_path(cfg, "5.7", "prune")
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,  # <2>
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed0", regions,  # <2>
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
 report <- guided_path(cfg, "5.7", "pca")  # <3>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--extract", paste0(prune, ".prune.in"), "--pca", "10", "--out", report))
@@ -2739,8 +2755,8 @@ check_step("5.7", data_dir = cfg$out, work_dir = cfg$out)
 | `--pfile` | Reads the retained study genotype files s5-6_state.pgen, .pvar and .psam from the results folder. |
 | `--chr` | Uses only chromosomes 1 to 22, the autosomes. |
 | `--maf` | Keeps sites whose less common allele has a frequency of at least 5%. |
-| `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed1, where distant sites can carry similar genetic information. |
-| &nbsp;&nbsp;&rarr; `bed1` | Reads region positions counted from 1 and includes both ends of each region. |
+| `--exclude` | Leaves out sites within the regions listed in s3-4_high_ld.bed0, where distant sites can carry similar genetic information. |
+| &nbsp;&nbsp;&rarr; `bed0` | Reads DNA regions in the BED way: the start of each region is counted from 0 and its end is not included. |
 | `--indep-pairwise` | Selects sites with weaker correlations within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. The value r² runs from 0 to 1, and a larger value means that the genotypes of the two sites vary together more closely. |
 | `--out` | Starts the site selection output file names with s5-7_prune. |
 
@@ -2767,7 +2783,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed1 results/guided/s3-4_high_ld.bed1 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
+bin/plink2 --pfile results/guided/s5-6_state --chr 1-22 --maf 0.05 --exclude bed0 results/guided/s3-4_high_ld.bed0 --indep-pairwise 200kb 0.2 --out results/guided/s5-7_prune --threads 2 --memory 2048
 bin/plink2 --pfile results/guided/s5-6_state --extract results/guided/s5-7_prune.prune.in --pca 10 --out results/guided/s5-7_pca --threads 2 --memory 2048
 ```
 

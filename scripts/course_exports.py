@@ -181,7 +181,7 @@ PLINK_MODIFIERS = {
     "--glm": {"sex", "hide-covar", "firth", "firth-fallback", "no-firth"},
     "--pca": {"allele-wts"},
     "--score": {"header-read", "no-mean-imputation", "variance-standardize"},
-    "--exclude": {"bed1"}, "--missing": {"sample-only"},
+    "--exclude": {"bed0"}, "--missing": {"sample-only"},
     "--hardy": {"midp"}, "--export": {"A"},
     "--rm-dup": {"exclude-mismatch", "list"},
 }

@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: f3a59cdffe0a84259e4b32168975e3c624d279475038b010bb4933b0527819b7
+# SHA-256: 4f92a08dc761f7a6c69c0cdf8e6ce7c33022abbc319096193c43fc06e767e7c5
 
 # Chunk: setup
 source("R/guided.R")
@@ -293,7 +293,7 @@ guided_register(cfg, "3.3", "3.2", 1963, 296360, operations = ops)
 regions <- guided_high_ld(cfg)
 # 2. Select variants with less similar patterns of DNA letters.
 run_plink(cfg, c("--pfile", guided_path(cfg, "3.3"), "--chr", "1-22", "--maf", "0.05", "--geno", "0.02",
-  "--exclude", "bed1", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
+  "--exclude", "bed0", regions, "--indep-pairwise", "200kb", "0.2", "--out", guided_path(cfg, "3.4", "prune")))
 # 3. Check and print how many variants were selected.
 pruned <- readLines(paste0(guided_path(cfg, "3.4", "prune"), ".prune.in"))
 stopifnot(length(pruned) == 69539L)
@@ -336,8 +336,14 @@ run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--extract", paste0(guided_
 # 3. Read the pairs and put the closest matches first.
 kin <- guided_table(paste0(report, ".kin0"))
 kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
-# 4. Read the sample details and start an empty removal list.
+# 4. Read the sample details, measure the missing data of every sample and start an empty removal list.
 metadata <- guided_metadata(cfg)
+run_plink(cfg, c("--pfile", guided_path(cfg, "3.5"), "--missing", "sample-only", "--out", guided_path(cfg, "3.6", "missing")))
+sample_missing <- guided_table(paste0(guided_path(cfg, "3.6", "missing"), ".smiss"))
+lower_call_rate <- function(a, b) {
+  fa <- as.numeric(sample_missing$F_MISS[match(a, sample_missing$IID)]); fb <- as.numeric(sample_missing$F_MISS[match(b, sample_missing$IID)])
+  if (fa > fb) a else if (fb > fa) b else max(a, b)
+}
 remove <- character()
 # 5. Review each pair to decide which samples to remove.
 for (i in seq_len(nrow(kin))) {
@@ -353,10 +359,10 @@ for (i in seq_len(nrow(kin))) {
       same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])),
                         unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
       # 9. Keep one matching record or remove both conflicting records.
-      remove <- union(remove, if (same) max(a, b) else c(a, b))
+      remove <- union(remove, if (same) lower_call_rate(a, b) else c(a, b))
     }
   # 10. Keep one person from each remaining closely related pair.
-  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+  } else if (value > 0.177 && !a %in% remove && !b %in% remove) remove <- union(remove, lower_call_rate(a, b))
 }
 # 11. Write the removal list.
 remove_file <- guided_list(remove, guided_path(cfg, "3.6", "remove.txt"), TRUE)
@@ -503,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: a1f5838a8c0bc6bca5b88d0b1d9a54a0e56c9952eac4a84de3fa6feefeb026d5
+# SHA-256: 230374052c3854b3611b1885d6267b4f78cc768508f552037b70cac019551757
 
 # Chunk: setup
 source("R/guided.R")
@@ -648,7 +654,7 @@ guided_register(cfg, "5.6", "5.4", 1811, 238513, operations = ops)
 regions <- guided_high_ld(cfg)
 prune <- guided_path(cfg, "5.7", "prune")
 # 2. Select common sites on chromosomes 1 to 22 with weaker correlations with each other.
-run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed1", regions,
+run_plink(cfg, c("--pfile", guided_path(cfg, "5.6"), "--chr", "1-22", "--maf", "0.05", "--exclude", "bed0", regions,
   "--indep-pairwise", "200kb", "0.2", "--out", prune))
 # 3. Calculate ten components within the retained study group using the selected sites.
 report <- guided_path(cfg, "5.7", "pca")
