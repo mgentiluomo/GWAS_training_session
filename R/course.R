@@ -765,7 +765,7 @@ course_plink_path <- function(path, root) {
   relative
 }
 
-run_plink <- function(cfg, args, expected = character()) {
+run_plink <- function(cfg, args, expected = character(), quiet = FALSE) {
   args <- as.character(args)
   oi <- match("--out", args)
   if (is.na(oi) || oi == length(args)) stop("Every command needs --out for a separate log.")
@@ -782,12 +782,12 @@ run_plink <- function(cfg, args, expected = character()) {
   on.exit(setwd(previous_directory), add = TRUE)
   args <- c(args, "--threads", cfg$threads, "--memory", cfg$memory_mb)
   command <- paste(shQuote(executable), paste(shQuote(args), collapse = " "))
-  cat(command, "\n")
+  if (!quiet) cat(command, "\n")
   writeLines(c(paste("Started:", Sys.time()), cfg$version, command), paste0(prefix, ".command.txt"))
   # system2 quotes the executable. Quote each argument so paths with spaces work.
   output <- suppressWarnings(system2(executable, args = shQuote(args), stdout = TRUE, stderr = TRUE))
   writeLines(output, paste0(prefix, ".console.txt"))
-  cat(paste(if (isTRUE(cfg$preflight)) output else tail(output, 10), collapse = "\n"), "\n")
+  if (!quiet) cat(paste(if (isTRUE(cfg$preflight)) output else tail(output, 10), collapse = "\n"), "\n")
   status <- attr(output, "status")
   if (!is.null(status) && status != 0L) stop("PLINK stopped. Read ", prefix, ".console.txt before continuing.")
   require_files(expected)
@@ -1018,6 +1018,74 @@ plot_regional <- function(region, r2, lead_row, chromosome, lead_label, title) {
   image(x = 1, y = seq(0, 1, length.out = 101), z = matrix(seq(0, 1, length.out = 101), nrow = 1), col = scale_colours,
         axes = FALSE, xlab = "", ylab = "")
   axis(4, at = seq(0, 1, 0.2), las = 1); mtext("r2 with the lead", side = 4, line = 3, cex = 0.8); box()
+}
+
+# Threshold trials (optional boxes in steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4).
+# Each trial starts from the same input and changes one threshold only. Trials never build on each other.
+# The PLINK trials write only a tiny temporary list file in a temporary folder, which is deleted at the end.
+
+# Count how many samples (--mind) or variants (--geno, --maf) PLINK removes at each threshold.
+# input is the file name prefix of a PGEN set. The result has the threshold, the removed count and the remaining count.
+threshold_counts <- function(cfg, input, option, values) {
+  if (!option %in% c("--mind", "--geno", "--maf")) stop("This helper supports --mind, --geno and --maf.")
+  kind <- if (option == "--mind") "samples" else "variants"
+  write_option <- if (kind == "samples") "--make-just-psam" else "--make-just-pvar"
+  folder <- tempfile("threshold-"); dir.create(folder)
+  on.exit(unlink(folder, recursive = TRUE), add = TRUE)
+  rows <- lapply(seq_along(values), function(i) {
+    prefix <- file.path(folder, paste0("trial", i))
+    output <- run_plink(cfg, c("--pfile", input, option, format(values[i], scientific = FALSE), write_option, "--out", prefix), quiet = TRUE)
+    loaded_line <- grep(paste0(kind, " .*loaded from|", kind, " loaded from"), output, value = TRUE)[1]
+    loaded <- as.numeric(sub("[^0-9].*", "", trimws(loaded_line)))
+    removed_line <- grep(paste0(kind, " removed"), output, value = TRUE)
+    removed <- if (length(removed_line)) as.numeric(sub(paste0(" ", kind, " removed.*"), "", sub(".*: ", "", removed_line[1]))) else 0
+    data.frame(threshold = values[i], removed = removed, remaining = loaded - removed)
+  })
+  do.call(rbind, rows)
+}
+
+# Count the samples that the heterozygosity rule removes (F below the mean minus k standard deviations)
+# and the samples that it flags (F above the mean plus k standard deviations). het is the PLINK .het table.
+het_counts <- function(het, multipliers) {
+  f <- as.numeric(het$F)
+  centre <- mean(f); spread <- sqrt(mean((f - centre)^2))
+  data.frame(threshold = multipliers, removed = vapply(multipliers, function(k) sum(f < centre - k * spread), numeric(1)),
+             flagged = vapply(multipliers, function(k) sum(f > centre + k * spread), numeric(1)))
+}
+
+# Count the variants that a Hardy-Weinberg threshold removes. hardy is the PLINK .hardy table of the controls.
+# Fixed thresholds are compared with the p-value (MIDP). With course_rule = TRUE the cutoff depends on the number of controls.
+hwe_counts <- function(hardy, thresholds, course_rule = TRUE) {
+  p <- as.numeric(hardy$MIDP)
+  n_control <- as.numeric(hardy$HOM_A1_CT) + as.numeric(hardy$HET_A1_CT) + as.numeric(hardy$TWO_AX_CT)
+  rows <- data.frame(threshold = thresholds, removed = vapply(thresholds, function(x) sum(!is.na(p) & p < x), numeric(1)))
+  if (course_rule) {
+    cutoff <- 10^(-6 - 0.001 * pmax(0, n_control - 1000))
+    rows <- rbind(rows, data.frame(threshold = NA_real_, removed = sum(!is.na(p) & p < cutoff)))
+  }
+  rows
+}
+
+# Count the samples that the relatedness rule of step 3.6 removes when the first-degree cutoff changes.
+# kin is the PLINK .kin0 table and metadata is the table from guided_metadata(). Pairs above 0.354 are always treated as repeats.
+kinship_counts <- function(kin, metadata, cutoffs) {
+  kin <- kin[order(-as.numeric(kin$KINSHIP)), ]
+  vapply(cutoffs, function(cutoff) {
+    remove <- character()
+    for (i in seq_len(nrow(kin))) {
+      a <- kin$IID1[i]; b <- kin$IID2[i]; value <- as.numeric(kin$KINSHIP[i])
+      if (value > 0.354) {
+        if (endsWith(a, "_R2") || endsWith(b, "_R2")) {
+          remove <- union(remove, if (endsWith(a, "_R2")) a else b)
+        } else {
+          ai <- match(a, metadata$IID); bi <- match(b, metadata$IID)
+          same <- identical(unname(unlist(metadata[ai, c("SEX", "Age", "Disease")])), unname(unlist(metadata[bi, c("SEX", "Age", "Disease")])))
+          remove <- union(remove, if (same) max(a, b) else c(a, b))
+        }
+      } else if (value > cutoff && !a %in% remove && !b %in% remove) remove <- union(remove, max(a, b))
+    }
+    length(remove)
+  }, numeric(1))
 }
 
 save_plot <- function(path, draw, width = 1800, height = 1200) {
