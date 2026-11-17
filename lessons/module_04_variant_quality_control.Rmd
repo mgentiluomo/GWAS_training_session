@@ -129,6 +129,46 @@ The rule works on the observed data, including other variants. Its result does n
 
 `s4-1_state.*`, the lists of excluded IDs and the records that let the course repeat this step.
 
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+At this step `--geno 0.02` removes variants with more than 2% missing calls in the samples that remain. A strict limit removes more variants, but each variant that stays has more complete data. A generous limit keeps more variants with more missing calls. Missing calls that depend on the disease status can create false associations, which is why a clear limit matters. Each trial starts from the cohort saved at 3.8 and changes the limit only.
+
+```{r s4-1_thresholds, eval=FALSE}
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
+trial <- threshold_counts(cfg, guided_path(cfg, "3.8"), "--geno", thresholds)
+trial$course_value <- trial$threshold == 0.02
+trial
+# Plot the removed variants. The course value is the large diamond.
+plot_threshold_trials(trial, "Variants removed")
+```
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s3-8_state --geno 0.05 --make-just-pvar --out results/trials/s4-1_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s4-1_trial.log` states how many variants were removed. To repeat the trial, change the number after `--geno` and use a new `--out` name.
+
+The expected result of the trials:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.01 | 1,053 | 295,307 |
+| **0.02 (course value)** | 801 | 295,559 |
+| 0.05 | 561 | 295,799 |
+| 0.1 | 0 | 296,360 |
+| 0.2 | 0 | 296,360 |
+
+How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 561 to 1,053. The course value of 0.02 removes 801.
+
+</details>
+
+
+
 ## 4.2 Differential missingness {#step-4-2}
 
 
@@ -307,6 +347,46 @@ Yes. The label describes how common the allele is in the sample. It is not a fix
 
 `s4-3_state.*` and the list of excluded variants that lets the course repeat this step.
 
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The minor allele frequency (MAF) is how often the less common version of a variant occurs. `--maf 0.01` removes variants with a MAF below 1%. A rare variant has few carriers, so its test has little power and gives unstable estimates. A higher limit removes more rare variants and keeps a cleaner set. A very high limit also removes real, common signals and shrinks the data a lot. Each trial starts from the cohort saved at 4.2 and changes the limit only.
+
+```{r s4-3_thresholds, eval=FALSE}
+# Optional. Each trial starts from the same input and changes one threshold only.
+thresholds <- c(0.001, 0.005, 0.01, 0.02, 0.05)
+trial <- threshold_counts(cfg, guided_path(cfg, "4.2"), "--maf", thresholds)
+trial$course_value <- trial$threshold == 0.01
+trial
+# Plot the removed variants. The course value is the large diamond.
+plot_threshold_trials(trial, "Variants removed")
+```
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s4-2_state --maf 0.02 --make-just-pvar --out results/trials/s4-3_trial --threads 2 --memory 2048
+```
+
+The log file `results/trials/s4-3_trial.log` states how many variants were removed. To repeat the trial, change the number after `--maf` and use a new `--out` name. PLINK 2 uses the founders to calculate the frequency when the sample table has family information. Our samples are all founders, so this makes no difference here.
+
+The expected result of the trials:
+
+| Threshold | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 0.001 | 33,951 | 261,488 |
+| 0.005 | 47,184 | 248,255 |
+| **0.01 (course value)** | 56,420 | 239,019 |
+| 0.02 | 89,204 | 206,235 |
+| 0.05 | 156,235 | 139,204 |
+
+How to read it. At 0.01 the course removes 56,420 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,420 minus 33,951). Many of them have only a handful of carriers.
+
+</details>
+
+
+
 ## 4.4 Hardy-Weinberg and sample size {#step-4-4}
 
 
@@ -422,6 +502,48 @@ Yes. Pooling can create a deficit even when there is no genotyping error.
 ### Files created
 
 The list of control IDs, the `.hardy` file, the exclusion list and `s4-4_state.*`.
+
+<details><summary>Try other thresholds (optional)</summary>
+
+This box is not part of the main path. No later step uses it. It does not change your results.
+
+The Hardy-Weinberg test gives a p-value for each variant in the controls. A smaller cutoff removes fewer variants. A larger cutoff removes more variants, including some that are only unusual. The course does not use one fixed cutoff. It uses the rule 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control is the number of controls tested at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. Here there are 920 controls, so the course rule is the same as the fixed cutoff 1e-6. The trials below compare fixed cutoffs and the course rule.
+
+```{r s4-4_thresholds, eval=FALSE}
+# Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
+cutoffs <- c(1e-3, 1e-4, 1e-6, 1e-8, 1e-10)
+trial <- hwe_counts(guided_table(paste0(guided_path(cfg, "4.4", "hardy"), ".hardy")), cutoffs)
+# The last row is the course rule. Its threshold is NA, so it is the course value.
+trial$course_value <- is.na(trial$threshold)
+trial
+# Plot the removed variants for the fixed cutoffs. The course rule equals 1e-6 here.
+plot_threshold_trials(trial, "Variants removed")
+```
+
+Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
+
+```sh
+bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hwe 1e-6 midp --make-just-pvar --out results/trials/s4-4_trial --threads 2 --memory 2048
+```
+
+The course does not use `--hwe`. It filters the table from `--hardy midp` in R, because its cutoff depends on the number of controls. The terminal command above uses a fixed cutoff. PLINK 2 can stop with an error when a cutoff is very strict for the sample size, unless you add a value `k` or the modifier `keep-fewhet` (read the `--hwe` entry of the PLINK 2 manual). PLINK 2 tests only founders by default.
+
+The expected result of the trials:
+
+| HWE p-value cutoff | Variants removed | Variants remaining |
+| --- | --- | --- |
+| 1e-3 | 700 | 238,319 |
+| 1e-4 | 273 | 238,746 |
+| 1e-6 | 167 | 238,852 |
+| 1e-8 | 150 | 238,869 |
+| 1e-10 | 127 | 238,892 |
+| **course rule (course value)** | 167 | 238,852 |
+
+How to read it. At 1e-3 the number removed is 700, and at 1e-4 it is 273. At 1e-6 it is 167, and at 1e-10 it is 127. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
+
+</details>
+
+
 
 ## 4.5 Sex chromosomes, MT and duplicated sites {#step-4-5}
 

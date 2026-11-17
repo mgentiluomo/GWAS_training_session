@@ -1088,6 +1088,22 @@ kinship_counts <- function(kin, metadata, cutoffs) {
   }, numeric(1))
 }
 
+# Plot the result of a threshold trial: the number removed at each threshold. The course value is a large diamond with a label.
+# trial needs the columns threshold and removed. course_value (TRUE for one row) marks the course threshold.
+plot_threshold_trials <- function(trial, ylab = "Removed", log_x = TRUE, course_label = "course value") {
+  fixed <- !is.na(trial$threshold)
+  x <- trial$threshold[fixed]; y <- trial$removed[fixed]
+  mark <- trial$course_value[fixed]
+  plot(x, y, type = "b", pch = 16, log = if (log_x) "x" else "", xaxt = "n", xlab = "Threshold", ylab = ylab,
+       ylim = c(0, max(y) * 1.15), main = "Trials with other thresholds")
+  axis(1, at = x, labels = format(x, scientific = FALSE, drop0trailing = TRUE), cex.axis = 0.85)
+  if (any(mark)) {
+    points(x[mark], y[mark], pch = 18, cex = 2.2, col = "#B91C1C")
+    text(x[mark], y[mark], course_label, pos = 3, offset = 1, col = "#B91C1C", cex = 0.9)
+  }
+  invisible(trial)
+}
+
 save_plot <- function(path, draw, width = 1800, height = 1200) {
   png(path, width = width, height = height, res = 180)
   on.exit(dev.off())

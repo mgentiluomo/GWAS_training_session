@@ -6,7 +6,7 @@
   "anchor": "step-4-2",
   "title": "Differential missingness",
   "source": "lessons/module_04_variant_quality_control.Rmd",
-  "source_sha256": "b86ecfaf62121628c40b5fef939470dedd5187362fb5c6df40d70d0b5bb0a72e",
+  "source_sha256": "a800bfe1eca3cf3890c307dbfe378792d6f64129877c6af56a1da5bceebf483b",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We test whether missing calls differ between cases and controls.",

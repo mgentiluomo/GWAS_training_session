@@ -6,7 +6,7 @@
   "anchor": "step-3-2",
   "title": "Sample call rate",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "29e3385f348996f1d938547e91ed297a77696ee3218c42ffeeffb7b1bc939f5a",
+  "source_sha256": "d122e45019fa8bc2be122e8b1bd81fba47967c3fab2eeede2d48c1cb83b49313",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We keep only samples with a call rate of at least 98%. We apply this rule after the rough cleaning.",
@@ -17,7 +17,8 @@
     "troubleshooting": "Stop at the first error. Check the input file named in the message and the previous step. Keep the command and the console messages. Do not use files from a different version of the dataset. See [troubleshooting](docs/troubleshooting.md).",
     "what_this_check_can_reveal": "Moderate sample failures that the rough screen did not catch. Missingness can be associated with the [phenotype](docs/glossary.md#phenotype), here case or control status (a case has the disease, a control does not). It can also be associated with a [batch](docs/glossary.md#batch-effect), which is a group of samples processed together. For this reason, write down every exclusion.",
     "quick_check": "A well has 1% missing calls. What is its call rate? Does it pass this rule?\n\n<details><summary>Show the answer</summary>\n\nThe call rate is 99%. The well passes the 98% call-rate rule.\n\n</details>",
-    "files_created": "`s3-2_state.*`, the list of removed samples and the replay metadata."
+    "files_created": "`s3-2_state.*`, the list of removed samples and the replay metadata.",
+    "try_other_thresholds": "This box is not part of the main path. No later step uses it. It does not change your results.\n\nThe call rate of a sample is the share of its calls that are not missing. `--mind 0.02` removes samples with more than 2% missing calls, which is a call rate below 98%. A lower limit keeps more samples but lets in samples with poor DNA. A higher limit removes more samples and may throw away good data. A call rate of 95% to 98% is a common choice in genome-wide studies, and 98% is the stricter end of it. Each trial starts from the cohort saved at 3.1 and changes the limit only.\n\n```{r s3-2_thresholds, eval=FALSE}\n# Optional. Each trial starts from the same input and changes one threshold only.\nthresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)\ntrial <- threshold_counts(cfg, guided_path(cfg, \"3.1\"), \"--mind\", thresholds)\ntrial$course_value <- trial$threshold == 0.02\ntrial\n# Plot the removed samples. The course value is the large diamond.\nplot_threshold_trials(trial, \"Samples removed\")\n```\n\nPlain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:\n\n```sh\nbin/plink2 --pfile results/guided/s3-1_state --mind 0.05 --make-just-psam --out results/trials/s3-2_trial --threads 2 --memory 2048\n```\n\nThe log file `results/trials/s3-2_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name.\n\nThe expected result of the trials:\n\n| Threshold | Samples removed | Samples remaining |\n| --- | --- | --- |\n| 0.01 | 118 | 1,895 |\n| **0.02 (course value)** | 42 | 1,971 |\n| 0.05 | 0 | 2,013 |\n| 0.1 | 0 | 2,013 |\n| 0.2 | 0 | 2,013 |\n\nHow to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken."
   },
   "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
