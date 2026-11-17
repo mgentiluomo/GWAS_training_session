@@ -90,7 +90,7 @@ def aes256_members(path: Path) -> list[str]:
     return names
 
 
-def build(source: Path, output: Path, sevenzip: Path) -> dict:
+def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1") -> dict:
     started = time.perf_counter()
     for path in (source, output, sevenzip):
         safe_path(path)
@@ -116,7 +116,7 @@ def build(source: Path, output: Path, sevenzip: Path) -> dict:
     writer.writerow(("path", "bytes", "sha256"))
     writer.writerows(rows)
     (output / "MANIFEST.tsv").write_text(text.getvalue(), encoding="utf-8", newline="\n")
-    archive = output / "course-data-2026.1.zip"
+    archive = output / f"course-data-{version}.zip"
     # An explicit list avoids directory entries. The environment is scrubbed.
     listing = output / "members.txt"
     listing.write_text("\n".join(name for _, name in members) + "\n", encoding="utf-8")
@@ -148,9 +148,10 @@ def build(source: Path, output: Path, sevenzip: Path) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=WORK / "classroom-stage-2026.1",
+    parser.add_argument("--version", default="2026.2", help="the data release version, used in the archive name")
+    parser.add_argument("--source", type=Path, default=WORK / "classroom-stage-2026.2",
                         help="the verified main-path staging folder (default) or the older sim2026/student folder")
-    parser.add_argument("--output", type=Path, default=WORK / "release-data-2026.1",
+    parser.add_argument("--output", type=Path, default=WORK / "release-data-2026.2",
                         help="a NEW folder under codex_work; an existing folder is refused")
     parser.add_argument("--min-password-length", type=int, default=12)
     parser.add_argument("--sevenzip", type=Path, default=Path(r"C:\Program Files\7-Zip\7z.exe"))
@@ -164,7 +165,7 @@ def main() -> None:
     if len(password) < args.min_password_length:
         parser.error(f"COURSE_RELEASE_PASSWORD must have at least {args.min_password_length} characters.")
     import json
-    print(json.dumps(build(args.source, args.output, args.sevenzip), indent=2))
+    print(json.dumps(build(args.source, args.output, args.sevenzip, args.version), indent=2))
 
 
 if __name__ == "__main__":

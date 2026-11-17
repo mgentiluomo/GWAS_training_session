@@ -90,3 +90,30 @@ Recommendation. In this dataset one PC is enough: the elbow and the outcome rule
 - `C:\GWAS_trials\make_trial.py` builds each trial from `git archive` of the branch, patches the copy (and never the repository), and runs `scripts/run_main_path.R`. The tolerant overrides are in `C:\GWAS_trials\trial_prelude.R`.
 - `C:\GWAS_trials\analyse_trials.py` reads the outputs. `C:\GWAS_trials\pc_criteria.R` runs 3d.
 - The runs took 108 to 123 seconds each and ended with exit code 0.
+
+## Update of 18 November 2026: what the 2026.5 course does
+
+Decisions taken for the course branch `course/2026.5` (nothing is published):
+
+- 3a, the long-range LD list: adopted in the main path (steps 3.4 and 5.7). The list is the file `highLD_b38.bed`, read with `bed0`. It is not in the repository. It travels with the course data in `pca_reference/highLD_b38.bed`. The repository GrindeLab/PCA has no declared licence, and the file comes from the review notes, so the decision is to keep it in the data release only. Its sources are Price et al. 2008, Anderson et al. 2010 and Privé et al. 2020 (DOIs verified in `references_checked.md`).
+- 3b, the call-rate rule for relatives: adopted (step 3.6). The call rate comes from `--missing sample-only` on the cohort saved at 3.5.
+- 3c, the robust Mahalanobis distance: kept as an alternative in a box of step 5.6. The main method stays at six standard deviations. A second alternative, the nearest 1000 Genomes group, is also in the box.
+- 3d, the number of PCs: ten PCs stay in the main path. The box of step 5.7 explains the scree plot, the PCs associated with the outcome and lambda against the number of PCs.
+
+Numbers of the main path with 3a and 3b together, on the new data (this replaces the 2026.4 numbers):
+
+| Quantity | 2026.4 | 2026.5 |
+| --- | --- | --- |
+| Samples after 3.6 | 1,920 | 1,920 (4 samples swapped) |
+| Variants after 4.3 | 239,019 | 239,018 |
+| Variants after 4.4 | 238,852 | 238,852 (166 removed instead of 167) |
+| Pruned sites at 3.4 | 69,539 | 68,800 |
+| Shared sites with the reference (5.2) | 48,614 | 48,615 |
+| Pruned sites at 5.7 | 68,622 | 67,905 |
+| Final cohort | 1,811 samples (900 cases, 911 controls), 238,513 variants | 1,811 samples (898 cases, 913 controls), 238,513 variants |
+| Finite tests | 236,815 | 236,820 |
+| Hits, lambda, clumps (main) | 8, 1.0165, 3 | 8, 1.0157, 3 |
+| Hits and lambda without PCs | 15, 1.546 | 17, 1.527 |
+| Hits and lambda without QC and PCs | 19, 1.655 | 19, 1.655 |
+
+The ancestry-outlier results on the new data: the six-SD rule and the nearest-group method remove the same 33 samples at step 5.6. The robust Mahalanobis distance removes 39 (6 more, at the edge of the European cluster, with squared distances between 18.8 and 24.6 against a cutoff of 18.47).

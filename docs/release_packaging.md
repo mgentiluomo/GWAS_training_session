@@ -78,3 +78,42 @@ This is staging only. No new encrypted archive or GitHub Release is created.
 When the author creates the classroom archive, select this approved source and
 a new output directory. Replace both configured URLs and both expected hashes
 in `config.R` after approval; the old local test ZIP remains a distinct artifact.
+
+## Data release data-2026.2 (for the 2026.5 course): the exact commands
+
+Do this on the author machine, in PowerShell, from `C:\GWAS_course`. Nothing here was run by the assistant: no archive exists and no password was used.
+
+1. Check that the staging folder is the verified one. Its manifest is `codex_work\classroom-stage-2026.2.MANIFEST.tsv` (109 files). Its SHA-256 is in `classroom-stage-2026.2.MANIFEST.tsv.sha256`.
+
+2. Type the password by hand into a secure prompt. It lives only in this PowerShell session.
+
+```powershell
+$secure = Read-Host "Course password (at least 12 characters)" -AsSecureString
+$env:COURSE_RELEASE_PASSWORD = [System.Net.NetworkCredential]::new("", $secure).Password
+```
+
+3. Create the encrypted archive. The folder `release-data-2026.2` must not exist.
+
+```powershell
+python -B scripts\package_release.py --version 2026.2 --source C:\WEB_site\data_sources\codex_work\classroom-stage-2026.2 --output C:\WEB_site\data_sources\codex_workelease-data-2026.2
+Remove-Item Env:\COURSE_RELEASE_PASSWORD
+```
+
+The script prints the SHA-256 of `course-data-2026.2.zip` and of `MANIFEST.tsv`. It also tests that the password opens the archive. It needs 7-Zip at `C:\Program Files-Zipz.exe`.
+
+4. Create the GitHub release and upload the three files. Keep the password out of the notes.
+
+```powershell
+gh release create data-2026.2 C:\WEB_site\data_sources\codex_workelease-data-2026.2\course-data-2026.2.zip C:\WEB_site\data_sources\codex_workelease-data-2026.2\MANIFEST.tsv C:\WEB_site\data_sources\codex_workelease-data-2026.2\SHA256SUMS.txt --repo mgentiluomo/GWAS_training_session --title "Course data 2026.2" --notes "Encrypted course data for the project release 2026.5. The password is given through the form on the course website."
+```
+
+5. After the upload, update these places in the project, with the SHA-256 values printed in step 3, and make a new project release (for example `project-2026.5`):
+
+- `config.R`: `archive_url`, `manifest_url`, `archive_sha256` and `manifest_sha256` (the comment says `data-2026.2`).
+- Steps 0.4 and 0.7 of module 0 (`lessons/module_00_preparation.Rmd`): the release name `data-2026.1` and the file name `course-data-2026.1.zip` become `data-2026.2` and `course-data-2026.2.zip`. Then regenerate the exports and notebooks (`python -B scripts/build_tutorial.py --export-steps site_content/steps --export-main-script scripts/run_main_path.R` and `--export-notebooks notebooks`).
+- `README.md`, `docs/data.md`, `docs/release_checklist.md` and `CLAUDE.md` (the "Data distribution" and "Current status" paragraphs).
+- The website: `npm run sync:gwas`, then the access form needs no change. Set a new password in the form backend, because the archive uses a new password. Keep the old release available until the new course is live, then delete it as the rule in `CLAUDE.md` says.
+
+6. Test as a student on a new folder: `download_course_data()` with the new password, then `where_am_i()`, then `check_step("2.8")`. Then run `scripts/run_main_path.R` and compare `step_counts.tsv` with `build_report_2026.2.md` (instructor folder).
+
+The project release 2026.5 and the data release 2026.2 must go out together. The new project does not work with `data-2026.1`, because the checkpoint folders of module 6 are renumbered and the list of long-range LD regions is in the new data (`pca_reference/highLD_b38.bed`).
