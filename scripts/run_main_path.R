@@ -503,7 +503,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 5f2b005a6106d9f5af12f950ce05ebbf4d16ac0a9f3c0b4ed96d2f1808dcc844
+# SHA-256: a1f5838a8c0bc6bca5b88d0b1d9a54a0e56c9952eac4a84de3fa6feefeb026d5
 
 # Chunk: setup
 source("R/guided.R")

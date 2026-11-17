@@ -436,6 +436,32 @@ Stop at the first error message. Check the input file named in the message and t
 
 </details>
 
+### Optional: a 3D plot with ellipses
+
+<details><summary>Show the optional 3D plot</summary>
+
+This box is not part of the main path. No later step uses it. The code is not run by default. It draws the three first components in one rotating 3D picture. A 95% ellipse is drawn around each reference group. An ellipse shows where about 95% of the points of a group are expected to lie. The code needs the package `rgl`, which step 0.5 does not install. To install it once, type `install.packages("rgl")` in the R console. On macOS, `rgl` may also need the free program XQuartz. If the package does not install, or no window opens, skip this box. The code does nothing when `rgl` is missing.
+
+```{r s5-5_optional_3d, eval=FALSE}
+# Optional. Needs the rgl package: install.packages("rgl")
+if (requireNamespace("rgl", quietly = TRUE)) {
+  # 1. Collect the scores of the first three components for the reference samples.
+  scores <- cbind(as.numeric(ref$PC1_AVG), as.numeric(ref$PC2_AVG), as.numeric(ref$PC3_AVG))
+  # 2. Draw the reference samples in 3D, with the colours used in the 2D plots.
+  rgl::plot3d(scores, col = colours[code], size = 4, xlab = "PC1", ylab = "PC2", zlab = "PC3")
+  # 3. Add one 95% ellipse for each reference group.
+  for (i in seq_along(levels)) {
+    group_scores <- scores[code == i, , drop = FALSE]
+    rgl::plot3d(rgl::ellipse3d(cov(group_scores), centre = colMeans(group_scores), level = 0.95),
+      col = colours[i], alpha = 0.15, add = TRUE)
+  }
+} else {
+  message("The rgl package is not installed. Skip this optional plot.")
+}
+```
+
+</details>
+
 ### Quick check
 
 Does overlap with a reference group prove a person's nationality?
