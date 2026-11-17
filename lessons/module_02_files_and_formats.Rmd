@@ -457,10 +457,10 @@ print(c(input_sites = nrow(bim37), mapped_same_chromosome = sum(keep), reverse_s
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
-`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. If R finds reverse-strand mappings, add `--flip` with the reverse list that R generates. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
+`--extract` keeps only the IDs that were mapped successfully; `--update-map` reads the ID and the new position from two columns. `--flip` replaces each base by its complement at the listed IDs. The list `s2-6_reverse.txt` holds the eight sites that map to the opposite strand. R adds this option only when such sites exist, and here they do, so the terminal command includes it. The exercise keeps only the sites that stay on the same chromosome, and it reports the sites it excludes. `--out` sets the prefix of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` sets the memory budget to 2048 MiB. The R helper prints the exact command with your own safe paths.
 
 <details><summary>Show the expected result</summary>
 

@@ -1003,7 +1003,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
 :::

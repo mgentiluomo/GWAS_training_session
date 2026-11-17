@@ -104,7 +104,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: 6f21443ff649fc39ed3afe96924dd6a85b6ae82484f88181dfb1f138c9469653
+# SHA-256: e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564
 
 # Chunk: setup
 source("R/guided.R")

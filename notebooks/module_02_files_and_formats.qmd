@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "6f21443ff649fc39ed3afe96924dd6a85b6ae82484f88181dfb1f138c9469653"
+course_source_sha256: "e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -351,7 +351,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
+bin/plink2 --bfile data/course/grch37_exercise/legacy_grch37 --extract results/guided/s2-6_mapped.txt --update-map results/guided/s2-6_update_map.tsv --flip results/guided/s2-6_reverse.txt --make-pgen --out results/guided/s2-6_grch38 --threads 2 --memory 2048
 ```
 
 :::

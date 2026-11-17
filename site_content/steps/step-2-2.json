@@ -6,7 +6,7 @@
   "anchor": "step-2-2",
   "title": "Convert to PLINK 2 native format",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "6f21443ff649fc39ed3afe96924dd6a85b6ae82484f88181dfb1f138c9469653",
+  "source_sha256": "e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We convert the matched BED, BIM and FAM files to PGEN, PVAR and PSAM files.",
