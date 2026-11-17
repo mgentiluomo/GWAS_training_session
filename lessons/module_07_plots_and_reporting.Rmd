@@ -56,6 +56,8 @@ A [QQ plot](../docs/glossary.md#qq-plot) puts the observed p-values in order and
 
 If the tests behave well, the points follow the diagonal line. A few associations with very small p-values lift only the highest points at the right end. A wider departure along the whole line can have several causes: [confounding](../docs/glossary.md#confounding), technical problems, a wrong model or many true small effects. The picture alone cannot tell these causes apart. Nearby variants can be correlated through [linkage disequilibrium (LD)](../docs/glossary.md#ld), so the points are not fully independent.
 
+The top left corner of the plot shows a number called lambda. Lambda summarises how far the middle of the p-values departs from what chance predicts. We only read it as a first hint here. We explain it and calculate it in step 7.2.
+
 ### You need
 
 The summary statistics file from step 6.8. If R says that the file is missing, run step 6.8 first.

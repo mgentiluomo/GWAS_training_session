@@ -802,7 +802,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 8493afb1318eec061754622f13a7f5738409efb59fc218e6f707af0ec1293369
+# SHA-256: a0af4f37969df5895f86ca1ae3a751d9acf40bb2f1c9c49e41781d857a4b1557
 
 # Chunk: setup
 source("R/guided.R")
