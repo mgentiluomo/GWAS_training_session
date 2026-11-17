@@ -32,7 +32,7 @@ images, download data, publish a website or create an encrypted release.
 
 The block keys are `what_we_do`, `why`, `you_need`, `command`,
 `expected_result`, `troubleshooting`, optional `what_this_check_can_reveal`,
-`quick_check`, `files_created` and optional `under_the_hood`. Preserve this order. Expected results and
+`quick_check`, `files_created`, optional `try_other_thresholds` and optional `under_the_hood`. Preserve this order. Expected results and
 troubleshooting are collapsed by default; quick-check answers retain their
 native `<details>` markup. Keep step numbers visible and provide previous/next
 navigation when the approved website design is implemented.
@@ -166,6 +166,14 @@ The author tool checks the 2,013 input wells and the 42 exclusions at 98%.
 It compares integer cross-products to avoid rounding `F_MISS` at boundaries.
 The source report uses PLINK 2.0 b.1.4 (7 November 2026), on the verified Windows
 main-path state. It stays external alongside its PLINK command and log.
+
+## Optional block: Try other thresholds
+
+`blocks.try_other_thresholds` is present only for the quality-control steps that carry an optional box with other thresholds
+(3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4). It comes after `files_created` and before `under_the_hood`. Its text holds an R chunk that is not run by default, a
+PLINK 2 terminal example and a table of expected results. The numbers come from `site_content/threshold_sweeps.json`, which `scripts/author/threshold_sweeps.R`
+writes from a main-path run. The course value of every trial must equal the count in `step_counts.tsv`; `scripts/tests/test_threshold_sweeps.py` checks this.
+The key is absent for other steps. The notebooks show the box as a collapsed callout. The schema version stays `1.1` because the key is optional.
 
 ## Optional ninth block: Under the hood and literature
 
