@@ -406,7 +406,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: 6377fa0203aeb7f2bb8c5731581a3f5e418eec13d351905f94e0277d0eca053c
+# SHA-256: fd3bdced0b04c21d6f87a2e1c859c1a45d31ac4e4d879082c0569033119a9956
 
 # Chunk: setup
 source("R/guided.R")

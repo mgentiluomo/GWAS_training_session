@@ -158,13 +158,13 @@ The expected result of the trials:
 
 | Threshold | Variants removed | Variants remaining |
 | --- | --- | --- |
-| 0.01 | 1,053 | 295,307 |
+| 0.01 | 1,052 | 295,308 |
 | **0.02 (course value)** | 801 | 295,559 |
-| 0.05 | 561 | 295,799 |
+| 0.05 | 560 | 295,800 |
 | 0.1 | 0 | 296,360 |
 | 0.2 | 0 | 296,360 |
 
-How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 561 to 1,053. The course value of 0.02 removes 801.
+How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 560 to 1,052. The course value of 0.02 removes 801.
 
 Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.02), where 801 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
@@ -379,13 +379,13 @@ The expected result of the trials:
 
 | Threshold | Variants removed | Variants remaining |
 | --- | --- | --- |
-| 0.001 | 33,951 | 261,488 |
-| 0.005 | 47,184 | 248,255 |
+| 0.001 | 33,941 | 261,498 |
+| 0.005 | 47,187 | 248,252 |
 | **0.01 (course value)** | 56,421 | 239,018 |
-| 0.02 | 89,204 | 206,235 |
-| 0.05 | 156,235 | 139,204 |
+| 0.02 | 89,210 | 206,229 |
+| 0.05 | 156,222 | 139,217 |
 
-How to read it. At 0.01 the course removes 56,421 variants. At 0.05 it would remove 156,235, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,469 more variants (the difference 56,421 minus 33,951). Many of them have only a handful of carriers.
+How to read it. At 0.01 the course removes 56,421 variants. At 0.05 it would remove 156,222, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,480 more variants (the difference 56,421 minus 33,941). Many of them have only a handful of carriers.
 
 Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,421 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
@@ -396,7 +396,7 @@ Expected plot. For `--maf`, the horizontal axis shows the threshold and the vert
 ## 4.4 Hardy-Weinberg and sample size {#step-4-4}
 
 
-<!-- step_meta: {"success_line": "167 variants are excluded, and 238,852 remain.", "student_summary": "We test whether DNA letter combinations on chromosomes 1 to 22 follow expected proportions in people without the disease. We remove variants that fail a rule based on the number of people tested, to reduce possible measurement errors.", "student_plink_options": [{"label": "test expected DNA letter combinations", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state."}, {"name": "--keep", "explanation": "Uses only people without the disease, listed in results/guided/s4-4_controls.txt, for this test."}, {"name": "--chr", "explanation": "Limits the test to chromosomes 1 to 22."}, {"name": "--hardy", "explanation": "Tests whether the shares of the three DNA letter combinations match those predicted from the allele frequencies when people mate at random.", "modifiers": [{"name": "midp", "explanation": "Uses the mid-p version of the exact test, which adjusts for the limited possible outcomes of whole-number counts."}]}, {"name": "--out", "explanation": "Starts the test report file names with results/guided/s4-4_hardy."}]}, {"label": "remove variants that fail the test", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state, including people with and without the disease."}, {"name": "--exclude", "explanation": "Removes variants listed in results/guided/s4-4_exclude.txt after R applies the cutoff 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control counts people without the disease who have a result at that variant."}, {"name": "--make-pgen", "explanation": "Saves the remaining data as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Starts the output file names with results/guided/s4-4_state."}]}]} -->
+<!-- step_meta: {"success_line": "166 variants are excluded, and 238,852 remain.", "student_summary": "We test whether DNA letter combinations on chromosomes 1 to 22 follow expected proportions in people without the disease. We remove variants that fail a rule based on the number of people tested, to reduce possible measurement errors.", "student_plink_options": [{"label": "test expected DNA letter combinations", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state."}, {"name": "--keep", "explanation": "Uses only people without the disease, listed in results/guided/s4-4_controls.txt, for this test."}, {"name": "--chr", "explanation": "Limits the test to chromosomes 1 to 22."}, {"name": "--hardy", "explanation": "Tests whether the shares of the three DNA letter combinations match those predicted from the allele frequencies when people mate at random.", "modifiers": [{"name": "midp", "explanation": "Uses the mid-p version of the exact test, which adjusts for the limited possible outcomes of whole-number counts."}]}, {"name": "--out", "explanation": "Starts the test report file names with results/guided/s4-4_hardy."}]}, {"label": "remove variants that fail the test", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM files named results/guided/s4-3_state, including people with and without the disease."}, {"name": "--exclude", "explanation": "Removes variants listed in results/guided/s4-4_exclude.txt after R applies the cutoff 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control counts people without the disease who have a result at that variant."}, {"name": "--make-pgen", "explanation": "Saves the remaining data as PGEN, PVAR and PSAM files."}, {"name": "--out", "explanation": "Starts the output file names with results/guided/s4-4_state."}]}]} -->
 ### What we do
 
 We run an exact Hardy–Weinberg test in the controls only, using the mid-p version. Then we apply a threshold that depends on the sample size.
@@ -476,7 +476,7 @@ R then applies the sample-size rule to the mid-p values and makes the list of fa
 
 <details><summary>Show the expected result</summary>
 
-167 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
+166 variants are excluded, and 238,852 remain. The strong planted errors are not the only failures. Eight unplanted variants and seven altered duplicate copies also fail. Some mild errors still pass. rs4988235, rs12913832 and rs1426654 leave here. They cannot be used as surviving markers in module 5.
 
 <!-- verification_note:start -->
 The tested PLINK version is defined in `config.R` and recorded in
@@ -513,7 +513,7 @@ The list of control IDs, the `.hardy` file, the exclusion list and `s4-4_state.*
 
 This box is not part of the main path. No later step uses it. It does not change your results.
 
-The Hardy-Weinberg test gives a p-value for each variant in the controls. A smaller cutoff removes fewer variants. A larger cutoff removes more variants, including some that are only unusual. The course does not use one fixed cutoff. It uses the rule 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control is the number of controls tested at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. Here there are 920 controls, so the course rule is the same as the fixed cutoff 1e-6. The trials below compare fixed cutoffs and the course rule.
+The Hardy-Weinberg test gives a p-value for each variant in the controls. A smaller cutoff removes fewer variants. A larger cutoff removes more variants, including some that are only unusual. The course does not use one fixed cutoff. It uses the rule 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control is the number of controls tested at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. Here there are 922 controls, so the course rule is the same as the fixed cutoff 1e-6. The trials below compare fixed cutoffs and the course rule.
 
 ```{r s4-4_thresholds, eval=FALSE}
 # Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
@@ -539,16 +539,16 @@ The expected result of the trials:
 
 | HWE p-value cutoff | Variants removed | Variants remaining |
 | --- | --- | --- |
-| 1e-3 | 700 | 238,319 |
-| 1e-4 | 273 | 238,746 |
-| 1e-6 | 167 | 238,852 |
-| 1e-8 | 150 | 238,869 |
-| 1e-10 | 127 | 238,892 |
-| **course rule (course value)** | 167 | 238,852 |
+| 1e-3 | 701 | 238,317 |
+| 1e-4 | 274 | 238,744 |
+| 1e-6 | 166 | 238,852 |
+| 1e-8 | 149 | 238,869 |
+| 1e-10 | 124 | 238,894 |
+| **course rule (course value)** | 166 | 238,852 |
 
-How to read it. At 1e-3 the number removed is 700, and at 1e-4 it is 273. At 1e-6 it is 167, and at 1e-10 it is 127. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
+How to read it. At 1e-3 the number removed is 701, and at 1e-4 it is 274. At 1e-6 it is 166, and at 1e-10 it is 124. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
 
-Expected plot. For `HWE p-value cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (course rule), where 167 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
+Expected plot. For `HWE p-value cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (course rule), where 166 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 </details>
 
@@ -748,7 +748,7 @@ Population structure, which means differences in ancestry between cases and cont
 - Step 4.1 removed 801 variants with a call rate below 98%.
 - Step 4.2 removed 120 variants whose missing calls differed between cases and controls.
 - Step 4.3 removed 56,421 variants with a minor allele frequency below 1%.
-- Step 4.4 removed 167 variants that failed the Hardy–Weinberg test in the controls.
+- Step 4.4 removed 166 variants that failed the Hardy–Weinberg test in the controls.
 - Step 4.5 removed 33 variants with impossible calls on X, Y or MT, and 306 duplicate entries.
 - You saved the module 4 checkpoint: 1,844 samples and 238,513 variants.
 

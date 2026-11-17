@@ -14,7 +14,7 @@ step	title	option	threshold	label	input_samples	input_variants	samples_removed	v
 3.2	Call rate of samples	--mind	0.05	0.05	2013	296360	0	0	2013	296360		FALSE
 3.2	Call rate of samples	--mind	0.1	0.1	2013	296360	0	0	2013	296360		FALSE
 3.2	Call rate of samples	--mind	0.2	0.2	2013	296360	0	0	2013	296360		FALSE
-3.5	Heterozygosity	F cutoff (standard deviations)	2	2	1963	296360	13	0	1950	296360	13	FALSE
+3.5	Heterozygosity	F cutoff (standard deviations)	2	2	1963	296360	13	0	1950	296360	14	FALSE
 3.5	Heterozygosity	F cutoff (standard deviations)	2.5	2.5	1963	296360	13	0	1950	296360	11	FALSE
 3.5	Heterozygosity	F cutoff (standard deviations)	3	3	1963	296360	13	0	1950	296360	8	TRUE
 3.5	Heterozygosity	F cutoff (standard deviations)	3.5	3.5	1963	296360	13	0	1950	296360	5	FALSE
@@ -23,19 +23,19 @@ step	title	option	threshold	label	input_samples	input_variants	samples_removed	v
 3.6	Relatedness	KING kinship cutoff	0.0884	0.0884	1950	296360	30	0	1920	296360		FALSE
 3.6	Relatedness	KING kinship cutoff	0.177	0.177	1950	296360	30	0	1920	296360		TRUE
 3.6	Relatedness	KING kinship cutoff	0.354	0.354	1950	296360	20	0	1930	296360		FALSE
-4.1	Call rate of variants	--geno	0.01	0.01	1844	296360	0	1053	1844	295307		FALSE
+4.1	Call rate of variants	--geno	0.01	0.01	1844	296360	0	1052	1844	295308		FALSE
 4.1	Call rate of variants	--geno	0.02	0.02	1844	296360	0	801	1844	295559		TRUE
-4.1	Call rate of variants	--geno	0.05	0.05	1844	296360	0	561	1844	295799		FALSE
+4.1	Call rate of variants	--geno	0.05	0.05	1844	296360	0	560	1844	295800		FALSE
 4.1	Call rate of variants	--geno	0.1	0.1	1844	296360	0	0	1844	296360		FALSE
 4.1	Call rate of variants	--geno	0.2	0.2	1844	296360	0	0	1844	296360		FALSE
-4.3	Allele frequency	--maf	0.001	0.001	1844	295439	0	33951	1844	261488		FALSE
-4.3	Allele frequency	--maf	0.005	0.005	1844	295439	0	47184	1844	248255		FALSE
-4.3	Allele frequency	--maf	0.01	0.01	1844	295439	0	56420	1844	239019		TRUE
-4.3	Allele frequency	--maf	0.02	0.02	1844	295439	0	89204	1844	206235		FALSE
-4.3	Allele frequency	--maf	0.05	0.05	1844	295439	0	156235	1844	139204		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	0.001	1e-03	1844	239019	0	700	1844	238319		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-04	1e-04	1844	239019	0	273	1844	238746		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-06	1e-06	1844	239019	0	167	1844	238852		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-08	1e-08	1844	239019	0	150	1844	238869		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-10	1e-10	1844	239019	0	127	1844	238892		FALSE
-4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff		course rule	1844	239019	0	167	1844	238852		TRUE
+4.3	Allele frequency	--maf	0.001	0.001	1844	295439	0	33941	1844	261498		FALSE
+4.3	Allele frequency	--maf	0.005	0.005	1844	295439	0	47187	1844	248252		FALSE
+4.3	Allele frequency	--maf	0.01	0.01	1844	295439	0	56421	1844	239018		TRUE
+4.3	Allele frequency	--maf	0.02	0.02	1844	295439	0	89210	1844	206229		FALSE
+4.3	Allele frequency	--maf	0.05	0.05	1844	295439	0	156222	1844	139217		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	0.001	1e-03	1844	239018	0	701	1844	238317		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-04	1e-04	1844	239018	0	274	1844	238744		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-06	1e-06	1844	239018	0	166	1844	238852		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-08	1e-08	1844	239018	0	149	1844	238869		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff	1e-10	1e-10	1844	239018	0	124	1844	238894		FALSE
+4.4	Hardy-Weinberg equilibrium	HWE p-value cutoff		course rule	1844	239018	0	166	1844	238852		TRUE
