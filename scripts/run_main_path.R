@@ -104,7 +104,7 @@ print(initial)
 stopifnot(initial$samples == 2016L, initial$variants == 299523L)
 
 # Source: lessons/module_02_files_and_formats.Rmd
-# SHA-256: e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564
+# SHA-256: de606f5ba9e6e4e393faa4ded7f7cfc494d077cd55f6b126a4871acb2cf82dba
 
 # Chunk: setup
 source("R/guided.R")
@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 52bcc2a142d2acc6894497c8bd944ba911f202a4e39fbf6f38ae6e9bf98a06de
+# SHA-256: 6cb90b5eceb3ed8ba405d26e78da22e89ca6f5c89f39ca52cf4abdbea372af38
 
 # Chunk: setup
 source("R/guided.R")
@@ -503,7 +503,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: aff37053bf04b62815a469c32c849ab1a4dfe4001cc440e60cc633dcfdcd60d3
+# SHA-256: e3ba8af064cc27ccfe6ba075cf4423f25a7c6221a345e3d551d1a34c3f456e41
 
 # Chunk: setup
 source("R/guided.R")
@@ -651,7 +651,7 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 }
 
 # Source: lessons/module_06_association.Rmd
-# SHA-256: 26b1f7a69396e6f0d34c018b1eb4b88e941b29876b9607ebb9614a3b9eb0a31d
+# SHA-256: 4b5bb4405771e59abb3ce995c0f87ffe52ab0308d7219aef80180cf2f9be48e8
 
 # Chunk: setup
 source("R/guided.R")
@@ -802,7 +802,7 @@ guided_artifact_checkpoint(cfg, "6.8", c(stats_file, dictionary_file), parent = 
 check_step("6.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31
+# SHA-256: a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544
 
 # Chunk: setup
 source("R/guided.R")

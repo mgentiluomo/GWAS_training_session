@@ -6,7 +6,7 @@
   "anchor": "step-2-5",
   "title": "Alleles and strand",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564",
+  "source_sha256": "de606f5ba9e6e4e393faa4ded7f7cfc494d077cd55f6b126a4871acb2cf82dba",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the allele pairs from the laboratory with the supplied plus-strand annotation. We flip the pairs that are complementary. We remove the sites that are ambiguous or incompatible.",

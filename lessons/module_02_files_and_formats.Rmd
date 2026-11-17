@@ -43,7 +43,7 @@ cfg <- guided_init()
 ## 2.1 The starting files {#step-2-1}
 
 
-<!-- step_meta: {"success_line": "You see 2,016 sample wells and 299,523 variant entries before QC.", "student_summary": "We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.", "student_plink_options": []} -->
+<!-- step_meta: {"success_line": "You see 2,016 sample wells and 299,523 variant entries before quality control (QC).", "student_summary": "We check that the three laboratory files are present and have matching sizes. We also look at the sample identifiers so we can recognise the starting data.", "student_plink_options": []} -->
 ### What we do
 
 We identify the complete set of files exported by the laboratory. We keep these input files unchanged.
@@ -75,7 +75,7 @@ R reads the files and shows the values. It does not change the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-You see 2,016 sample wells and 299,523 variant entries before QC. Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
+You see 2,016 sample wells and 299,523 variant entries before quality control (QC). Each well has its own [FID/IID](../docs/glossary.md#fid-iid) pair, the two identifiers that name a sample in the files.
 
 <!-- verification_note:start -->The tested PLINK version is defined in `config.R` and recorded in
 `software_versions.txt`. Validation: executable chunks and the expected counts passed on Windows.<!-- verification_note:end -->

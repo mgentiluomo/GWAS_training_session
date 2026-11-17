@@ -32,7 +32,7 @@ cfg <- guided_init()
 
 **What you will learn.**
 
-- How to draw and read the two main GWAS plots.
+- How to draw and read the two main genome-wide association study (GWAS) plots.
 - How to check if the test results are too strong overall.
 - How to choose a p-value threshold when you run many tests.
 - How to group nearby signals and look closely at one region.
@@ -46,7 +46,7 @@ cfg <- guided_init()
 <!-- step_meta: {"success_line":"Most points are close to the diagonal line.","student_summary":"We draw a QQ plot, which compares observed p-values with those expected by chance, using chromosomes 1 to 22. This helps us see whether most tests behave as expected and whether the strongest results stand out.","student_plink_options":[]} -->
 ### What we do
 
-Draw a QQ plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
+Draw a quantile-quantile (QQ) plot. It compares the p-values we observed with the p-values we would expect if no variant were linked to the disease. We use only the [autosomal](../docs/glossary.md#autosome) variants, on chromosomes 1 to 22.
 
 The plot reads the [summary statistics file](../docs/glossary.md#summary-statistics) that we made at step 6.8. This file is a table with one row for each tested variant. Each row holds the chromosome, the position, the alleles, the odds ratio, the standard error, the p-value and the number of samples. The plots in this module all read this one file, so every figure comes from the same results.
 
@@ -222,7 +222,7 @@ R reads or calculates the displayed values without changing the genotype files.
 
 <details><summary>Show the expected result</summary>
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 <!-- verification_note:start -->The tested PLINK version is set in `config.R` and recorded in
 `software_versions.txt`. Validation: the executable chunks, the comparisons with the expected results and the final plot checks passed on Windows.<!-- verification_note:end -->
@@ -507,9 +507,9 @@ Compare the main analysis, which we planned in advance, with two analyses that w
 
 ### Why
 
-In the first comparison, we leave out the [PCs](../docs/glossary.md#pca-pc). PCs are the numbers that summarise ancestry. We keep the same cleaned cohort and the same [covariates](../docs/glossary.md#covariate), age and sex. This shows the effect of the PC adjustment alone.
+In the first comparison, we leave out the [principal components (PCs)](../docs/glossary.md#pca-pc). PCs are the numbers that summarise ancestry. We keep the same cleaned cohort and the same [covariates](../docs/glossary.md#covariate), age and sex. This shows the effect of the PC adjustment alone.
 
-In the second comparison, we start from the state saved at module 2. It has the case and control labels and the corrected strands. We use no sample [QC](../docs/glossary.md#qc), no variant QC and no PCs. This comparison changes the samples and the variants as well as the QC. We cannot give its differences to one single cause. The label "no QC" does not mean that we undid the strand correction or the case and control labels. When you interpret the differences, compare the shared variants and the number of samples for each variant.
+In the second comparison, we start from the state saved at module 2. It has the case and control labels and the corrected strands. We use no sample [quality control (QC)](../docs/glossary.md#qc), no variant QC and no PCs. This comparison changes the samples and the variants as well as the QC. We cannot give its differences to one single cause. The label "no QC" does not mean that we undid the strand correction or the case and control labels. When you interpret the differences, compare the shared variants and the number of samples for each variant.
 
 ### You need
 

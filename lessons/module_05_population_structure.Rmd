@@ -52,7 +52,7 @@ Learn how [population structure](../docs/glossary.md#population-stratification) 
 
 Cases and controls may be recruited from groups with different ancestry. Ancestry means the broad genetic background that a person inherits from their forebears. Then the [allele frequency](../docs/glossary.md#allele-frequency) (how common an allele is in a group) can differ between cases and controls, even at sites that have nothing to do with the disease. This is called [confounding](../docs/glossary.md#confounding): a hidden factor is linked to both the group and the genetics.
 
-A PC is a single number per person that summarises one main direction of genetic variation across many sites. Principal component analysis (PCA) is the method that finds these directions. PCA only describes patterns. Its axes are not diagnoses, nationality or ethnicity. The reference labels are background information, not a ranking of people. We define an ancestry-matched teaching cohort before we look at any association p-values.
+A principal component (PC) is a single number per person that summarises one main direction of genetic variation across many sites. Principal component analysis (PCA) is the method that finds these directions. PCA only describes patterns. Its axes are not diagnoses, nationality or ethnicity. The reference labels are background information, not a ranking of people. We define an ancestry-matched teaching cohort before we look at any association p-values.
 
 ### You need
 
@@ -117,7 +117,7 @@ Find the sites that are present in both the reference subset and the cleaned stu
 
 Nearby sites are often inherited together, so they carry the same information. This is called linkage disequilibrium ([LD](../docs/glossary.md#ld)). If PCA uses many such sites, one long correlated stretch can dominate the result. To avoid this, the supplied reference was built with [LD pruning](../docs/glossary.md#ld-pruning), which keeps one site from each correlated group. It kept only common autosomal array sites. It used an [r^2](../docs/glossary.md#r-squared) limit of 0.15 in windows of 200 kb, and it kept at most 50,000 sites.
 
-We keep only the sites that are in both the reference and the study after QC. We do not add back sites that failed earlier checks. We will prune the sites again later, after we define the final cohort.
+We keep only the sites that are in both the reference and the study after quality control (QC). We do not add back sites that failed earlier checks. We will prune the sites again later, after we define the final cohort.
 
 ### You need
 

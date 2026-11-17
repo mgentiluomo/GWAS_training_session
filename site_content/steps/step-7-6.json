@@ -6,7 +6,7 @@
   "anchor": "step-7-6",
   "title": "Regional plot",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31",
+  "source_sha256": "a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Look closely at the L2 region. Each variant is coloured by its LD with the lead variant of the region.",

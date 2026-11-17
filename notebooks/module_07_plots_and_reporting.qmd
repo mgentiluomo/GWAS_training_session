@@ -20,7 +20,7 @@ format:
         });
         </script>
 editor: visual
-course_source_sha256: "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31"
+course_source_sha256: "a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -156,7 +156,7 @@ No PLINK options are used in this step.
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and MT stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
+There are three strong regions, on chromosomes 3, 9 and 12. Together they hold eight variants below 5e-8. The moderate region that we planted does not reach this usual threshold. Tests on the sex chromosomes and mitochondrial DNA (MT) stay in the result table, but this figure shows only the autosomes. R saves the picture as a PNG file and prints its path. It does not show the picture in the console. To see it, open the file from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 

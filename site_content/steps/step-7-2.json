@@ -6,7 +6,7 @@
   "anchor": "step-7-2",
   "title": "Genomic inflation factor",
   "source": "lessons/module_07_plots_and_reporting.Rmd",
-  "source_sha256": "6605b31a5ad24857163900a90de04491cf7f4f955f83b767471f78ff30ac6e31",
+  "source_sha256": "a734e362285422c7fc762f27818b464d51410ecb188b3aef4e2b21a8d453d544",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Calculate lambda for the autosomal variants. Then read it together with the QQ plot.",

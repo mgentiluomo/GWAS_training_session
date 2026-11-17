@@ -6,7 +6,7 @@
   "anchor": "step-2-4",
   "title": "First overview",
   "source": "lessons/module_02_files_and_formats.Rmd",
-  "source_sha256": "e9799d17a4a625391e34654942b81b9fe1a7387c1040f2b741692fc32dcea564",
+  "source_sha256": "de606f5ba9e6e4e393faa4ded7f7cfc494d077cd55f6b126a4871acb2cf82dba",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We measure how much data is missing, before we decide which samples or sites to remove.",

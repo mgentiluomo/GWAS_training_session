@@ -335,7 +335,7 @@ bin/plink2 --pfile results/guided/s3-3_par --check-sex max-female-xf=0.2 min-mal
 bin/plink2 --pfile results/guided/s3-3_par --remove results/guided/s3-3_remove.txt --make-pgen --out results/guided/s3-3_state --threads 2 --memory 2048
 ```
 
-`--split-par b38` gives the PAR sites their own region, using the PAR boundaries of GRCh38 (the version of the human reference genome that this course uses). `--check-sex` compares the recorded sex with the genotype patterns; `max-female-xf` and `min-male-xf` set the limits of the X coefficient for recorded females and males; the two `ycount` limits set the limits of the number of Y calls. `--remove` reads the reviewed list of samples and removes them. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
+`--split-par b38` gives the [pseudoautosomal region](../docs/glossary.md#pseudoautosomal-region) (PAR) sites their own region, using the PAR boundaries of GRCh38 (the version of the human reference genome that this course uses). `--check-sex` compares the recorded sex with the genotype patterns; `max-female-xf` and `min-male-xf` set the limits of the X coefficient for recorded females and males; the two `ycount` limits set the limits of the number of Y calls. `--remove` reads the reviewed list of samples and removes them. `--pfile`, `--make-pgen`, `--out`, `--threads` and `--memory` have the meanings given at step 3.1.
 
 <details><summary>Show the expected result</summary>
 
@@ -376,7 +376,7 @@ The PAR fileset, the `.sexcheck` report, the review and removal list, and `s3-3_
 <!-- step_meta: {"success_line": "The `.prune.in` file lists 69,539 sites.", "student_summary": "We select common DNA sites that are less strongly correlated with each other. This stops groups of similar sites from weighing too much in the sample checks. The full dataset is kept for the association scan.", "student_plink_options": [{"label": "select less strongly linked variants", "options": [{"name": "--pfile", "explanation": "Reads the PGEN, PVAR and PSAM input files that share the given name prefix."}, {"name": "--chr", "explanation": "Uses only chromosomes 1 to 22, the autosomes."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele has a frequency of at least 5%."}, {"name": "--geno", "explanation": "Keeps variants with no more than 2% missing calls."}, {"name": "--exclude", "explanation": "Leaves out variants within the listed DNA regions.", "modifiers": [{"name": "bed1", "explanation": "Reads DNA regions with positions counted from 1 and includes both ends of each region."}]}, {"name": "--indep-pairwise", "explanation": "Compares genotype patterns at pairs of sites within windows of 200 kb (200,000 DNA bases). It drops one site of every pair with a squared correlation (r²) above 0.2. A larger r² means that the genotypes of the two sites vary together more closely."}, {"name": "--out", "explanation": "Sets the shared beginning of the output file names."}]}]} -->
 ### What we do
 
-We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [PCA](../docs/glossary.md#pca-pc). PCA (principal component analysis) is a method that summarises the genetic differences between people.
+We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants that are less correlated with each other. Removing correlated variants is called pruning for [linkage disequilibrium](../docs/glossary.md#ld) (LD). Autosomes are the chromosomes 1 to 22. We use this set for the heterozygosity check, for the relatedness check and, later, for [principal component analysis](../docs/glossary.md#pca-pc) (PCA). PCA is a method that summarises the genetic differences between people.
 
 ### Why
 
@@ -439,7 +439,7 @@ Should the later association scan test only the pruned sites?
 
 <details><summary>Show the answer</summary>
 
-No. We use pruning only for specific checks and for the PCA. The association scan uses the full set of variants that pass QC.
+No. We use pruning only for specific checks and for the PCA. The association scan uses the full set of variants that pass quality control (QC).
 
 </details>
 
