@@ -177,9 +177,9 @@ def render_steps_rmd(model: dict) -> list[str]:
         else:
             lines.extend(["No PLINK equivalent", ""])
         if record.get("thresholds"):
-            lines.extend(["### Try other thresholds (optional)", "", notebook_links(record["thresholds"]), ""])
+            lines.extend(["### Try other thresholds (optional)", "", notebook_links(drop_example_lines(record["thresholds"])), ""])
         if record.get("approach"):
-            lines.extend(["### Another approach (optional)", "", notebook_links(record["approach"]), ""])
+            lines.extend(["### Another approach (optional)", "", notebook_links(drop_example_lines(record["approach"])), ""])
         if record.get("deep_dive"):
             intro, sections = split_deep_dives(record["deep_dive"])
             lines.extend(["### Optional: deep dives", "", notebook_links(intro), ""])
@@ -263,9 +263,24 @@ def split_deep_dives(text: str) -> tuple[str, list[tuple[str, str]]]:
 EXAMPLE_LINE = re.compile(r"^\{\{example:[a-z0-9-]+\}\}[ \t]*(?:\r?\n)?", re.M)
 
 
+MOVE_NAMED = re.compile(r"Move the \*\*(.+?)\*\* slider to \*\*(.+?)\*\*")
+MOVE_PLAIN = re.compile(r"Move the slider to \*\*(.+?)\*\*")
+MOVE_IT = re.compile(r"Move it to \*\*(.+?)\*\*")
+
+
 def drop_example_lines(text: str) -> str:
-    """A line {{example:ID}} marks an interactive example on the website. The notebook has the R code instead."""
-    return EXAMPLE_LINE.sub("", text)
+    """A line {{example:ID}} marks an interactive example on the website. The notebook has the R code instead.
+    The guided "Try this" steps move a slider on the website. In the notebook they change a value in the R chunk."""
+    text = EXAMPLE_LINE.sub("", text)
+    text = re.sub(r"(,| and) the \*\*(.+?)\*\* slider to \*\*(.+?)\*\*", lambda m: f"{m[1]} **{m[2]}** to **{m[3]}**", text)
+    text = MOVE_NAMED.sub(lambda m: f"Change **{m[1]}** to **{m[2]}**", text)
+    text = MOVE_PLAIN.sub(lambda m: f"Change the setting to **{m[1]}**", text)
+    text = MOVE_IT.sub(lambda m: f"Change it to **{m[1]}**", text)
+    text = text.replace("**Try this.**", "**Try this: change the value in the R chunk and run it again.**")
+    text = text.replace("The buttons above the chart switch between the hits below 5e-8 and lambda.",
+                        "The left plot shows lambda and the right plot shows the hits below 5e-8.")
+    text = re.sub(r"(\*\*[^*\n]+\*\*|\bthe [A-Za-z0-9 ()]+?) slider\b", lambda m: m[1] + " setting", text)
+    return text
 
 
 def qmd_thresholds(text: str, used: set[str]) -> str:
@@ -435,10 +450,10 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
             lines.extend(['::: {.callout-note title="PLINK terminal equivalent"}', "", "No PLINK equivalent", "", ":::", ""])
         if record.get("thresholds"):
             lines.extend(['::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}', "",
-                          qmd_thresholds(record["thresholds"], used), "", ":::", ""])
+                          qmd_thresholds(drop_example_lines(record["thresholds"]), used), "", ":::", ""])
         if record.get("approach"):
             lines.extend(['::: {.callout-tip title="Another approach (optional)" collapse="true"}', "",
-                          qmd_thresholds(record["approach"], used), "", ":::", ""])
+                          qmd_thresholds(drop_example_lines(record["approach"]), used), "", ":::", ""])
         if record.get("deep_dive"):
             intro, sections = split_deep_dives(record["deep_dive"])
             if intro.strip():
