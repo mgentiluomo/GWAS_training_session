@@ -1194,9 +1194,43 @@ bin/plink2 --pfile results/guided/s3-1_samples --geno 0.10 --make-pgen --out res
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The step makes a rough first clean. `--mind` is the largest share of missing calls that a sample may have. `--geno` is the same limit for a variant. A low value is strict and removes more. A high value is generous. At 0.10 only wells and sites that are clearly broken are removed. The finer checks come later, at steps 3.2 and 4.1, so this first clean can be generous. Each trial below starts from the same input as the step and changes one threshold only.
+Each trial changes one limit and starts from the same input as the step.
+
+**Chart: --mind.**
+
+**Why this simulation.** The first clean removes broken wells before the finer checks. How generous should the call rate limit be?
+
+**How to read the chart.** Each point is one value of `--mind`, the largest share of missing calls that a sample may have. The vertical axis counts the samples removed, and the diamond is the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.2**. The count equals the one at the course value.
+- Change it to **0.01**. Many more samples are removed.
+
+**What you should see, and why.** A few wells are so poor that every generous limit removes them. Stricter limits remove good wells too.
+
+**Why it matters for your GWAS.** [step 3.1](../lessons/module_03_sample_quality_control.Rmd#step-3-1) is a rough first clean. Finer checks follow in [step 3.2](../lessons/module_03_sample_quality_control.Rmd#step-3-2) and [step 4.1](../lessons/module_04_variant_quality_control.Rmd#step-4-1), so it can be generous.
+
+**Key idea:** A generous first clean removes only broken wells and leaves the fine decisions to later steps.
+
+**Chart: --geno.**
+
+**Why this simulation.** The same question for variants: how generous should the first variant filter be?
+
+**How to read the chart.** Each point is one value of `--geno`, the largest share of missing calls that a variant may have. The vertical axis counts the variants removed.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.01**. Many more variants are removed.
+- Change it to **0.2**. Fewer variants are removed.
+
+**What you should see, and why.** Many variants have a little missing data, so a strict limit removes many sites. The generous course value removes only the clearly broken ones.
+
+**Why it matters for your GWAS.** [step 4.1](../lessons/module_04_variant_quality_control.Rmd#step-4-1) applies a stricter variant filter after the sample checks, so this one can stay generous.
+
+**Key idea:** Variants can be removed later, so the first filter is generous.
 
 ```{r}
 #| label: s3-1_thresholds
@@ -1224,7 +1258,7 @@ Plain PLINK 2 command for one trial. It writes only small files with the name th
 bin/plink2 --pfile results/guided/s2-8_state --mind 0.05 --make-just-psam --out results/trials/s3-1_trial --threads 2 --memory 2048
 ```
 
-The log file `results/trials/s3-1_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name. For variants, use `--geno` and `--make-just-pvar`, and start from `results/guided/s3-1_samples`. PLINK 2 treats a dosage without a hard call as missing by default (the `dosage` modifier changes this). The course data have hard calls only, so this makes no difference here.
+The log file `results/trials/s3-1_trial.log` states how many samples were removed. To repeat the trial, change the number after `--mind` and use a new `--out` name. For variants, use `--geno` and `--make-just-pvar` on `s3-1_samples`.
 
 The expected result of the trials:
 
@@ -1247,10 +1281,6 @@ Variants removed by `--geno`, after `--mind 0.10`:
 | 0.05 | 735 | 295,775 |
 | **0.1 (course value)** | 150 | 296,360 |
 | 0.2 | 130 | 296,380 |
-
-How to read it. Between 0.05 and 0.20 the same three wells are removed. Those wells are so poor that no limit in this range keeps them. Below 0.05 the limit starts to remove good wells too (45 at 0.02 and 121 at 0.01). For variants, a stricter limit removes many more sites. The course value of 0.10 keeps the rough clean generous on purpose.
-
-Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.1), where 150 variants are removed. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.1), where 3 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1300,9 +1330,26 @@ bin/plink2 --pfile results/guided/s3-1_state --mind 0.02 --make-pgen --out resul
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The call rate of a sample is the share of its calls that are not missing. `--mind 0.02` removes samples with more than 2% missing calls, which is a call rate below 98%. A lower limit keeps more samples but lets in samples with poor DNA. A higher limit removes more samples and may throw away good data. A call rate of 95% to 98% is a common choice in genome-wide studies, and 98% is the stricter end of it. Each trial starts from the cohort saved at 3.1 and changes the limit only.
+Each trial starts from the cohort saved at 3.1 and changes the limit only.
+
+**Chart: --mind.**
+
+**Why this simulation.** A sample with many missing calls has poor DNA or a poor genotyping well. Where should the call rate limit be?
+
+**How to read the chart.** Each point is one `--mind` value: samples with more than that share of missing calls are removed. The vertical axis counts the samples removed, and the diamond is the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.05**. The count falls, because poor but not broken wells stay.
+- Change it to **0.01**. Many more samples are removed.
+
+**What you should see, and why.** The course value removes wells that are poor but not broken. A looser limit lets them in. A stricter limit throws away good data.
+
+**Why it matters for your GWAS.** [step 3.2](../lessons/module_03_sample_quality_control.Rmd#step-3-2) decides which samples enter every later step. Poor samples add noise.
+
+**Key idea:** A call rate limit trades sample size against data quality.
 
 ```{r}
 #| label: s3-2_thresholds
@@ -1335,10 +1382,6 @@ The expected result of the trials:
 | 0.05 | 0 | 2,013 |
 | 0.1 | 0 | 2,013 |
 | 0.2 | 0 | 2,013 |
-
-How to read it. At 0.02 the course removes 42 wells. At 0.05 none are removed, so all 42 wells have between 2% and 5% missing calls. At 0.01 another 76 wells go (118 in total). The step is a clear case of a choice: the course value removes the wells that are poor but not broken.
-
-Expected plot. For `--mind`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.02), where 42 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1751,9 +1794,26 @@ bin/plink2 --pfile results/guided/s3-3_state --remove results/guided/s3-5_remove
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The statistic F compares the homozygosity that we see in a sample with the homozygosity that we expect from the allele frequencies. A very low F means too many heterozygous calls, which can come from contamination. A very high F means too few, which can come from related parents or a different ancestry. The course removes samples with F more than 3 standard deviations (SD) below the mean. It only flags, and keeps, samples with F more than 3 SD above the mean. The trials change the number of SD from 2 to 4. They use the same F values.
+The trials change the number of standard deviations (SD) and use the same F values.
+
+**Chart: F cutoff (standard deviations).**
+
+**Why this simulation.** Samples with too many heterozygous calls may be contaminated. How many SD below the mean should the course remove?
+
+**How to read the chart.** Each point is one SD limit for the F statistic, which compares the homozygosity that we see in a sample with the one that we expect. A very low F means too many heterozygous calls. The vertical axis counts the samples removed, and the diamond marks the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **2**. Note the count.
+- Change it to **4**. The count is the same.
+
+**What you should see, and why.** The same group is removed at every limit from 2 to 4 SD, so it is clearly separate from the rest of the samples.
+
+**Why it matters for your GWAS.** [step 3.5](../lessons/module_03_sample_quality_control.Rmd#step-3-5) removes samples with too many heterozygous calls, a sign of contamination, which would add false genotypes.
+
+**Key idea:** A clear outlier group does not depend on the exact SD limit.
 
 ```{r}
 #| label: s3-5_thresholds
@@ -1775,7 +1835,7 @@ Plain PLINK 2 command for one trial. It writes only small files with the name th
 bin/plink2 --pfile results/guided/s3-3_state --extract results/guided/s3-4_prune.prune.in --het --out results/trials/s3-5_trial --threads 2 --memory 2048
 ```
 
-This command writes the F table (`results/trials/s3-5_trial.het`). The limit itself is not a PLINK option: the course calculates it in R from the table. To repeat a trial in R, change the number 3 in the rule for `low` and `high` at the step.
+The command writes the F table (`results/trials/s3-5_trial.het`). The course calculates the limit in R from this table.
 
 The expected result of the trials:
 
@@ -1786,10 +1846,6 @@ The expected result of the trials:
 | **3 (course value)** | 13 | 1,950 | 8 |
 | 3.5 | 13 | 1,950 | 5 |
 | 4 | 13 | 1,950 | 0 |
-
-How to read the two numbers. "Removed" counts wells with an F value below the mean by more than the chosen number of SD. They have too many heterozygous calls, so the course takes them out of the data. At the course value of 3 SD, 13 wells are removed. "Flagged" counts wells with an F value above the mean by more than the chosen number of SD. They have too few heterozygous calls. The course keeps them in the data and only lists them for review. At the course value, 8 wells are flagged. Now the table. The same 13 wells are removed at every limit from 2 to 4 SD. This group is clearly separate from the rest. The number of flagged wells changes from 13 to 0, so it depends more on the rule than on the data. Flagged wells are kept, so this choice does not change the cohort.
-
-Expected plot. For `F cutoff (standard deviations)`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (3), where 13 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -1900,9 +1956,26 @@ bin/plink2 --pfile results/guided/s3-5_state --remove results/guided/s3-6_remove
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The kinship coefficient estimates how much DNA two samples share. The usual KING cutoffs are 0.354 for repeated samples and identical twins, 0.177 for first-degree relatives, 0.0884 for second-degree relatives and 0.0442 for third-degree relatives (Manichaikul et al. 2010, doi:10.1093/bioinformatics/btq559). This step does not use `--king-cutoff`. It writes the table of pairs with `--make-king-table` and `--king-table-filter 0.0442`, and a rule in R decides who to remove. The trials change the cutoff for relatives. Pairs above 0.354 are always treated as repeats.
+The usual KING cutoffs are 0.354 for repeated samples, 0.177 for first-degree relatives, 0.0884 for second-degree and 0.0442 for third-degree relatives (Manichaikul et al. 2010, [doi:10.1093/bioinformatics/btq559](https://doi.org/10.1093/bioinformatics/btq559)). The trials change the cutoff for relatives.
+
+**Chart: KING kinship cutoff.**
+
+**Why this simulation.** Related people break the assumption that samples are independent. Which kinship cutoff should we use?
+
+**How to read the chart.** Each point is one kinship cutoff for relatives. The vertical axis counts the samples removed, and the diamond is the course value. Pairs above 0.354 are always treated as repeats of one sample.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.0442**. Note the count.
+- Change it to **0.354**. Fewer samples are removed, because close relatives stay.
+
+**What you should see, and why.** In this simulated cohort no pair lies between 0.0442 and 0.177, so the first three cutoffs remove the same samples. Real cohorts have more distant relatives, so their counts would differ.
+
+**Why it matters for your GWAS.** [step 3.6](../lessons/module_03_sample_quality_control.Rmd#step-3-6) removes one sample of each related pair. Close relatives share alleles, and keeping them inflates the tests.
+
+**Key idea:** The cutoff decides which degree of relatedness the cohort accepts.
 
 ```{r}
 #| label: s3-6_thresholds
@@ -1925,7 +1998,7 @@ Plain PLINK 2 command for one trial. It writes only small files with the name th
 bin/plink2 --pfile results/guided/s3-5_state --extract results/guided/s3-4_prune.prune.in --king-cutoff 0.177 --out results/trials/s3-6_trial --threads 2 --memory 2048
 ```
 
-`--king-cutoff` removes one member of each pair above the cutoff with a greedy rule, and it writes two lists of sample IDs (`.king.cutoff.in.id` and `.king.cutoff.out.id`). Its count can differ a little from the course rule, which also treats repeats separately. To repeat the trial, change the number after `--king-cutoff`.
+`--king-cutoff` removes one member of each pair above the cutoff and writes two lists of sample IDs. Its count can differ a little from the course rule, which treats repeats separately.
 
 The expected result of the trials:
 
@@ -1935,10 +2008,6 @@ The expected result of the trials:
 | 0.0884 | 30 | 1,920 |
 | **0.177 (course value)** | 30 | 1,920 |
 | 0.354 | 20 | 1,930 |
-
-How to read it. The cutoffs 0.0442, 0.0884 and 0.177 give the same 30 removed samples. In this simulated cohort no extra pair lies between 0.0442 and 0.177. At 0.354 only repeated samples are removed (20), and the ten first-degree pairs stay in the data. Real cohorts usually have many more distant relatives, so the counts would then differ.
-
-Expected plot. For `KING kinship cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of samples removed. A red diamond marks the course value (0.177), where 30 samples are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2125,9 +2194,26 @@ bin/plink2 --pfile results/guided/s3-8_state --geno 0.02 --make-pgen --out resul
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-At this step `--geno 0.02` removes variants with more than 2% missing calls in the samples that remain. A strict limit removes more variants, but each variant that stays has more complete data. A generous limit keeps more variants with more missing calls. Missing calls that depend on the disease status can create false associations, which is why a clear limit matters. Each trial starts from the cohort saved at 3.8 and changes the limit only.
+Each trial starts from the cohort saved at 3.8 and changes the limit only.
+
+**Chart: --geno.**
+
+**Why this simulation.** Variants with many missing calls give weak data. How strict should the variant filter be?
+
+**How to read the chart.** Each point is one `--geno` value: variants with more than that share of missing calls are removed. The vertical axis counts the variants removed, and the diamond is the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.2**. No variant is removed, because step 3.1 already removed the worst.
+- Change it to **0.01**. Many more variants are removed.
+
+**What you should see, and why.** Step 3.1 already removed the variants with the most missing calls, so looser limits remove nothing. Stricter limits remove variants with a little missing data.
+
+**Why it matters for your GWAS.** [step 4.1](../lessons/module_04_variant_quality_control.Rmd#step-4-1) cleans variants after the sample checks. Missing calls that depend on disease status can create false associations ([step 4.2](../lessons/module_04_variant_quality_control.Rmd#step-4-2)).
+
+**Key idea:** A variant filter trades the number of variants against the completeness of each.
 
 ```{r}
 #| label: s4-1_thresholds
@@ -2160,10 +2246,6 @@ The expected result of the trials:
 | 0.05 | 560 | 295,800 |
 | 0.1 | 0 | 296,360 |
 | 0.2 | 0 | 296,360 |
-
-How to read it. At 0.10 and 0.20 no variant is removed, because step 3.1 already removed the variants above 10% missing. From 0.05 to 0.01 the number of removed variants grows from 560 to 1,052. The course value of 0.02 removes 801.
-
-Expected plot. For `--geno`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.02), where 801 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2334,9 +2416,26 @@ bin/plink2 --pfile results/guided/s4-2_state --maf 0.01 --make-pgen --out result
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The minor allele frequency (MAF) is how often the less common version of a variant occurs. `--maf 0.01` removes variants with a MAF below 1%. A rare variant has few carriers, so its test has little power and gives unstable estimates. A higher limit removes more rare variants and keeps a cleaner set. A very high limit also removes real, common signals and shrinks the data a lot. Each trial starts from the cohort saved at 4.2 and changes the limit only.
+The minor allele frequency (MAF) is how often the less common version of a variant occurs. Each trial starts from the cohort saved at 4.2.
+
+**Chart: --maf.**
+
+**Why this simulation.** Rare variants have few carriers, so their tests are weak and unstable. How rare is too rare?
+
+**How to read the chart.** Each point is one `--maf` value: variants whose MAF is below it are removed. The vertical axis counts the variants removed, and the diamond is the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **0.001**. Fewer variants are removed.
+- Change it to **0.05**. More than half of the variants are removed.
+
+**What you should see, and why.** A higher limit removes many more variants, including common-enough ones. A very low limit keeps many variants with only a handful of carriers.
+
+**Why it matters for your GWAS.** [step 4.3](../lessons/module_04_variant_quality_control.Rmd#step-4-3) sets the lowest frequency that the association scan uses. A limit that is too high hides real signals, and one that is too low adds unstable tests.
+
+**Key idea:** The MAF limit trades power on rare variants against stable estimates.
 
 ```{r}
 #| label: s4-3_thresholds
@@ -2358,7 +2457,7 @@ Plain PLINK 2 command for one trial. It writes only small files with the name th
 bin/plink2 --pfile results/guided/s4-2_state --maf 0.02 --make-just-pvar --out results/trials/s4-3_trial --threads 2 --memory 2048
 ```
 
-The log file `results/trials/s4-3_trial.log` states how many variants were removed. To repeat the trial, change the number after `--maf` and use a new `--out` name. PLINK 2 uses the founders to calculate the frequency when the sample table has family information. Our samples are all founders, so this makes no difference here.
+The log file `results/trials/s4-3_trial.log` states how many variants were removed. To repeat the trial, change the number after `--maf` and use a new `--out` name.
 
 The expected result of the trials:
 
@@ -2369,10 +2468,6 @@ The expected result of the trials:
 | **0.01 (course value)** | 56,421 | 239,018 |
 | 0.02 | 89,210 | 206,229 |
 | 0.05 | 156,222 | 139,217 |
-
-How to read it. At 0.01 the course removes 56,421 variants. At 0.05 it would remove 156,222, which is more than half of the 295,439 variants that enter this step. Going from 0.01 to 0.001 keeps 22,480 more variants (the difference 56,421 minus 33,941). Many of them have only a handful of carriers.
-
-Expected plot. For `--maf`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.01), where 56,421 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
@@ -2452,9 +2547,26 @@ bin/plink2 --pfile results/guided/s4-3_state --exclude results/guided/s4-4_exclu
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The Hardy-Weinberg test gives a p-value for each variant in the controls. A smaller cutoff removes fewer variants. A larger cutoff removes more variants, including some that are only unusual. The course does not use one fixed cutoff. It uses the rule 10^(-6 - 0.001 * max(0, n_control - 1000)), where n_control is the number of controls tested at that variant. With 1,000 controls or fewer, the cutoff is 0.000001. Here there are 922 controls, so the course rule is the same as the fixed cutoff 1e-6. The trials below compare fixed cutoffs and the course rule.
+The Hardy-Weinberg test compares the genotype counts of a variant in controls with the counts expected from its allele frequency.
+
+**Chart: HWE p-value cutoff.**
+
+**Why this simulation.** Genotyping errors often break Hardy-Weinberg equilibrium. Which cutoff should remove them?
+
+**How to read the chart.** Each point is one fixed p-value cutoff, on a log scale. The dashed line is the course rule, which here equals the cutoff 1e-06. The vertical axis counts the variants removed.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **1e-03**. Many more variants are removed.
+- Change it to **1e-10**. The count falls only a little more.
+
+**What you should see, and why.** The count falls slowly after 1e-06, so the variants that fail even at 1e-10 are the clearest departures. Variants removed only at loose cutoffs may be sound.
+
+**Why it matters for your GWAS.** [step 4.4](../lessons/module_04_variant_quality_control.Rmd#step-4-4) removes variants whose genotype counts look like errors. It tests controls only, so a true disease variant is not removed for its disease effect.
+
+**Key idea:** Strong departures are errors at any cutoff, and loose cutoffs also remove sound variants.
 
 ```{r}
 #| label: s4-4_thresholds
@@ -2477,7 +2589,7 @@ Plain PLINK 2 command for one trial. It writes only small files with the name th
 bin/plink2 --pfile results/guided/s4-3_state --keep results/guided/s4-4_controls.txt --chr 1-22 --hwe 1e-6 midp --make-just-pvar --out results/trials/s4-4_trial --threads 2 --memory 2048
 ```
 
-The course does not use `--hwe`. It filters the table from `--hardy midp` in R, because its cutoff depends on the number of controls. The terminal command above uses a fixed cutoff. PLINK 2 can stop with an error when a cutoff is very strict for the sample size, unless you add a value `k` or the modifier `keep-fewhet` (read the `--hwe` entry of the PLINK 2 manual). PLINK 2 tests only founders by default.
+The course does not use `--hwe`: it filters the table from `--hardy midp` in R, because its cutoff depends on the number of controls. The command above uses a fixed cutoff.
 
 The expected result of the trials:
 
@@ -2489,10 +2601,6 @@ The expected result of the trials:
 | 1e-8 | 149 | 238,869 |
 | 1e-10 | 124 | 238,894 |
 | **course rule (course value)** | 166 | 238,852 |
-
-How to read it. At 1e-3 the number removed is 701, and at 1e-4 it is 274. At 1e-6 it is 166, and at 1e-10 it is 124. The number falls slowly after 1e-6. The variants that fail even at 1e-10 show the strongest departures. The variants removed only at the looser cutoffs are less clear, and some of them may be sound.
-
-Expected plot. For `HWE p-value cutoff`, the horizontal axis shows the threshold and the vertical axis shows the number of variants removed. A red diamond marks the course value (course rule), where 166 variants are removed. The line joins the points in the order of the thresholds, so you can see how fast the count changes. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 
