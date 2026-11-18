@@ -21,6 +21,15 @@ Written for the course author. Every reference below was opened on 17 November 2
 
 - Nothing at present. The earlier entry "Grinde 2019" was a wrong name for the paper that is now verified (Grinde et al. 2024, see the table). Its repository (kegrinde/PCA) still shows no licence file, so the list itself is not stored in the project. It stays in the course data as `pca_reference/highLD_b38.bed`.
 
+## Gene positions (step 7.6): GENCODE, licence checked on 18 November 2026
+
+- **Data policy sentence.** UCSC Genome Browser, GENCODE track page, https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg38&g=knownGene : "GENCODE data are available for use without restrictions."
+- **GENCODE data access page**, https://www.gencodegenes.org/pages/data_access.html : "All the GENCODE project data is open access and can be accessed by any of the following methods." The page has no licence text and no citation rule of its own.
+- **EMBL-EBI terms of use** (the GENCODE files are served from EMBL-EBI), https://www.ebi.ac.uk/about/terms-of-use/ : "EMBL-EBI itself places no additional restrictions on the use or redistribution of the data", "other than those provided by the original data owners". The terms also say "EMBL-EBI expects attribution (e.g. in publications, services or products)". The course gives the source and the release in `annotation/README_genes.txt` and in step 7.6.
+- **Version used.** GENCODE human release 50 (GRCh38, Ensembl 116, file header date 2026-04-08), the newest release folder on https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/ (release_50) on 18 November 2026. File `gencode.v50.basic.annotation.gtf.gz`, 79,970,394 bytes, SHA-256 `5b9ad9aa71f6ab5d55123c51f74723644a895bc0cbaa9cee8fbc11bb9dec0bf7`.
+- **What is kept.** The large GTF stays in `C:\GWAS_trials\gencode` and is not in the repository or in the staging. Only the extract goes to the course data: the protein-coding genes (`gene_type` "protein_coding") that overlap the three windows of step 7.6 plus 50,000 bases on each side (L1 on chromosome 3: 0 genes, L2 on chromosome 9: 11 genes, L3 on chromosome 12: 24 genes). The tool is `scripts/author/extract_region_genes.py`.
+- **No journal reference** is cited for GENCODE in the course text. The text links only the official data page https://www.gencodegenes.org/human/ . A publication was not opened and checked, so it is not cited.
+
 ## Software pages read
 
 - PLINK 2 filters, https://www.cog-genomics.org/plink/2.0/filter, for `--mind`, `--geno`, `--maf` and `--hwe`. Read on 17 November 2026.
