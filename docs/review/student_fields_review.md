@@ -1,6 +1,53 @@
 # Review of the student fields for modules 0 to 7
 
+## Session of 18 November, morning
+
+Written for the author. Everything is on the branches `course/2026.5` (course) and `course/2026.5-preview` (site). Nothing was merged into `main` and no release was made. No password was asked for, read or written. No encrypted archive was made. No force, rebase, reset, stash, clean, restore or amend was used.
+
+### 1. Grinde reference (verified, now used)
+
+- The DOI `10.1371/journal.pgen.1011242` is verified on 18 November 2026. Crossref: "Adjusting for principal components can induce collider bias in genome-wide association studies", PLOS Genetics, volume 20, article e1011242, 16 December 2024, five authors (Grinde, Browning, Reiner, Thornton, Browning). PubMed: PMID 39680601, same title and authors. "Grinde 2019" was the wrong name. The report `references_checked.md` now lists the 2024 paper and no longer lists a "not verified" entry.
+- Step 3.4 and step 5.7 now say that the regions follow the list collected by Grinde et al. 2024, with the DOI link. This rests on the README of `kegrinde/PCA`, which names the paper for its lists of high-LD regions (it points to Table 1). I did not read the full text of the paper, only its abstract in PubMed. The repository still has no licence file, so the list stays in the course data and not in the project.
+- The optional box "Another approach" of step 5.7 has a new paragraph on the result of the paper. In simple words: leaving out the known long-range LD regions is common advice, but it did not remove the collider bias that the authors found in samples of African American people (mixed ancestry), where later PCs describe small parts of the genome. LD pruning worked better. The paragraph explains "collider" in one sentence and says why the risk is smaller in our cohort (one European cluster, and only PC1 carries ancestry). It advises checking what each PC describes before using it.
+
+### 2. Genes near the regional plots (2h, done)
+
+- **Licence.** Checked on 18 November 2026 and quoted in `references_checked.md`: UCSC says "GENCODE data are available for use without restrictions."; GENCODE says "All the GENCODE project data is open access"; EMBL-EBI says it "places no additional restrictions on the use or redistribution of the data" and "expects attribution". The attribution is in `annotation/README_genes.txt` and in step 7.6.
+- **Version.** GENCODE human release 50 (GRCh38, Ensembl 116, header date 2026-04-08), `gencode.v50.basic.annotation.gtf.gz` (79,970,394 bytes, SHA-256 `5b9ad9aa71f6ab5d55123c51f74723644a895bc0cbaa9cee8fbc11bb9dec0bf7`). It is the newest release folder on the EBI FTP. The file stays in `C:\GWAS_trials\gencode`. It is not in the repository or in the staging.
+- **Extract.** `scripts/author/extract_region_genes.py` keeps the protein-coding genes (`gene_type` "protein_coding") that overlap the three windows plus 50 kb on each side. I used the windows of the regional plots, which are in step 7.6 (lead variant plus and minus 500 kb). Step 7.7 compares analyses and has no regional plots. Result: L1 (chromosome 3) 0 genes, L2 (chromosome 9) 11 genes, L3 (chromosome 12) 24 genes, 35 in total. The columns are chr, start, end, gene_name, strand. Three names are Ensembl identifiers (`ENSG00000285269`, `ENSG00000111780`, `ENSG00000288623`), because GENCODE has no symbol for them.
+- **Staging.** New folder `annotation` in `classroom-stage-2026.2` with `genes_gencode_v50_regions.tsv` (1,130 bytes) and `README_genes.txt` (686 bytes). The staging has 111 files (it had 109) and 656,324,189 bytes. The new manifest hash is in the final section.
+- **Plots.** `plot_regional()` has a second panel with the genes (`guided_genes(cfg)` reads the table). Genes that would overlap go on separate rows, and a label never covers another one. The caption in the picture and in the text says: "Gene positions are real. The association signals are simulated, so these genes are not causal." The L1 panel says "No protein-coding gene in this window". The notebooks carry the new code and text (nine notebooks regenerated). The website shows the text and the code of step 7.6, not pictures, so the track is described there and the picture appears when a student runs the step.
+- **Test.** `scripts/tests/test_regional_genes.R`: missing file gives one clear message and a plot without the track, a damaged file gives a message, a table with overlapping genes and a very long name draws, and a window without genes draws. It passes.
+
+### 3. The variant of step 4.3 (no error)
+
+Details are in `analysis_change_trials.md` (new last section). In short: step 3.6 removes four different relatives in 2026.5 (the call-rate rule), so a few allele frequencies move by about 0.0003. 23 variants fall below the 1% limit of step 4.3 in 2026.5 and 22 other variants pass it. The net result is 239,019 and 239,018. In step 4.4 the Hardy-Weinberg test removes 167 variants in 2026.4 and 166 in 2026.5. The variant that balances the count is `GSA-rs10905119` (later `10:7224559:T:G`) on chromosome 10: midp 9.5e-07 in 2026.4 (removed, below 1e-6) and 1.4e-06 in 2026.5 (kept), because one control genotype differs. The final count is 238,513 in both versions, but the two lists differ by 23 variants each. It is a coincidence of two small changes.
+
+### 4. Text of the MCD box (5.6)
+
+Checked against a new run on the 2026.5 data: the six-SD rule removes 33 samples, the robust Mahalanobis distance removes 39 (33 in common, 6 only MCD, none missed), and the nearest 1000 Genomes group removes 33 (33 in common). The box has these numbers. The "11 more" of the first trial remained only in the history table of `analysis_change_trials.md`, which now has a note that it does not apply to 2026.5.
+
+### Errors that I found and fixed
+
+1. **Corrupted paths in the commands for the data release (my mistake of the night).** In `docs/release_packaging.md` the paths `...\codex_work\release-data-2026.2` and `C:\Program Files\7-Zip\7z.exe` had control characters (a carriage return and a bell character), because my shell tool turned `\r` and `\7` into them. The commands would have failed. They are repaired and the file was scanned for control characters (none left). Please use the version of this commit.
+2. **Old lambda in the final summary.** The text of step 7.8 and the module 7 recap still said that the lambda without PCs is 1.546 (the 2026.4 value). On the 2026.5 data it is 1.527 (step 7.7 already said so). The text is corrected, and so are the stored `s7-8_summary.md` in the checkpoint 7.8 of the staging. The expected pictures `s7-6_regional.png` of the checkpoints 7.6 and 7.8 were replaced with the new picture with genes, and the two `MANIFEST.tsv` files of those checkpoints were rewritten. Nothing else in the staging changed.
+3. **Process, not content.** A web server from the night was still listening on port 3100 and served the old pages for my first check. I stopped it and repeated the checks on the new build.
+
+### Checks (all passed)
+
+- Python tests: all pass. R tests: all pass with the new data (`test_checkpoint_replay`, `test_checkpoints`, `test_course_setup`, `test_file_comparison`, `test_guided_module_check`, `test_guided_modules`, `test_plink_setup`, `test_preflight_no_data`, `test_preflight_output`, `test_regional_genes`, `test_session_locale`, `test_summary_stats`, `test_unicode_plink`, `test_main_path_recovery`, `scripts/author/test_checkpoint_restarts.R` for all five checkpoints).
+- `scripts/run_main_path.R`, complete run on `classroom-stage-2026.2`: exit 0. `step_counts.tsv` is identical to the night run. Final cohort 1,811 samples (898 cases, 913 controls), 238,513 variants, 236,820 tests, 8 hits, 3 clumps, lambda 1.0157. All file comparisons say "matches", including `s7-8_summary.md` and `s7-6_regional.png`.
+- Quarto 1.10.18 (RStudio): the complete notebook renders with execution (exit 0, 121 seconds, 0 error cells; the same 10 cosmetic warnings "List item N has no corresponding annotation" in module 7 as in 2026.4). The nine notebooks render with `--no-execute` (exit 0).
+- Site (branch `course/2026.5-preview`): `sync:gwas` (63 steps), `tsc`, lint (0 errors, 10 warnings that were already there), review build and production build pass. axe-core 4.14.1 on 16 pages (home, /teaching, steps 0.3, 3.1, 3.3, 3.4, 3.6, 4.2, 5.5, 5.6, 5.7, 6.1, 6.2, 6.7, 7.6, 7.7), light and dark, 360 and 1280 px: 64 runs, 0 violations, no horizontal overflow. The text of steps 3.4, 5.7 and 7.6 on the new build shows the Grinde citation, the collider bias paragraph and the gene track text.
+
+### What changes for the data release
+
+- The staging has 111 files and 656,324,189 bytes. The manifest `classroom-stage-2026.2.MANIFEST.tsv` has the SHA-256 `a93c0f8ee2d0ed04bcf6d31466b41e4bbeffd7e9956d6e5c940779a7ecb9b9da` (the night value `3acbf378...` and the intermediate value `34c13296...` are obsolete). `docs/release_packaging.md` has the new number.
+- The encryption commands do not change: the packaging script now accepts the folder `annotation` and its inventory check reads the 111 files. The archive will hold the new folder. The only change is that you must use the repaired commands of this commit.
+
 ## Session of 17-18 November, night
+
+Update of the morning of 18 November: step 2h (genes) was done afterwards, "Grinde 2019" is Grinde et al. 2024 (verified), the staging has 111 files and a new manifest hash, and two errors of this night were fixed. See the section above. Where this section says that genes were skipped, that the staging has 109 files, or gives the hash `3acbf378...`, the morning section is the current version.
 
 Written for the author. Phase 1 is published (project release 2026.4 and the website). Phases 2 to 4 are on branches and are NOT published. No password was asked for, read or written. No encrypted archive was made.
 
