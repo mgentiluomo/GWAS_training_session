@@ -14,6 +14,8 @@ Every trial changes one choice. The last row changes the three choices of 3a, 3b
 | 3c | Ancestry outliers: robust Mahalanobis distance (MCD) | 1,920 | 1,800 (238,513) | 11 more removed at 5.6 | 2.26% | 1.0160 | 8 | 3 |
 | 3a + 3b + 3c | All three | 1,920 | 1,805 (238,513) | 4 swapped at 3.6, 6 more removed at 5.6 | 2.26% | 1.0142 | 8 | 3 |
 
+This table records the trials of 17 November on the 2026.4 data. It is kept as the history of the decision. On the 2026.5 data (checked again on 18 November) the robust Mahalanobis distance removes 39 samples at step 5.6, which is 6 more than the 33 of the six-SD rule and of the nearest-group method. The "11 more" in row 3c does not apply to the 2026.5 course. The box "Another approach" in step 5.6 uses the new numbers (33, 39 and 33, with 33 in common).
+
 In every trial the three lead variants of the clumps are the same: 9:96426973:A:G, 3:163224115:T:C and 12:120965921:G:A. The number of tests is 236,815 in all single trials, and 236,814 in the combined trial. The "variance in the first 20 PCs" is the sum of the 20 eigenvalues divided by the number of samples. This is an approximation of the share of the total variance, because the trace of the relationship matrix is about the number of samples.
 
 ## 3a. Long-range LD regions before the PCA
