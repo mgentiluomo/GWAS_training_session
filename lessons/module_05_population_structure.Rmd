@@ -700,6 +700,48 @@ The difference between the populations is the same, but the axes, the eigenvalue
 
 **Reference.** McVean G. 2009. A genealogical interpretation of principal components analysis. PLoS Genetics 5:e1000686. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
 
+#### Deep dive: a real example with European populations
+
+**The idea.** The examples above use simulated data. The reference of step 5.4 holds real people from the 1000 Genomes project. Some of them come from European populations: GBR (British), CEU (Utah residents with northern and western European ancestry), FIN (Finnish), IBS (Iberian) and TSI (Tuscan). The code keeps these people and calculates new PCs with only them. It uses the shared sites of step 5.2 and common variants. The table printed by the first line shows which of the five populations your reference holds. The step writes only files that start with `s5-5_dd_eur`.
+
+```{r s5-5_dd_eur, eval=FALSE}
+# Optional. This takes about ten seconds. It writes only files that start with s5-5_dd_eur.
+source("R/pca_examples.R")
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+psam <- read.delim(paste0(reference, ".psam"), check.names = FALSE)
+# 1. Keep the people of the European populations that the reference holds.
+wanted <- c("GBR", "CEU", "FIN", "IBS", "TSI")
+people <- psam[psam$Population %in% wanted, c("#IID", "Population")]
+table(people$Population)
+keep <- guided_path(cfg, "5.5", "dd_eur_keep.txt")
+write.table(data.frame(IID = people[["#IID"]]), keep, quote = FALSE, row.names = FALSE, sep = "\t")
+# 2. Calculate four PCs with only these people. PLINK needs common variants for this (--maf 0.05).
+fit <- guided_path(cfg, "5.5", "dd_eur")
+run_plink(cfg, c("--pfile", reference, "--extract", guided_path(cfg, "5.2", "common.txt"), "--keep", keep,
+                 "--maf", "0.05", "--freq", "--pca", "4", "--out", fit), quiet = TRUE)
+# 3. Plot PC1 against PC2. Each population has its own shape and colour.
+pcs <- read.delim(paste0(fit, ".eigenvec"), check.names = FALSE)
+names(pcs)[1] <- "IID"
+pcs$Population <- people$Population[match(pcs$IID, people[["#IID"]])]
+present <- intersect(wanted, unique(pcs$Population))
+g <- match(pcs$Population, present)
+plot(pcs$PC1, pcs$PC2, pch = demo_marks$shapes[g], col = demo_marks$colours[g], xlab = "PC1", ylab = "PC2",
+     main = "European populations of the 1000 Genomes reference")
+legend("topright", legend = present, pch = demo_marks$shapes[seq_along(present)], col = demo_marks$colours[seq_along(present)], bty = "n")
+# 4. The mean position of each population.
+aggregate(cbind(PC1, PC2) ~ Population, pcs, mean)
+```
+
+**What to observe.** Some populations overlap, and others lie apart. The positions follow the geography of the populations in a loose way, as in the study of Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)). The sign and the angle of the axes still depend on this sample. These PCs were calculated from European people only, so they are different from the PCs of step 5.4, which come from all the populations of the reference.
+
+**Quick check.** Why do the PCs of this plot differ from the PCs of step 5.4?
+
+<details><summary>Show the answer</summary>
+
+The PCs summarise the people who are in the sample. This sample holds only European people, so the PCs describe the differences among them. The sample of step 5.4 also holds people from other regions of the world, and the largest differences there are between regions.
+
+</details>
+
 #### Debate: what does a PCA plot tell us?
 
 **Why a debate.** PCA plots of human genetic data are everywhere, and how to read them is debated. In 2022, Elhaik published an article ([doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4)). It says that PCA results can be artefacts of the data and can be manipulated to give a wanted result. This box shows the idea of its colour model. Then it separates what the model shows from the wider claims. The idea of the colour model is from that article. The code and the numbers in the example are our own, and we do not reproduce any figure of the article.

@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "bec866429cc101cc7cbcfa432d9f9e5c0bdc108a9554c1161d3ffe6f299d94b4"
+course_source_sha256: "2105c72f7505472c22863242c6a8a3a4410e2bb25c4284c7c7217de6f6b694f7"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -551,6 +551,52 @@ The difference between the populations is the same, but the axes, the eigenvalue
 **What clusters are.** A cluster on a PCA plot is a statistical summary of allele frequencies. It is not a sharp biological category. People who lie in one cluster have similar allele frequencies, and the edge of a cluster depends on the sample and on the variants. In this course we say genetic ancestry or ancestry group. We do not use the words race or ethnicity for these groups.
 
 **Reference.** McVean G. 2009. A genealogical interpretation of principal components analysis. PLoS Genetics 5:e1000686. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
+
+#### Deep dive: a real example with European populations
+
+**The idea.** The examples above use simulated data. The reference of step 5.4 holds real people from the 1000 Genomes project. Some of them come from European populations: GBR (British), CEU (Utah residents with northern and western European ancestry), FIN (Finnish), IBS (Iberian) and TSI (Tuscan). The code keeps these people and calculates new PCs with only them. It uses the shared sites of step 5.2 and common variants. The table printed by the first line shows which of the five populations your reference holds. The step writes only files that start with `s5-5_dd_eur`.
+
+```{r}
+#| label: s5-5_dd_eur
+#| eval: false
+# Optional. This takes about ten seconds. It writes only files that start with s5-5_dd_eur.
+source("R/pca_examples.R")
+reference <- file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38")
+psam <- read.delim(paste0(reference, ".psam"), check.names = FALSE)
+wanted <- c("GBR", "CEU", "FIN", "IBS", "TSI")  # <1>
+people <- psam[psam$Population %in% wanted, c("#IID", "Population")]
+table(people$Population)
+keep <- guided_path(cfg, "5.5", "dd_eur_keep.txt")
+write.table(data.frame(IID = people[["#IID"]]), keep, quote = FALSE, row.names = FALSE, sep = "\t")
+fit <- guided_path(cfg, "5.5", "dd_eur")  # <2>
+run_plink(cfg, c("--pfile", reference, "--extract", guided_path(cfg, "5.2", "common.txt"), "--keep", keep,
+                 "--maf", "0.05", "--freq", "--pca", "4", "--out", fit), quiet = TRUE)
+pcs <- read.delim(paste0(fit, ".eigenvec"), check.names = FALSE)  # <3>
+names(pcs)[1] <- "IID"
+pcs$Population <- people$Population[match(pcs$IID, people[["#IID"]])]
+present <- intersect(wanted, unique(pcs$Population))
+g <- match(pcs$Population, present)
+plot(pcs$PC1, pcs$PC2, pch = demo_marks$shapes[g], col = demo_marks$colours[g], xlab = "PC1", ylab = "PC2",
+     main = "European populations of the 1000 Genomes reference")
+legend("topright", legend = present, pch = demo_marks$shapes[seq_along(present)], col = demo_marks$colours[seq_along(present)], bty = "n")
+aggregate(cbind(PC1, PC2) ~ Population, pcs, mean)  # <4>
+```
+
+1. Keep the people of the European populations that the reference holds.
+2. Calculate four PCs with only these people. PLINK needs common variants for this (--maf 0.05).
+3. Plot PC1 against PC2. Each population has its own shape and colour.
+4. The mean position of each population.
+
+
+**What to observe.** Some populations overlap, and others lie apart. The positions follow the geography of the populations in a loose way, as in the study of Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)). The sign and the angle of the axes still depend on this sample. These PCs were calculated from European people only, so they are different from the PCs of step 5.4, which come from all the populations of the reference.
+
+**Quick check.** Why do the PCs of this plot differ from the PCs of step 5.4?
+
+<details><summary>Show the answer</summary>
+
+The PCs summarise the people who are in the sample. This sample holds only European people, so the PCs describe the differences among them. The sample of step 5.4 also holds people from other regions of the world, and the largest differences there are between regions.
+
+</details>
 
 #### Debate: what does a PCA plot tell us?
 
