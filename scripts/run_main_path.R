@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: 276c3dd5567e72704114f77413255c0412751b292cc9b36c7e2ae8da882ab701
+# SHA-256: 7bbd8bf1cc95ffdf34ba3609c1256ab9d51a6cb9da651499a8c48645a91188d2
 
 # Chunk: setup
 source("R/guided.R")
@@ -509,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 2105c72f7505472c22863242c6a8a3a4410e2bb25c4284c7c7217de6f6b694f7
+# SHA-256: fcf263849a960ab5332106571fa15bebbc9c1a3ba24c4dad2fa5f8fcd36f556d
 
 # Chunk: setup
 source("R/guided.R")

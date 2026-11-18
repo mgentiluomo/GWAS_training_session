@@ -665,7 +665,7 @@ Expected plot. For `r2 limit`, the horizontal axis shows the setting and the ver
 
 <details><summary>Optional: deep dives</summary>
 
-This box is not part of the main path. No later step uses it.
+This optional box is not part of the main path. No later step uses it.
 
 #### Deep dive: what happens if the long-range LD regions stay in?
 

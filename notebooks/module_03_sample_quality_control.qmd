@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "276c3dd5567e72704114f77413255c0412751b292cc9b36c7e2ae8da882ab701"
+course_source_sha256: "7bbd8bf1cc95ffdf34ba3609c1256ab9d51a6cb9da651499a8c48645a91188d2"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -527,11 +527,9 @@ Expected plot. For `r2 limit`, the horizontal axis shows the setting and the ver
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+This optional box is not part of the main path. No later step uses it.
 
-This box is not part of the main path. No later step uses it.
-
-#### Deep dive: what happens if the long-range LD regions stay in?
+::: {.callout-tip title="Deep dive: what happens if the long-range LD regions stay in?" collapse="true"}
 
 **The idea.** A principal component should describe differences between people across the whole genome. In a region with a long stretch of strongly correlated variants, one pattern repeats over thousands of sites. A PC can then describe that one region instead of the ancestry of the people. This is why this step leaves such regions out before the PCA.
 

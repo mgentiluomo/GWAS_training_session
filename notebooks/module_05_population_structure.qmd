@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "2105c72f7505472c22863242c6a8a3a4410e2bb25c4284c7c7217de6f6b694f7"
+course_source_sha256: "fcf263849a960ab5332106571fa15bebbc9c1a3ba24c4dad2fa5f8fcd36f556d"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -93,11 +93,9 @@ No PLINK equivalent
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+These optional boxes are not part of the main path. No later step uses them. They write no file in your results folder. They are three deep dives on principal components: what a component is, why genetic data form clusters, and what happens when populations lie on a map. Each deep dive has an example that you can change. The numbers in the examples come from simulated data with a fixed seed.
 
-This box is not part of the main path. No later step uses it. It writes no file in your results folder. It has three deep dives on principal components: what a component is, why genetic data form clusters, and what happens when populations lie on a map. Each deep dive has an example that you can change. The numbers in the examples come from simulated data with a fixed seed.
-
-#### Deep dive: what is a principal component?
+::: {.callout-tip title="Deep dive: what is a principal component?" collapse="true"}
 
 **The idea.** Take two measurements for each person, for example height and arm span. The two are correlated, because tall people tend to have a long arm span. The dots form a long, thin cloud. A [principal component](#glossary-pca-pc) (PC) is the direction along which the dots are most spread out. To see this, draw a line through the middle of the cloud and drop every dot onto the line. The spread of the dropped dots is their variance. Turn the line and the variance changes. The direction with the largest variance is PC1. The line at a right angle to it is PC2. PC2 holds the spread that PC1 does not describe.
 
@@ -136,9 +134,11 @@ No. PC1 is defined as the direction with the largest variance. Every other direc
 
 **Reference.** Jolliffe IT, Cadima J. 2016. Principal component analysis: a review and recent developments. Philosophical Transactions of the Royal Society A 374:20150202. [doi:10.1098/rsta.2015.0202](https://doi.org/10.1098/rsta.2015.0202).
 
-#### Deep dive: why genetic data form clusters
+:::
 
-**The idea.** Two populations that once were one population drift apart. Allele frequencies change by chance in each of them. Fst is a number for how far two populations have drifted. It is 0 when their allele frequencies are the same, and it grows as they differ more. At one variant the difference is tiny, so one variant cannot tell the populations apart. Many variants together can. PCA adds up the small differences of all variants. The populations separate on PC1 only when three things are large enough together: the drift, the number of people and the number of variants. Patterson et al. 2006 call this a phase change. For a fixed data size, a divergence below a threshold is essentially undetectable, and a little above the threshold it is easy to detect. In this example, each population has 100 people.
+::: {.callout-tip title="Deep dive: why genetic data form clusters" collapse="true"}
+
+**The idea.** Two populations that once were one population drift apart. Allele frequencies change by chance in each of them. Fst is a number for how far two populations have drifted. It is 0 when their allele frequencies are the same, and it grows as they differ more. At one variant the difference is tiny, so one variant cannot tell the populations apart. Many variants together can. PCA adds up the small differences of all variants. The populations separate on PC1 only when three things are large enough together: the drift, the number of people and the number of variants. Patterson et al. 2006 call this a phase change. For a fixed data size, a divergence below a threshold is essentially undetectable, and a little above the threshold it is easy to detect. For two populations with the same number of people, the threshold is reached when Fst is equal to 1 divided by the square root of the data size. The data size is the number of people times the number of variants. More people or more variants lower the threshold. In this example, each population has 100 people. The mark on the Fst slider shows the threshold for the current number of variants.
 
 
 **R code.** Change `fst` and run the chunk again. The three panels use 1,000, 10,000 and 100,000 variants.
@@ -155,10 +155,12 @@ frames <- demo_fst_frames(fst, snps, seed = 1)
 demo_plot_panels(frames, paste(format(snps, big.mark = ","), "variants"), c("Population A", "Population B"))
 # Separation of A and B on PC1: 0 means no separation, and a value above 3 is a clear gap.
 round(vapply(frames, function(f) f$stats$separation, numeric(1)), 2)
+# The Fst at the phase change for each number of variants: 1 divided by the square root of (people times variants).
+signif(vapply(frames, function(f) f$stats$threshold, numeric(1)), 2)
 ```
 
 
-**What to observe.** With an Fst of 0, PC1 does not split the two populations, however many variants you use. With a larger Fst, the populations separate, and they separate sooner when you add variants. Near the threshold, more variants turn one blurred cloud into two clusters.
+**What to observe.** With an Fst of 0, PC1 does not split the two populations, however many variants you use. When the Fst is well below the threshold, the populations do not separate. When it is well above, they separate clearly. Near the threshold, the result varies, and more variants turn one blurred cloud into two clusters. The Fst that you choose is the Fst between the two populations.
 
 **Quick check.** A study has few variants. PCA shows one cloud for two closely related populations. Does this prove that the populations are the same?
 
@@ -195,7 +197,9 @@ A person from a third population that is genetically between A and B, but that w
 
 **References.** Patterson N, Price AL, Reich D. 2006. Population structure and eigenanalysis. PLoS Genetics 2:e190. [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190).
 
-#### Deep dive: genes and geography
+:::
+
+::: {.callout-tip title="Deep dive: genes and geography" collapse="true"}
 
 **The idea.** Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)) studied people from across Europe. The article reports 3,192 people genotyped at 500,568 variants. The main analysis used 1,387 people and 197,146 variants, because the origin of these people was known with confidence. The origin was the country of all observed grandparents. People whose grandparents came from different countries were left out. We do not reproduce the figures of the article. In words, it reports three things.
 
@@ -413,11 +417,9 @@ bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_commo
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+This optional box is not part of the main path. No later step uses it. It writes no file in your results folder.
 
-This box is not part of the main path. No later step uses it. It writes no file in your results folder.
-
-#### Deep dive: what does projecting mean, and why do projected people shrink?
+::: {.callout-tip title="Deep dive: what does projecting mean, and why do projected people shrink?" collapse="true"}
 
 **The idea.** In this step the axes come from the reference people only. The study people do not help to find the axes. They are placed on the axes afterwards. This is a [projection](#glossary-projection). It gives every study person a position that can be compared with the reference groups. There is a catch. The reference people were used to fit the axes, so the axes partly follow their own random noise. Study people do not share that noise. Their projected positions are pulled towards the centre. This is called shrinkage. Shrinkage is larger when the reference is small, or when the populations differ little.
 
@@ -510,11 +512,9 @@ No PLINK equivalent
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+These optional boxes are not part of the main path. No later step uses them. They write only files that start with `s5-5_dd_`. They are three deep dives: what a PCA plot is not, a real example with European populations, and a debate about what a PCA plot tells us.
 
-This box is not part of the main path. No later step uses it. It writes no file in your results folder. It has two parts: what a PCA plot is not, and a debate about what a PCA plot tells us.
-
-#### Deep dive: what a PCA plot is not
+::: {.callout-tip title="Deep dive: what a PCA plot is not" collapse="true"}
 
 **The idea.** The axes of a PCA plot are not fixed properties of populations. They summarise the people who are in the sample. If you change who is in the sample, the axes and the distances change, although the populations do not. McVean 2009 shows why. The positions on the PCs follow from how closely related the sampled people are to each other, pair by pair. A different sample gives different pairs.
 
@@ -552,7 +552,9 @@ The difference between the populations is the same, but the axes, the eigenvalue
 
 **Reference.** McVean G. 2009. A genealogical interpretation of principal components analysis. PLoS Genetics 5:e1000686. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
 
-#### Deep dive: a real example with European populations
+:::
+
+::: {.callout-tip title="Deep dive: a real example with European populations" collapse="true"}
 
 **The idea.** The examples above use simulated data. The reference of step 5.4 holds real people from the 1000 Genomes project. Some of them come from European populations: GBR (British), CEU (Utah residents with northern and western European ancestry), FIN (Finnish), IBS (Iberian) and TSI (Tuscan). The code keeps these people and calculates new PCs with only them. It uses the shared sites of step 5.2 and common variants. The table printed by the first line shows which of the five populations your reference holds. The step writes only files that start with `s5-5_dd_eur`.
 
@@ -598,11 +600,13 @@ The PCs summarise the people who are in the sample. This sample holds only Europ
 
 </details>
 
-#### Debate: what does a PCA plot tell us?
+:::
+
+::: {.callout-tip title="Debate: what does a PCA plot tell us?" collapse="true"}
 
 **Why a debate.** PCA plots of human genetic data are everywhere, and how to read them is debated. In 2022, Elhaik published an article ([doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4)). It says that PCA results can be artefacts of the data and can be manipulated to give a wanted result. This box shows the idea of its colour model. Then it separates what the model shows from the wider claims. The idea of the colour model is from that article. The code and the numbers in the example are our own, and we do not reproduce any figure of the article.
 
-**The colour model.** Think of four populations: Red, Green, Blue and Black. Each person is a list of three numbers, like three variants. A red person is (1, 0, 0), a green person is (0, 1, 0), a blue person is (0, 0, 1) and a black person is (0, 0, 0). All people of one colour are identical, so the plot shows four dots. There are always 10 black people. The sliders set the number of red, green and blue people.
+**The colour model.** Think of four populations: Red, Green, Blue and Black. Each person is a list of three numbers, like three variants. A red person is (1, 0, 0), a green person is (0, 1, 0), a blue person is (0, 0, 1) and a black person is (0, 0, 0). As in the article, we add a small random noise of 0.01 to every number, and PCA centres the data first. The code is our own. The true distance between two colours is the distance between their lists of three numbers. PCA turns the three numbers into three PCs. This is a rotation, so the distances over all three PCs stay the same as the true distances. The plot keeps only PC1 and PC2. Two axes cannot hold the three, so the distances in the plot are distorted. How they are distorted depends on how many people each colour has. There are always 50 black people. The sliders set the number of red, green and blue people. The plot shows the mean position of each colour, and the tables give the three kinds of distance for every pair of colours.
 
 
 **R code.** Change `n_red` and run the chunk again.
@@ -612,21 +616,22 @@ The PCs summarise the people who are in the sample. This sample holds only Europ
 #| eval: false
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
-# Change this number of red people and run the chunk again (the other colours have 20 people each).
-n_red <- 10
-sizes <- c(n_red, 20, 50, 100)
-frames <- lapply(sizes, function(n) {
-  f <- demo_colour_frame(n, 20, 20)
-  f$labels <- data.frame(x = f$points$x, y = f$points$y, text = c("Red", "Green", "Blue", "Black"))
-  f
-})
+# Change this number of red people and run the chunk again (the other colours have 50 people each).
+n_red <- 25
+sizes <- c(n_red, 50, 100)
+frames <- lapply(sizes, function(n) demo_colour_frame(n, 50, 50))
 demo_plot_panels(frames, paste(sizes, "red people"), c("Red", "Green", "Blue", "Black"))
-# Distance from the Black dot to the Red, Green and Blue dots.
-round(t(vapply(frames, function(f) unlist(f$stats[c("black_to_red", "black_to_green", "black_to_blue")]), numeric(3))), 2)
+# Distance from Black to each colour: true, over all three PCs, and in the PC1-PC2 plane.
+distances <- function(f) unlist(f$stats[c("true_red_black", "true_green_black", "true_blue_black",
+                                          "all_red_black", "all_green_black", "all_blue_black",
+                                          "plane_red_black", "plane_green_black", "plane_blue_black")])
+result <- t(vapply(frames, distances, numeric(9)))
+rownames(result) <- paste(sizes, "red people")
+round(result, 2)
 ```
 
 
-**What to observe.** The data of the black people never change, but their place among the colours does. Look at the distances in the table when you change the sample sizes. The positions on a PCA plot depend on who is in the sample. This is the same lesson as the example above.
+**What to observe.** The data of the black people never change, but their place among the colours does. Over all three PCs, every distance stays equal to the true distance, whatever the sample sizes. In the PC1-PC2 plane, the distances are distorted. With equal numbers of people, Black is at the same distance from the three colours. When one colour has fewer people than the others, Black lies closer to that colour in the plane. When one colour has more people, Black lies farther from it. The article describes the same effect: a colour with many people repels Black. Its Box 1 shows that when the number of blue people is reduced, the distance between Black and Blue decreases. The distortion comes from keeping two PCs, and it depends on who is in the sample.
 
 **What the model shows, and what it does not.**
 
@@ -648,7 +653,7 @@ Both. The structure is in the data: in the grid example of step 5.1, neighbourin
 
 <details><summary>Note for the instructor</summary>
 
-The axes, the eigenvalues and the distances change, while the populations do not. Use the two examples of this step. Ask students to predict the plot before they move the slider.
+The axes, the eigenvalues and the distances change, while the populations do not. Use the two examples of this step. Ask students to predict the plot before they move the slider. In the colour example, a colour with fewer people comes closer to Black in the PC1-PC2 plane, and the distances over all three PCs do not change. Ask why keeping only two PCs is what distorts the distances.
 
 </details>
 
@@ -836,11 +841,9 @@ References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+This optional box is not part of the main path. No later step uses it. It writes no file in your results folder. The deep dive explains why the course removes ancestry outliers instead of only correcting for them. It does not repeat the boxes "Try other thresholds" and "Another approach" above.
 
-This box is not part of the main path. No later step uses it. It writes no file in your results folder. It explains why the course removes ancestry outliers instead of only correcting for them. It does not repeat the boxes "Try other thresholds" and "Another approach" above.
-
-#### Deep dive: why we remove outliers
+::: {.callout-tip title="Deep dive: why we remove outliers" collapse="true"}
 
 **First reason: ancestry can confound the test.** Suppose the study has two subpopulations, A and B. Cases come more often from B than controls do. Allele frequencies also differ between A and B. Then a variant can look linked to the disease only because it marks the subpopulation. This is [confounding](#glossary-confounding), and the problem is called [population stratification](#glossary-population-stratification). In the example, no variant has a real effect. Any small p-value is a false signal. The inflation factor lambda ([Lambda GC](#glossary-lambda-gc)) is 1 when the tests are well calibrated. A PC that carries the ancestry difference can remove most of the problem when it is a covariate.
 
@@ -1077,11 +1080,9 @@ How to read it. Only PC1 stands out. Its eigenvalue is ten times larger than the
 
 :::
 
-::: {.callout-tip title="Optional: deep dives" collapse="true"}
+These optional boxes are not part of the main path. No later step uses them. They write only files that start with `s5-7_dd_`. The files and the checkpoint of the main path do not change.
 
-This box is not part of the main path. No later step uses it. It writes only files that start with `s5-7_dd_`. The files and the checkpoint of the main path do not change.
-
-#### Deep dive: from eigenvalues to the scree plot
+::: {.callout-tip title="Deep dive: from eigenvalues to the scree plot" collapse="true"}
 
 **The idea.** In the first deep dive of step 5.1, the variance on a line was largest for PC1. That variance is the [eigenvalue](#glossary-eigenvalue) of PC1. The next PC has the largest variance that is left, and so on. A [scree plot](#glossary-scree-plot) lists these eigenvalues in order. PCs that carry real structure stand above a flat tail. The tail looks like noise. The box "Another approach" in this step uses this idea, and it also tests the PCs against the outcome and repeats the scan with other numbers of PCs. This deep dive only connects the numbers to the idea of variance explained.
 
@@ -1107,7 +1108,9 @@ PLINK reports only the eigenvalues of the PCs that it computes. The share of the
 
 </details>
 
-#### Deep dive: can one region take over a PC?
+:::
+
+::: {.callout-tip title="Deep dive: can one region take over a PC?" collapse="true"}
 
 **The idea.** A PC should describe differences between people across the whole genome. Sometimes a PC describes only one region instead. This happens in regions with long stretches of strongly correlated variants, where one pattern is repeated across thousands of sites. Step 3.4 leaves out a list of such regions. In the example below, you calculate the PCs twice. The first time you do not leave the regions out. The second time you do, as in the main path. For each variant, a PC has a loading, which tells how much the variant contributes to that PC. The plot shows the absolute loadings of one PC along the genome. The code picks the PC for which most of the 200 largest loadings fall in one window of 5 million bases.
 
@@ -1134,6 +1137,8 @@ pca_local_peaks(first)
 3. Calculate them again with the sites of the main path, which leave the list out.
 4. Plot the absolute loadings of the PC with the busiest window.
 
+
+**Where the block comes from.** The simulated people are mosaics of real phased haplotypes from the 1000 Genomes project. The simulator does not add a block of strong LD on purpose. The block is inherited from the real haplotypes, and real genomes have long LD in the region of chromosome 6 that holds the major histocompatibility complex (MHC). So this is not a discovery. It shows what real genomes do, and why the list exists. The list of step 3.4 covers this region of chromosome 6.
 
 **What to observe.** Without the list, one PC has a tall block of loadings in one place, which is drawn as orange triangles. With the list, the block is gone. The table shows the chromosome, the start of the window in millions of bases, and the number of the 200 largest loadings in it. A PC like this describes one region, not the ancestry of the people. This is why the course leaves the regions out in steps 3.4 and 5.7.
 
