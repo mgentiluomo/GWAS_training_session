@@ -286,20 +286,41 @@ demo_outlier_frame <- function(outliers, n_per_pop = 100, snps = 10000, seed = 1
 
 # --- D7: the colour model -----------------------------------------------------------------------------------
 
-# Populations are colours. Each person is a vector of three numbers (red, green, blue), like three variants.
-# The colour model of Elhaik 2022 is used here as an idea. The code is our own.
-demo_colour_frame <- function(n_red, n_green, n_blue, n_black = 10) {
+# Populations are colours. Each person is a vector of three numbers (red, green, blue), like three variants, plus a small
+# noise of 0.01. This follows the colour model of Elhaik 2022: PCA of the three numbers, with centring. The code is our own.
+# The frame holds the mean position of each colour on PC1 and PC2, and the distances between the colours:
+# true (in the space of the three numbers), over all three PCs, and in the PC1-PC2 plane.
+demo_colour_pairs <- function() {
+  names <- c("Red", "Green", "Blue", "Black")
+  pairs <- t(combn(4, 2))
+  data.frame(a = pairs[, 1], b = pairs[, 2], key = tolower(paste(names[pairs[, 1]], names[pairs[, 2]], sep = "_")),
+             label = paste(names[pairs[, 1]], "and", names[pairs[, 2]]), stringsAsFactors = FALSE)
+}
+
+demo_colour_frame <- function(n_red, n_green, n_blue, n_black = 50, noise = 0.01, seed = 1) {
+  set.seed(seed)
   colours <- rbind(Red = c(1, 0, 0), Green = c(0, 1, 0), Blue = c(0, 0, 1), Black = c(0, 0, 0))
-  counts <- c(n_red, n_green, n_blue, n_black)
-  data <- colours[rep(1:4, counts), , drop = FALSE]
-  centre <- colMeans(data)
+  group <- rep(1:4, c(n_red, n_green, n_blue, n_black))
+  data <- colours[group, , drop = FALSE] + matrix(rnorm(length(group) * 3, 0, noise), ncol = 3)
   pc <- prcomp(data, center = TRUE, scale. = FALSE)
-  pos <- pc$x[!duplicated(rep(1:4, counts)), 1:2]
-  pos <- sweep(pos, 2, ifelse(pos[1, ] > 0, -1, 1), "*")
-  dist <- function(i) sqrt(sum((pos[4, ] - pos[i, ])^2))
-  demo_frame(pos[, 1], pos[, 2], 1:4,
-    list(n_red = n_red, n_green = n_green, n_blue = n_blue, n_black = n_black,
-         black_to_red = dist(1), black_to_green = dist(2), black_to_blue = dist(3)))
+  scores <- pc$x
+  scores[, 1] <- scores[, 1] * ifelse(mean(scores[group == 1, 1]) > 0, -1, 1)
+  scores[, 2] <- scores[, 2] * ifelse(mean(scores[group == 2, 2]) < 0, -1, 1)
+  mean_by <- function(m) t(vapply(1:4, function(k) colMeans(m[group == k, , drop = FALSE]), numeric(ncol(m))))
+  rgb <- mean_by(data)
+  all_pcs <- mean_by(scores)
+  plane <- all_pcs[, 1:2]
+  dist <- function(m, i, j) sqrt(sum((m[i, ] - m[j, ])^2))
+  pairs <- demo_colour_pairs()
+  stats <- list(n_red = n_red, n_green = n_green, n_blue = n_blue, n_black = n_black,
+                share12 = sum(pc$sdev[1:2]^2) / sum(pc$sdev^2))
+  for (r in seq_len(nrow(pairs))) {
+    stats[[paste0("true_", pairs$key[r])]] <- dist(rgb, pairs$a[r], pairs$b[r])
+    stats[[paste0("all_", pairs$key[r])]] <- dist(all_pcs, pairs$a[r], pairs$b[r])
+    stats[[paste0("plane_", pairs$key[r])]] <- dist(plane, pairs$a[r], pairs$b[r])
+  }
+  demo_frame(plane[, 1], plane[, 2], 1:4, stats,
+             labels = data.frame(x = plane[, 1], y = plane[, 2], text = c("Red", "Green", "Blue", "Black"), stringsAsFactors = FALSE))
 }
 
 # --- Plots for notebooks ------------------------------------------------------------------------------------

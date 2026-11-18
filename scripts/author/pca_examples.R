@@ -22,10 +22,11 @@ frame_json <- function(index, f) {
   }
   out
 }
-write_example <- function(id, title, description, axes, sliders, groups, stats, frames, fixed_bounds, note = NULL, equal_aspect = FALSE) {
+write_example <- function(id, title, description, axes, sliders, groups, stats, frames, fixed_bounds, note = NULL, equal_aspect = FALSE, tables = NULL) {
   spec <- list(schema_version = "1.0", id = id, title = title, description = description, axes = axes,
                fixed_bounds = fixed_bounds, equal_aspect = equal_aspect, sliders = sliders, groups = as.list(groups), stats = stats, frames = frames)
   if (!is.null(note)) spec$note <- note
+  if (!is.null(tables)) spec$tables <- tables
   path <- file.path(out_dir, paste0(id, ".json"))
   jsonlite::write_json(spec, path, auto_unbox = TRUE, digits = NA, pretty = FALSE)
   cat(sprintf("%-16s %3d frames %7.1f kB\n", id, length(frames), file.size(path) / 1000))
@@ -122,20 +123,22 @@ write_example("outliers", "A few far-away people can turn the axes",
   frames, FALSE)
 
 # D7: the colour model -------------------------------------------------------------------------------------
-sizes <- c(10, 50, 100)
+sizes <- c(25, 50, 100)
 frames <- list()
 for (i in seq_along(sizes)) for (j in seq_along(sizes)) for (k in seq_along(sizes)) {
-  f <- demo_colour_frame(sizes[i], sizes[j], sizes[k])
-  f$labels <- data.frame(x = f$points$x, y = f$points$y, text = c("Red", "Green", "Blue", "Black"), stringsAsFactors = FALSE)
-  frames[[length(frames) + 1]] <- frame_json(c(i - 1, j - 1, k - 1), f)
+  frames[[length(frames) + 1]] <- frame_json(c(i - 1, j - 1, k - 1), demo_colour_frame(sizes[i], sizes[j], sizes[k], seed = 8000 + 100 * i + 10 * j + k))
 }
+pairs <- demo_colour_pairs()
+colour_table <- list(caption = "Distance between each pair of colours: true (in the space of the three numbers), over all three PCs, and in the PC1-PC2 plane.",
+  columns = list("True distance", "All three PCs", "PC1 and PC2 only"),
+  rows = lapply(seq_len(nrow(pairs)), function(r) list(label = pairs$label[r], keys = list(paste0("true_", pairs$key[r]), paste0("all_", pairs$key[r]), paste0("plane_", pairs$key[r])))))
 write_example("colour-model", "Four colours as four populations",
-  "Red, green, blue and black people are vectors of three numbers: (1,0,0), (0,1,0), (0,0,1) and (0,0,0). There are always 10 black people. The sliders set the number of red, green and blue people. The black dot never changes in the data, but its place among the colours changes.",
+  "Red, green, blue and black people are vectors of three numbers: (1,0,0), (0,1,0), (0,0,1) and (0,0,0), each with a small noise. There are always 50 black people. The sliders set the number of red, green and blue people. The plot shows the mean position of each colour on PC1 and PC2. The tables give the true distances and the distances on the PCs.",
   list(x = "PC1", y = "PC2"),
   list(slider("n_red", "Red people", sizes), slider("n_green", "Green people", sizes), slider("n_blue", "Blue people", sizes)),
   c("Red", "Green", "Blue", "Black"),
-  list(stat("black_to_red", "Distance from Black to Red", 2), stat("black_to_green", "Distance from Black to Green", 2), stat("black_to_blue", "Distance from Black to Blue", 2)),
-  frames, FALSE)
+  list(stat("share12", "Share of the variance on PC1 and PC2 together", 3, TRUE)),
+  frames, FALSE, tables = list(colour_table))
 
 # D4: projection onto a reference and shrinkage ----------------------------------------------------------------
 ref_sizes <- c(10, 25, 100, 400)

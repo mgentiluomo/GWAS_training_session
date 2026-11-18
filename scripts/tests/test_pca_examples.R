@@ -41,10 +41,16 @@ local({
   out0 <- demo_outlier_frame(0, seed = 6)$stats
   out10 <- demo_outlier_frame(10, seed = 6)$stats
   check(out0$separation_pc1 > 5 && out10$separation_pc1 < 1 && out10$separation_pc2 > 5, "ten distant people should take over PC1")
-  # D7: the position of Black among the colours changes with the sample sizes, though its data never change.
-  small <- demo_colour_frame(10, 20, 20)$stats$black_to_red
-  large <- demo_colour_frame(100, 20, 20)$stats$black_to_red
-  check(abs(small - large) > 0.05, "the distance from Black to Red should depend on the sample sizes")
+  # D7: the colour model follows Elhaik 2022. With even samples, the distance from Black to a colour is 1 in the space of the
+  # three numbers and about 0.82 on PC1 and PC2. All three PCs keep the true distance. A colour with fewer people comes closer to Black.
+  even <- demo_colour_frame(50, 50, 50, seed = 1)$stats
+  check(abs(even$true_red_black - 1) < 0.01 && abs(even$all_red_black - 1) < 0.01, "all PCs should keep the true distance")
+  check(abs(even$plane_red_black - 0.82) < 0.03 && even$share12 > 0.87 && even$share12 < 0.91, "the plane should show about 0.82 and hold about 88% of the variance")
+  few_red <- demo_colour_frame(25, 50, 50, seed = 1)$stats
+  many_red <- demo_colour_frame(100, 50, 50, seed = 1)$stats
+  check(few_red$plane_red_black < few_red$plane_green_black - 0.1, "with fewer red people, Black should lie closer to Red")
+  check(many_red$plane_red_black > many_red$plane_green_black + 0.04, "with more red people, Black should lie farther from Red")
+  check(abs(few_red$all_green_black - few_red$true_green_black) < 0.01, "all PCs keep the true distance for any sample sizes")
   # The same call gives the same numbers.
   check(identical(demo_fst_frames(0.005, 1000, seed = 5), demo_fst_frames(0.005, 1000, seed = 5)), "a call must be reproducible")
   cat("PCA example tests passed\n")

@@ -34,6 +34,10 @@ class PcaExamples(unittest.TestCase):
                 self.assertTrue(all(0 <= i < c for i, c in zip(index, counts)))
                 seen.add(index)
                 self.assertTrue(keys <= set(frame["stats"]), path.name)
+                for table in spec.get("tables", []):
+                    for row in table["rows"]:
+                        self.assertTrue(set(row["keys"]) <= set(frame["stats"]), path.name)
+                        self.assertEqual(len(row["keys"]), len(table["columns"]))
                 self.assertTrue(frame["points"])
                 for x, y, g in frame["points"]:
                     self.assertTrue(0 <= g < len(spec["groups"]), path.name)
