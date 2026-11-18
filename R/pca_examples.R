@@ -185,8 +185,9 @@ demo_stepping_stone <- function(migration, sampling = c("uniform", "corner"), pe
   turned_centres <- demo_apply_procrustes(fit, centres)
   # Raw view: the same scale and centre, but the axes as PCA gave them.
   raw_fit <- fit; raw_fit$rotation <- diag(2)
-  raw_scale <- sum(sweep(centres, 2, colMeans(centres)) * sweep(truth, 2, colMeans(truth))) / sum(sweep(centres, 2, colMeans(centres))^2)
-  raw_fit$scale <- abs(raw_scale)
+  # The raw view only scales the PCA positions so that they spread as much as the grid does.
+  raw_scale <- sqrt(sum(sweep(truth, 2, colMeans(truth))^2) / sum(sweep(centres, 2, colMeans(centres))^2))
+  raw_fit$scale <- raw_scale
   raw_centres <- demo_apply_procrustes(raw_fit, centres)
   error <- function(a) mean(sqrt(rowSums((a - truth)^2)))
   list(cells = cells, deme = deme, raw = demo_apply_procrustes(raw_fit, pc), turned = demo_apply_procrustes(fit, pc),
