@@ -61,6 +61,7 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 "terminal_commands": record["plink"]["commands"],
                 "thresholds": (record.get("blocks") or {}).get("try_other_thresholds", ""),
                 "approach": (record.get("blocks") or {}).get("another_approach", ""),
+                "deep_dive": (record.get("blocks") or {}).get("deep_dive", ""),
             })
         models.append({"module": number, "title": module["title"], "prerequisites": spec,
                        "time": re.match(r"[^.]*\.", time_line[1])[0] if time_line else "",
@@ -179,6 +180,8 @@ def render_steps_rmd(model: dict) -> list[str]:
             lines.extend(["### Try other thresholds (optional)", "", notebook_links(record["thresholds"]), ""])
         if record.get("approach"):
             lines.extend(["### Another approach (optional)", "", notebook_links(record["approach"]), ""])
+        if record.get("deep_dive"):
+            lines.extend(["### Optional: deep dives", "", notebook_links(drop_example_lines(record["deep_dive"])), ""])
     return lines
 
 
@@ -238,6 +241,14 @@ def glossary_entries(root: Path = ROOT) -> dict[str, tuple[str, str]]:
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         entries[match[2]] = (match[1], text[match.end():end].strip())
     return entries
+
+
+EXAMPLE_LINE = re.compile(r"^\{\{example:[a-z0-9-]+\}\}[ \t]*(?:\r?\n)?", re.M)
+
+
+def drop_example_lines(text: str) -> str:
+    """A line {{example:ID}} marks an interactive example on the website. The notebook has the R code instead."""
+    return EXAMPLE_LINE.sub("", text)
 
 
 def qmd_thresholds(text: str, used: set[str]) -> str:
@@ -411,6 +422,9 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
         if record.get("approach"):
             lines.extend(['::: {.callout-tip title="Another approach (optional)" collapse="true"}', "",
                           qmd_thresholds(record["approach"], used), "", ":::", ""])
+        if record.get("deep_dive"):
+            lines.extend(['::: {.callout-tip title="Optional: deep dives" collapse="true"}', "",
+                          qmd_thresholds(drop_example_lines(record["deep_dive"]), used), "", ":::", ""])
     return lines
 
 

@@ -33,12 +33,15 @@ BLOCKS = [
     ("try_other_thresholds", "<details><summary>Try other thresholds (optional)</summary>"),
     # Optional alternative methods (for example another outlier rule). Output goes to separate prefixes, never to the main path.
     ("another_approach", "<details><summary>Another approach (optional)</summary>"),
+    # Optional deep dives (module 5). One block per step. Each deep dive inside it starts with "#### Deep dive: ..." or "#### Debate: ...".
+    # A line {{example:ID}} marks a precomputed interactive example (site_content/pca_examples/ID.json). Notebooks drop that line.
+    ("deep_dive", "<details><summary>Optional: deep dives</summary>"),
     # Optional last block for readers who want the statistics and the literature behind a step.
     # It must come last, after "Files created", so the beginner path ends where it always did.
     ("under_the_hood", "<details><summary>Under the hood & literature</summary>"),
 ]
-OPTIONAL_BLOCKS = {"what_this_check_can_reveal", "try_other_thresholds", "another_approach", "under_the_hood"}
-COLLAPSED_BLOCKS = {"expected_result", "troubleshooting", "try_other_thresholds", "another_approach", "under_the_hood"}
+OPTIONAL_BLOCKS = {"what_this_check_can_reveal", "try_other_thresholds", "another_approach", "deep_dive", "under_the_hood"}
+COLLAPSED_BLOCKS = {"expected_result", "troubleshooting", "try_other_thresholds", "another_approach", "deep_dive", "under_the_hood"}
 FENCE = re.compile(r"^```.*?^```\s*$", re.M | re.S)
 MD_LINK = re.compile(r"(\]\()([^)\s]+)((?:\s+\"[^\"]*\")?\))")
 HTML_HREF = re.compile(r"(\bhref=\")([^\"]+)(\")")
