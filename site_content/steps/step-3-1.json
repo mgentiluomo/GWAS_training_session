@@ -6,7 +6,7 @@
   "anchor": "step-3-1",
   "title": "Rough cleaning",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "7bbd8bf1cc95ffdf34ba3609c1256ab9d51a6cb9da651499a8c48645a91188d2",
+  "source_sha256": "438bc5933b0394974e689a5f6106b116b3c741396e1790988e9b90db8c0917a5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "First we remove [wells](docs/glossary.md#well) that were read very badly. A well is a small hole in a plate that holds the DNA of one sample. Then we remove [variants](docs/glossary.md#variant) (also called sites) that were read very badly. A variant is a place in the DNA where people differ.",

@@ -107,17 +107,31 @@ None.
 
 <details><summary>Optional: deep dives</summary>
 
-These optional boxes are not part of the main path. No later step uses them. They write no file in your results folder. They are three deep dives on principal components: what a component is, why genetic data form clusters, and what happens when populations lie on a map. Each deep dive has an example that you can change. The numbers in the examples come from simulated data with a fixed seed.
+These optional boxes are not part of the main path. No later step uses them. They write no file in your results folder. They are four deep dives on principal components: what a component is, why genetic data form clusters, where mixed people lie, and genes and geography.
 
 #### Deep dive: what is a principal component?
 
-**The idea.** Take two measurements for each person, for example height and arm span. The two are correlated, because tall people tend to have a long arm span. The dots form a long, thin cloud. A [principal component](../docs/glossary.md#pca-pc) (PC) is the direction along which the dots are most spread out. To see this, draw a line through the middle of the cloud and drop every dot onto the line. The spread of the dropped dots is their variance. Turn the line and the variance changes. The direction with the largest variance is PC1. The line at a right angle to it is PC2. PC2 holds the spread that PC1 does not describe.
+**Why we use simulations.** The examples in this course use simulated data. In simulated data we know the truth: which populations exist, where each person comes from and which effects are real. So we can check whether a method finds the truth, and see when it fails. In real data we never know the truth for sure.
+
+**Why this simulation.** A principal component (PC) is a direction. This example shows how PCA finds it for two measurements.
+
+**How to read the chart.** Each dot is a person, with height across and arm span up, each minus the average. The thick line is a direction that you choose. Grey lines drop each dot onto it. The table gives the variance of the dropped dots, their spread along the line.
 
 {{example:pc-rotation}}
 
-**From two measurements to 100,000 variants.** In genotype data, every variant is one measurement. A person is a point in a space with one axis for each variant. We cannot draw 100,000 axes, but PCA can still find the few directions that carry most of the differences between people. Each person gets one number for each direction. This number is the score. Each variant also gets one weight for each direction. This weight is the loading, and it shows how much the variant contributes to the direction. An [eigenvalue](../docs/glossary.md#eigenvalue) is the variance along one direction. The variance explained is the share of the total variance that one direction holds. The [scree plot](../docs/glossary.md#scree-plot) of step 5.7 shows the eigenvalues in order.
+**Try this.**
 
-**R code.** The function `demo_rotation_frame()` projects the dots on a line at the angle that you choose. Change `angle` and run the chunk again. The first panel shows your angle. The other four panels show four fixed angles for comparison.
+- Move the **Angle of the line (degrees)** slider to **0**. The line ignores arm span and holds little of the spread.
+- Move it to **45**. The line follows the long direction of the cloud. The share is large.
+- Move it to **135**. The line cuts across the cloud. The share is small.
+
+**What you should see, and why.** Height and arm span rise together, so the cloud is long in one direction. The variance is largest there. That direction is PC1, and the table gives its angle. PC2 is at a right angle to it. With genotypes, each variant is one measurement, and a person's number along a direction is the score.
+
+**Why it matters for your GWAS.** [Step 5.4](module_05_population_structure.Rmd#step-5-4) turns thousands of variants into a few scores per person. [Step 6.2](module_06_association.Rmd#step-6-2) uses the scores as [covariates](../docs/glossary.md#covariate).
+
+**Key idea:** A PC is the direction of largest spread, and the data choose it.
+
+**R code.** Change `angle` at the top of the chunk and run it again.
 
 ```{r s5-1_dd_rotation, eval=FALSE}
 # Optional. Nothing here changes your results folder.
@@ -134,8 +148,6 @@ demo_plot_panels(frames, titles, "People", "Height (cm, centred)", "Arm span (cm
 demo_rotation_pc1_angle(data)
 ```
 
-**What to observe.** The share of the variance is largest when the line follows the long direction of the cloud. It is smallest when the line is at a right angle to it. The best angle is the angle of PC1, which the table under the example reports. PCA does the same thing in many dimensions at once.
-
 **Quick check.** Can a turned line ever hold more variance than PC1?
 
 <details><summary>Show the answer</summary>
@@ -148,11 +160,25 @@ No. PC1 is defined as the direction with the largest variance. Every other direc
 
 #### Deep dive: why genetic data form clusters
 
-**The idea.** Two populations that once were one population drift apart. Allele frequencies change by chance in each of them. Fst is a number for how far two populations have drifted. It is 0 when their allele frequencies are the same, and it grows as they differ more. At one variant the difference is tiny, so one variant cannot tell the populations apart. Many variants together can. PCA adds up the small differences of all variants. The populations separate on PC1 only when three things are large enough together: the drift, the number of people and the number of variants. Patterson et al. 2006 call this a phase change. For a fixed data size, a divergence below a threshold is essentially undetectable, and a little above the threshold it is easy to detect. For two populations with the same number of people, the threshold is reached when Fst is equal to 1 divided by the square root of the data size. The data size is the number of people times the number of variants. More people or more variants lower the threshold. In this example, each population has 100 people. The mark on the Fst slider shows the threshold for the current number of variants.
+**Why this simulation.** Two populations do not always form two clusters. When does PCA show them?
+
+**How to read the chart.** Each dot is a person: circles are population A, triangles are population B. Fst is how different their allele frequencies are (0 means identical). The table gives the separation of A and B on PC1: above 3 is a clear gap. The mark on the Fst slider is the threshold of Patterson et al. 2006: 1 divided by the square root of the people times the variants.
 
 {{example:fst-snps}}
 
-**R code.** Change `fst` and run the chunk again. The three panels use 1,000, 10,000 and 100,000 variants.
+**Try this.**
+
+- Move the **Fst** slider to **0.001** and the **Number of variants** slider to **1000**. The groups mix.
+- Move the **Number of variants** slider to **100000**. The mark falls below your Fst, and the groups separate.
+- Move the **Fst** slider to **0**. They mix again.
+
+**What you should see, and why.** Each variant differs a little between the populations, and PCA adds these differences up. The groups separate when the Fst is above the mark. More people or variants lower the mark. Near it, the result varies.
+
+**Why it matters for your GWAS.** In [step 5.5](module_05_population_structure.Rmd#step-5-5) you look for clusters. One cloud does not prove one ancestry: there may be too little data.
+
+**Key idea:** PCA shows two populations apart only when the Fst, the people and the variants are large enough together.
+
+**R code.** Change `fst` and run the chunk again.
 
 ```{r s5-1_dd_fst, eval=FALSE}
 # Optional. This takes about ten seconds.
@@ -168,19 +194,37 @@ round(vapply(frames, function(f) f$stats$separation, numeric(1)), 2)
 signif(vapply(frames, function(f) f$stats$threshold, numeric(1)), 2)
 ```
 
-**What to observe.** With an Fst of 0, PC1 does not split the two populations, however many variants you use. When the Fst is well below the threshold, the populations do not separate. When it is well above, they separate clearly. Near the threshold, the result varies, and more variants turn one blurred cloud into two clusters. The Fst that you choose is the Fst between the two populations.
-
 **Quick check.** A study has few variants. PCA shows one cloud for two closely related populations. Does this prove that the populations are the same?
 
 <details><summary>Show the answer</summary>
 
-No. With this amount of data, a small divergence cannot be seen. More people or more variants could show two clusters.
+No. With this amount of data, a small difference cannot be seen. More people or more variants could show two clusters.
 
 </details>
 
-**Mixed people.** Some people have ancestors from more than one population. This is admixture. The allele frequencies of a mixed person are a blend of the source populations. PCA places such a person between the sources. In the next example, 40 mixed people have ancestry from populations A and B. A third population, C, is not involved.
+**Reference.** Patterson N, Price AL, Reich D. 2006. Population structure and eigenanalysis. PLoS Genetics 2:e190. [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190).
+
+#### Deep dive: where do mixed people lie?
+
+**Why this simulation.** Some people have ancestors from two populations. This example shows where PCA puts them.
+
+**How to read the chart.** Circles are population A, triangles B and squares C. Diamonds are 40 mixed people from A and B. The table gives their mean position on the line from A (0) to B (1), and the position expected from their ancestry.
 
 {{example:admixture}}
+
+**Try this.**
+
+- Move the **Share of ancestry from A in the mixed people** slider to **0.5**. The diamonds lie half-way between A and B.
+- Move it to **0.9**. They move towards A.
+- Move it to **0.1**. They move towards B.
+
+**What you should see, and why.** The allele frequencies of a mixed person are a blend of A and B. PCA uses allele counts, so the person lies between the two sources. Population C is not in the mix, so it lies elsewhere.
+
+**Why it matters for your GWAS.** In [step 5.6](module_05_population_structure.Rmd#step-5-6) you keep people close to the European group. A mixed person lies between groups, and the distance shows how far from Europeans.
+
+**Key idea:** A mixed person lies between the source populations, in proportion to the mix.
+
+**R code.** Change `shares` and run the chunk again.
 
 ```{r s5-1_dd_admixture, eval=FALSE}
 # Optional. Each frame takes a few seconds.
@@ -191,33 +235,37 @@ frames <- lapply(shares, function(s) demo_admixture_frame(s, seed = 1))
 demo_plot_panels(frames, paste("Share from A:", shares), c("A", "B", "C", "Mixed A and B"))
 ```
 
-**What to observe.** The mixed people lie on the line between A and B. They move towards A as the share from A grows. The table under the example compares their mean position with the position expected from their ancestry share.
-
 **Quick check.** A person lies half-way between A and B on the plot. Give one reason, other than admixture, that could place a person there.
 
 <details><summary>Show the answer</summary>
 
-A person from a third population that is genetically between A and B, but that was not sampled, can lie there too. A technical problem with the genotypes can also move a person. A position alone does not show the ancestry.
+A person from a third population that is genetically between A and B, but was not sampled, can lie there too. A technical problem with the genotypes can also move a person. A position alone does not show the ancestry.
 
 </details>
 
-**References.** Patterson N, Price AL, Reich D. 2006. Population structure and eigenanalysis. PLoS Genetics 2:e190. [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190).
-
 #### Deep dive: genes and geography
 
-**The idea.** Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)) studied people from across Europe. The article reports 3,192 people genotyped at 500,568 variants. The main analysis used 1,387 people and 197,146 variants, because the origin of these people was known with confidence. The origin was the country of all observed grandparents. People whose grandparents came from different countries were left out. We do not reproduce the figures of the article. In words, it reports three things.
+Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)) found that PC1 and PC2 of 1,387 Europeans look like a map of Europe, once the axes are turned by 16 degrees. They warn that the axes depend on how samples are spread. Novembre and Stephens 2008 ([doi:10.1038/ng.139](https://doi.org/10.1038/ng.139)) show that smooth gradients give wave-like patterns that need not show migrations. This example is our own.
 
-- The first two PCs, plotted against each other, look like a map of Europe. People from the same region lie together, and neighbouring regions touch. The authors turned the axes by 16 degrees. They chose this angle because it gave the best match with latitude and longitude.
-- The data tell apart Swiss people who speak French, German or Italian.
-- The genetic correlation between two people falls as the distance between them grows.
+**Why this simulation.** Do genes mirror geography? When does PCA draw a map of populations?
 
-The authors also warn that the direction and the strength of the PC axes depend on how the samples are spread in space. Novembre and Stephens 2008 ([doi:10.1038/ng.139](https://doi.org/10.1038/ng.139)) show that smooth gradients across space give regular wave-like patterns in PCA. These patterns do not necessarily show migration events.
-
-Our example is a grid of 36 simulated populations. They are named A1 to F6, and only neighbours exchange migrants. The grid is not a map of any real place. The plot shows the PC1 and PC2 position of each population, and lines join neighbours. PCA does not know where north is, so the raw plot has arbitrary directions. In the turned view we choose the rotation ourselves, knowing the true grid. The method is called Procrustes analysis. It turns, flips and scales the points to match the true places as closely as possible. The table gives the mean error in grid steps.
+**How to read the chart.** Labels A1 to F6 are the mean positions of 36 populations on a 6 by 6 grid. Lines join neighbours, and small dots are people. The table gives the mean position error in grid steps. Raw PCA has no north, so the turned view uses Procrustes analysis to turn, flip and scale the plot onto the true grid.
 
 {{example:stepping-stone}}
 
-**R code.** Change `migration` and run the chunk again. This takes about ten seconds.
+**Try this.**
+
+- Move the **View** slider to **Turned onto the true grid (Procrustes)** and the **Migration rate between neighbours** slider to **0.25**. The grid is recovered.
+- Move the **Migration rate between neighbours** slider to **0.8**. The grid blurs. Move it to **0.01**. The populations become islands.
+- Move the **Migration rate between neighbours** slider to **0.25** and the **Sampling** slider to **Corner: many people in A1, B1, A2 and B2**. The sampled corner takes more room.
+
+**What you should see, and why.** With moderate migration, nearby populations share ancestry and lie close, so the grid appears. With very high migration all populations are alike. With very low migration each is an island. PCA has no north, so we turn the plot ourselves. Who is sampled changes the shape.
+
+**Why it matters for your GWAS.** In [step 5.5](module_05_population_structure.Rmd#step-5-5) a gradient in your cohort can look like clusters or a map. The PCs used as covariates in [step 5.7](module_05_population_structure.Rmd#step-5-7) capture such gradients. Do not read plot shapes as migration history.
+
+**Key idea:** PCA can draw a map of populations, but only when migration and sampling allow it, and we choose its direction.
+
+**R code.** Change `migration` and run the chunk again.
 
 ```{r s5-1_dd_grid, eval=FALSE}
 # Optional. Nothing here changes your results folder.
@@ -234,8 +282,6 @@ demo_plot_panels(frames, c("Raw PCA, uniform sampling", "Turned onto the grid, u
 round(c(uniform$error_raw, uniform$error_turned, corner$error_turned), 2)
 ```
 
-**What to observe.** With a moderate migration rate, the turned plot recovers the grid. With a very high rate, the populations are so alike that the grid blurs. With a very low rate, each population is nearly an island, and the neighbours no longer lie side by side. With corner sampling, many people come from four populations and few from the others. The sampled corner takes more room, and the rest of the grid is squeezed. The map depends on how we sample.
-
 **Quick check.** Can we say that PC1 points north?
 
 <details><summary>Show the answer</summary>
@@ -243,8 +289,6 @@ round(c(uniform$error_raw, uniform$error_turned, corner$error_turned), 2)
 No. PCA chooses its axes by variance, not by geography. The sign and the angle depend on the sample. We turned the plot ourselves, using the true grid.
 
 </details>
-
-**References.** Novembre J, et al. 2008. Genes mirror geography within Europe. Nature 456:98-101. [doi:10.1038/nature07331](https://doi.org/10.1038/nature07331). Novembre J, Stephens M. 2008. Interpreting principal component analyses of spatial population genetic variation. Nature Genetics 40:646-649. [doi:10.1038/ng.139](https://doi.org/10.1038/ng.139).
 
 </details>
 
@@ -474,17 +518,29 @@ Otherwise the two sets of scores would not share the same coordinate system.
 
 <details><summary>Optional: deep dives</summary>
 
-This optional box is not part of the main path. No later step uses it. It writes no file in your results folder.
+This optional box is not part of the main path. No later step uses it. It writes no file in your results folder. These examples use simulated data, so the true answer is known. The first box of [step 5.1](module_05_population_structure.Rmd#step-5-1) explains why.
 
 #### Deep dive: what does projecting mean, and why do projected people shrink?
 
-**The idea.** In this step the axes come from the reference people only. The study people do not help to find the axes. They are placed on the axes afterwards. This is a [projection](../docs/glossary.md#projection). It gives every study person a position that can be compared with the reference groups. There is a catch. The reference people were used to fit the axes, so the axes partly follow their own random noise. Study people do not share that noise. Their projected positions are pulled towards the centre. This is called shrinkage. Shrinkage is larger when the reference is small, or when the populations differ little.
+**Why this simulation.** In step 5.4 study people are placed on axes made from a reference. This example asks whether the placement keeps the distances.
 
-In the example, two populations are simulated. A reference defines the axes. A study of the same size is projected on them. A shrinkage of 1 would mean that the study groups are as far apart as the reference groups. A smaller value means that the study is pulled towards the centre.
+**How to read the chart.** Circles and triangles are reference people (populations A and B). Squares and diamonds are study people. The study does not make the axes. The table gives the gap between the study groups on PC1 divided by the gap in the reference: 1 means no shrinkage, which is the pull of study people towards the centre.
 
 {{example:projection}}
 
-**R code.** Change `n_ref` and run the chunk again. The four panels use four sizes of reference.
+**Try this.**
+
+- Move the **Reference people in each population** slider to **10** and the **Fst** slider to **0.01**. The study dots huddle near the centre.
+- Move the **Reference people in each population** slider to **400**. The study dots spread out to match the reference.
+- Move the **Fst** slider to **0.002**. The study dots move towards the centre again.
+
+**What you should see, and why.** The axes are fitted to the reference people, noise included. Study people are not fitted, so they lie nearer the centre. A larger reference has less noise to fit, and more different populations give a stronger signal.
+
+**Why it matters for your GWAS.** [Step 5.4](module_05_population_structure.Rmd#step-5-4) projects your study on 1000 Genomes axes. [Step 5.6](module_05_population_structure.Rmd#step-5-6) uses the first four PCs to find outliers. Privé et al. 2020 report that shrinkage is large only from PC5 on.
+
+**Key idea:** Projected people are pulled towards the centre, more so when the reference is small.
+
+**R code.** Change `n_ref` and run the chunk again.
 
 ```{r s5-4_dd_projection, eval=FALSE}
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
@@ -499,8 +555,6 @@ demo_plot_panels(frames, paste(sizes, "reference people per population"),
 round(vapply(frames, function(f) f$stats$ratio, numeric(1)), 2)
 ```
 
-**What to observe.** The study groups lie closer to the centre than the reference groups do. This is clearest for a small reference. As the reference grows, the shrinkage fades. The course uses only the first four PCs of the projection to find outliers in step 5.6. Privé et al. report that the bias becomes large only from PC5 onwards (see the reference below).
-
 **Quick check.** Why can the reference people not show shrinkage themselves?
 
 <details><summary>Show the answer</summary>
@@ -509,7 +563,7 @@ The axes were fitted to them, noise included. Their positions are the fitted val
 
 </details>
 
-**Reference.** Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) report a shrinkage bias of projected PCs. In their projection onto 1000 Genomes data, the bias becomes large for PC5 and beyond. They show how to obtain unbiased projections with the R package bigsnpr.
+**Reference.** Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) report a shrinkage bias of projected PCs, and they show how to obtain unbiased projections with the R package bigsnpr.
 
 </details>
 
@@ -664,17 +718,29 @@ No. The plot summarises genetic variation compared with a chosen reference. It d
 
 <details><summary>Optional: deep dives</summary>
 
-These optional boxes are not part of the main path. No later step uses them. They write only files that start with `s5-5_dd_`. They are three deep dives: what a PCA plot is not, a real example with European populations, and a debate about what a PCA plot tells us.
+These optional boxes are not part of the main path. No later step uses them. They write only files that start with `s5-5_dd_`. The examples use simulated data, so the true answer is known. The first box of [step 5.1](module_05_population_structure.Rmd#step-5-1) explains why. They are four deep dives: what a PCA plot is not, a real example with European populations, the colour model, and a debate about what a PCA plot tells us.
 
 #### Deep dive: what a PCA plot is not
 
-**The idea.** The axes of a PCA plot are not fixed properties of populations. They summarise the people who are in the sample. If you change who is in the sample, the axes and the distances change, although the populations do not. McVean 2009 shows why. The positions on the PCs follow from how closely related the sampled people are to each other, pair by pair. A different sample gives different pairs.
+**Why this simulation.** Are PCA axes a property of populations, or of the sample? Here the sample changes and the populations do not.
 
-The example has two populations and 200 people in total. The slider sets how many of them come from population B.
+**How to read the chart.** Circles are population A, triangles B, 200 people in all. The centre is the mean of the sample. The table gives the first eigenvalue (the variance along PC1) and the mean PC1 score of each population.
 
 {{example:composition}}
 
-**R code.** Change `share_b` and run the chunk again. The five panels use five shares.
+**Try this.**
+
+- Move the **Share of the sample from B** slider to **0.5**. The two populations lie on opposite sides of the centre.
+- Move it to **0.9**. The small group A lies far from the centre, and B lies near it.
+- Move it to **0.1**. The positions swap.
+
+**What you should see, and why.** The larger population lies near the centre, because the centre is the sample mean. The first eigenvalue is largest when the sizes are equal. The populations did not change. Only the sample did.
+
+**Why it matters for your GWAS.** The PCs of [step 5.7](module_05_population_structure.Rmd#step-5-7) summarise your final cohort. If you add or remove many people, they change, so the course fixes the cohort first.
+
+**Key idea:** A PCA plot describes the sample you give it, so the axes change when the sample changes.
+
+**R code.** Change `share_b` and run the chunk again.
 
 ```{r s5-5_dd_composition, eval=FALSE}
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
@@ -688,8 +754,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% from B"), c("Population A", "Po
 round(t(vapply(frames, function(f) unlist(f$stats[c("eigenvalue", "mean_a", "mean_b")]), numeric(3))), 3)
 ```
 
-**What to observe.** The centre of the plot is the mean of the sample. The larger population lies near the centre, and the smaller one lies far from it. The first eigenvalue is largest when the two populations have the same size. The populations did not change. Only the sample did.
-
 **Quick check.** A study doubles the number of people from one population. Does PC1 describe the same difference as before?
 
 <details><summary>Show the answer</summary>
@@ -698,7 +762,7 @@ The difference between the populations is the same, but the axes, the eigenvalue
 
 </details>
 
-**What clusters are.** A cluster on a PCA plot is a statistical summary of allele frequencies. It is not a sharp biological category. People who lie in one cluster have similar allele frequencies, and the edge of a cluster depends on the sample and on the variants. In this course we say genetic ancestry or ancestry group. We do not use the words race or ethnicity for these groups.
+**What a cluster is.** A cluster is a summary of allele frequencies, not a sharp biological category. We say genetic ancestry or ancestry group, not race or ethnicity.
 
 **Reference.** McVean G. 2009. A genealogical interpretation of principal components analysis. PLoS Genetics 5:e1000686. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
 
@@ -744,13 +808,27 @@ The PCs summarise the people who are in the sample. This sample holds only Europ
 
 </details>
 
-#### Debate: what does a PCA plot tell us?
+#### Debate: the colour model
 
-**Why a debate.** PCA plots of human genetic data are everywhere, and how to read them is debated. In 2022, Elhaik published an article ([doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4)). It says that PCA results can be artefacts of the data and can be manipulated to give a wanted result. This box shows the idea of its colour model. Then it separates what the model shows from the wider claims. The idea of the colour model is from that article. The code and the numbers in the example are our own, and we do not reproduce any figure of the article.
+In 2022 Elhaik argued that PCA results can be artefacts of the data and can be manipulated ([doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4)). This box uses the idea of its colour model. The code is our own, and we reproduce no figure.
 
-**The colour model.** Think of four populations: Red, Green, Blue and Black. Each person is a list of three numbers, like three variants. A red person is (1, 0, 0), a green person is (0, 1, 0), a blue person is (0, 0, 1) and a black person is (0, 0, 0). As in the article, we add a small random noise of 0.01 to every number, and PCA centres the data first. The code is our own. The true distance between two colours is the distance between their lists of three numbers. PCA turns the three numbers into three PCs. This is a rotation, so the distances over all three PCs stay the same as the true distances. The plot keeps only PC1 and PC2. Two axes cannot hold the three, so the distances in the plot are distorted. How they are distorted depends on how many people each colour has. There are always 50 black people. The sliders set the number of red, green and blue people. The plot shows the mean position of each colour, and the tables give the three kinds of distance for every pair of colours.
+**Why this simulation.** Can the same data give different PCA pictures? Four colours stand for four populations.
+
+**How to read the chart.** A person is three numbers, like three variants: Red (1,0,0), Green (0,1,0), Blue (0,0,1), Black (0,0,0), with a little noise. There are always 50 black people. Each dot is the mean position of a colour. The tables give true distances, distances over all three PCs and distances in the PC1-PC2 plane.
 
 {{example:colour-model}}
+
+**Try this.**
+
+- Move the **Red people** slider to **50**, the **Green people** slider to **50** and the **Blue people** slider to **50**. Black is equally far from the three colours.
+- Move the **Red people** slider to **25**. Black comes closer to Red.
+- Move it to **100**. Black moves away from Red.
+
+**What you should see, and why.** PCA rotates the data, so distances over all three PCs stay true. The plot keeps two PCs, so it distorts them, and the distortion depends on how many people each colour has. A colour with many people pushes Black away (Elhaik 2022).
+
+**Why it matters for your GWAS.** Plots in [step 5.5](module_05_population_structure.Rmd#step-5-5) show two PCs out of many, so their distances are not true genetic distances. Use them to find outliers ([step 5.6](module_05_population_structure.Rmd#step-5-6)), not to measure relatedness.
+
+**Key idea:** Keeping only two PCs distorts distances, and how much depends on who is in the sample.
 
 **R code.** Change `n_red` and run the chunk again.
 
@@ -771,21 +849,19 @@ rownames(result) <- paste(sizes, "red people")
 round(result, 2)
 ```
 
-**What to observe.** The data of the black people never change, but their place among the colours does. Over all three PCs, every distance stays equal to the true distance, whatever the sample sizes. In the PC1-PC2 plane, the distances are distorted. With equal numbers of people, Black is at the same distance from the three colours. When one colour has fewer people than the others, Black lies closer to that colour in the plane. When one colour has more people, Black lies farther from it. The article describes the same effect: a colour with many people repels Black. Its Box 1 shows that when the number of blue people is reduced, the distance between Black and Blue decreases. The distortion comes from keeping two PCs, and it depends on who is in the sample.
+#### Debate: what does a PCA plot tell us?
 
-**What the model shows, and what it does not.**
+**Why a debate.** How to read PCA plots of human genetic data is debated. This box separates what the colour model shows from the wider claims of the article.
 
-- **What it shows.** The plot depends on the composition of the sample. This point is not new. Novembre et al. 2008 warn that the direction and the strength of the axes depend on how the samples are spread. McVean 2009 and Novembre and Stephens 2008 discuss how PCA patterns relate to migration, isolation, admixture and space (see the references below).
-- **The most far-reaching claim.** The article concludes that 32,000 to 216,000 genetic studies should be reevaluated. A toy model with three variants cannot show this. A reader should judge it against independent replies. We do not cite a reply here, because we could not verify one while writing this box. Ask your instructor for current replies.
-- **Two different uses of PCA.** One use tells a story about origins and migrations from the shape of a plot. Another use puts the PCs in a model as covariates, to remove confounding in an association study. The first use asks the plot to be right about history. The second use asks only that the PCs capture the ancestry differences that confound the test. The article also says that adjusting for PCs gave unfavourable outcomes in association studies, so it criticises the second use as well. On our own data, you can look at this directly: in step 5.7, the box "Another approach" shows lambda and the number of hits with 0, 1, 2, 3, 5, 10, 15 and 20 PCs.
-
-**Discussion questions.** Each question has a note for the instructor.
+- **What the model shows.** The plot depends on the sample. This is not new: Novembre et al. 2008, McVean 2009 and Novembre and Stephens 2008 all discuss how PCA patterns depend on sampling, space and ancestry.
+- **The most far-reaching claim.** The article concludes that 32,000 to 216,000 genetic studies should be reevaluated. A model with three variants cannot show this. Judge it against independent replies. We cite none, because we could not verify one.
+- **Two uses of PCA.** One tells a story about origins from a plot. The other uses PCs as covariates to remove confounding, and the article criticises it too. Test it on your data: step 5.7 shows lambda and hits for 0 to 20 PCs.
 
 **Question 1.** Does PCA reconstruct geography, or do we choose it with the rotation?
 
 <details><summary>Note for the instructor</summary>
 
-Both. The structure is in the data: in the grid example of step 5.1, neighbouring populations lie side by side. The direction of the map is not in the data. PCA has no north. Novembre et al. 2008 turned the axes by an angle that matched latitude and longitude best, so the rotation used knowledge of geography.
+Both. The structure is in the data, as in the grid example. The direction is not: Novembre et al. 2008 chose the angle that best matched latitude and longitude.
 
 </details>
 
@@ -793,7 +869,7 @@ Both. The structure is in the data: in the grid example of step 5.1, neighbourin
 
 <details><summary>Note for the instructor</summary>
 
-The axes, the eigenvalues and the distances change, while the populations do not. Use the two examples of this step. Ask students to predict the plot before they move the slider. In the colour example, a colour with fewer people comes closer to Black in the PC1-PC2 plane, and the distances over all three PCs do not change. Ask why keeping only two PCs is what distorts the distances.
+The axes, eigenvalues and distances change, not the populations. Ask students to predict the plot first. In the colour example, a colour with fewer people comes closer to Black in the plane.
 
 </details>
 
@@ -801,7 +877,7 @@ The axes, the eigenvalues and the distances change, while the populations do not
 
 <details><summary>Note for the instructor</summary>
 
-No. The person can come from a third population that is genetically intermediate, can be the result of how the sample was chosen, or can have a technical problem in the genotypes. Mixed ancestry needs other evidence, for example a model that estimates ancestry proportions.
+No. The person may come from a third population, or from how the sample was chosen, or have a technical problem. Mixed ancestry needs other evidence.
 
 </details>
 
@@ -809,11 +885,11 @@ No. The person can come from a third population that is genetically intermediate
 
 <details><summary>Note for the instructor</summary>
 
-An association study needs the PCs to remove confounding by ancestry, and it checks this with lambda. It does not need the axes to tell a true story. The limits still matter, though: outliers can take over axes (step 5.6), and PCs that describe one region instead of ancestry can bias the results (Grinde et al. 2024, step 5.7).
+A scan needs PCs that remove confounding, checked with lambda. It does not need the axes to tell a true story. The limits still matter: outliers can take over axes (step 5.6) and PCs of one region can bias results (Grinde et al. 2024).
 
 </details>
 
-**References.** Elhaik E. 2022. Principal Component Analyses (PCA)-based findings in population genetic studies are highly biased and must be reevaluated. Scientific Reports 12:14683. [doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4). Novembre J, et al. 2008. [doi:10.1038/nature07331](https://doi.org/10.1038/nature07331). Novembre J, Stephens M. 2008. [doi:10.1038/ng.139](https://doi.org/10.1038/ng.139). McVean G. 2009. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
+**References.** Elhaik E. 2022. Scientific Reports 12:14683. [doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4). Novembre J, et al. 2008. [doi:10.1038/nature07331](https://doi.org/10.1038/nature07331). Novembre J, Stephens M. 2008. [doi:10.1038/ng.139](https://doi.org/10.1038/ng.139). McVean G. 2009. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
 
 </details>
 
@@ -903,10 +979,43 @@ A difference that is weak or invisible on the first two axes can appear on later
 `s5-6_remove.txt`, `s5-6_state.*` and replay metadata.
 
 <details><summary>Try other thresholds (optional)</summary>
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](module_05_population_structure.Rmd#step-5-1)).
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+Each trial starts from the study samples of step 4.6.
 
-The course removes a study sample when it lies more than six standard deviations (SD) from the mean of the European reference on any of the first four PCs. The first table changes the number of SD. The second table is an alternative method (see the box "Another approach"): the robust Mahalanobis distance with a cutoff at a quantile of the chi-squared distribution. It has no course value. Each trial starts from the 1,844 study samples of step 4.6.
+**Chart: SD limit.**
+
+**Why this simulation.** Step 5.6 removes people far from the European reference. How many standard deviations (SD) is far?
+
+**How to read the chart.** Each point is one SD limit. A person is removed when they are farther than that many SD from the European mean on any of the first four PCs. The vertical axis counts the people removed, and the diamond marks the course value.
+
+**Try this.**
+
+- Move the slider to **4**. One more person is removed.
+- Move it to **8**. The count equals the course value.
+
+**What you should see, and why.** The real outliers are far from the European group, so any sensible limit finds them. Only the strictest limit adds a person.
+
+**Why it matters for your GWAS.** [step 5.6](module_05_population_structure.Rmd#step-5-6) defines your ancestry-matched cohort. The limit hardly changes who is removed, so you can fix it before you see association results.
+
+**Key idea:** Real outliers are far away, so the exact SD limit changes little.
+
+**Chart: MCD chi-squared quantile.**
+
+**Why this simulation.** Another method uses a robust distance. How does its cutoff change who is removed?
+
+**How to read the chart.** Each point is one cutoff of the robust Mahalanobis distance, given as a chi-squared quantile (a probability level: a higher level is stricter). The vertical axis counts the people removed. There is no course value, because this is an alternative method.
+
+**Try this.**
+
+- Move the slider to **0.99**. Many more people are removed.
+- Move it to **0.9999**. The count comes close to the course rule.
+
+**What you should see, and why.** About 1 in 100 people of a perfectly normal group lies beyond the 0.99 point, so this cutoff flags normal Europeans. Stricter cutoffs keep mainly the distant people.
+
+**Why it matters for your GWAS.** If you prefer a distance method, choose its cutoff before you see results and report it.
+
+**Key idea:** A statistical cutoff flags some normal people, so check who is flagged.
 
 ```{r s5-6_thresholds, eval=FALSE}
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
@@ -949,22 +1058,16 @@ Study samples removed by the robust Mahalanobis distance (alternative method):
 | 0.99 | 86 | 1,758 |
 | 0.999 | 39 | 1,805 |
 | 0.9999 | 34 | 1,810 |
-
-How to read it. The number of SD hardly matters. From 5 to 8 SD the rule removes the same 33 samples, and 4 SD adds one. The 33 samples are far from the European cluster, so any sensible limit finds them. The distance method depends much more on its cutoff. At the 99% point it removes 86 samples, at 99.9% it removes 39 and at 99.99% it removes 34. The extra samples are at the edge of the European cluster, so a loose cutoff removes people of European ancestry. At 99.99% the method nearly agrees with the course rule.
-
-Expected plot. For `SD limit`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. A red diamond marks the course value (6), where 33 samples are removed. For `MCD chi-squared quantile`, the horizontal axis shows the setting and the vertical axis shows the number of samples removed. This is an alternative method, so the plot has no course value. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
-
 </details>
 
 <details><summary>Another approach (optional)</summary>
+This optional box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
 
-This box is not part of the main path. No later step uses it. It writes only to files that start with `s5-6_alt_`, so the files and checkpoints of the main path do not change.
+The course rule is simple: a sample is an outlier when it lies more than six standard deviations from the European mean on any of the first four PCs. This box compares it with two other methods on the same samples.
 
-The course rule is simple. A sample is an outlier when it lies more than six standard deviations from the mean of the European reference on any of the first four PCs. Two other methods are common. This box runs all three on the same samples and compares them.
+**Robust Mahalanobis distance (MCD).** The Mahalanobis distance measures how far a sample is from the centre of a group, and it takes the shape of the group into account. The minimum covariance determinant (MCD) finds the centre and the shape from the most compact part of the group, so outliers cannot move them. A sample is an outlier when its squared distance is above the 99.9% point of a chi-squared distribution with four degrees of freedom (one for each PC), which is 18.47. We use `cov.rob` of the package MASS.
 
-**Robust Mahalanobis distance (MCD).** The Mahalanobis distance measures how far a sample is from the centre of a group, and it takes the shape of the group into account. A plain centre can be pulled away by outliers. The minimum covariance determinant (MCD) method finds the centre and the shape from the most compact part of the group, so the outliers cannot move them. A sample is an outlier when its squared distance is above the 99.9% point of a chi-squared distribution with four degrees of freedom (one degree for each PC), which is 18.47. We use the function `cov.rob` of the package MASS, which is installed with R. When to prefer it: when the reference group is small or its shape is not round, because the distance follows the shape.
-
-**Nearest 1000 Genomes group.** The step 5.4 scores place the study samples in the same space as the reference. This method measures the Mahalanobis distance of each study sample to the centre of each of the four reference groups (AFR, EAS, EUR and SAS) and assigns the sample to the nearest one. A sample is an outlier when its nearest group is not EUR. When to prefer it: when you want to know where each outlier comes from, for example to keep a second ancestry group for a separate analysis.
+**Nearest 1000 Genomes group.** This method assigns each study sample to the nearest of the four reference groups (AFR, EAS, EUR and SAS) by Mahalanobis distance. A sample is an outlier when its nearest group is not EUR. It also tells where each outlier comes from.
 
 ```{r s5-6_alternatives, eval=FALSE}
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
@@ -990,23 +1093,34 @@ Expected result. The table has one row for each method.
 | Robust Mahalanobis (MCD) | 39 | 33 | 6 | 0 |
 | Nearest 1000 Genomes group | 33 | 33 | 0 | 0 |
 
-The plot shows an orange triangle, a blue square and a black cross around the samples that each method removes. The 33 samples that all three methods remove form three small groups far from the European cluster. The six extra samples of the MCD method are blue squares at the edge of the European cluster.
-
-How to read it. The six extra MCD samples are not ancestry outliers. Their largest distance on a single PC is between 2.3 and 4.3 standard deviations, and their squared Mahalanobis distance is between 18.8 and 24.6, just above the cutoff of 18.47. The real outliers have a squared distance of at least 2,866. With a cutoff at the 99.9% point, we expect about 0.1% of a perfectly normal group to be flagged. Here that is about 1.8 of the 1,811 European-like samples, and the method flags 6. This is why the course keeps the six-SD rule: the European cluster of this dataset is large and homogeneous, and the distance cutoff is too tight for it. The nearest-group method gives the same 33 samples as the course rule, so here it adds a label (where each outlier comes from) and no new samples.
+The plot marks the samples that each method removes. The samples that all three methods remove form small groups far from the European cluster. The extra samples of the MCD method lie at the edge of the European cluster, so they are not ancestry outliers. With a cutoff at the 99.9% point, about 0.1% of a perfectly normal group is flagged, and the method flags more than that here. This is why the course keeps the six-SD rule. The nearest-group method gives the same samples as the course rule and adds a label.
 
 References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847). The MCD estimator: Rousseeuw and Van Driessen 1999, [doi:10.1080/00401706.1999.10485670](https://doi.org/10.1080/00401706.1999.10485670). Outlier detection in PCA of genetic data: Privé et al. 2020, [doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520). Assigning people to ancestry groups with a reference: Privé et al. 2022, [doi:10.1016/j.ajhg.2021.11.008](https://doi.org/10.1016/j.ajhg.2021.11.008).
-
 </details>
 
 <details><summary>Optional: deep dives</summary>
 
-This optional box is not part of the main path. No later step uses it. It writes no file in your results folder. The deep dive explains why the course removes ancestry outliers instead of only correcting for them. It does not repeat the boxes "Try other thresholds" and "Another approach" above.
+These optional boxes are not part of the main path. No later step uses them. They write no file in your results folder. The examples use simulated data, so the true answer is known. The first box of [step 5.1](module_05_population_structure.Rmd#step-5-1) explains why. They explain why the course removes ancestry outliers instead of only correcting for them. They do not repeat the boxes "Try other thresholds" and "Another approach" above.
 
-#### Deep dive: why we remove outliers
+#### Deep dive: why ancestry can confound the test
 
-**First reason: ancestry can confound the test.** Suppose the study has two subpopulations, A and B. Cases come more often from B than controls do. Allele frequencies also differ between A and B. Then a variant can look linked to the disease only because it marks the subpopulation. This is [confounding](../docs/glossary.md#confounding), and the problem is called [population stratification](../docs/glossary.md#population-stratification). In the example, no variant has a real effect. Any small p-value is a false signal. The inflation factor lambda ([Lambda GC](../docs/glossary.md#lambda-gc)) is 1 when the tests are well calibrated. A PC that carries the ancestry difference can remove most of the problem when it is a covariate.
+**Why this simulation.** Why correct for ancestry in a case-control study? Here cases and controls come from different subpopulations.
+
+**How to read the chart.** Circles are controls, triangles are cases, from subpopulations A and B. No variant has a true effect, so every small p-value is false. Lambda ([Lambda GC](../docs/glossary.md#lambda-gc)) is 1 when tests are well calibrated and above 1 when p-values are too small. The table also gives the share of tests with p below 0.05 (about 5% is right).
 
 {{example:confounding}}
+
+**Try this.**
+
+- Move the **Share of cases from B** slider to **0.5**. Cases and controls have the same mix, and lambda is close to 1.
+- Move it to **0.9**. Lambda without PCs is high. With PC1 as a covariate it stays close to 1.
+- Move it to **0.7**. The inflation is in between.
+
+**What you should see, and why.** Allele frequencies differ between A and B. If cases come more often from B, a variant that marks B looks linked to the disease. PC1 carries the A-B difference, so as a covariate it removes the false link.
+
+**Why it matters for your GWAS.** [Step 6.2](module_06_association.Rmd#step-6-2) adds PCs as covariates. [Step 7.1](module_07_plots_and_reporting.Rmd#step-7-1) checks lambda of your scan, and [step 7.7](module_07_plots_and_reporting.Rmd#step-7-7) compares it with and without PCs.
+
+**Key idea:** If ancestry differs between cases and controls, tests give false signals, and PCs that carry ancestry remove them.
 
 **R code.** Change `case_share_b` and run the chunk again.
 
@@ -1022,8 +1136,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% of cases from B"), c("Controls"
 round(t(vapply(frames, function(f) unlist(f$stats[c("lambda_none", "lambda_pc1", "false_none", "false_pc1")]), numeric(4))), 3)
 ```
 
-**What to observe.** When the cases and the controls have the same mix, lambda is close to 1. As more cases come from B, lambda without PCs grows, and so does the share of tests with a small p-value. With PC1 as a covariate, lambda stays close to 1. In real studies the correction is not always this clean, but the idea is the same.
-
 **Quick check.** Why does PC1 as a covariate remove the inflation here?
 
 <details><summary>Show the answer</summary>
@@ -1032,9 +1144,27 @@ PC1 carries the difference between A and B. That difference is what links the di
 
 </details>
 
-**Second reason: a few far-away people can turn the axes.** The PCs are the directions of largest variance. A few people who are very far from everybody else add a lot of variance. If there are enough of them, a PC turns to describe them alone. The difference among the main group then moves to a later PC, or is lost. In the example, two close subpopulations, A and B, form the main group. The slider adds people from a distant population.
+**Reference.** Price AL, et al. 2006. Principal components analysis corrects for stratification in genome-wide association studies. Nature Genetics 38:904-909. [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847).
+
+#### Deep dive: why a few far-away people matter
+
+**Why this simulation.** What does a handful of far-away people do to the axes?
+
+**How to read the chart.** Circles and triangles are two close subpopulations, A and B. Squares are distant people. The table gives how well PC1 and PC2 separate A from B (above 3 is clear) and the share of variance on PC1.
 
 {{example:outliers}}
+
+**Try this.**
+
+- Move the **Number of distant people** slider to **0**. PC1 separates A from B.
+- Move it to **5**. PC1 still separates them.
+- Move it to **10**. PC1 now describes only the distant people, and the split between A and B has moved to PC2.
+
+**What you should see, and why.** PC1 is the direction of largest variance. Enough distant people carry more variance than the difference between A and B, so PC1 turns towards them. The difference between A and B moves to PC2.
+
+**Why it matters for your GWAS.** [Step 5.6](module_05_population_structure.Rmd#step-5-6) removes people far from the European group before [step 5.7](module_05_population_structure.Rmd#step-5-7) computes the cohort PCs. Otherwise outliers could use up a PC. A far-away person may also be an error, such as a swapped sample.
+
+**Key idea:** A few distant people can turn an axis, so we remove them before we compute the PCs that we keep.
 
 **R code.** Change `outliers` and run the chunk again.
 
@@ -1050,19 +1180,13 @@ demo_plot_panels(frames, paste(counts, "distant people"), c("Population A", "Pop
 round(t(vapply(frames, function(f) unlist(f$stats[c("outliers", "separation_pc1", "separation_pc2")]), numeric(3))), 2)
 ```
 
-**What to observe.** With no distant people, PC1 separates A from B. As distant people are added, there comes a point where PC1 describes only them. The difference between A and B then appears on PC2. In this toy example, ten distant people are enough to do this.
-
 **Quick check.** Why not keep the distant people and add more PCs?
 
 <details><summary>Show the answer</summary>
 
-Extra PCs would be used up to describe a handful of people, and the ancestry differences in the main group would still have to be captured. A linear model with a few PCs also describes smooth differences between many people badly. It does not describe a few people who are very far away.
+Extra PCs would be used up to describe a handful of people, and the ancestry differences in the main group would still have to be captured. A linear model with a few PCs also describes a few very distant people badly.
 
 </details>
-
-**Third reason: outliers can be errors.** A person who is far from all the reference groups may have a technical or a record problem. Examples are a contaminated sample, a swapped sample or a wrong label. Removing the person is a safe step, and it is easy to explain in a report. The course uses six standard deviations from the European reference, as in Price et al. 2006 ([doi:10.1038/ng1847](https://doi.org/10.1038/ng1847)). The boxes "Another approach" above show two other ways to find outliers.
-
-**Reference.** Price AL, et al. 2006. Principal components analysis corrects for stratification in genome-wide association studies. Nature Genetics 38:904-909. [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847).
 
 </details>
 
@@ -1156,10 +1280,25 @@ No. Fix the main model before you see any association result. Report the sensiti
 Pruning lists, eigenvectors and eigenvalues, the scree plot (PNG), the working state and the full 5.7 checkpoint.
 
 <details><summary>Try other thresholds (optional)</summary>
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](module_05_population_structure.Rmd#step-5-1)). The box runs the association scan again with other numbers of PCs. It writes only files that start with `s5-7_alt_`, and it takes about three minutes.
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+**Chart: Number of PCs.**
 
-The course keeps ten PCs as covariates. This box repeats the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs and shows how many hits and which lambda each choice gives. It runs its own 20-component PCA and writes only to files that start with `s5-7_alt_`. The box takes about three minutes, because it runs PLINK eight times. See also the box "Another approach", which shows the scree plot and the PCs that are associated with the outcome.
+**Why this simulation.** The course keeps ten PCs. Is that the right number?
+
+**How to read the chart.** Each point is one number of PCs used as covariates. The buttons above the chart switch between the hits below 5e-8 and lambda. The diamond marks the course value.
+
+**Try this.**
+
+- Move the slider to **0**. Lambda is high, and there are more hits than at the course value.
+- Move it to **1**. Lambda falls to near 1, and the hits fall to the course value.
+- Move it to **20**. Lambda rises a little.
+
+**What you should see, and why.** Without PCs, the ancestry difference inflates the tests and gives false hits. In this dataset one PC carries all of it, so later PCs only add a little noise.
+
+**Why it matters for your GWAS.** [step 5.7](module_05_population_structure.Rmd#step-5-7) fixes the number of PCs before you see association results, and [step 6.2](module_06_association.Rmd#step-6-2) uses them. Fix the number first. Do not choose it to get attractive p-values.
+
+**Key idea:** Choose the number of PCs before you look at results, because here one PC already does the job.
 
 ```{r s5-7_thresholds, eval=FALSE}
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
@@ -1185,26 +1324,20 @@ The expected result of the trials:
 | **10 (course value)** | 8 | 1.0157 |
 | 15 | 8 | 1.0185 |
 | 20 | 8 | 1.0183 |
-
-How to read it. Without PCs, there are 17 hits and lambda is 1.527, so the correction is needed. One PC already brings lambda to 1.010. Ten PCs give 1.016, and 15 and 20 PCs give 1.018. The number of hits stays at eight from one PC on. In this dataset only PC1 carries ancestry, so more PCs add only a little noise.
-
-Expected plot. The horizontal axis shows the number of PCs. The left plot shows lambda, which falls from 1.53 to about 1.01 with one PC and then rises slowly to 1.02. The right plot shows the number of hits, which falls from 17 to 8 with one PC and then stays at 8. The course value is ten PCs, with 8 hits and lambda 1.016.
-
 </details>
 
 <details><summary>Another approach (optional)</summary>
+This optional box is not part of the main path. No later step uses it. It runs its own PCA with 20 components and its own association scans, and it writes only to files that start with `s5-7_alt_`. It takes about three minutes.
 
-This box is not part of the main path. No later step uses it. It runs its own PCA with 20 components and its own association scans, and it writes only to files that start with `s5-7_alt_`. The files and checkpoints of the main path do not change. The box takes about three minutes, because it runs PLINK eight times.
+The course keeps ten PCs. Three ideas help to decide how many a study needs.
 
-The course keeps ten PCs. This box shows how to decide how many PCs a study needs. Three ideas help.
+- **The scree plot.** PCs that carry real structure stand above a flat tail. The elbow between the two parts suggests how many to keep.
+- **PCs associated with the outcome.** A PC that differs between cases and controls can confound the test. We test each PC against the disease. A PC with no association adds little.
+- **The inflation factor.** We repeat the scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs and read lambda and the hits. Lambda should be close to 1.
 
-- **The scree plot.** The eigenvalue of a PC shows how much variation it carries. PCs that carry real structure stand above a flat tail. The bend between the two parts, the elbow, suggests how many to keep.
-- **PCs associated with the outcome.** A PC that differs between cases and controls can confound the test. We test each PC against the disease with a logistic regression. A PC that is not associated with the outcome adds little to the correction.
-- **The inflation factor.** We repeat the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs, and we read lambda and the number of hits. Lambda should be close to 1.
+A formal test also exists: the Tracy-Widom test asks whether an eigenvalue is larger than expected from noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
 
-A formal test also exists. The Tracy-Widom test asks whether an eigenvalue is larger than expected from random noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
-
-One more point concerns the regions that we exclude before the PCA. Leaving out the long-range LD regions is common advice, and the course follows it. It does not remove every problem, though. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied samples of African American people, who have mixed ancestry. They found that later PCs can describe small parts of the genome instead of ancestry. Adjusting for such a PC can create a false link between a variant and the disease. This problem is called collider bias. A collider is a variable that two other things both influence. When a model adjusts for it, those two things can look related when they are not. Excluding the known long-range LD regions did not solve it in their data, and LD pruning worked better. In our cohort the risk is smaller. Everyone belongs to one European cluster, and only PC1 carries ancestry (see the table below). Still, a good habit is to check what each PC describes, for example by plotting its loadings along the genome, before you add it to a model.
+Leaving out long-range LD regions before the PCA does not remove every problem. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied people of mixed ancestry. Later PCs described small parts of the genome instead of ancestry, and adjusting for them gave false links through collider bias. A collider is a variable that two other things both influence. Adjusting for it can make those two look related. Excluding known regions did not solve it there, and LD pruning worked better. In our cohort the risk is smaller, because only PC1 carries ancestry. Still, check what each PC describes before you use it.
 
 ```{r s5-7_pc_number, eval=FALSE}
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
@@ -1237,10 +1370,7 @@ Expected result.
 | 15 | 8 | 1.0185 |
 | 20 | 8 | 1.0183 |
 
-The scree plot has one high point and a flat tail. The first eigenvalue is 13.996, and the second is 1.428. The p-values against the outcome are 2.3e-17 for PC1, 0.054 for PC2 and 0.59 for PC3.
-
-How to read it. Only PC1 stands out. Its eigenvalue is ten times larger than the rest, and it is the only PC with a clear association with the outcome. Without any PC, there are 17 hits and lambda is 1.53, so the correction is needed. One PC already brings lambda to 1.010. Ten PCs give 1.016 and 20 give 1.018, so extra PCs do not help and add a little noise. The number of hits stays at eight. The course keeps ten PCs because it is a common default and it is safe, and this dataset shows that fewer would also work. For a real study, choose the number from the scree plot and the lambda, and report it.
-
+Only PC1 stands out. Its eigenvalue is far above the rest, and it is the only PC clearly associated with the outcome. Extra PCs do not help and add a little noise. The course keeps ten PCs as a safe default. For a real study, choose the number from the scree plot and lambda, and report it.
 </details>
 
 <details><summary>Optional: deep dives</summary>
@@ -1272,7 +1402,7 @@ PLINK reports only the eigenvalues of the PCs that it computes. The share of the
 
 #### Deep dive: can one region take over a PC?
 
-**The idea.** A PC should describe differences between people across the whole genome. Sometimes a PC describes only one region instead. This happens in regions with long stretches of strongly correlated variants, where one pattern is repeated across thousands of sites. Step 3.4 leaves out a list of such regions. In the example below, you calculate the PCs twice. The first time you do not leave the regions out. The second time you do, as in the main path. For each variant, a PC has a loading, which tells how much the variant contributes to that PC. The plot shows the absolute loadings of one PC along the genome. The code picks the PC for which most of the 200 largest loadings fall in one window of 5 million bases.
+**The idea.** A PC should describe differences between people across the whole genome. Sometimes it describes one region instead, where long stretches of variants are strongly correlated. Step 3.4 leaves out a list of such regions. Here you calculate the PCs twice, without and with the list. A loading tells how much a variant contributes to a PC. The plot shows the absolute loadings of one PC along the genome. The code picks the PC for which most of the 200 largest loadings fall in one window of 5 million bases.
 
 ```{r s5-7_dd_loadings, eval=FALSE}
 # Optional. This takes about two minutes. It writes only files that start with s5-7_dd_.

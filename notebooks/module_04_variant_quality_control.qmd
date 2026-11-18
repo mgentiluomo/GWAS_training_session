@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "37e5cf864578ae7705fa68c180a2600e9a7a098425a967f9c056f01f8db6f1e1"
+course_source_sha256: "3d855b4e622ae0cdc2b0148a1daf31f33ce5b3ca0a9d801d5d870eea6cf8eb84"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -212,9 +212,27 @@ bin/plink2 --pfile results/guided/s4-1_state --exclude results/guided/s4-2_exclu
 
 ::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}
 
-This box is not part of the main path. No later step uses it. It does not change your results.
+This optional box is not part of the main path and does not change your results. The examples use simulated data, so the true answer is known ([why](../lessons/module_05_population_structure.Rmd#step-5-1)).
 
-The missingness test compares the share of missing calls of every variant in cases and in controls. A small p-value means that the missing calls depend on the disease status. Such a variant can give a false association, because the missing calls are not random. The course removes the variants with p below 0.00001 (1e-5). A looser cutoff removes more variants and some of them are only unusual. A stricter cutoff keeps variants whose missing data may still depend on the disease status. Each trial starts from the cohort saved at 4.1 and applies a different cutoff to the same test results.
+Each trial applies a different cutoff to the same test results.
+
+**Chart: test-missing p-value cutoff.**
+
+**Why this simulation.** Variants whose missing calls depend on case or control status can give false associations. How strict should the cutoff be?
+
+**How to read the chart.** Each point is one p-value cutoff for the missingness test, which compares missing calls in cases and controls. The scale is logarithmic. Variants with p below the cutoff are removed. The vertical axis counts them, and the diamond marks the course value.
+
+**Try this: change the value in the R chunk and run it again.**
+
+- Change the setting to **1e-03**. Note the count.
+- Change it to **1e-08**. Far fewer variants are removed.
+- Change it to **1e-05**. This is the course value.
+
+**What you should see, and why.** Looser cutoffs add only a few variants, so almost all flagged variants are found at every cutoff except the strictest. A very strict cutoff misses most of them.
+
+**Why it matters for your GWAS.** [step 4.2](../lessons/module_04_variant_quality_control.Rmd#step-4-2) removes variants whose missing calls depend on disease status. Otherwise a variant could look associated only because cases and controls were genotyped differently.
+
+**Key idea:** Variants with strongly status-dependent missing data are found at any reasonable cutoff.
 
 ```{r}
 #| label: s4-2_thresholds
@@ -248,10 +266,6 @@ The expected result of the trials:
 | **1e-05 (course value)** | 120 | 295,439 |
 | 1e-06 | 106 | 295,453 |
 | 1e-08 | 3 | 295,556 |
-
-How to read it. At the course cutoff of 1e-5, 120 variants are removed. Most of the flagged variants have very small p-values: 106 variants are below 1e-6, and 103 of them lie between 1e-8 and 1e-6. Only 3 are below 1e-8. Looser cutoffs add only a few variants: 121 at 1e-4 and 126 at 1e-3. This means that the choice between 1e-3 and 1e-6 changes the result by a few variants, and almost all flagged variants are found at every cutoff.
-
-Expected plot. For `test-missing p-value cutoff`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (1e-05), where 120 variants are removed. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
 
 :::
 

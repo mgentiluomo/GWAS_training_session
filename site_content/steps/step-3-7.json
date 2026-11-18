@@ -6,7 +6,7 @@
   "anchor": "step-3-7",
   "title": "Batch effects",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "7bbd8bf1cc95ffdf34ba3609c1256ab9d51a6cb9da651499a8c48645a91188d2",
+  "source_sha256": "438bc5933b0394974e689a5f6106b116b3c741396e1790988e9b90db8c0917a5",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We compare the call rate of each plate. A plate is a tray of 96 wells. We remove the plate that is clearly faulty in the simulated data.",
