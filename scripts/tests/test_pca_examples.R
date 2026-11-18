@@ -49,3 +49,21 @@ local({
   check(identical(demo_fst_frames(0.005, 1000, seed = 5), demo_fst_frames(0.005, 1000, seed = 5)), "a call must be reproducible")
   cat("PCA example tests passed\n")
 })
+
+local({
+  check <- function(ok, message) if (!isTRUE(ok)) stop("FAIL: ", message, call. = FALSE)
+  # D3: a PC that describes one region has its largest loadings in one window.
+  set.seed(1)
+  n <- 5000
+  loadings <- data.frame(chr = sample(as.character(1:22), n, TRUE), pos = round(runif(n, 1e6, 2e8)), PC1 = rnorm(n), PC2 = rnorm(n), stringsAsFactors = FALSE)
+  spike <- sample(which(loadings$chr == "6"), 100)
+  loadings$pos[spike] <- round(runif(100, 3e7, 3.4e7))
+  loadings$PC2[spike] <- loadings$PC2[spike] + 8
+  peaks <- pca_local_peaks(loadings)
+  check(peaks$pc[which.max(peaks$count)] == "PC2" && peaks$chr[peaks$pc == "PC2"] == "6" && peaks$start_mb[peaks$pc == "PC2"] == 30,
+        "the busiest window of PC2 should be chromosome 6 at 30 Mb")
+  check(peaks$count[peaks$pc == "PC2"] > 3 * peaks$count[peaks$pc == "PC1"], "a PC with a spike should stand out")
+  tmp <- tempfile(fileext = ".png"); png(tmp); mark <- pca_plot_loadings(loadings, loadings, c("a", "b")); dev.off()
+  check(identical(mark$pc, "PC2") && file.exists(tmp), "the loadings plot should be drawn for PC2")
+  cat("PCA loading tests passed\n")
+})

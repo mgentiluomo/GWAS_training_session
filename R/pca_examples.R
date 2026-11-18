@@ -360,3 +360,56 @@ demo_projection_frame <- function(n_ref, fst, snps = 10000, seed = 1) {
              c(pop_ref, pop_study + 2L),
              list(n_ref = n_ref, fst = fst, ratio = gap(study_scores, pop_study) / gap(ref_scores, pop_ref)))
 }
+
+# --- D3: can one region take over a PC? -----------------------------------------------------------------------
+
+# Read the loadings that PLINK 2 writes with `--pca 10 allele-wts` (the file ending in .eigenvec.allele).
+# The chromosome and the position come from the variant ID (chromosome:position:alleles).
+pca_read_loadings <- function(path) {
+  x <- read.delim(path, check.names = FALSE, stringsAsFactors = FALSE, colClasses = c("#CHROM" = "character"))
+  parts <- strsplit(x$ID, ":", fixed = TRUE)
+  out <- data.frame(chr = x[["#CHROM"]], pos = suppressWarnings(as.numeric(vapply(parts, function(p) p[2], ""))), stringsAsFactors = FALSE)
+  cbind(out, x[, grep("^PC[0-9]+$", names(x)), drop = FALSE])
+}
+
+# For each PC: how many of its 200 largest absolute loadings fall in the busiest window of `window` bases.
+# A PC that describes one region has many of them in one place.
+pca_local_peaks <- function(loadings, top = 200, window = 5e6) {
+  pcs <- grep("^PC[0-9]+$", names(loadings), value = TRUE)
+  rows <- lapply(pcs, function(pc) {
+    big <- order(abs(loadings[[pc]]), decreasing = TRUE)[seq_len(min(top, nrow(loadings)))]
+    cell <- paste(loadings$chr[big], floor(loadings$pos[big] / window))
+    counts <- table(cell)
+    best <- names(counts)[which.max(counts)]
+    parts <- strsplit(best, " ", fixed = TRUE)[[1]]
+    data.frame(pc = pc, chr = parts[1], start_mb = as.numeric(parts[2]) * window / 1e6, count = as.integer(max(counts)), stringsAsFactors = FALSE)
+  })
+  do.call(rbind, rows)
+}
+
+# Absolute loadings of one PC along the genome, for two analyses side by side (for example without and with the list
+# of long-range LD regions). The busiest window of the first analysis is marked in both.
+pca_plot_loadings <- function(first, second, titles, pc = NULL, window = 5e6) {
+  peaks <- pca_local_peaks(first, window = window)
+  if (is.null(pc)) pc <- peaks$pc[which.max(peaks$count)]
+  mark <- peaks[peaks$pc == pc, ]
+  chroms <- as.character(1:22)
+  sizes <- vapply(chroms, function(ch) max(c(first$pos[first$chr == ch], second$pos[second$chr == ch]), na.rm = TRUE), numeric(1))
+  offset <- c(0, cumsum(sizes))[seq_along(chroms)]
+  names(offset) <- chroms
+  old <- par(mfrow = c(2, 1), mar = c(3, 4, 3, 1)); on.exit(par(old))
+  ymax <- max(abs(first[[pc]]), abs(second[[pc]]), na.rm = TRUE)
+  for (k in 1:2) {
+    d <- if (k == 1) first else second
+    d <- d[d$chr %in% chroms, ]
+    x <- d$pos + offset[d$chr]
+    inside <- d$chr == mark$chr & d$pos >= mark$start_mb * 1e6 & d$pos < mark$start_mb * 1e6 + window
+    plot(x, abs(d[[pc]]), pch = ifelse(inside, 17, 16), col = ifelse(inside, "#D55E00", "grey55"), cex = ifelse(inside, 0.9, 0.4),
+         ylim = c(0, ymax), xaxt = "n", xlab = "", ylab = paste("|loading|", pc), main = titles[k])
+    mid <- offset + sizes / 2
+    axis(1, at = mid, labels = chroms, tick = FALSE, cex.axis = 0.7)
+    abline(v = c(offset, sum(sizes)), col = "grey85")
+  }
+  mtext("Orange triangles: the busiest window of the first plot (chromosome and position in the table printed by the code).", side = 1, line = 2, cex = 0.7)
+  invisible(mark)
+}
