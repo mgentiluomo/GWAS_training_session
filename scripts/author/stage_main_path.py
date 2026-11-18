@@ -44,7 +44,7 @@ def copy_tree(source: Path, destination: Path) -> None:
             raise ValueError("A staged copy failed verification.")
 
 
-def stage(student: Path, run: Path, chain: Path, destination: Path, ld_list: Path | None = None) -> dict:
+def stage(student: Path, run: Path, chain: Path, destination: Path, ld_list: Path | None = None, genes: Path | None = None) -> dict:
     student, run, chain = student.resolve(strict=True), run.resolve(strict=True), chain.resolve(strict=True)
     destination = destination.resolve()
     destination.relative_to(WORK.resolve())
@@ -65,6 +65,12 @@ def stage(student: Path, run: Path, chain: Path, destination: Path, ld_list: Pat
     # The GRCh38 long-range LD regions (BED, zero-based start) used at steps 3.4 and 5.7 travel with the course data, not with the project.
     if ld_list is not None:
         shutil.copyfile(ld_list.resolve(strict=True), destination / "pca_reference" / "highLD_b38.bed")
+    # The small table of protein-coding genes near the regional plots of step 7.6 (extract of a GENCODE GTF, made by extract_region_genes.py).
+    if genes is not None:
+        (destination / "annotation").mkdir()
+        for item in sorted(Path(genes).resolve(strict=True).iterdir()):
+            if item.is_file():
+                shutil.copyfile(item, destination / "annotation" / item.name)
     (destination / "README_simulated.txt").write_text(
         "Simulated guided GWAS course: modules 0 to 7. Genome assembly GRCh38.\n"
         "Full genotype boundaries: 2.8, 3.8, 4.6, 5.7. Intermediate steps replay stored lists.\n"
@@ -90,11 +96,12 @@ def main() -> None:
     parser.add_argument("--chain", type=Path, default=os.environ.get("COURSE_CHAIN_FILE"))
     parser.add_argument("--destination", type=Path, default=WORK / "classroom-stage-2026.2")
     parser.add_argument("--ld-list", type=Path, default=None, help="BED file with the long-range LD regions (GRCh38).")
+    parser.add_argument("--genes", type=Path, default=None, help="Folder made by extract_region_genes.py (gene table and README_genes.txt).")
     args = parser.parse_args()
     if args.chain is None:
         parser.error("Supply --chain or COURSE_CHAIN_FILE for the official hg19-to-hg38 chain.")
     import json
-    print(json.dumps(stage(args.student, args.run, Path(args.chain), args.destination, args.ld_list), indent=2))
+    print(json.dumps(stage(args.student, args.run, Path(args.chain), args.destination, args.ld_list, args.genes), indent=2))
 
 
 if __name__ == "__main__":
