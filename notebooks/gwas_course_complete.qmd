@@ -4099,7 +4099,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
   "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
-  "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
+  "Sensitivity: omitting PCs increases lambda to approximately 1.527; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
   "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",

@@ -760,7 +760,7 @@ summary <- c("# Simulated GWAS: main-path summary", "", "Genome assembly: GRCh38
   "Eight variants pass p < 5e-8 in three LD clumps. Autosomal lambda is approximately 1.016.",
   "Report the effect allele, odds ratio, 95% interval, p-value and per-variant sample count n from s7-8_leads.tsv.",
   "Interpretation: the three simulated regions with very small p-values are recovered; the moderate region is subthreshold. No causal gene is established.",
-  "Sensitivity: omitting PCs increases lambda to approximately 1.546; omitting sample/variant QC as well gives approximately 1.655.",
+  "Sensitivity: omitting PCs increases lambda to approximately 1.527; omitting sample/variant QC as well gives approximately 1.655.",
   "Limitations: simulated design, selected array sites, finite power, provisional imported REF labels, study-specific QC and ancestry rules.",
   "Three named ancestry markers left at HWE step 4.4; comparisons must not pretend they survived to module 5.",
   "Figures: s7-1_qq.png, s7-3_manhattan.png, s7-6_regional.png and s7-7_qq_comparison.png.",
@@ -820,7 +820,7 @@ We would need real data that are handled under proper rules, [replication](../do
 - You drew a Manhattan plot. Eight variants are below 5e-8, in three regions on chromosomes 3, 9 and 12.
 - You compared thresholds: 5e-8 for the usual rule and approximately 2.11e-7 from Bonferroni for 236,820 tests.
 - You grouped the eight variants into three clumps and looked at the L2 region on chromosome 9.
-- Without PCs the lambda rose to about 1.546, and without sample or variant QC as well it rose to about 1.655.
+- Without PCs the lambda rose to about 1.527, and without sample or variant QC as well it rose to about 1.655.
 - You wrote a final summary and a table of the lead variants.
 
 **Next:** this is the last module of the main path. You can now report your findings, with their limits. Modules A (imputation) and B (mixed models) are optional extras and are not part of the main path.
