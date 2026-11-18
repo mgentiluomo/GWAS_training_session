@@ -39,5 +39,20 @@ class FunctionCoverage(unittest.TestCase):
             self.assertNotIn("local_helper", result.stdout)
 
 
+class VersionGuards(unittest.TestCase):
+    def test_guards_name_the_project_version(self):
+        import re
+        version = re.search(r'course_project_version <- "([^"]+)"', (ROOT / "R" / "course.R").read_text(encoding="utf-8")).group(1)
+        guards = 0
+        for lesson in (ROOT / "lessons").glob("module_0*.Rmd"):
+            text = lesson.read_text(encoding="utf-8")
+            for found in re.findall(r"requires_course_version\(\"([^\"]+)\"\)", text):
+                self.assertEqual(found, version, lesson.name)
+                guards += 1
+            for found in re.findall(r"This step needs project version ([0-9.]+) or later", text):
+                self.assertEqual(found, version, lesson.name)
+        self.assertGreater(guards, 20, "the chunks that use new functions start with the version guard")
+
+
 if __name__ == "__main__":
     unittest.main()
