@@ -117,3 +117,21 @@ Numbers of the main path with 3a and 3b together, on the new data (this replaces
 | Hits and lambda without QC and PCs | 19, 1.655 | 19, 1.655 |
 
 The ancestry-outlier results on the new data: the six-SD rule and the nearest-group method remove the same 33 samples at step 5.6. The robust Mahalanobis distance removes 39 (6 more, at the edge of the European cluster, with squared distances between 18.8 and 24.6 against a cutoff of 18.47).
+
+## Why step 4.3 keeps 239,018 variants and the final count is still 238,513
+
+Checked on 18 November 2026 with the complete main-path runs of 2026.4 and 2026.5. There is no error. The cause is a small change in the people that remain after step 3.6, not a change in a rule.
+
+1. **Different relatives are removed in step 3.6.** The 2026.5 course removes, from each related pair, the sample with the lower call rate. Both versions keep 1,844 samples at this point, but four samples are different (listed at the end of this section).
+2. **A few variants sit at the edge of the 1% frequency limit of step 4.3.** With a different set of samples, the allele frequency moves by about 0.0003. Step 4.3 keeps variants with a minor allele frequency of at least 0.01. In 2026.4, 23 variants pass with a frequency between 0.01003 and 0.01033, and they fall just below 0.01 in 2026.5. In 2026.5, 22 other variants pass, with frequencies between 0.01003 and 0.01045, and they fall just below 0.01 in 2026.4. These two groups of variants are listed by ID in the table below. The net result is 239,019 variants in 2026.4 and 239,018 in 2026.5.
+3. **The count is balanced in step 4.4.** The Hardy-Weinberg test removes 167 variants in 2026.4 and 166 in 2026.5. The variant that explains the difference is `GSA-rs10905119` (chromosome 10). It has 467 homozygous, 330 heterozygous and 121 homozygous controls in 2026.4 and a midp p-value of 9.5e-07, just below the limit 1e-6, so it is removed. In 2026.5 one control genotype differs (468, 331 and 121), the p-value is 1.4e-06, and the variant is kept. After step 4.4 both versions have 238,852 variants.
+4. **Step 4.5 and the final count.** Step 4.5 removes 339 variants in both versions (33 variants with impossible sex-chromosome or MT calls and 306 duplicate entries), so both end with 238,513. In step 4.5 the variants are renamed as chromosome:position:alleles, so `GSA-rs10905119` becomes `10:7224559:T:G`. The final lists are not identical. 23 variants are present only in 2026.4 and 23 only in 2026.5. These are the edge-of-frequency variants of point 2 (23 in 2026.4 and 22 in 2026.5) plus `10:7224559:T:G` in 2026.5. The two small changes cancel out in the count, but not in the list.
+
+What this means for the course text: every number that depends on the exact variant list (4.3 to 4.5, pruning in 3.4 and 5.7, the tests in step 6.3 and the lambda) is recalculated on the 2026.5 data, and the tests compare the course value with the main path.
+
+| Version | Only passes step 4.3 in this version (ID, allele frequency in this version) |
+| --- | --- |
+| 2026.4 | GSA-rs111281664, GSA-rs114732713, GSA-rs114978744, GSA-rs116021462, GSA-rs116991301, GSA-rs117034756, GSA-rs117822811, GSA-rs12829660, GSA-rs5999481, GSA-rs72796589, GSA-rs75370053, GSA-rs75573098, GSA-rs76412440, GSA-rs76589940, GSA-rs77036987, GSA-rs78890084, GSA-rs79672848, GSA-rs79817907, GSA-rs80160721, GSA-rs80277058, rs1562446, rs28677164, rs7721976 (frequencies 0.01003 to 0.01033) |
+| 2026.5 | GSA-rs115630440, GSA-rs116147642, GSA-rs116457148, GSA-rs116895807, GSA-rs117471497, GSA-rs117493843, GSA-rs117797001, GSA-rs117851094, GSA-rs143902861, GSA-rs17450827, GSA-rs17686420, GSA-rs61749350, GSA-rs73015621, GSA-rs74153106, GSA-rs74803821, GSA-rs76946369, GSA-rs79700000, GSA-rs79783247, Y:22823352-A-G, rs149657043, rs16874231, rs80320751 (frequencies 0.01003 to 0.01045) |
+
+The four samples that differ after step 3.6 (from the `.psam` files of step 4.3): `SIM26_0017`, `SIM26_0423`, `SIM26_0678` and `SIM26_1264` remain only in 2026.4. `SIM26_1088`, `SIM26_1291`, `SIM26_1329` and `SIM26_1636` remain only in 2026.5. These are the relatives swapped by the call-rate rule. The 1,811 final samples are the same count in both versions, but the case and control numbers differ (898 and 913 in 2026.5, 900 and 911 in 2026.4).
