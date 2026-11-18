@@ -41,7 +41,7 @@ Enter the password at the masked prompt. The package contains 108 files.
 If you already have the published ZIP and its `MANIFEST.tsv`, you can supply
 `zip_path` as a local fallback. See [encrypted data setup](troubleshooting.md#downloading-the-encrypted-course-data). The classroom package
 contains `lab_export/`, `array/`, `phenotypes/`, `pca_reference/`,
-`grch37_exercise/`, `final_report/` and `checkpoints/`.
+`grch37_exercise/`, `final_report/`, `checkpoints/` and, from the data release 2026.2, `annotation/` (the genes near the regional plots).
 Imputation material is not part of the main-path classroom package.
 No data archive is hosted in the repository or under the browser tutorial.
 

@@ -135,7 +135,7 @@ python -B scripts\author\stage_main_path.py `
 ```
 
 The staging folder contains `array`, `checkpoints`, `final_report`,
-`grch37_exercise`, `lab_export`, `pca_reference` and `phenotypes`.
+`grch37_exercise`, `lab_export`, `pca_reference` and `phenotypes`. The staging for the data release 2026.2 also has `annotation`.
 It also contains `README_simulated.txt`. It excludes instructor keys,
 manufacturer manifests and imputation material. All 108 inventory hashes were
 verified. Student input copies and the chain match their source hashes.
