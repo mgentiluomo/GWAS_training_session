@@ -4,6 +4,27 @@
 
 Written for the author. Branches: course `course/2026.5-pca` (from `course/2026.5`) and site `course/2026.5-pca-preview` (from `course/2026.5-preview`). Both are pushed. Nothing was merged into `course/2026.5` or `main`, and no release was made. The staging `classroom-stage-2026.2` and the instructor key were not touched (reading only). No password was asked for, read or written. No encrypted archive was made. No force, rebase, reset, stash, clean, restore or amend was used.
 
+### Corrections after your review (same day)
+
+1. **Colour model (D7).** I read the full text of Elhaik 2022 (open access, PMC9424212). The direction is as you said: Black moves towards the colour with fewer people in the PC1-PC2 plane. The article says that the overrepresentation of a colour shifts Black away from (0,0), "the most common allele repelling Black", and its Box 1 reduces the Blue sample so that Black comes closer to Blue. The figure panels are not readable in the text that I could access, so I checked Figure 4 only through your description and through my own numbers.
+   - **Method.** My implementation follows the article: each person is a colour vector plus a noise of 0.01, and the PCA centres the data (the article uses the Matlab PCA function, which uses singular value decomposition; I use `prcomp` with centring and no scaling). With 50 people of each colour I get the same two numbers as the article: a distance of 0.82 in the PC1-PC2 plane (it is 1 in three dimensions) and 88.9% of the variance on the first two PCs (article: 88%). With 25 red and 50 green and 50 blue people, Black is at 0.71 from Red and at 0.86 from Green and Blue.
+   - **Differences.** My sample sizes are 25, 50 and 100 (50 black people), not the sizes of the article's figures. I plot the mean position of each colour, not each person. I did not reproduce the admixed (Cyan) cases or the human data. The 10 black people of the first version were changed to 50.
+   - **Tables.** The example now has a table for each pair of colours with the true distance (RGB space), the distance over all three PCs and the distance in the PC1-PC2 plane. The text says in simple words that PCA only rotates the data, so all three PCs keep the true distances, and that the distortion comes from keeping two PCs, depending on who is in the sample. The text now states the direction, and the observations and the discussion notes were updated.
+2. **The block on chromosome 6 (5.7).** The simulator does not add it on purpose. The simulated people are mosaics of real phased 1000 Genomes haplotypes (see the header of `scripts/author/make_sim2026.py`: "allele frequencies and linkage disequilibrium look real"). The block is the real long LD of the MHC region, inherited from the donors. The text now says so and says that it is not a discovery. Exact numbers (cohort state of step 5.6, GRCh38): the window is chr6 30,000,000 to 35,000,000; the long-range LD list has the region chr6:23,691,793-38,924,246 (BED, start counted from 0), and it covers all 2,603 variants of the cohort in the window. Without the list, pruning keeps 213 variants of the window. Of the 200 largest loadings of PC3, 30 are in the window (positions 30,243,978 to 32,227,077), and all 30 lie inside the list region.
+3. **One closed box for each deep dive.** In step 5.1 there are three boxes (D1, D2 with the admixture example, D2-bis). In the other steps, one box for each deep dive: 3.4 one; 5.4 one; 5.5 three (what a PCA plot is not, the real European example, the debate); 5.6 one; 5.7 two (eigenvalues, one region and a PC). The notebooks have one closed callout for each deep dive.
+4. **Page weight.** The JSON files are no longer in the page bundle. They are static files in `public/gwas/pca_examples/`, fetched only when the box that holds the example is opened. A loading message (`role=status`) shows while the file loads. If it fails, the box shows an error message (`role=alert`) and an empty table, and the page still works. Measured on the review build with Chrome, cache disabled, 1280 px, until the network is idle, boxes closed (compressed transfer, kB):
+
+   | Page | Before | After |
+   | --- | --- | --- |
+   | 5.1 | 747 | 486 |
+   | 5.4 | 716 | 476 |
+   | 5.5 | 723 | 481 |
+   | 5.6 | 740 | 482 |
+   | 5.3 (no deep dive) | 702 | 465 |
+
+   The weight of every page of the course dropped, because the JSON files were in a chunk that all pages shared. An example now costs 9 to 109 kB (uncompressed) when its box is opened. No file is requested before a box is opened (tested).
+5. **Phase change (Patterson 2006).** The formula is explicit in the full text (read in the JATS XML of Europe PMC): "For two subpopulations of equal sample size, the phase change threshold is reached when 1/FST is equal to the square root of the data size D", with D the number of samples times the number of SNPs. So the threshold is Fst = 1/sqrt(n x m). It is in the text of the deep dive (D2) and in the example: the mark on the Fst slider shows 1/sqrt(people x variants) for the current number of variants, and the table has a row with its value. The Fst of the slider is now the Fst between the two populations. In the first version each population drifted by the slider value, and the realised Fst between them was half of it (checked on the simulated frequencies), so the code now drifts each population by twice the slider value. A test checks that the groups do not separate well below the threshold and do separate well above it. Near the threshold the result varies, as in the article.
+
 ### Where each block is, and why
 
 The deep dives are in one collapsed box "Optional: deep dives" for each step. It is a new optional block `deep_dive` of the existing steps (after "Another approach", before "Under the hood"). There is no new step and no renumbering. The main text of the steps was not changed.
@@ -40,15 +61,15 @@ Each deep dive has the idea in simple words, an example, R code to run again wit
 
 ### Decisions and findings that you should know
 
-1. **The brief's expectation about the colour model was not reproduced.** With more red people the distance from Black to Red in the PC1-PC2 plane became larger in my implementation. The text does not say in which direction Black moves. It says that the place of Black depends on the sample sizes and the table shows the distances. If you want a stronger statement, the model of the article should be read in full first (I used only the abstract).
+1. **Superseded.** The first version of this note said that the colour model did not reproduce the brief. The brief was wrong and the model agrees with the article (see Corrections, point 1).
 2. **No verified reply to Elhaik 2022.** I searched PubMed and Crossref and found none, so the debate cites none and names none. It says so and asks students to ask the instructor. See `references_checked.md`.
-3. **The formula of the phase change of Patterson 2006 is not given.** The formulas were not readable in the text I could access. The text uses the verified sentence about a threshold, and the example computes a separation index.
+3. **Superseded.** The formula of the phase change is now in the text and in the example (see Corrections, point 5).
 4. **"Contested" claims.** The article's claim about 32,000 to 216,000 studies is described as the most far-reaching claim, to be judged against independent replies. I did not write that it is "disputed" as a fact, because I could not verify a source.
 5. **The grid example is not a real stepping-stone model fitted to data.** It is a forward simulation of drift and migration between four neighbours on a 6 by 6 grid (1,000 variants, 100 generations). Very high migration gives a blur, moderate migration gives a map, very low migration gives islands. Corner sampling deforms the map. The labels are neutral (A1 to F6). No map of Europe and nothing that imitates the figure of Novembre et al. 2008.
 6. **Real data example (EUR).** The staging reference holds CEU, GBR, IBS and TSI but no FIN. The code uses the populations that exist, and the text does not say how many there are. `--maf 0.05` is needed because PLINK refuses PCA with rarer variants for 212 people.
-7. **The simulated data have a locus that takes over a PC.** Without the long-range LD list, PC3 of the cohort has a tall block of loadings on chromosome 6 (window of 5 million bases at 30 Mb); with the list it is gone. This is a property of the simulation and it makes the deep dive concrete.
+7. **The simulated data have a locus that takes over a PC.** It is the real long LD of the MHC region, inherited from the real haplotypes used by the simulator. See Corrections, point 2.
 8. **Commits.** The blocks for 3.4, 5.4, 5.5, 5.6 and 5.7 are in one commit because they share the same lesson files and the generated files (the tool cannot stage parts of a file). The other changes are one per commit.
-9. **Bundle size.** The JSON files are imported into the client component, so the step pages with examples carry about 470 kB of JSON before compression. If this matters, load each file only when its example is opened.
+9. **Bundle size.** Solved. The files are fetched when a box is opened (see Corrections, point 4).
 
 ### References used and not used
 
