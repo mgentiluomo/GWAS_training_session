@@ -544,7 +544,7 @@ We select a smaller set of [autosomal](../docs/glossary.md#autosome) variants th
 
 We also leave out the long-range LD regions, where the correlation reaches over very long distances. These regions are known to pull principal components towards themselves. Examples are the major histocompatibility complex (MHC) on chromosome 6, the 8p23 inversion on chromosome 8 and the 17q21 inversion on chromosome 17.
 
-The course uses a list of 18 regions on build GRCh38. It collects the regions that were published for genome scans and for principal component analysis (Price et al. 2008, doi:10.1016/j.ajhg.2008.06.005; Anderson et al. 2010, doi:10.1038/nprot.2010.116; Privé et al. 2020, doi:10.1093/bioinformatics/btaa520). Nine regions that sit around centromeres could not be converted from build 36 to GRCh38, so the list does not contain them. The list is a BED file in the course data (`pca_reference/highLD_b38.bed`), not in the project. It is not a complete catalogue for all studies.
+The course uses a list of 18 regions on build GRCh38. It collects the regions that were published for genome scans and for principal component analysis (Price et al. 2008, doi:10.1016/j.ajhg.2008.06.005; Anderson et al. 2010, doi:10.1038/nprot.2010.116; Privé et al. 2020, doi:10.1093/bioinformatics/btaa520). The regions follow the list collected by Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)). Nine regions that sit around centromeres could not be converted from build 36 to GRCh38, so the list does not contain them. The list is a BED file in the course data (`pca_reference/highLD_b38.bed`), not in the project. It is not a complete catalogue for all studies.
 
 ### You need
 

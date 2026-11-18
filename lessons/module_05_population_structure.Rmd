@@ -673,7 +673,7 @@ The reference axes describe broad differences between world regions. PCs calcula
 
 An [eigenvalue](../docs/glossary.md#eigenvalue) measures how much variation one PC explains. A [scree plot](../docs/glossary.md#scree-plot) shows the eigenvalues in order, from the largest to the smallest.
 
-The course fixes the number of PCs at ten for the main model. We do not choose the number to get attractive p-values. Too few PCs can leave confounding in the results. Too many PCs can reduce the precision of the estimates. In module 7 we compare other numbers of PCs as a sensitivity check. We do not use that check to search for the most significant result.
+The long-range LD regions are the same as in step 3.4. The list follows the collection of Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)). The course fixes the number of PCs at ten for the main model. We do not choose the number to get attractive p-values. Too few PCs can leave confounding in the results. Too many PCs can reduce the precision of the estimates. In module 7 we compare other numbers of PCs as a sensitivity check. We do not use that check to search for the most significant result.
 
 ### You need
 
@@ -796,6 +796,8 @@ The course keeps ten PCs. This box shows how to decide how many PCs a study need
 - **The inflation factor.** We repeat the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs, and we read lambda and the number of hits. Lambda should be close to 1.
 
 A formal test also exists. The Tracy-Widom test asks whether an eigenvalue is larger than expected from random noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
+
+One more point concerns the regions that we exclude before the PCA. Leaving out the long-range LD regions is common advice, and the course follows it. It does not remove every problem, though. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied samples of African American people, who have mixed ancestry. They found that later PCs can describe small parts of the genome instead of ancestry. Adjusting for such a PC can create a false link between a variant and the disease. This problem is called collider bias. A collider is a variable that two other things both influence. When a model adjusts for it, those two things can look related when they are not. Excluding the known long-range LD regions did not solve it in their data, and LD pruning worked better. In our cohort the risk is smaller. Everyone belongs to one European cluster, and only PC1 carries ancestry (see the table below). Still, a good habit is to check what each PC describes, for example by plotting its loadings along the genome, before you add it to a model.
 
 ```{r s5-7_pc_number, eval=FALSE}
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.

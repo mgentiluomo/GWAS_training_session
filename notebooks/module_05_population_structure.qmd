@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "884b9a5c45a5c83c0cace6e5c6d3111213cd1764a33f32517de227e81419a1ca"
+course_source_sha256: "f92c8874c4e5d566cd9bf1a0198b38be8fc7a20a731090cf969262ab238ca11e"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -607,6 +607,8 @@ The course keeps ten PCs. This box shows how to decide how many PCs a study need
 - **The inflation factor.** We repeat the association scan with 0, 1, 2, 3, 5, 10, 15 and 20 PCs, and we read lambda and the number of hits. Lambda should be close to 1.
 
 A formal test also exists. The Tracy-Widom test asks whether an eigenvalue is larger than expected from random noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
+
+One more point concerns the regions that we exclude before the PCA. Leaving out the long-range LD regions is common advice, and the course follows it. It does not remove every problem, though. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied samples of African American people, who have mixed ancestry. They found that later PCs can describe small parts of the genome instead of ancestry. Adjusting for such a PC can create a false link between a variant and the disease. This problem is called collider bias. A collider is a variable that two other things both influence. When a model adjusts for it, those two things can look related when they are not. Excluding the known long-range LD regions did not solve it in their data, and LD pruning worked better. In our cohort the risk is smaller. Everyone belongs to one European cluster, and only PC1 carries ancestry (see the table below). Still, a good habit is to check what each PC describes, for example by plotting its loadings along the genome, before you add it to a model.
 
 ```{r}
 #| label: s5-7_pc_number

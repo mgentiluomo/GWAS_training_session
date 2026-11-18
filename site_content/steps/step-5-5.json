@@ -6,7 +6,7 @@
   "anchor": "step-5-5",
   "title": "Plot the reference and projected study",
   "source": "lessons/module_05_population_structure.Rmd",
-  "source_sha256": "884b9a5c45a5c83c0cace6e5c6d3111213cd1764a33f32517de227e81419a1ca",
+  "source_sha256": "f92c8874c4e5d566cd9bf1a0198b38be8fc7a20a731090cf969262ab238ca11e",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Draw three plots of the first three reference axes: PC1 against PC2, PC1 against PC3 and PC2 against PC3. Each reference group has its own label and symbol, and the study samples are added on top. All three plots use the same symbols, colours and key.",

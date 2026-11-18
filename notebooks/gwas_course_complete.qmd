@@ -3109,6 +3109,8 @@ The course keeps ten PCs. This box shows how to decide how many PCs a study need
 
 A formal test also exists. The Tracy-Widom test asks whether an eigenvalue is larger than expected from random noise (Patterson et al. 2006, [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190)). We do not run it here.
 
+One more point concerns the regions that we exclude before the PCA. Leaving out the long-range LD regions is common advice, and the course follows it. It does not remove every problem, though. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied samples of African American people, who have mixed ancestry. They found that later PCs can describe small parts of the genome instead of ancestry. Adjusting for such a PC can create a false link between a variant and the disease. This problem is called collider bias. A collider is a variable that two other things both influence. When a model adjusts for it, those two things can look related when they are not. Excluding the known long-range LD regions did not solve it in their data, and LD pruning worked better. In our cohort the risk is smaller. Everyone belongs to one European cluster, and only PC1 carries ancestry (see the table below). Still, a good habit is to check what each PC describes, for example by plotting its loadings along the genome, before you add it to a model.
+
 ```{r}
 #| label: s5-7_pc_number
 #| eval: false
