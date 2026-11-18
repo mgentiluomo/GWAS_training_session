@@ -22,11 +22,12 @@ frame_json <- function(index, f) {
   }
   out
 }
-write_example <- function(id, title, description, axes, sliders, groups, stats, frames, fixed_bounds, note = NULL, equal_aspect = FALSE, tables = NULL) {
+write_example <- function(id, title, description, axes, sliders, groups, stats, frames, fixed_bounds, note = NULL, equal_aspect = FALSE, tables = NULL, threshold_marker = NULL) {
   spec <- list(schema_version = "1.0", id = id, title = title, description = description, axes = axes,
                fixed_bounds = fixed_bounds, equal_aspect = equal_aspect, sliders = sliders, groups = as.list(groups), stats = stats, frames = frames)
   if (!is.null(note)) spec$note <- note
   if (!is.null(tables)) spec$tables <- tables
+  if (!is.null(threshold_marker)) spec$threshold_marker <- threshold_marker
   path <- file.path(out_dir, paste0(id, ".json"))
   jsonlite::write_json(spec, path, auto_unbox = TRUE, digits = NA, pretty = FALSE)
   cat(sprintf("%-16s %3d frames %7.1f kB\n", id, length(frames), file.size(path) / 1000))
@@ -59,11 +60,12 @@ for (i in seq_along(fst_values)) {
   for (j in seq_along(snp_values)) frames[[length(frames) + 1]] <- frame_json(c(i - 1, j - 1), fr[[j]])
 }
 write_example("fst-snps", "When do two populations form two clusters?",
-  "Two simulated populations of 100 people each. The sliders set how far the populations have drifted apart (Fst) and how many variants are used. The plot shows PC1 and PC2. The two populations separate on PC1 only when the drift and the number of variants are large enough.",
+  "Two simulated populations of 100 people each. The sliders set the Fst between the populations and the number of variants. The plot shows PC1 and PC2. The two populations separate on PC1 only when the Fst is above a threshold that falls as the number of people and variants grows. The mark on the Fst slider shows this threshold.",
   list(x = "PC1", y = "PC2"),
   list(slider("fst", "Fst", fst_values), slider("snps", "Number of variants", snp_values)), c("Population A", "Population B"),
-  list(stat("separation", "Separation of A and B on PC1 (0 = none, above 3 = clear)", 2), stat("share", "Share of variance on PC1", 4, TRUE)),
-  frames, FALSE)
+  list(stat("separation", "Separation of A and B on PC1 (0 = none, above 3 = clear)", 2), stat("share", "Share of variance on PC1", 4, TRUE),
+       stat("threshold", "Fst at the phase change, 1 / sqrt(people x variants)", 5)),
+  frames, FALSE, threshold_marker = list(slider = "fst", stat = "threshold", label = "Phase change for this number of variants"))
 
 shares <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 frames <- lapply(seq_along(shares), function(i) frame_json(i - 1, demo_admixture_frame(shares[i], seed = 2000 + i)))
@@ -148,7 +150,7 @@ for (i in seq_along(ref_sizes)) for (j in seq_along(fst_proj)) {
   frames[[length(frames) + 1]] <- frame_json(c(i - 1, j - 1), demo_projection_frame(ref_sizes[i], fst_proj[j], seed = 7000 + 10 * i + j))
 }
 write_example("projection", "Projecting people on a reference: shrinkage",
-  "Two populations. A reference of people defines the axes. A study of the same size is projected on them, and it does not change the axes. The sliders set the number of reference people in each population and the drift between the populations (Fst). When the reference is small, the projected study people lie closer to the centre than the reference people do.",
+  "Two populations. A reference of people defines the axes. A study of the same size is projected on them, and it does not change the axes. The sliders set the number of reference people in each population and the Fst between the populations. When the reference is small, the projected study people lie closer to the centre than the reference people do.",
   list(x = "PC1", y = "PC2"),
   list(slider("n_ref", "Reference people in each population", ref_sizes), slider("fst", "Fst", fst_proj)),
   c("Reference, population A", "Reference, population B", "Study, population A", "Study, population B"),

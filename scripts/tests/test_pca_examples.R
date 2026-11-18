@@ -13,6 +13,12 @@ local({
   big <- demo_fst_frames(0.05, 10000, seed = 11)[[1]]$stats$separation
   check(none < 1, "with fst = 0 the groups should not separate on PC1")
   check(big > 5, "with fst = 0.05 the groups should separate clearly on PC1")
+  # The threshold of Patterson et al. 2006 is 1 / sqrt(people * variants). Below it, no separation; above it, a separation.
+  thr <- demo_fst_frames(0.0005, 1000, seed = 21)[[1]]$stats
+  check(abs(thr$threshold - 1 / sqrt(200 * 1000)) < 1e-12, "the threshold should be 1 / sqrt(people * variants)")
+  check(0.0005 < thr$threshold / 3 && thr$separation < 1, "well below the threshold the groups should not separate")
+  above <- demo_fst_frames(0.005, 10000, seed = 13)[[1]]$stats
+  check(above$threshold < 0.005 / 3 && above$separation > 5, "above the threshold the groups should separate")
   edge <- demo_fst_frames(0.0005, c(1000, 100000), seed = 12)
   check(edge[[2]]$stats$separation > edge[[1]]$stats$separation + 1, "more variants should help to separate weakly different populations")
   # D2: mixed people lie between their sources, in the order of their ancestry share.

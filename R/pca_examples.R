@@ -99,13 +99,22 @@ demo_rotation_pc1_angle <- function(data) {
 # --- D2: why genetics produces clusters ---------------------------------------------------------------------
 
 # Two populations with the same number of people. fst is the drift of each population from the ancestral frequencies.
+# fst is the Fst between the two populations. Each population drifts away from the ancestral frequencies by 2 * fst,
+# so that the two populations differ by fst (the Fst of two populations that drifted by D each is D / 2).
+# threshold is the Fst at the phase change of Patterson et al. 2006: 1 / sqrt(D), where D is the number of people
+# times the number of variants (for two groups of the same size).
 demo_fst_frames <- function(fst, snps = c(1000, 10000, 100000), n_per_pop = 100, seed = 1) {
   group <- rep(1:2, each = n_per_pop)
-  freq <- function(p) rbind(matrix(demo_drift(p, fst), n_per_pop, length(p), byrow = TRUE),
-                            matrix(demo_drift(p, fst), n_per_pop, length(p), byrow = TRUE))
+  drift <- 2 * fst
+  freq <- function(p) rbind(matrix(demo_drift(p, drift), n_per_pop, length(p), byrow = TRUE),
+                            matrix(demo_drift(p, drift), n_per_pop, length(p), byrow = TRUE))
   sims <- demo_simulate(length(group), freq, snps, seed = seed)
-  lapply(sims, function(s) demo_frame(s$scores[, 1], s$scores[, 2], group,
-    list(separation = demo_separation(s$scores[, 1], group), share = s$share[1])))
+  lapply(names(sims), function(m) {
+    s <- sims[[m]]
+    demo_frame(s$scores[, 1], s$scores[, 2], group,
+      list(separation = demo_separation(s$scores[, 1], group), share = s$share[1],
+           threshold = 1 / sqrt(length(group) * as.numeric(m))))
+  })
 }
 
 # Three populations and a group of mixed people. `share_a` is the part of the ancestry of the mixed people that comes from population A.
@@ -357,7 +366,7 @@ demo_projection_frame <- function(n_ref, fst, snps = 10000, seed = 1) {
   set.seed(seed)
   n <- 2 * n_ref
   p <- runif(snps, 0.1, 0.9)
-  pop_freq <- rbind(demo_drift(p, fst), demo_drift(p, fst))
+  pop_freq <- rbind(demo_drift(p, 2 * fst), demo_drift(p, 2 * fst))  # fst is the Fst between the populations
   draw <- function(pop) matrix(rbinom(length(pop) * snps, 2, as.vector(pop_freq[pop, ])), nrow = length(pop))
   pop_ref <- rep(1:2, each = n_ref)
   pop_study <- rep(1:2, each = n_ref)
