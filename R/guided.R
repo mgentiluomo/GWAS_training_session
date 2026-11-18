@@ -84,7 +84,14 @@ guided_init <- function() {
   normalise_course_locale()
   data <- Sys.getenv("COURSE_DATA_DIR", unset = "data/course")
   output <- Sys.getenv("COURSE_OUTPUT_DIR", unset = "results/guided")
-  course_config(".", data_dir = data, output_dir = output)
+  cfg <- course_config(".", data_dir = data, output_dir = output)
+  # Say once for each R session which project version runs, so that a student can compare it with the version of the page.
+  if (!isTRUE(getOption("gwas_course_version_shown"))) {
+    cat("Project version: ", course_project_version, "
+", sep = "")
+    options(gwas_course_version_shown = TRUE)
+  }
+  cfg
 }
 
 guided_path <- function(cfg, step, name = "state") {

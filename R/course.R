@@ -1,5 +1,18 @@
 # Shared course utilities. Analytical choices remain visible in the notebooks.
 
+# The version of this project. Each page of the course website names the project version that it needs (step 0.3 explains
+# how to download it). A step that uses functions of a newer project starts with requires_course_version().
+course_project_version <- "2026.5"
+
+# Stops with a clear message when this project is older than the step needs. `current` is for tests.
+requires_course_version <- function(required, current = course_project_version) {
+  if (utils::compareVersion(as.character(current), as.character(required)) < 0) {
+    stop("This step needs project version ", required, " or later. Your project is ", current,
+         ". Download the new version at step 0.3.", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 # R stops a download after 60 seconds by default (the "timeout" option). The course archive is large and a slow
 # connection needs longer. The limit is raised for this download only and restored afterwards.
 COURSE_DOWNLOAD_TIMEOUT <- 3600
