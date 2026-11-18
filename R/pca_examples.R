@@ -325,3 +325,38 @@ demo_plot_panels <- function(frames, titles, group_names = NULL, xlab = "PC1", y
     }
   }
 }
+
+# --- D4: projection onto a reference ---------------------------------------------------------------------------
+
+# A reference of n_ref people per population defines the axes. A study of the same size is then projected on these axes
+# (the study is not used to find the axes). A small reference, or populations that differ little, pull the projected
+# people towards the centre. This is called shrinkage. ratio is the gap between the two study groups on PC1 divided by
+# the same gap in the reference: 1 means no shrinkage.
+demo_projection_frame <- function(n_ref, fst, snps = 10000, seed = 1) {
+  set.seed(seed)
+  n <- 2 * n_ref
+  p <- runif(snps, 0.1, 0.9)
+  pop_freq <- rbind(demo_drift(p, fst), demo_drift(p, fst))
+  draw <- function(pop) matrix(rbinom(length(pop) * snps, 2, as.vector(pop_freq[pop, ])), nrow = length(pop))
+  pop_ref <- rep(1:2, each = n_ref)
+  pop_study <- rep(1:2, each = n_ref)
+  g_ref <- draw(pop_ref)
+  g_study <- draw(pop_study)
+  freq <- colMeans(g_ref) / 2
+  keep <- freq > 0 & freq < 1
+  scale_by <- function(g) sweep(sweep(g[, keep, drop = FALSE], 2, 2 * freq[keep]), 2, sqrt(2 * freq[keep] * (1 - freq[keep])), "/")
+  x_ref <- scale_by(g_ref)
+  x_study <- scale_by(g_study)
+  e <- eigen(tcrossprod(x_ref), symmetric = TRUE)
+  u <- e$vectors[, 1:2]
+  d <- sqrt(e$values[1:2])
+  ref_scores <- sweep(u, 2, d, "*") / sqrt(ncol(x_ref))
+  study_scores <- sweep(tcrossprod(x_study, x_ref) %*% u, 2, d, "/") / sqrt(ncol(x_ref))
+  flip <- ifelse(ref_scores[1, ] > 0, -1, 1)
+  ref_scores <- sweep(ref_scores, 2, flip, "*")
+  study_scores <- sweep(study_scores, 2, flip, "*")
+  gap <- function(s, pop) abs(mean(s[pop == 1, 1]) - mean(s[pop == 2, 1]))
+  demo_frame(c(ref_scores[, 1], study_scores[, 1]), c(ref_scores[, 2], study_scores[, 2]),
+             c(pop_ref, pop_study + 2L),
+             list(n_ref = n_ref, fst = fst, ratio = gap(study_scores, pop_study) / gap(ref_scores, pop_ref)))
+}

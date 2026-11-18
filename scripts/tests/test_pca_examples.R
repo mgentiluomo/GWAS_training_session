@@ -28,6 +28,9 @@ local({
   check(low$error_turned < island$error_turned, "very low migration (islands) should give a larger error than moderate migration")
   corner <- demo_stepping_stone(0.1, "corner", seed = 3001)
   check(corner$error_turned > low$error_turned, "sampling mostly one corner should deform the map")
+  # D4: a small reference shrinks the projected study towards the centre. A larger reference shrinks it less.
+  shrink <- vapply(c(10, 100, 400), function(n) demo_projection_frame(n, 0.01, seed = 3)$stats$ratio, numeric(1))
+  check(all(diff(shrink) > 0) && shrink[1] < 0.4 && shrink[3] > 0.8, "shrinkage should fall as the reference grows")
   # D3: the first eigenvalue is largest when the sample is balanced.
   eig <- vapply(c(0.1, 0.5, 0.9), function(s) demo_composition_frame(s, seed = 2)$stats$eigenvalue, numeric(1))
   check(eig[2] > eig[1] && eig[2] > eig[3], "the first eigenvalue should be largest for a 50/50 sample")

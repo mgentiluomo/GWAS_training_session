@@ -136,3 +136,18 @@ write_example("colour-model", "Four colours as four populations",
   c("Red", "Green", "Blue", "Black"),
   list(stat("black_to_red", "Distance from Black to Red", 2), stat("black_to_green", "Distance from Black to Green", 2), stat("black_to_blue", "Distance from Black to Blue", 2)),
   frames, FALSE)
+
+# D4: projection onto a reference and shrinkage ----------------------------------------------------------------
+ref_sizes <- c(10, 25, 100, 400)
+fst_proj <- c(0.002, 0.01, 0.05)
+frames <- list()
+for (i in seq_along(ref_sizes)) for (j in seq_along(fst_proj)) {
+  frames[[length(frames) + 1]] <- frame_json(c(i - 1, j - 1), demo_projection_frame(ref_sizes[i], fst_proj[j], seed = 7000 + 10 * i + j))
+}
+write_example("projection", "Projecting people on a reference: shrinkage",
+  "Two populations. A reference of people defines the axes. A study of the same size is projected on them, and it does not change the axes. The sliders set the number of reference people in each population and the drift between the populations (Fst). When the reference is small, the projected study people lie closer to the centre than the reference people do.",
+  list(x = "PC1", y = "PC2"),
+  list(slider("n_ref", "Reference people in each population", ref_sizes), slider("fst", "Fst", fst_proj)),
+  c("Reference, population A", "Reference, population B", "Study, population A", "Study, population B"),
+  list(stat("ratio", "Gap between the study groups on PC1 divided by the gap in the reference (1 = no shrinkage)", 2)),
+  frames, FALSE)

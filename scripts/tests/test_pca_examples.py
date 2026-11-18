@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FOLDER = ROOT / "site_content" / "pca_examples"
 RSCRIPT = Path(os.environ.get("RSCRIPT") or r"C:\Program Files\R\R-4.5.2\bin\Rscript.exe")
-IDS = {"pc-rotation", "fst-snps", "admixture", "stepping-stone", "composition", "confounding", "outliers", "colour-model"}
+IDS = {"pc-rotation", "fst-snps", "admixture", "stepping-stone", "composition", "confounding", "outliers", "colour-model", "projection"}
 
 
 class PcaExamples(unittest.TestCase):
