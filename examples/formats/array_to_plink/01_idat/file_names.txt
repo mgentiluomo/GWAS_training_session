@@ -1,0 +1,9 @@
+# One pair of IDAT files per sample: <BeadChip barcode>_<position>_<channel>.idat
+200000000001_R01C01_Grn.idat
+200000000001_R01C01_Red.idat
+200000000001_R02C01_Grn.idat
+200000000001_R02C01_Red.idat
+200000000001_R03C01_Grn.idat
+200000000001_R03C01_Red.idat
+200000000001_R04C01_Grn.idat
+200000000001_R04C01_Red.idat

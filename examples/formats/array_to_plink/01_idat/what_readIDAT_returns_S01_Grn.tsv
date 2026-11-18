@@ -1,0 +1,11 @@
+# ILLUSTRATIVE values. Not a real IDAT file.
+# Layout of the 'Quants' table returned by illuminaio::readIDAT() for one channel of one sample.
+IlluminaID	Mean	SD	NBeads
+10600007	10776	194	5
+10600020	4806	330	12
+10600033	2586	834	8
+10600046	11387	838	22
+10600059	1724	684	18
+10600072	820	110	7
+10600085	3882	318	21
+10600098	10163	107	22

@@ -1,0 +1,22 @@
+##fileformat=VCFv4.3
+##fileDate=20261118
+##source=PLINKv2.0
+##contig=<ID=1>
+##contig=<ID=2>
+##contig=<ID=3>
+##contig=<ID=5>
+##contig=<ID=7>
+##contig=<ID=17>
+##contig=<ID=22>
+##contig=<ID=X>
+##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	S01	S02	S03	S04
+1	1000123	1:1000123	A	G	.	.	PR	GT	0/1	0/0	1/1	0/1
+2	2000456	2:2000456	C	T	.	.	PR	GT	0/0	0/1	0/1	1/1
+3	3000789	3:3000789	A	T	.	.	PR	GT	0/1	0/0	1/1	0/0
+5	5001011	5:5001011	C	G	.	.	PR	GT	0/1	0/1	0/0	1/1
+7	7001213	7:7001213	C	A	.	.	PR	GT	0/1	0/0	1/1	0/0
+17	17001415	17:17001415	T	C	.	.	PR	GT	0/0	0/1	./.	1/1
+22	22001617	22:22001617	A	G	.	.	PR	GT	0/1	./.	1/1	0/0
+X	10001819	X:10001819	C	T	.	.	PR	GT	0/1	0	1	0/0
