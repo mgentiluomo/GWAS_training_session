@@ -13,7 +13,7 @@ LABELS = ["**Why this simulation.**", "**How to read the chart.**", "**Try this.
           "**Why it matters for your GWAS.**", "**Key idea:**"]
 MAX_BOX_WORDS = 400
 MAX_EXAMPLE_WORDS = 260
-GUIDED_STEPS = {"3-3": 2, "3-4": 2, "4-2": 1, "5-6": 2, "5-7": 1}
+GUIDED_STEPS = {"3-1": 2, "3-2": 1, "3-3": 2, "3-4": 2, "3-5": 1, "3-6": 1, "4-1": 1, "4-2": 1, "4-3": 1, "4-4": 1, "5-6": 2, "5-7": 1}
 
 
 def words(text: str) -> int:
@@ -36,7 +36,7 @@ def steps(text: str):
 
 
 def boxes(step_text: str, title: str):
-    for m in re.finditer(r"<details><summary>" + re.escape(title) + r"[^<]*</summary>\n(.*?)\n</details>\n(?=\n(?:<details>|## |### ))", step_text, re.S):
+    for m in re.finditer(r"<details><summary>" + re.escape(title) + r"[^<]*</summary>\n(.*?)\n</details>\n(?=\n+(?:<details>|## |### ))", step_text, re.S):
         yield m.group(1)
 
 
@@ -93,6 +93,13 @@ class GuidedExamples(unittest.TestCase):
                                 checked += 1
                         self.assertGreaterEqual(checked, 3, f"{ids[0]} needs at least three guided actions")
 
+    def test_every_sweep_step_is_guided(self):
+        counts = {}
+        for s in SWEEPS:
+            key = s["step"].replace(".", "-")
+            counts[key] = counts.get(key, 0) + 1
+        self.assertEqual(counts, GUIDED_STEPS)
+
     def test_threshold_charts_are_guided(self):
         by_step = {}
         for s in SWEEPS:
@@ -129,7 +136,7 @@ class GuidedExamples(unittest.TestCase):
                         if title == "Optional: deep dives":
                             for section in re.split(r"^#### ", box, flags=re.M)[1:]:
                                 self.assertLessEqual(words(section), MAX_BOX_WORDS, f"{step} {section[:50]!r}")
-                        elif step in ("5-6", "5-7"):
+                        else:
                             self.assertLessEqual(words(box), MAX_BOX_WORDS, f"{step} {title}")
 
 
