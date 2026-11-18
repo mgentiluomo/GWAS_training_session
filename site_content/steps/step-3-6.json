@@ -6,7 +6,7 @@
   "anchor": "step-3-6",
   "title": "Relatedness and duplicates",
   "source": "lessons/module_03_sample_quality_control.Rmd",
-  "source_sha256": "41614dbbe0c36f19dbfa4e003cc55e9a42b3249301503d2ca308777e43e6f7c3",
+  "source_sha256": "276c3dd5567e72704114f77413255c0412751b292cc9b36c7e2ae8da882ab701",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "We estimate the kinship of every pair of samples. We review the duplicates. We keep a set of unrelated samples for the main analysis.",

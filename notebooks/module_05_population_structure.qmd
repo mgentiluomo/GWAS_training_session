@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "d98ac25049220276882bd80f5bdbd0513e065e9957edda899676bb413ff1d5c8"
+course_source_sha256: "bec866429cc101cc7cbcfa432d9f9e5c0bdc108a9554c1161d3ffe6f299d94b4"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -413,6 +413,49 @@ bin/plink2 --pfile results/guided/s4-6_state --extract results/guided/s5-2_commo
 
 :::
 
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes no file in your results folder.
+
+#### Deep dive: what does projecting mean, and why do projected people shrink?
+
+**The idea.** In this step the axes come from the reference people only. The study people do not help to find the axes. They are placed on the axes afterwards. This is a [projection](#glossary-projection). It gives every study person a position that can be compared with the reference groups. There is a catch. The reference people were used to fit the axes, so the axes partly follow their own random noise. Study people do not share that noise. Their projected positions are pulled towards the centre. This is called shrinkage. Shrinkage is larger when the reference is small, or when the populations differ little.
+
+In the example, two populations are simulated. A reference defines the axes. A study of the same size is projected on them. A shrinkage of 1 would mean that the study groups are as far apart as the reference groups. A smaller value means that the study is pulled towards the centre.
+
+
+**R code.** Change `n_ref` and run the chunk again. The four panels use four sizes of reference.
+
+```{r}
+#| label: s5-4_dd_projection
+#| eval: false
+# Optional. Nothing here changes your results folder. This takes about ten seconds.
+source("R/pca_examples.R")
+# Change this number of reference people in each population (try 10, 25, 100 or 400).
+n_ref <- 25
+sizes <- c(n_ref, 10, 100, 400)
+frames <- lapply(sizes, function(n) demo_projection_frame(n, fst = 0.01))
+demo_plot_panels(frames, paste(sizes, "reference people per population"),
+                 c("Reference, A", "Reference, B", "Study, A", "Study, B"))
+# Shrinkage: the gap between the study groups divided by the gap between the reference groups. 1 means none.
+round(vapply(frames, function(f) f$stats$ratio, numeric(1)), 2)
+```
+
+
+**What to observe.** The study groups lie closer to the centre than the reference groups do. This is clearest for a small reference. As the reference grows, the shrinkage fades. The course uses only the first four PCs of the projection to find outliers in step 5.6. Privé et al. report that the bias becomes large only from PC5 onwards (see the reference below).
+
+**Quick check.** Why can the reference people not show shrinkage themselves?
+
+<details><summary>Show the answer</summary>
+
+The axes were fitted to them, noise included. Their positions are the fitted values. New people are not fitted, so they lack this advantage.
+
+</details>
+
+**Reference.** Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) report a shrinkage bias of projected PCs. In their projection onto 1000 Genomes data, the bias becomes large for PC5 and beyond. They show how to obtain unbiased projections with the R package bigsnpr.
+
+:::
+
 ## Step 5.5 · Plot the reference and projected study {#step-5-5}
 
 We plot the first three principal components, each a number summarising one pattern of genetic variation, in three pairs. We show reference groups with labels and symbols and add the study samples to see how their genetic backgrounds compare.
@@ -464,6 +507,122 @@ A labelled plot of the reference with the projected study. Most study samples fa
 ::: {.callout-note title="PLINK terminal equivalent"}
 
 No PLINK equivalent
+
+:::
+
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes no file in your results folder. It has two parts: what a PCA plot is not, and a debate about what a PCA plot tells us.
+
+#### Deep dive: what a PCA plot is not
+
+**The idea.** The axes of a PCA plot are not fixed properties of populations. They summarise the people who are in the sample. If you change who is in the sample, the axes and the distances change, although the populations do not. McVean 2009 shows why. The positions on the PCs follow from how closely related the sampled people are to each other, pair by pair. A different sample gives different pairs.
+
+The example has two populations and 200 people in total. The slider sets how many of them come from population B.
+
+
+**R code.** Change `share_b` and run the chunk again. The five panels use five shares.
+
+```{r}
+#| label: s5-5_dd_composition
+#| eval: false
+# Optional. Nothing here changes your results folder. This takes about ten seconds.
+source("R/pca_examples.R")
+# Change this share of the sample that comes from population B (the other panels use fixed shares).
+share_b <- 0.1
+shares <- c(share_b, 0.25, 0.5, 0.75, 0.9)
+frames <- lapply(shares, function(s) demo_composition_frame(s, seed = 4000))
+demo_plot_panels(frames, paste0(shares * 100, "% from B"), c("Population A", "Population B"))
+# First eigenvalue and mean PC1 score of each population, for each share.
+round(t(vapply(frames, function(f) unlist(f$stats[c("eigenvalue", "mean_a", "mean_b")]), numeric(3))), 3)
+```
+
+
+**What to observe.** The centre of the plot is the mean of the sample. The larger population lies near the centre, and the smaller one lies far from it. The first eigenvalue is largest when the two populations have the same size. The populations did not change. Only the sample did.
+
+**Quick check.** A study doubles the number of people from one population. Does PC1 describe the same difference as before?
+
+<details><summary>Show the answer</summary>
+
+The difference between the populations is the same, but the axes, the eigenvalues and the distances on the plot change. A plot is a summary of one sample. It is not a measurement of the populations.
+
+</details>
+
+**What clusters are.** A cluster on a PCA plot is a statistical summary of allele frequencies. It is not a sharp biological category. People who lie in one cluster have similar allele frequencies, and the edge of a cluster depends on the sample and on the variants. In this course we say genetic ancestry or ancestry group. We do not use the words race or ethnicity for these groups.
+
+**Reference.** McVean G. 2009. A genealogical interpretation of principal components analysis. PLoS Genetics 5:e1000686. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
+
+#### Debate: what does a PCA plot tell us?
+
+**Why a debate.** PCA plots of human genetic data are everywhere, and how to read them is debated. In 2022, Elhaik published an article ([doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4)). It says that PCA results can be artefacts of the data and can be manipulated to give a wanted result. This box shows the idea of its colour model. Then it separates what the model shows from the wider claims. The idea of the colour model is from that article. The code and the numbers in the example are our own, and we do not reproduce any figure of the article.
+
+**The colour model.** Think of four populations: Red, Green, Blue and Black. Each person is a list of three numbers, like three variants. A red person is (1, 0, 0), a green person is (0, 1, 0), a blue person is (0, 0, 1) and a black person is (0, 0, 0). All people of one colour are identical, so the plot shows four dots. There are always 10 black people. The sliders set the number of red, green and blue people.
+
+
+**R code.** Change `n_red` and run the chunk again.
+
+```{r}
+#| label: s5-5_dd_colours
+#| eval: false
+# Optional. Nothing here changes your results folder.
+source("R/pca_examples.R")
+# Change this number of red people and run the chunk again (the other colours have 20 people each).
+n_red <- 10
+sizes <- c(n_red, 20, 50, 100)
+frames <- lapply(sizes, function(n) {
+  f <- demo_colour_frame(n, 20, 20)
+  f$labels <- data.frame(x = f$points$x, y = f$points$y, text = c("Red", "Green", "Blue", "Black"))
+  f
+})
+demo_plot_panels(frames, paste(sizes, "red people"), c("Red", "Green", "Blue", "Black"))
+# Distance from the Black dot to the Red, Green and Blue dots.
+round(t(vapply(frames, function(f) unlist(f$stats[c("black_to_red", "black_to_green", "black_to_blue")]), numeric(3))), 2)
+```
+
+
+**What to observe.** The data of the black people never change, but their place among the colours does. Look at the distances in the table when you change the sample sizes. The positions on a PCA plot depend on who is in the sample. This is the same lesson as the example above.
+
+**What the model shows, and what it does not.**
+
+- **What it shows.** The plot depends on the composition of the sample. This point is not new. Novembre et al. 2008 warn that the direction and the strength of the axes depend on how the samples are spread. McVean 2009 and Novembre and Stephens 2008 discuss how PCA patterns relate to migration, isolation, admixture and space (see the references below).
+- **The most far-reaching claim.** The article concludes that 32,000 to 216,000 genetic studies should be reevaluated. A toy model with three variants cannot show this. A reader should judge it against independent replies. We do not cite a reply here, because we could not verify one while writing this box. Ask your instructor for current replies.
+- **Two different uses of PCA.** One use tells a story about origins and migrations from the shape of a plot. Another use puts the PCs in a model as covariates, to remove confounding in an association study. The first use asks the plot to be right about history. The second use asks only that the PCs capture the ancestry differences that confound the test. The article also says that adjusting for PCs gave unfavourable outcomes in association studies, so it criticises the second use as well. On our own data, you can look at this directly: in step 5.7, the box "Another approach" shows lambda and the number of hits with 0, 1, 2, 3, 5, 10, 15 and 20 PCs.
+
+**Discussion questions.** Each question has a note for the instructor.
+
+**Question 1.** Does PCA reconstruct geography, or do we choose it with the rotation?
+
+<details><summary>Note for the instructor</summary>
+
+Both. The structure is in the data: in the grid example of step 5.1, neighbouring populations lie side by side. The direction of the map is not in the data. PCA has no north. Novembre et al. 2008 turned the axes by an angle that matched latitude and longitude best, so the rotation used knowledge of geography.
+
+</details>
+
+**Question 2.** What changes if we double the sample of one population?
+
+<details><summary>Note for the instructor</summary>
+
+The axes, the eigenvalues and the distances change, while the populations do not. Use the two examples of this step. Ask students to predict the plot before they move the slider.
+
+</details>
+
+**Question 3.** Is a person between two clusters necessarily mixed?
+
+<details><summary>Note for the instructor</summary>
+
+No. The person can come from a third population that is genetically intermediate, can be the result of how the sample was chosen, or can have a technical problem in the genotypes. Mixed ancestry needs other evidence, for example a model that estimates ancestry proportions.
+
+</details>
+
+**Question 4.** Why do these limits weigh less for association studies than for the history of populations?
+
+<details><summary>Note for the instructor</summary>
+
+An association study needs the PCs to remove confounding by ancestry, and it checks this with lambda. It does not need the axes to tell a true story. The limits still matter, though: outliers can take over axes (step 5.6), and PCs that describe one region instead of ancestry can bias the results (Grinde et al. 2024, step 5.7).
+
+</details>
+
+**References.** Elhaik E. 2022. Principal Component Analyses (PCA)-based findings in population genetic studies are highly biased and must be reevaluated. Scientific Reports 12:14683. [doi:10.1038/s41598-022-14395-4](https://doi.org/10.1038/s41598-022-14395-4). Novembre J, et al. 2008. [doi:10.1038/nature07331](https://doi.org/10.1038/nature07331). Novembre J, Stephens M. 2008. [doi:10.1038/ng.139](https://doi.org/10.1038/ng.139). McVean G. 2009. [doi:10.1371/journal.pgen.1000686](https://doi.org/10.1371/journal.pgen.1000686).
 
 :::
 
@@ -628,6 +787,78 @@ The plot shows an orange triangle, a blue square and a black cross around the sa
 How to read it. The six extra MCD samples are not ancestry outliers. Their largest distance on a single PC is between 2.3 and 4.3 standard deviations, and their squared Mahalanobis distance is between 18.8 and 24.6, just above the cutoff of 18.47. The real outliers have a squared distance of at least 2,866. With a cutoff at the 99.9% point, we expect about 0.1% of a perfectly normal group to be flagged. Here that is about 1.8 of the 1,811 European-like samples, and the method flags 6. This is why the course keeps the six-SD rule: the European cluster of this dataset is large and homogeneous, and the distance cutoff is too tight for it. The nearest-group method gives the same 33 samples as the course rule, so here it adds a label (where each outlier comes from) and no new samples.
 
 References. Six standard deviations on the first PCs: Price et al. 2006, [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847). The MCD estimator: Rousseeuw and Van Driessen 1999, [doi:10.1080/00401706.1999.10485670](https://doi.org/10.1080/00401706.1999.10485670). Outlier detection in PCA of genetic data: Privé et al. 2020, [doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520). Assigning people to ancestry groups with a reference: Privé et al. 2022, [doi:10.1016/j.ajhg.2021.11.008](https://doi.org/10.1016/j.ajhg.2021.11.008).
+
+:::
+
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes no file in your results folder. It explains why the course removes ancestry outliers instead of only correcting for them. It does not repeat the boxes "Try other thresholds" and "Another approach" above.
+
+#### Deep dive: why we remove outliers
+
+**First reason: ancestry can confound the test.** Suppose the study has two subpopulations, A and B. Cases come more often from B than controls do. Allele frequencies also differ between A and B. Then a variant can look linked to the disease only because it marks the subpopulation. This is [confounding](#glossary-confounding), and the problem is called [population stratification](#glossary-population-stratification). In the example, no variant has a real effect. Any small p-value is a false signal. The inflation factor lambda ([Lambda GC](#glossary-lambda-gc)) is 1 when the tests are well calibrated. A PC that carries the ancestry difference can remove most of the problem when it is a covariate.
+
+
+**R code.** Change `case_share_b` and run the chunk again.
+
+```{r}
+#| label: s5-6_dd_confounding
+#| eval: false
+# Optional. Nothing here changes your results folder. This takes about ten seconds.
+source("R/pca_examples.R")
+# Change this share of the cases that come from subpopulation B (half of the controls come from B).
+case_share_b <- 0.5
+shares <- c(case_share_b, 0.6, 0.7, 0.8, 0.9)
+frames <- lapply(shares, function(s) demo_confounding_frame(s, seed = 5000))
+demo_plot_panels(frames, paste0(shares * 100, "% of cases from B"), c("Controls", "Cases"))
+# Lambda and the share of tests with p below 0.05, without PCs and with PC1 as a covariate.
+round(t(vapply(frames, function(f) unlist(f$stats[c("lambda_none", "lambda_pc1", "false_none", "false_pc1")]), numeric(4))), 3)
+```
+
+
+**What to observe.** When the cases and the controls have the same mix, lambda is close to 1. As more cases come from B, lambda without PCs grows, and so does the share of tests with a small p-value. With PC1 as a covariate, lambda stays close to 1. In real studies the correction is not always this clean, but the idea is the same.
+
+**Quick check.** Why does PC1 as a covariate remove the inflation here?
+
+<details><summary>Show the answer</summary>
+
+PC1 carries the difference between A and B. That difference is what links the disease status to the allele frequencies. Once the model knows it, the link disappears.
+
+</details>
+
+**Second reason: a few far-away people can turn the axes.** The PCs are the directions of largest variance. A few people who are very far from everybody else add a lot of variance. If there are enough of them, a PC turns to describe them alone. The difference among the main group then moves to a later PC, or is lost. In the example, two close subpopulations, A and B, form the main group. The slider adds people from a distant population.
+
+
+**R code.** Change `outliers` and run the chunk again.
+
+```{r}
+#| label: s5-6_dd_outliers
+#| eval: false
+# Optional. Nothing here changes your results folder. This takes about twenty seconds.
+source("R/pca_examples.R")
+# Change this number of distant people and run the chunk again (the other panels use fixed numbers).
+outliers <- 1
+counts <- c(0, outliers, 5, 10)
+frames <- lapply(counts, function(k) demo_outlier_frame(k, seed = 6000))
+demo_plot_panels(frames, paste(counts, "distant people"), c("Population A", "Population B", "Distant people"))
+# How well PC1 and PC2 separate A from B. A value above 3 is a clear separation.
+round(t(vapply(frames, function(f) unlist(f$stats[c("outliers", "separation_pc1", "separation_pc2")]), numeric(3))), 2)
+```
+
+
+**What to observe.** With no distant people, PC1 separates A from B. As distant people are added, there comes a point where PC1 describes only them. The difference between A and B then appears on PC2. In this toy example, ten distant people are enough to do this.
+
+**Quick check.** Why not keep the distant people and add more PCs?
+
+<details><summary>Show the answer</summary>
+
+Extra PCs would be used up to describe a handful of people, and the ancestry differences in the main group would still have to be captured. A linear model with a few PCs also describes smooth differences between many people badly. It does not describe a few people who are very far away.
+
+</details>
+
+**Third reason: outliers can be errors.** A person who is far from all the reference groups may have a technical or a record problem. Examples are a contaminated sample, a swapped sample or a wrong label. Removing the person is a safe step, and it is easy to explain in a report. The course uses six standard deviations from the European reference, as in Price et al. 2006 ([doi:10.1038/ng1847](https://doi.org/10.1038/ng1847)). The boxes "Another approach" above show two other ways to find outliers.
+
+**Reference.** Price AL, et al. 2006. Principal components analysis corrects for stratification in genome-wide association studies. Nature Genetics 38:904-909. [doi:10.1038/ng1847](https://doi.org/10.1038/ng1847).
 
 :::
 
@@ -800,17 +1031,105 @@ How to read it. Only PC1 stands out. Its eigenvalue is ten times larger than the
 
 :::
 
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes only files that start with `s5-7_dd_`. The files and the checkpoint of the main path do not change.
+
+#### Deep dive: from eigenvalues to the scree plot
+
+**The idea.** In the first deep dive of step 5.1, the variance on a line was largest for PC1. That variance is the [eigenvalue](#glossary-eigenvalue) of PC1. The next PC has the largest variance that is left, and so on. A [scree plot](#glossary-scree-plot) lists these eigenvalues in order. PCs that carry real structure stand above a flat tail. The tail looks like noise. The box "Another approach" in this step uses this idea, and it also tests the PCs against the outcome and repeats the scan with other numbers of PCs. This deep dive only connects the numbers to the idea of variance explained.
+
+**R code.** The chunk reads the eigenvalues that step 5.7 wrote and prints the share of each PC among the ten.
+
+```{r}
+#| label: s5-7_dd_eigenvalues
+#| eval: false
+# Optional. Nothing here changes your results folder.
+eigenvalues <- scan(paste0(guided_path(cfg, "5.7", "pca"), ".eigenval"), quiet = TRUE)
+# PLINK writes only the eigenvalues of the PCs that it computed, so these shares are shares among the ten PCs.
+round(100 * eigenvalues / sum(eigenvalues), 1)
+```
+
+
+**What to observe.** One PC stands well above the others, and the rest are close to each other. The flat tail is what noise looks like. The share that each PC holds is the variance explained, in the sense of the first deep dive.
+
+**Quick check.** Why are these shares shares among the ten PCs, not shares of all variation?
+
+<details><summary>Show the answer</summary>
+
+PLINK reports only the eigenvalues of the PCs that it computes. The share of the total variance needs all the eigenvalues, which the course does not compute.
+
+</details>
+
+#### Deep dive: can one region take over a PC?
+
+**The idea.** A PC should describe differences between people across the whole genome. Sometimes a PC describes only one region instead. This happens in regions with long stretches of strongly correlated variants, where one pattern is repeated across thousands of sites. Step 3.4 leaves out a list of such regions. In the example below, you calculate the PCs twice. The first time you do not leave the regions out. The second time you do, as in the main path. For each variant, a PC has a loading, which tells how much the variant contributes to that PC. The plot shows the absolute loadings of one PC along the genome. The code picks the PC for which most of the 200 largest loadings fall in one window of 5 million bases.
+
+```{r}
+#| label: s5-7_dd_loadings
+#| eval: false
+# Optional. This takes about two minutes. It writes only files that start with s5-7_dd_.
+source("R/pca_examples.R")
+state <- guided_path(cfg, "5.6")
+without_list <- guided_path(cfg, "5.7", "dd_without_list")  # <1>
+run_plink(cfg, c("--pfile", state, "--chr", "1-22", "--maf", "0.05", "--indep-pairwise", "200kb", "0.2", "--out", without_list), quiet = TRUE)
+run_plink(cfg, c("--pfile", state, "--extract", paste0(without_list, ".prune.in"), "--pca", "10", "allele-wts", "--out", paste0(without_list, "_pca")), quiet = TRUE)  # <2>
+with_list <- guided_path(cfg, "5.7", "dd_with_list")  # <3>
+run_plink(cfg, c("--pfile", state, "--extract", paste0(guided_path(cfg, "5.7", "prune"), ".prune.in"), "--pca", "10", "allele-wts", "--out", with_list), quiet = TRUE)
+first <- pca_read_loadings(paste0(without_list, "_pca.eigenvec.allele"))  # <4>
+second <- pca_read_loadings(paste0(with_list, ".eigenvec.allele"))
+pca_plot_loadings(first, second, c("Without leaving out the long-range LD regions", "With the list (the main path)"))
+# For each PC: the busiest window of 5 million bases among its 200 largest loadings, and how many loadings fall in it.
+pca_local_peaks(first)
+```
+
+1. Select weakly correlated sites without leaving out the long-range LD regions.
+2. Calculate ten PCs and the loading of every site, first without the list.
+3. Calculate them again with the sites of the main path, which leave the list out.
+4. Plot the absolute loadings of the PC with the busiest window.
+
+
+**What to observe.** Without the list, one PC has a tall block of loadings in one place, which is drawn as orange triangles. With the list, the block is gone. The table shows the chromosome, the start of the window in millions of bases, and the number of the 200 largest loadings in it. A PC like this describes one region, not the ancestry of the people. This is why the course leaves the regions out in steps 3.4 and 5.7.
+
+**Quick check.** Leaving out the list removes the block in this example. Does it solve the problem in every study?
+
+<details><summary>Show the answer</summary>
+
+No. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) found that leaving out regions found in earlier studies did not remove the problem in samples of mixed ancestry, and that LD pruning worked better there. The habit to keep is to look at what each PC describes before you use it.
+
+</details>
+
+**References.** Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) found that some PCs of the UK Biobank describe complex LD structure and not population structure. Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)) describe how they removed regions with long-range LD, such as the inversions on 8p23 and 17q21.31, before the PCA.
+
+:::
+
 ## Glossary terms used in this notebook {#glossary}
 
 These entries repeat the course glossary so that every link in this notebook works offline.
+
+### Confounding {#glossary-confounding .unlisted}
+
+A mix-up that happens when a hidden factor is associated with both the group (for example case or control) and the result. The factor can create a false association. Ancestry is a common example.
 
 ### Eigenvalue {#glossary-eigenvalue .unlisted}
 
 A number that tells how much variation one principal component explains. A large eigenvalue means that the component is important.
 
+### Lambda GC {#glossary-lambda-gc .unlisted}
+
+Summary of test-statistic inflation/deflation, not proof of a valid model.
+
 ### PCA / PC {#glossary-pca-pc .unlisted}
 
 Principal component analysis / a component summarising genetic variation.
+
+### Population stratification {#glossary-population-stratification .unlisted}
+
+Genetic structure that can confound association when related to outcome.
+
+### Projection {#glossary-projection .unlisted}
+
+Placing new samples on axes that were calculated from other samples. The axes do not change, so all samples are compared on the same scale.
 
 ### Scree plot {#glossary-scree-plot .unlisted}
 

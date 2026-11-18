@@ -663,6 +663,28 @@ Expected plot. For `r2 limit`, the horizontal axis shows the setting and the ver
 
 </details>
 
+<details><summary>Optional: deep dives</summary>
+
+This box is not part of the main path. No later step uses it.
+
+#### Deep dive: what happens if the long-range LD regions stay in?
+
+**The idea.** A principal component should describe differences between people across the whole genome. In a region with a long stretch of strongly correlated variants, one pattern repeats over thousands of sites. A PC can then describe that one region instead of the ancestry of the people. This is why this step leaves such regions out before the PCA.
+
+**Where to see it.** You cannot see this effect yet, because the PCs are calculated in module 5. The optional deep dive "Can one region take over a PC?" in step 5.7 does the experiment on your own data. It calculates the PCs with and without the list of regions, and it plots the loadings along the genome. A loading tells how much a variant contributes to a PC.
+
+**Quick check.** Why do we leave the regions out before the PCA, and not only before the association scan?
+
+<details><summary>Show the answer</summary>
+
+The regions disturb the PCs, and the PCs are then used as covariates in the scan. The association scan itself still uses all the variants that pass quality control.
+
+</details>
+
+**Reference.** Price et al. 2008 ([doi:10.1016/j.ajhg.2008.06.005](https://doi.org/10.1016/j.ajhg.2008.06.005)) describe long-range LD that can confound genome scans in admixed populations. Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) report that some PCs capture LD structure and not population structure.
+
+</details>
+
 <details><summary>Under the hood & literature</summary>
 
 **What the tool computes.** `--indep-pairwise 200kb 0.2` moves a 200 kb window along each chromosome one variant at a time. In each window it calculates r^2, the squared correlation between the genotype counts (0, 1 or 2) of two variants, from unphased hard calls. For every pair above 0.2 it drops one of the two. `.prune.in` lists the kept variants and `.prune.out` the dropped ones. No genotype is deleted.

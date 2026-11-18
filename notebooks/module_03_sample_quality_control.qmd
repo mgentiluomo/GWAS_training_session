@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "41614dbbe0c36f19dbfa4e003cc55e9a42b3249301503d2ca308777e43e6f7c3"
+course_source_sha256: "276c3dd5567e72704114f77413255c0412751b292cc9b36c7e2ae8da882ab701"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -524,6 +524,28 @@ Variants pruned out and kept when the window changes (r^2 limit 0.2):
 How to read it. The r^2 limit has a large effect. At 0.1 the pruning keeps 48,602 variants, at 0.2 it keeps 68,800 and at 0.5 it keeps 100,753. The window has a smaller effect: 50 kb keeps 78,100, 200 kb keeps 68,800 and 1,000 kb keeps 67,686. More variants are not better for the checks that use this list. A larger set contains more correlated variants, which count several times. A smaller set carries less information. The course value is a middle choice that leaves enough sites for the heterozygosity check, the relatedness check and the PCA.
 
 Expected plot. For `r2 limit`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (0.2), where 56,261 variants are removed. For `window (kb)`, the horizontal axis shows the setting and the vertical axis shows the number of variants removed. A red diamond marks the course value (200), where 56,261 variants are removed. The line joins the points in the order of the settings. The same plot with ggplot2 looks the same and has a light grid.
+
+:::
+
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it.
+
+#### Deep dive: what happens if the long-range LD regions stay in?
+
+**The idea.** A principal component should describe differences between people across the whole genome. In a region with a long stretch of strongly correlated variants, one pattern repeats over thousands of sites. A PC can then describe that one region instead of the ancestry of the people. This is why this step leaves such regions out before the PCA.
+
+**Where to see it.** You cannot see this effect yet, because the PCs are calculated in module 5. The optional deep dive "Can one region take over a PC?" in step 5.7 does the experiment on your own data. It calculates the PCs with and without the list of regions, and it plots the loadings along the genome. A loading tells how much a variant contributes to a PC.
+
+**Quick check.** Why do we leave the regions out before the PCA, and not only before the association scan?
+
+<details><summary>Show the answer</summary>
+
+The regions disturb the PCs, and the PCs are then used as covariates in the scan. The association scan itself still uses all the variants that pass quality control.
+
+</details>
+
+**Reference.** Price et al. 2008 ([doi:10.1016/j.ajhg.2008.06.005](https://doi.org/10.1016/j.ajhg.2008.06.005)) describe long-range LD that can confound genome scans in admixed populations. Privé et al. 2020 ([doi:10.1093/bioinformatics/btaa520](https://doi.org/10.1093/bioinformatics/btaa520)) report that some PCs capture LD structure and not population structure.
 
 :::
 
