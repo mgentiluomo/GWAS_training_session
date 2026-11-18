@@ -207,6 +207,9 @@ The summary statistics file from step 6.7. If R says that the file is missing, r
 ### Command
 
 ```{r s7-3}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
 # 2. Prepare the chromosome, position and p-value columns.
@@ -227,7 +230,6 @@ save_plot(guided_path(cfg, "7.3", "manhattan_suggestive.png"), function() plot_m
 # 6. Check that eight variants have p-values below 0.00000005.
 stopifnot(sum(stats$p_value[valid_p(stats$p_value)] < 5e-8) == 8L)
 ```
-
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 Not applicable: this step needs no PLINK command. The R chunk is the complete command.
@@ -441,6 +443,9 @@ The summary statistics file from step 6.7, the final cohort and the three lead v
 ### Command
 
 ```{r s7-6}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
 regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),
   position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
@@ -479,7 +484,6 @@ for (i in seq_len(nrow(regions))) {
 # Course bookkeeping: records the counts for the next step. Do not change.
 guided_artifact_checkpoint(cfg, "7.6", c(paste0(guided_path(cfg, "7.6", "ld"), ".vcor"), guided_path(cfg, "7.6", "regional.png")), parent = "6.7")
 ```
-
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows). The three commands are for L1, L2 and L3:
 
 ```sh
@@ -548,6 +552,9 @@ The method here is Wakefield's approximate Bayes factor (ABF). For each variant,
 There is one important limit. The method assumes that the region holds exactly one causal variant. If a region has two or more, the PIPs are not valid. The method SuSiE removes this limit, because it can fit several causal variants in one region (Wang et al. 2020, [doi:10.1111/rssb.12388](https://doi.org/10.1111/rssb.12388)). We do not run it here.
 
 ```{r s7-6_credible_sets, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This reads the objects `regions` and `stats` made in the chunk of this step. It writes no file.
 # 1. For each region, take the variants within 500,000 DNA positions of the lead variant.
 credible <- lapply(seq_len(nrow(regions)), function(i) {
@@ -559,7 +566,6 @@ credible <- lapply(seq_len(nrow(regions)), function(i) {
 data.frame(region = regions$label, lead = regions$rs, variants_in_region = sapply(credible, function(x) x$variants),
            set_size = sapply(credible, function(x) x$size), lead_pip = round(sapply(credible, function(x) x$lead_pip), 3))
 ```
-
 Plain PLINK 2 command: not applicable. R calculates the Bayes factors from the summary statistics.
 
 Expected result.
@@ -597,6 +603,9 @@ The state from step 5.7, the state from step 2.8, the summary statistics file fr
 ### Command
 
 ```{r s7-7}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
@@ -657,7 +666,6 @@ save_plot(guided_path(cfg, "7.7", "manhattan_comparison.png"), function() {
   plot_manhattan(panels$main, "QC + ten PCs", suggestive = FALSE, label_leads = TRUE, max_labels = 5, ylim = c(0, top))
 }, width = 1800, height = 2400)
 ```
-
 Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
 
 ```sh

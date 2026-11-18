@@ -6,7 +6,7 @@
 # Interactive installation/download chunks are omitted; no password is stored here.
 
 # Source: lessons/module_00_preparation.Rmd
-# SHA-256: 7d51ac0c935abf29c2171838e9b18128d4391caa73e75f8f079e6ba2d87cc328
+# SHA-256: 31d31e6cb06407247e25a4bbf1080f073f52f7c4185eb8f51c0665c3e22281aa
 
 # Chunk: s0-4_project
 # 1. Show the folder where R looks for files.
@@ -240,7 +240,7 @@ guided_snapshot(cfg, "2.8", guided_path(cfg, "2.7"), 2016, 296510)
 check_step("2.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_03_sample_quality_control.Rmd
-# SHA-256: ce9e76a355ecf5917adbc99fee086a6ea53d8147a5f76f123d94afb72877db8b
+# SHA-256: d6b8cb97b4732d7ef5e2ea65b9b18cc75bf07c457e835a2a887021e1e9de7ed7
 
 # Chunk: setup
 source("R/guided.R")
@@ -406,7 +406,7 @@ print(read.delim(file.path(cfg$out, "step_counts.tsv")))
 check_step("3.8", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_04_variant_quality_control.Rmd
-# SHA-256: e114d48833446881df78c51108435ac8979cf1d32df4c499b857d97e6d2e1088
+# SHA-256: 2aee4eb31d9e0f6b63412e00572eaa462d14cace68d5ab0ab908a73b1c200403
 
 # Chunk: setup
 source("R/guided.R")
@@ -509,7 +509,7 @@ guided_snapshot(cfg, "4.6", guided_path(cfg, "4.5"), 1844, 238513, parent = "4.5
 check_step("4.6", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_05_population_structure.Rmd
-# SHA-256: 65976bf5cca259afc0df306a243211f43bac9b9152bb7c4799d1d5486a7e7aab
+# SHA-256: 3edaa117be89a2f1569f2698ce0d8f2b65898ec22acb164b16830328e2661e98
 
 # Chunk: setup
 source("R/guided.R")
@@ -824,7 +824,7 @@ guided_artifact_checkpoint(cfg, "6.7", c(stats_file, dictionary_file), parent = 
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: 9167ca0f748d5a812084e0d7fa7e08c6e5a53bf7f3e2ce4f11c0ebe59a8ab2d2
+# SHA-256: cb52130a2514b8fd23f16c9a549dde42b31da9629820e4b9212da5b31c125fa0
 
 # Chunk: setup
 source("R/guided.R")
@@ -860,6 +860,9 @@ guided_write(data.frame(model = "QC plus ten PCs", lambda = lambda), guided_path
 
 
 # Chunk: s7-3
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. Read the saved association summary table.
 stats <- guided_summary_stats(cfg)
 # 2. Prepare the chromosome, position and p-value columns.
@@ -921,6 +924,9 @@ stopifnot(nrow(clumps) == 3L)
 
 
 # Chunk: s7-6
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. List the three regions, their lead variants, output names and the expected number of genome-wide significant variants.
 regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),
   position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
@@ -979,6 +985,9 @@ if (requireNamespace("knitr", quietly = TRUE) && knitr::is_html_output()) {
 
 
 # Chunk: s7-7
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # 1. Repeat the final cohort analysis using age and sex without genetic components.
 no_pc <- guided_path(cfg, "7.7", "no_pcs")
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),

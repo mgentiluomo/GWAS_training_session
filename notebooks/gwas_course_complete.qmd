@@ -1235,6 +1235,9 @@ Each trial changes one limit and starts from the same input as the step.
 ```{r}
 #| label: s3-1_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only. Your results folder is not changed.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 samples <- threshold_counts(cfg, guided_path(cfg, "2.8"), "--mind", thresholds)  # <1>
@@ -1250,7 +1253,6 @@ par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_th
 1. Samples: --mind on the cohort saved at 2.8.
 2. Variants: --geno on the samples that remain after --mind 0.10.
 3. Plot the removed numbers. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -1354,6 +1356,9 @@ Each trial starts from the cohort saved at 3.1 and changes the limit only.
 ```{r}
 #| label: s3-2_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 trial <- threshold_counts(cfg, guided_path(cfg, "3.1"), "--mind", thresholds)
@@ -1363,7 +1368,6 @@ trial
 plot_threshold_trials(trial, "Samples removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -1509,6 +1513,9 @@ Each trial changes one limit of the sex check.
 ```{r}
 #| label: s3-3_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one limit only. Your results folder is not changed.
 females <- sexcheck_counts(cfg, guided_path(cfg, "3.3", "par"), "max-female-xf", c(0.1, 0.2, 0.3, 0.4))  # <1>
 females$course_value <- females$threshold == 0.2
@@ -1523,7 +1530,6 @@ par(mfrow = c(1, 2)); plot_threshold_trials(females, "Samples flagged", log_x = 
 1. Change the female limit, with the other limits at their course values.
 2. Change the male limit.
 3. Plot the flagged samples. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -1652,6 +1658,9 @@ Each trial changes one setting of LD pruning. Here "removed" means pruned out.
 ```{r}
 #| label: s3-4_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one setting only. It writes no file in your results folder.
 regions <- guided_high_ld(cfg)
 r2_limits <- c(0.1, 0.2, 0.5)  # <1>
@@ -1669,7 +1678,6 @@ plot_threshold_trials(data.frame(threshold = windows, removed = by_window["prune
 1. Change the r2 limit, with a window of 200 kb.
 2. Change the window, with an r2 limit of 0.2.
 3. Plot the pruned variants. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -1818,6 +1826,9 @@ The trials change the number of standard deviations (SD) and use the same F valu
 ```{r}
 #| label: s3-5_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of F values that the step wrote. No PLINK run is needed.
 multipliers <- c(2, 2.5, 3, 3.5, 4)
 trial <- het_counts(guided_table(paste0(guided_path(cfg, "3.5", "het"), ".het")), multipliers)
@@ -1827,7 +1838,6 @@ trial
 plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -1980,6 +1990,9 @@ The usual KING cutoffs are 0.354 for repeated samples, 0.177 for first-degree re
 ```{r}
 #| label: s3-6_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
 cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
@@ -1990,7 +2003,6 @@ trial
 plot_threshold_trials(trial, "Samples removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -2218,6 +2230,9 @@ Each trial starts from the cohort saved at 3.8 and changes the limit only.
 ```{r}
 #| label: s4-1_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 trial <- threshold_counts(cfg, guided_path(cfg, "3.8"), "--geno", thresholds)
@@ -2227,7 +2242,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -2338,6 +2352,9 @@ Each trial applies a different cutoff to the same test results.
 ```{r}
 #| label: s4-2_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
 missing_table <- guided_table(paste0(guided_path(cfg, "4.2", "missing"), ".missing"))
 cutoffs <- c(1e-3, 1e-4, 1e-5, 1e-6, 1e-8)
@@ -2348,7 +2365,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -2440,6 +2456,9 @@ The minor allele frequency (MAF) is how often the less common version of a varia
 ```{r}
 #| label: s4-3_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.001, 0.005, 0.01, 0.02, 0.05)
 trial <- threshold_counts(cfg, guided_path(cfg, "4.2"), "--maf", thresholds)
@@ -2449,7 +2468,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -2571,6 +2589,9 @@ The Hardy-Weinberg test compares the genotype counts of a variant in controls wi
 ```{r}
 #| label: s4-4_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
 cutoffs <- c(1e-3, 1e-4, 1e-6, 1e-8, 1e-10)
 trial <- hwe_counts(guided_table(paste0(guided_path(cfg, "4.4", "hardy"), ".hardy")), cutoffs)
@@ -2581,7 +2602,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -2824,6 +2844,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 ```{r}
 #| label: s5-1_dd_rotation
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this angle (in degrees) and run the chunk again.
@@ -2837,7 +2860,6 @@ demo_plot_panels(frames, titles, "People", "Height (cm, centred)", "Arm span (cm
 # The angle of PC1, found by PCA.
 demo_rotation_pc1_angle(data)
 ```
-
 
 **Quick check.** Can a turned line ever hold more variance than PC1?
 
@@ -2875,6 +2897,9 @@ No. PC1 is defined as the direction with the largest variance. Every other direc
 ```{r}
 #| label: s5-1_dd_fst
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this value (0, 0.0005, 0.001, 0.005, 0.01 or 0.05) and run the chunk again.
@@ -2887,7 +2912,6 @@ round(vapply(frames, function(f) f$stats$separation, numeric(1)), 2)
 # The Fst at the phase change for each number of variants: 1 divided by the square root of (people times variants).
 signif(vapply(frames, function(f) f$stats$threshold, numeric(1)), 2)
 ```
-
 
 **Quick check.** A study has few variants. PCA shows one cloud for two closely related populations. Does this prove that the populations are the same?
 
@@ -2925,6 +2949,9 @@ No. With this amount of data, a small difference cannot be seen. More people or 
 ```{r}
 #| label: s5-1_dd_admixture
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each frame takes a few seconds.
 source("R/pca_examples.R")
 # Change these shares of ancestry from A in the mixed people and run the chunk again.
@@ -2932,7 +2959,6 @@ shares <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 frames <- lapply(shares, function(s) demo_admixture_frame(s, seed = 1))
 demo_plot_panels(frames, paste("Share from A:", shares), c("A", "B", "C", "Mixed A and B"))
 ```
-
 
 **Quick check.** A person lies half-way between A and B on the plot. Give one reason, other than admixture, that could place a person there.
 
@@ -2970,6 +2996,9 @@ Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07
 ```{r}
 #| label: s5-1_dd_grid
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this migration rate (try 0.8, 0.25, 0.1 or 0.01) and run the chunk again.
@@ -2983,7 +3012,6 @@ demo_plot_panels(frames, c("Raw PCA, uniform sampling", "Turned onto the grid, u
 # Mean error of the population positions, in grid steps: raw, turned, turned with corner sampling.
 round(c(uniform$error_raw, uniform$error_turned, corner$error_turned), 2)
 ```
-
 
 **Quick check.** Can we say that PC1 points north?
 
@@ -3192,6 +3220,9 @@ This optional box is not part of the main path. No later step uses it. It writes
 ```{r}
 #| label: s5-4_dd_projection
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this number of reference people in each population (try 10, 25, 100 or 400).
@@ -3203,7 +3234,6 @@ demo_plot_panels(frames, paste(sizes, "reference people per population"),
 # Shrinkage: the gap between the study groups divided by the gap between the reference groups. 1 means none.
 round(vapply(frames, function(f) f$stats$ratio, numeric(1)), 2)
 ```
-
 
 **Quick check.** Why can the reference people not show shrinkage themselves?
 
@@ -3297,6 +3327,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 ```{r}
 #| label: s5-5_dd_composition
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this share of the sample that comes from population B (the other panels use fixed shares).
@@ -3307,7 +3340,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% from B"), c("Population A", "Po
 # First eigenvalue and mean PC1 score of each population, for each share.
 round(t(vapply(frames, function(f) unlist(f$stats[c("eigenvalue", "mean_a", "mean_b")]), numeric(3))), 3)
 ```
-
 
 **Quick check.** A study doubles the number of people from one population. Does PC1 describe the same difference as before?
 
@@ -3397,6 +3429,9 @@ In 2022 Elhaik argued that PCA results can be artefacts of the data and can be m
 ```{r}
 #| label: s5-5_dd_colours
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this number of red people and run the chunk again (the other colours have 50 people each).
@@ -3563,6 +3598,9 @@ Each trial starts from the study samples of step 4.6.
 ```{r}
 #| label: s5-6_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))  # <1>
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
@@ -3582,7 +3620,6 @@ par(mfrow = c(1, 2)); plot_threshold_trials(sd_trial, "Samples removed", log_x =
 2. Change the number of SD of the course rule.
 3. Change the chi-squared quantile of the robust Mahalanobis distance.
 4. Plot the removed samples.
-
 
 Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances.
 
@@ -3621,6 +3658,9 @@ The course rule is simple: a sample is an outlier when it lies more than six sta
 ```{r}
 #| label: s5-6_alternatives
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))  # <1>
 ref <- guided_table(paste0(guided_path(cfg, "5.4", "ref_scores"), ".sscore"))
@@ -3634,7 +3674,6 @@ plot_outlier_methods(result, guided_path(cfg, "5.6", "alt_methods.png"))  # <3>
 1. Read the scores of step 5.4 and the group of each reference sample.
 2. Apply the three methods to the same samples and compare them.
 3. Save a plot with a different symbol for the samples that each method removes.
-
 
 Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances. It does not change the genotype files.
 
@@ -3678,6 +3717,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 ```{r}
 #| label: s5-6_dd_confounding
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this share of the cases that come from subpopulation B (half of the controls come from B).
@@ -3688,7 +3730,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% of cases from B"), c("Controls"
 # Lambda and the share of tests with p below 0.05, without PCs and with PC1 as a covariate.
 round(t(vapply(frames, function(f) unlist(f$stats[c("lambda_none", "lambda_pc1", "false_none", "false_pc1")]), numeric(4))), 3)
 ```
-
 
 **Quick check.** Why does PC1 as a covariate remove the inflation here?
 
@@ -3726,6 +3767,9 @@ PC1 carries the difference between A and B. That difference is what links the di
 ```{r}
 #| label: s5-6_dd_outliers
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about twenty seconds.
 source("R/pca_examples.R")
 # Change this number of distant people and run the chunk again (the other panels use fixed numbers).
@@ -3736,7 +3780,6 @@ demo_plot_panels(frames, paste(counts, "distant people"), c("Population A", "Pop
 # How well PC1 and PC2 separate A from B. A value above 3 is a clear separation.
 round(t(vapply(frames, function(f) unlist(f$stats[c("outliers", "separation_pc1", "separation_pc2")]), numeric(3))), 2)
 ```
-
 
 **Quick check.** Why not keep the distant people and add more PCs?
 
@@ -3847,6 +3890,9 @@ This optional box is not part of the main path and does not change your results.
 ```{r}
 #| label: s5-7_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
 trials <- guided_pc_trials(cfg)
 trials$trials
@@ -3855,7 +3901,6 @@ par(mfrow = c(1, 2))
 plot(trials$trials$k, trials$trials$lambda, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Lambda", main = "Lambda"); abline(h = 1, lty = 2)
 plot(trials$trials$k, trials$trials$hits, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Hits below 5e-8", main = "Hits")
 ```
-
 
 Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3.
 
@@ -3891,6 +3936,9 @@ Leaving out long-range LD regions before the PCA does not remove every problem. 
 ```{r}
 #| label: s5-7_pc_number
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
 trials <- guided_pc_trials(cfg)  # <1>
 trials$trials  # <2>
@@ -3906,7 +3954,6 @@ abline(h = 1, lty = 2)
 2. Show hits and lambda for each number of PCs.
 3. Show the first eigenvalues and the p-values of the first PCs against the outcome.
 4. Plot the eigenvalues (scree plot) and lambda against the number of PCs.
-
 
 Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3. The covariates are Age and the first k PCs (`--covar-name Age,PC1-PC10` for ten).
 
@@ -3964,6 +4011,9 @@ PLINK reports only the eigenvalues of the PCs that it computes. The share of the
 ```{r}
 #| label: s5-7_dd_loadings
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This takes about two minutes. It writes only files that start with s5-7_dd_.
 source("R/pca_examples.R")
 state <- guided_path(cfg, "5.6")
@@ -3983,7 +4033,6 @@ pca_local_peaks(first)
 2. Calculate ten PCs and the loading of every site, first without the list.
 3. Calculate them again with the sites of the main path, which leave the list out.
 4. Plot the absolute loadings of the PC with the busiest window.
-
 
 **Where the block comes from.** The simulated people are mosaics of real phased haplotypes from the 1000 Genomes project. The simulator does not add a block of strong LD on purpose. The block is inherited from the real haplotypes, and real genomes have long LD in the region of chromosome 6 that holds the major histocompatibility complex (MHC). So this is not a discovery. It shows what real genomes do, and why the list exists. The list of step 3.4 covers this region of chromosome 6.
 
@@ -4504,6 +4553,9 @@ We draw a Manhattan plot, which shows the strength of each result at its positio
 
 ```{r}
 #| label: s7-3
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 stats <- guided_summary_stats(cfg)  # <1>
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),  # <2>
   POS = stats$base_pair_location, P = stats$p_value)
@@ -4643,6 +4695,9 @@ We draw three detailed regional plots, one for each region with genome-wide sign
 
 ```{r}
 #| label: s7-6
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),  # <1>
   position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
   ld = c("ld_chr3", "ld", "ld_chr12"), picture = c("regional_chr3.png", "regional.png", "regional_chr12.png"),
@@ -4761,6 +4816,9 @@ There is one important limit. The method assumes that the region holds exactly o
 ```{r}
 #| label: s7-6_credible_sets
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This reads the objects `regions` and `stats` made in the chunk of this step. It writes no file.
 credible <- lapply(seq_len(nrow(regions)), function(i) {  # <1>
   region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
@@ -4773,7 +4831,6 @@ data.frame(region = regions$label, lead = regions$rs, variants_in_region = sappl
 1. For each region, take the variants within 500,000 DNA positions of the lead variant.
 2. Calculate the credible set with a prior standard deviation of 0.2 on the log odds ratio (W = 0.04).
 3. Show one row for each region: the size of the set and the PIP of the lead variant.
-
 
 Plain PLINK 2 command: not applicable. R calculates the Bayes factors from the summary statistics.
 
@@ -4799,6 +4856,9 @@ We repeat the association tests without genetic components, the numbers that sum
 
 ```{r}
 #| label: s7-7
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 no_pc <- guided_path(cfg, "7.7", "no_pcs")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))

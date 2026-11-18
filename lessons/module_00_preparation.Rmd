@@ -176,6 +176,8 @@ If you already use Git, a plain `git clone https://github.com/mgentiluomo/GWAS_t
 
 The source project contains code and text. The encrypted data are separate and are downloaded at step 0.7. One project folder keeps the relative paths consistent.
 
+Each page of this website says which project version it needs. To see your version, start R in the project folder and run `source("R/guided.R"); cfg <- guided_init()`. It prints "Project version" and the number. An older project prints no version. If a page needs a newer version than yours, download the project again from this step into a new folder.
+
 ### You need
 
 R and RStudio from steps 0.1 and 0.2, an internet connection and a folder where you can save files.

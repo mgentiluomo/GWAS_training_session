@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "ce9e76a355ecf5917adbc99fee086a6ea53d8147a5f76f123d94afb72877db8b"
+course_source_sha256: "d6b8cb97b4732d7ef5e2ea65b9b18cc75bf07c457e835a2a887021e1e9de7ed7"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -166,6 +166,9 @@ Each trial changes one limit and starts from the same input as the step.
 ```{r}
 #| label: s3-1_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only. Your results folder is not changed.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 samples <- threshold_counts(cfg, guided_path(cfg, "2.8"), "--mind", thresholds)  # <1>
@@ -181,7 +184,6 @@ par(mfrow = c(1, 2)); plot_threshold_trials(samples, "Samples removed"); plot_th
 1. Samples: --mind on the cohort saved at 2.8.
 2. Variants: --geno on the samples that remain after --mind 0.10.
 3. Plot the removed numbers. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -285,6 +287,9 @@ Each trial starts from the cohort saved at 3.1 and changes the limit only.
 ```{r}
 #| label: s3-2_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 trial <- threshold_counts(cfg, guided_path(cfg, "3.1"), "--mind", thresholds)
@@ -294,7 +299,6 @@ trial
 plot_threshold_trials(trial, "Samples removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -440,6 +444,9 @@ Each trial changes one limit of the sex check.
 ```{r}
 #| label: s3-3_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one limit only. Your results folder is not changed.
 females <- sexcheck_counts(cfg, guided_path(cfg, "3.3", "par"), "max-female-xf", c(0.1, 0.2, 0.3, 0.4))  # <1>
 females$course_value <- females$threshold == 0.2
@@ -454,7 +461,6 @@ par(mfrow = c(1, 2)); plot_threshold_trials(females, "Samples flagged", log_x = 
 1. Change the female limit, with the other limits at their course values.
 2. Change the male limit.
 3. Plot the flagged samples. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -583,6 +589,9 @@ Each trial changes one setting of LD pruning. Here "removed" means pruned out.
 ```{r}
 #| label: s3-4_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one setting only. It writes no file in your results folder.
 regions <- guided_high_ld(cfg)
 r2_limits <- c(0.1, 0.2, 0.5)  # <1>
@@ -600,7 +609,6 @@ plot_threshold_trials(data.frame(threshold = windows, removed = by_window["prune
 1. Change the r2 limit, with a window of 200 kb.
 2. Change the window, with an r2 limit of 0.2.
 3. Plot the pruned variants. The course value is the large diamond.
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -749,6 +757,9 @@ The trials change the number of standard deviations (SD) and use the same F valu
 ```{r}
 #| label: s3-5_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of F values that the step wrote. No PLINK run is needed.
 multipliers <- c(2, 2.5, 3, 3.5, 4)
 trial <- het_counts(guided_table(paste0(guided_path(cfg, "3.5", "het"), ".het")), multipliers)
@@ -758,7 +769,6 @@ trial
 plot_threshold_trials(trial, "Samples removed", log_x = FALSE)
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -911,6 +921,9 @@ The usual KING cutoffs are 0.354 for repeated samples, 0.177 for first-degree re
 ```{r}
 #| label: s3-6_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of pairs that the step wrote. No PLINK run is needed.
 cutoffs <- c(0.0442, 0.0884, 0.177, 0.354)
 kin <- guided_table(paste0(guided_path(cfg, "3.6", "king"), ".kin0"))
@@ -921,7 +934,6 @@ trial
 plot_threshold_trials(trial, "Samples removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 

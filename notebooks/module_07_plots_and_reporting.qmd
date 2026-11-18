@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "9167ca0f748d5a812084e0d7fa7e08c6e5a53bf7f3e2ce4f11c0ebe59a8ab2d2"
+course_source_sha256: "cb52130a2514b8fd23f16c9a549dde42b31da9629820e4b9212da5b31c125fa0"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -140,6 +140,9 @@ We draw a Manhattan plot, which shows the strength of each result at its positio
 
 ```{r}
 #| label: s7-3
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 stats <- guided_summary_stats(cfg)  # <1>
 plot_data <- data.frame(CHROM = suppressWarnings(as.numeric(stats$chromosome)),  # <2>
   POS = stats$base_pair_location, P = stats$p_value)
@@ -279,6 +282,9 @@ We draw three detailed regional plots, one for each region with genome-wide sign
 
 ```{r}
 #| label: s7-6
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"),  # <1>
   position = c(163224115, 96426973, 120965921), lead = c("3:163224115:T:C", "9:96426973:A:G", "12:120965921:G:A"),
   ld = c("ld_chr3", "ld", "ld_chr12"), picture = c("regional_chr3.png", "regional.png", "regional_chr12.png"),
@@ -397,6 +403,9 @@ There is one important limit. The method assumes that the region holds exactly o
 ```{r}
 #| label: s7-6_credible_sets
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This reads the objects `regions` and `stats` made in the chunk of this step. It writes no file.
 credible <- lapply(seq_len(nrow(regions)), function(i) {  # <1>
   region <- stats[stats$chromosome == regions$chromosome[i] & abs(stats$base_pair_location - regions$position[i]) <= 500000 & valid_p(stats$p_value), ]
@@ -409,7 +418,6 @@ data.frame(region = regions$label, lead = regions$rs, variants_in_region = sappl
 1. For each region, take the variants within 500,000 DNA positions of the lead variant.
 2. Calculate the credible set with a prior standard deviation of 0.2 on the log odds ratio (W = 0.04).
 3. Show one row for each region: the size of the set and the PIP of the lead variant.
-
 
 Plain PLINK 2 command: not applicable. R calculates the Bayes factors from the summary statistics.
 
@@ -435,6 +443,9 @@ We repeat the association tests without genetic components, the numbers that sum
 
 ```{r}
 #| label: s7-7
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 no_pc <- guided_path(cfg, "7.7", "no_pcs")  # <1>
 run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--maf", "0.01", "--covar", guided_path(cfg, "6.2", "covariates.tsv"),
   "--covar-name", "Age", "--covar-variance-standardize", "--glm", "sex", "hide-covar", "firth-fallback", "--out", no_pc))

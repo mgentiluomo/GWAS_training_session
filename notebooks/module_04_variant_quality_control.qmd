@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "e114d48833446881df78c51108435ac8979cf1d32df4c499b857d97e6d2e1088"
+course_source_sha256: "2aee4eb31d9e0f6b63412e00572eaa462d14cace68d5ab0ab908a73b1c200403"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -130,6 +130,9 @@ Each trial starts from the cohort saved at 3.8 and changes the limit only.
 ```{r}
 #| label: s4-1_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.01, 0.02, 0.05, 0.10, 0.20)
 trial <- threshold_counts(cfg, guided_path(cfg, "3.8"), "--geno", thresholds)
@@ -139,7 +142,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -250,6 +252,9 @@ Each trial applies a different cutoff to the same test results.
 ```{r}
 #| label: s4-2_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
 missing_table <- guided_table(paste0(guided_path(cfg, "4.2", "missing"), ".missing"))
 cutoffs <- c(1e-3, 1e-4, 1e-5, 1e-6, 1e-8)
@@ -260,7 +265,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -352,6 +356,9 @@ The minor allele frequency (MAF) is how often the less common version of a varia
 ```{r}
 #| label: s4-3_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each trial starts from the same input and changes one threshold only.
 thresholds <- c(0.001, 0.005, 0.01, 0.02, 0.05)
 trial <- threshold_counts(cfg, guided_path(cfg, "4.2"), "--maf", thresholds)
@@ -361,7 +368,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 
@@ -483,6 +489,9 @@ The Hardy-Weinberg test compares the genotype counts of a variant in controls wi
 ```{r}
 #| label: s4-4_thresholds
 #| eval: false
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. The trials use the table of tests that the step wrote. No PLINK run is needed.
 cutoffs <- c(1e-3, 1e-4, 1e-6, 1e-8, 1e-10)
 trial <- hwe_counts(guided_table(paste0(guided_path(cfg, "4.4", "hardy"), ".hardy")), cutoffs)
@@ -493,7 +502,6 @@ trial
 plot_threshold_trials(trial, "Variants removed")
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 
 Plain PLINK 2 command for one trial. It writes only small files with the name that you give to `--out`, never a new dataset:
 

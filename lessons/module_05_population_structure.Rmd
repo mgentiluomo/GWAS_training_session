@@ -134,6 +134,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 **R code.** Change `angle` at the top of the chunk and run it again.
 
 ```{r s5-1_dd_rotation, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this angle (in degrees) and run the chunk again.
@@ -147,7 +150,6 @@ demo_plot_panels(frames, titles, "People", "Height (cm, centred)", "Arm span (cm
 # The angle of PC1, found by PCA.
 demo_rotation_pc1_angle(data)
 ```
-
 **Quick check.** Can a turned line ever hold more variance than PC1?
 
 <details><summary>Show the answer</summary>
@@ -181,6 +183,9 @@ No. PC1 is defined as the direction with the largest variance. Every other direc
 **R code.** Change `fst` and run the chunk again.
 
 ```{r s5-1_dd_fst, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this value (0, 0.0005, 0.001, 0.005, 0.01 or 0.05) and run the chunk again.
@@ -193,7 +198,6 @@ round(vapply(frames, function(f) f$stats$separation, numeric(1)), 2)
 # The Fst at the phase change for each number of variants: 1 divided by the square root of (people times variants).
 signif(vapply(frames, function(f) f$stats$threshold, numeric(1)), 2)
 ```
-
 **Quick check.** A study has few variants. PCA shows one cloud for two closely related populations. Does this prove that the populations are the same?
 
 <details><summary>Show the answer</summary>
@@ -227,6 +231,9 @@ No. With this amount of data, a small difference cannot be seen. More people or 
 **R code.** Change `shares` and run the chunk again.
 
 ```{r s5-1_dd_admixture, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Each frame takes a few seconds.
 source("R/pca_examples.R")
 # Change these shares of ancestry from A in the mixed people and run the chunk again.
@@ -234,7 +241,6 @@ shares <- c(0.1, 0.25, 0.5, 0.75, 0.9)
 frames <- lapply(shares, function(s) demo_admixture_frame(s, seed = 1))
 demo_plot_panels(frames, paste("Share from A:", shares), c("A", "B", "C", "Mixed A and B"))
 ```
-
 **Quick check.** A person lies half-way between A and B on the plot. Give one reason, other than admixture, that could place a person there.
 
 <details><summary>Show the answer</summary>
@@ -268,6 +274,9 @@ Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07
 **R code.** Change `migration` and run the chunk again.
 
 ```{r s5-1_dd_grid, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this migration rate (try 0.8, 0.25, 0.1 or 0.01) and run the chunk again.
@@ -281,7 +290,6 @@ demo_plot_panels(frames, c("Raw PCA, uniform sampling", "Turned onto the grid, u
 # Mean error of the population positions, in grid steps: raw, turned, turned with corner sampling.
 round(c(uniform$error_raw, uniform$error_turned, corner$error_turned), 2)
 ```
-
 **Quick check.** Can we say that PC1 points north?
 
 <details><summary>Show the answer</summary>
@@ -543,6 +551,9 @@ This optional box is not part of the main path. No later step uses it. It writes
 **R code.** Change `n_ref` and run the chunk again.
 
 ```{r s5-4_dd_projection, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this number of reference people in each population (try 10, 25, 100 or 400).
@@ -554,7 +565,6 @@ demo_plot_panels(frames, paste(sizes, "reference people per population"),
 # Shrinkage: the gap between the study groups divided by the gap between the reference groups. 1 means none.
 round(vapply(frames, function(f) f$stats$ratio, numeric(1)), 2)
 ```
-
 **Quick check.** Why can the reference people not show shrinkage themselves?
 
 <details><summary>Show the answer</summary>
@@ -743,6 +753,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 **R code.** Change `share_b` and run the chunk again.
 
 ```{r s5-5_dd_composition, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this share of the sample that comes from population B (the other panels use fixed shares).
@@ -753,7 +766,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% from B"), c("Population A", "Po
 # First eigenvalue and mean PC1 score of each population, for each share.
 round(t(vapply(frames, function(f) unlist(f$stats[c("eigenvalue", "mean_a", "mean_b")]), numeric(3))), 3)
 ```
-
 **Quick check.** A study doubles the number of people from one population. Does PC1 describe the same difference as before?
 
 <details><summary>Show the answer</summary>
@@ -833,6 +845,9 @@ In 2022 Elhaik argued that PCA results can be artefacts of the data and can be m
 **R code.** Change `n_red` and run the chunk again.
 
 ```{r s5-5_dd_colours, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder.
 source("R/pca_examples.R")
 # Change this number of red people and run the chunk again (the other colours have 50 people each).
@@ -848,7 +863,6 @@ result <- t(vapply(frames, distances, numeric(9)))
 rownames(result) <- paste(sizes, "red people")
 round(result, 2)
 ```
-
 #### Debate: what does a PCA plot tell us?
 
 **Why a debate.** How to read PCA plots of human genetic data is debated. This box separates what the colour model shows from the wider claims of the article.
@@ -1018,6 +1032,9 @@ Each trial starts from the study samples of step 4.6.
 **Key idea:** A statistical cutoff flags some normal people, so check who is flagged.
 
 ```{r s5-6_thresholds, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
 # 1. Read the scores of step 5.4 and apply the methods to the same samples.
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
@@ -1036,7 +1053,6 @@ mcd_trial
 par(mfrow = c(1, 2)); plot_threshold_trials(sd_trial, "Samples removed", log_x = FALSE); plot_threshold_trials(mcd_trial, "Samples removed", log_x = FALSE)
 # Optional: add engine = "ggplot2" to plot_threshold_trials() to draw the plot with ggplot2 (install.packages("ggplot2") once first).
 ```
-
 Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances.
 
 The expected result of the trials:
@@ -1070,6 +1086,9 @@ The course rule is simple: a sample is an outlier when it lies more than six sta
 **Nearest 1000 Genomes group.** This method assigns each study sample to the nearest of the four reference groups (AFR, EAS, EUR and SAS) by Mahalanobis distance. A sample is an outlier when its nearest group is not EUR. It also tells where each outlier comes from.
 
 ```{r s5-6_alternatives, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.6. The package MASS comes with R.
 # 1. Read the scores of step 5.4 and the group of each reference sample.
 metadata <- guided_table(file.path(cfg$data_dir, "pca_reference", "ref1000g_grch38.psam"))
@@ -1082,7 +1101,6 @@ outlier_method_table(result)
 # 3. Save a plot with a different symbol for the samples that each method removes.
 plot_outlier_methods(result, guided_path(cfg, "5.6", "alt_methods.png"))
 ```
-
 Plain PLINK 2 command: not applicable. R reads the score tables and calculates the distances. It does not change the genotype files.
 
 Expected result. The table has one row for each method.
@@ -1125,6 +1143,9 @@ These optional boxes are not part of the main path. No later step uses them. The
 **R code.** Change `case_share_b` and run the chunk again.
 
 ```{r s5-6_dd_confounding, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about ten seconds.
 source("R/pca_examples.R")
 # Change this share of the cases that come from subpopulation B (half of the controls come from B).
@@ -1135,7 +1156,6 @@ demo_plot_panels(frames, paste0(shares * 100, "% of cases from B"), c("Controls"
 # Lambda and the share of tests with p below 0.05, without PCs and with PC1 as a covariate.
 round(t(vapply(frames, function(f) unlist(f$stats[c("lambda_none", "lambda_pc1", "false_none", "false_pc1")]), numeric(4))), 3)
 ```
-
 **Quick check.** Why does PC1 as a covariate remove the inflation here?
 
 <details><summary>Show the answer</summary>
@@ -1169,6 +1189,9 @@ PC1 carries the difference between A and B. That difference is what links the di
 **R code.** Change `outliers` and run the chunk again.
 
 ```{r s5-6_dd_outliers, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes your results folder. This takes about twenty seconds.
 source("R/pca_examples.R")
 # Change this number of distant people and run the chunk again (the other panels use fixed numbers).
@@ -1179,7 +1202,6 @@ demo_plot_panels(frames, paste(counts, "distant people"), c("Population A", "Pop
 # How well PC1 and PC2 separate A from B. A value above 3 is a clear separation.
 round(t(vapply(frames, function(f) unlist(f$stats[c("outliers", "separation_pc1", "separation_pc2")]), numeric(3))), 2)
 ```
-
 **Quick check.** Why not keep the distant people and add more PCs?
 
 <details><summary>Show the answer</summary>
@@ -1301,6 +1323,9 @@ This optional box is not part of the main path and does not change your results.
 **Key idea:** Choose the number of PCs before you look at results, because here one PC already does the job.
 
 ```{r s5-7_thresholds, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
 trials <- guided_pc_trials(cfg)
 trials$trials
@@ -1309,7 +1334,6 @@ par(mfrow = c(1, 2))
 plot(trials$trials$k, trials$trials$lambda, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Lambda", main = "Lambda"); abline(h = 1, lty = 2)
 plot(trials$trials$k, trials$trials$hits, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Hits below 5e-8", main = "Hits")
 ```
-
 Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3.
 
 The expected result of the trials:
@@ -1340,6 +1364,9 @@ A formal test also exists: the Tracy-Widom test asks whether an eigenvalue is la
 Leaving out long-range LD regions before the PCA does not remove every problem. Grinde et al. 2024 ([doi:10.1371/journal.pgen.1011242](https://doi.org/10.1371/journal.pgen.1011242)) studied people of mixed ancestry. Later PCs described small parts of the genome instead of ancestry, and adjusting for them gave false links through collider bias. A collider is a variable that two other things both influence. Adjusting for it can make those two look related. Excluding known regions did not solve it there, and LD pruning worked better. In our cohort the risk is smaller, because only PC1 carries ancestry. Still, check what each PC describes before you use it.
 
 ```{r s5-7_pc_number, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. Nothing here changes the files of step 5.7. This takes about three minutes.
 # 1. Run a 20-component PCA and the association scans for 0, 1, 2, 3, 5, 10, 15 and 20 PCs.
 trials <- guided_pc_trials(cfg)
@@ -1354,7 +1381,6 @@ plot(1:20, trials$eigenvalues, type = "b", pch = 16, xlab = "PC number", ylab = 
 plot(trials$trials$k, trials$trials$lambda, type = "b", pch = 16, xlab = "Number of PCs", ylab = "Lambda", main = "Lambda")
 abline(h = 1, lty = 2)
 ```
-
 Plain PLINK 2 command: the function runs `--pca 20` on the pruned list of step 5.7, and then `--glm sex hide-covar firth-fallback` once for each number of PCs, with the same options as step 6.3. The covariates are Age and the first k PCs (`--covar-name Age,PC1-PC10` for ten).
 
 Expected result.
@@ -1405,6 +1431,9 @@ PLINK reports only the eigenvalues of the PCs that it computes. The share of the
 **The idea.** A PC should describe differences between people across the whole genome. Sometimes it describes one region instead, where long stretches of variants are strongly correlated. Step 3.4 leaves out a list of such regions. Here you calculate the PCs twice, without and with the list. A loading tells how much a variant contributes to a PC. The plot shows the absolute loadings of one PC along the genome. The code picks the PC for which most of the 200 largest loadings fall in one window of 5 million bases.
 
 ```{r s5-7_dd_loadings, eval=FALSE}
+# Course check. This step needs project version 2026.5 or later.
+if (!exists("requires_course_version")) stop("This step needs project version 2026.5 or later. Your project is older. Download the new version at step 0.3.", call. = FALSE)
+requires_course_version("2026.5")
 # Optional. This takes about two minutes. It writes only files that start with s5-7_dd_.
 source("R/pca_examples.R")
 state <- guided_path(cfg, "5.6")
@@ -1423,7 +1452,6 @@ pca_plot_loadings(first, second, c("Without leaving out the long-range LD region
 # For each PC: the busiest window of 5 million bases among its 200 largest loadings, and how many loadings fall in it.
 pca_local_peaks(first)
 ```
-
 **Where the block comes from.** The simulated people are mosaics of real phased haplotypes from the 1000 Genomes project. The simulator does not add a block of strong LD on purpose. The block is inherited from the real haplotypes, and real genomes have long LD in the region of chromosome 6 that holds the major histocompatibility complex (MHC). So this is not a discovery. It shows what real genomes do, and why the list exists. The list of step 3.4 covers this region of chromosome 6.
 
 **What to observe.** Without the list, one PC has a tall block of loadings in one place, which is drawn as orange triangles. With the list, the block is gone. The table shows the chromosome, the start of the window in millions of bases, and the number of the 200 largest loadings in it. A PC like this describes one region, not the ancestry of the people. This is why the course leaves the regions out in steps 3.4 and 5.7.
