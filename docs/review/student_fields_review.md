@@ -1,5 +1,67 @@
 # Review of the student fields for modules 0 to 7
 
+## PCA deep dives, 18 November
+
+Written for the author. Branches: course `course/2026.5-pca` (from `course/2026.5`) and site `course/2026.5-pca-preview` (from `course/2026.5-preview`). Both are pushed. Nothing was merged into `course/2026.5` or `main`, and no release was made. The staging `classroom-stage-2026.2` and the instructor key were not touched (reading only). No password was asked for, read or written. No encrypted archive was made. No force, rebase, reset, stash, clean, restore or amend was used.
+
+### Where each block is, and why
+
+The deep dives are in one collapsed box "Optional: deep dives" for each step. It is a new optional block `deep_dive` of the existing steps (after "Another approach", before "Under the hood"). There is no new step and no renumbering. The main text of the steps was not changed.
+
+| Step | Deep dives | Why here |
+| --- | --- | --- |
+| 5.1 | D1 what a PC is; D2 why genetic data form clusters, with the admixture example; D2-bis genes and geography | 5.1 is the first step of the module and explains why ancestry matters. The ideas of score, loading, eigenvalue and drift are needed before the PCA of 5.4. |
+| 5.4 | D4 projection and shrinkage | 5.4 is where the study is projected on the 1000 Genomes axes. |
+| 5.5 | D3 what a PCA plot is not (composition of the sample, the word "ancestry"); a real example with European populations of the reference; D7 debate on the colour model | 5.5 is where the student first reads a PCA plot. The debate follows D3 and uses the same lesson (the plot depends on the sample). |
+| 5.6 | D5 why we remove outliers (confounding, far-away people turn the axes, outliers can be errors) | 5.6 removes the outliers. The two boxes that were already there (thresholds and "Another approach") are not repeated. |
+| 5.7 | D6 eigenvalues and the scree plot; can one region take over a PC (loadings with and without the long-range LD list) | 5.7 has the scree plot and the PCs of the cohort. The loadings experiment needs the cohort state of step 5.6. |
+| 3.4 | A short pointer to the experiment of 5.7 | 3.4 leaves the long-range LD regions out, but the PCs do not exist yet in module 3, so the experiment cannot run there. Decision: the experiment lives in 5.7 and 3.4 points to it. |
+
+Each deep dive has the idea in simple words, an example, R code to run again with the parameter at the top, what to observe, a quick check with a hidden answer and the references. D6 and the LD experiment have no JSON example: they use the student's own results.
+
+### Interactive examples
+
+- `R/pca_examples.R` (base R, fixed seeds) holds the simulations. `scripts/author/pca_examples.R` writes `site_content/pca_examples/*.json`. The numbers in the lesson text are never typed by hand: the table of each example is read from its JSON. Parameters of the design (for example 100 people in each population) are in the text, results are not.
+- Nine examples, with the size of the JSON file: `pc-rotation` 106.8 kB, `fst-snps` 62.5 kB, `admixture` 14.9 kB, `stepping-stone` 84.0 kB, `composition` 18.4 kB, `confounding` 51.7 kB, `outliers` 15.0 kB, `colour-model` 9.4 kB, `projection` 109.2 kB. All are below 300 kB (the total is 472 kB).
+- Site: the component `PcaExample` (SVG, no library). It has one slider for each parameter (native `input[type=range]`, usable from the keyboard), groups by shape and colour (Okabe-Ito colours), a table with the numbers of the current setting, a live text line, no animation (so `prefers-reduced-motion` is respected). The sync script validates the files (number of frames, groups, size). The JSON files are in the page bundle of the step pages that use them.
+- Notebooks: the same R code with the parameter at the top and a panel plot of four or five values. The marker line `{{example:ID}}` is dropped from the notebooks.
+
+### Tests
+
+- `scripts/tests/test_pca_examples.R` (behaviour): the largest variance of the rotating line is at the angle of PC1; with Fst 0 PC1 does not separate the groups, with Fst 0.05 it does, and more variants help near the threshold; the position of mixed people follows their ancestry share; low migration gives a smaller Procrustes error than very high or very low migration, and the turned view is better than the raw view; corner sampling deforms the map; the first eigenvalue is largest for a 50/50 sample; lambda grows with the share of cases from one subpopulation and PC1 as a covariate brings it back; ten distant people take over PC1; shrinkage falls as the reference grows; a call is reproducible; the loadings helper finds a planted peak.
+- `scripts/tests/test_pca_examples.py`: the files exist, are below 300 kB, have the expected structure and are rebuilt byte for byte by the R script.
+
+### Checks
+
+- Python tests: all pass. R tests: all pass with the data of the staging (including `test_main_path_recovery.R` and `scripts/author/test_checkpoint_restarts.R` for the five checkpoints).
+- **The numbers of the main path did not change.** A complete run of `scripts/run_main_path.R` (exit 0) gave a `step_counts.tsv` identical to the run of the morning, and the final summary, the leads, the comparison, the clumps and the association table are byte for byte the same. The deep dive chunks are not in the main script (they are `eval=FALSE`), and they write only into files and folders with their own prefixes (`s5-5_dd_`, `s5-7_dd_`).
+- All 11 R chunks of the deep dives were executed on the staging data (no error). The notebook of the whole course renders in Quarto 1.10.18 with execution (exit 0, 0 errors, the same 10 cosmetic warnings of module 7 as before). The nine notebooks render with `--no-execute`.
+- Site: `sync:gwas`, `tsc`, lint (0 errors, 10 old warnings), review build and production build pass. axe-core 4.14.1 on steps 3.4, 5.1, 5.4, 5.5, 5.6 and 5.7, light and dark, 360 and 1280 px (24 runs): 0 violations and no horizontal overflow. Keyboard test: every slider of every PCA example changes with the arrow keys, the live text changes and the table has its rows (5.1: 4 examples, 7 sliders; 5.4: 1 example, 2 sliders; 5.5: 2 examples, 4 sliders; 5.6: 2 examples, 2 sliders).
+
+### Decisions and findings that you should know
+
+1. **The brief's expectation about the colour model was not reproduced.** With more red people the distance from Black to Red in the PC1-PC2 plane became larger in my implementation. The text does not say in which direction Black moves. It says that the place of Black depends on the sample sizes and the table shows the distances. If you want a stronger statement, the model of the article should be read in full first (I used only the abstract).
+2. **No verified reply to Elhaik 2022.** I searched PubMed and Crossref and found none, so the debate cites none and names none. It says so and asks students to ask the instructor. See `references_checked.md`.
+3. **The formula of the phase change of Patterson 2006 is not given.** The formulas were not readable in the text I could access. The text uses the verified sentence about a threshold, and the example computes a separation index.
+4. **"Contested" claims.** The article's claim about 32,000 to 216,000 studies is described as the most far-reaching claim, to be judged against independent replies. I did not write that it is "disputed" as a fact, because I could not verify a source.
+5. **The grid example is not a real stepping-stone model fitted to data.** It is a forward simulation of drift and migration between four neighbours on a 6 by 6 grid (1,000 variants, 100 generations). Very high migration gives a blur, moderate migration gives a map, very low migration gives islands. Corner sampling deforms the map. The labels are neutral (A1 to F6). No map of Europe and nothing that imitates the figure of Novembre et al. 2008.
+6. **Real data example (EUR).** The staging reference holds CEU, GBR, IBS and TSI but no FIN. The code uses the populations that exist, and the text does not say how many there are. `--maf 0.05` is needed because PLINK refuses PCA with rarer variants for 212 people.
+7. **The simulated data have a locus that takes over a PC.** Without the long-range LD list, PC3 of the cohort has a tall block of loadings on chromosome 6 (window of 5 million bases at 30 Mb); with the list it is gone. This is a property of the simulation and it makes the deep dive concrete.
+8. **Commits.** The blocks for 3.4, 5.4, 5.5, 5.6 and 5.7 are in one commit because they share the same lesson files and the generated files (the tool cannot stage parts of a file). The other changes are one per commit.
+9. **Bundle size.** The JSON files are imported into the client component, so the step pages with examples carry about 470 kB of JSON before compression. If this matters, load each file only when its example is opened.
+
+### References used and not used
+
+Used and verified (details in `references_checked.md`): Jolliffe and Cadima 2016; Novembre et al. 2008 (full text of the author manuscript read through PubMed); Novembre and Stephens 2008; McVean 2009; Elhaik 2022 (abstract only); Price et al. 2006, Patterson et al. 2006, Privé et al. 2020, Grinde et al. 2024 and Price et al. 2008 (already verified). Not used: a reply to Elhaik (none verified); the formula of the Patterson threshold (not readable); the later Mohseni and Elhaik article in eLife (Crossref marks it as retracted, and it is not needed).
+
+### Blocks not done
+
+None of the blocks of the brief was left out. D6 has no dynamic example by design (it uses the student's own eigenvalues). The instructor notes are in hidden boxes inside the debate.
+
+### Commits
+
+Course (`course/2026.5-pca`): the toy examples and their tests; the `deep_dive` block in the exporter and the notebooks; step 5.1; the scaling of the raw grid view; the projection example; the loadings helpers; the blocks for 3.4, 5.4, 5.5, 5.6 and 5.7; the European example in 5.5; the references report; this report. Site (`course/2026.5-pca-preview`): the component and the page change; two syncs of the course content.
+
 ## Session of 18 November, morning
 
 Written for the author. Everything is on the branches `course/2026.5` (course) and `course/2026.5-preview` (site). Nothing was merged into `main` and no release was made. No password was asked for, read or written. No encrypted archive was made. No force, rebase, reset, stash, clean, restore or amend was used.
