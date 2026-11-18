@@ -2594,6 +2594,155 @@ No PLINK equivalent
 
 :::
 
+::: {.callout-tip title="Optional: deep dives" collapse="true"}
+
+This box is not part of the main path. No later step uses it. It writes no file in your results folder. It has three deep dives on principal components: what a component is, why genetic data form clusters, and what happens when populations lie on a map. Each deep dive has an example that you can change. The numbers in the examples come from simulated data with a fixed seed.
+
+#### Deep dive: what is a principal component?
+
+**The idea.** Take two measurements for each person, for example height and arm span. The two are correlated, because tall people tend to have a long arm span. The dots form a long, thin cloud. A [principal component](#glossary-pca-pc) (PC) is the direction along which the dots are most spread out. To see this, draw a line through the middle of the cloud and drop every dot onto the line. The spread of the dropped dots is their variance. Turn the line and the variance changes. The direction with the largest variance is PC1. The line at a right angle to it is PC2. PC2 holds the spread that PC1 does not describe.
+
+
+**From two measurements to 100,000 variants.** In genotype data, every variant is one measurement. A person is a point in a space with one axis for each variant. We cannot draw 100,000 axes, but PCA can still find the few directions that carry most of the differences between people. Each person gets one number for each direction. This number is the score. Each variant also gets one weight for each direction. This weight is the loading, and it shows how much the variant contributes to the direction. An [eigenvalue](#glossary-eigenvalue) is the variance along one direction. The variance explained is the share of the total variance that one direction holds. The [scree plot](#glossary-scree-plot) of step 5.7 shows the eigenvalues in order.
+
+**R code.** The function `demo_rotation_frame()` projects the dots on a line at the angle that you choose. Change `angle` and run the chunk again. The first panel shows your angle. The other four panels show four fixed angles for comparison.
+
+```{r}
+#| label: s5-1_dd_rotation
+#| eval: false
+# Optional. Nothing here changes your results folder.
+source("R/pca_examples.R")
+# Change this angle (in degrees) and run the chunk again.
+angle <- 20
+data <- demo_rotation_data()
+angles <- c(angle, 0, 45, 90, 135)
+frames <- lapply(angles, function(a) demo_rotation_frame(data, a))
+# Title of each panel: the angle and the share of the total variance on the line.
+titles <- sprintf("%d degrees: %.0f%%", angles, 100 * vapply(frames, function(f) f$stats$share, numeric(1)))
+demo_plot_panels(frames, titles, "People", "Height (cm, centred)", "Arm span (cm, centred)", equal = TRUE)
+# The angle of PC1, found by PCA.
+demo_rotation_pc1_angle(data)
+```
+
+
+**What to observe.** The share of the variance is largest when the line follows the long direction of the cloud. It is smallest when the line is at a right angle to it. The best angle is the angle of PC1, which the table under the example reports. PCA does the same thing in many dimensions at once.
+
+**Quick check.** Can a turned line ever hold more variance than PC1?
+
+<details><summary>Show the answer</summary>
+
+No. PC1 is defined as the direction with the largest variance. Every other direction holds the same or less.
+
+</details>
+
+**Reference.** Jolliffe IT, Cadima J. 2016. Principal component analysis: a review and recent developments. Philosophical Transactions of the Royal Society A 374:20150202. [doi:10.1098/rsta.2015.0202](https://doi.org/10.1098/rsta.2015.0202).
+
+#### Deep dive: why genetic data form clusters
+
+**The idea.** Two populations that once were one population drift apart. Allele frequencies change by chance in each of them. Fst is a number for how far two populations have drifted. It is 0 when their allele frequencies are the same, and it grows as they differ more. At one variant the difference is tiny, so one variant cannot tell the populations apart. Many variants together can. PCA adds up the small differences of all variants. The populations separate on PC1 only when three things are large enough together: the drift, the number of people and the number of variants. Patterson et al. 2006 call this a phase change. For a fixed data size, a divergence below a threshold is essentially undetectable, and a little above the threshold it is easy to detect. In this example, each population has 100 people.
+
+
+**R code.** Change `fst` and run the chunk again. The three panels use 1,000, 10,000 and 100,000 variants.
+
+```{r}
+#| label: s5-1_dd_fst
+#| eval: false
+# Optional. This takes about ten seconds.
+source("R/pca_examples.R")
+# Change this value (0, 0.0005, 0.001, 0.005, 0.01 or 0.05) and run the chunk again.
+fst <- 0.005
+snps <- c(1000, 10000, 100000)
+frames <- demo_fst_frames(fst, snps, seed = 1)
+demo_plot_panels(frames, paste(format(snps, big.mark = ","), "variants"), c("Population A", "Population B"))
+# Separation of A and B on PC1: 0 means no separation, and a value above 3 is a clear gap.
+round(vapply(frames, function(f) f$stats$separation, numeric(1)), 2)
+```
+
+
+**What to observe.** With an Fst of 0, PC1 does not split the two populations, however many variants you use. With a larger Fst, the populations separate, and they separate sooner when you add variants. Near the threshold, more variants turn one blurred cloud into two clusters.
+
+**Quick check.** A study has few variants. PCA shows one cloud for two closely related populations. Does this prove that the populations are the same?
+
+<details><summary>Show the answer</summary>
+
+No. With this amount of data, a small divergence cannot be seen. More people or more variants could show two clusters.
+
+</details>
+
+**Mixed people.** Some people have ancestors from more than one population. This is admixture. The allele frequencies of a mixed person are a blend of the source populations. PCA places such a person between the sources. In the next example, 40 mixed people have ancestry from populations A and B. A third population, C, is not involved.
+
+
+```{r}
+#| label: s5-1_dd_admixture
+#| eval: false
+# Optional. Each frame takes a few seconds.
+source("R/pca_examples.R")
+# Change these shares of ancestry from A in the mixed people and run the chunk again.
+shares <- c(0.1, 0.25, 0.5, 0.75, 0.9)
+frames <- lapply(shares, function(s) demo_admixture_frame(s, seed = 1))
+demo_plot_panels(frames, paste("Share from A:", shares), c("A", "B", "C", "Mixed A and B"))
+```
+
+
+**What to observe.** The mixed people lie on the line between A and B. They move towards A as the share from A grows. The table under the example compares their mean position with the position expected from their ancestry share.
+
+**Quick check.** A person lies half-way between A and B on the plot. Give one reason, other than admixture, that could place a person there.
+
+<details><summary>Show the answer</summary>
+
+A person from a third population that is genetically between A and B, but that was not sampled, can lie there too. A technical problem with the genotypes can also move a person. A position alone does not show the ancestry.
+
+</details>
+
+**References.** Patterson N, Price AL, Reich D. 2006. Population structure and eigenanalysis. PLoS Genetics 2:e190. [doi:10.1371/journal.pgen.0020190](https://doi.org/10.1371/journal.pgen.0020190).
+
+#### Deep dive: genes and geography
+
+**The idea.** Novembre et al. 2008 ([doi:10.1038/nature07331](https://doi.org/10.1038/nature07331)) studied people from across Europe. The article reports 3,192 people genotyped at 500,568 variants. The main analysis used 1,387 people and 197,146 variants, because the origin of these people was known with confidence. The origin was the country of all observed grandparents. People whose grandparents came from different countries were left out. We do not reproduce the figures of the article. In words, it reports three things.
+
+- The first two PCs, plotted against each other, look like a map of Europe. People from the same region lie together, and neighbouring regions touch. The authors turned the axes by 16 degrees. They chose this angle because it gave the best match with latitude and longitude.
+- The data tell apart Swiss people who speak French, German or Italian.
+- The genetic correlation between two people falls as the distance between them grows.
+
+The authors also warn that the direction and the strength of the PC axes depend on how the samples are spread in space. Novembre and Stephens 2008 ([doi:10.1038/ng.139](https://doi.org/10.1038/ng.139)) show that smooth gradients across space give regular wave-like patterns in PCA. These patterns do not necessarily show migration events.
+
+Our example is a grid of 36 simulated populations. They are named A1 to F6, and only neighbours exchange migrants. The grid is not a map of any real place. The plot shows the PC1 and PC2 position of each population, and lines join neighbours. PCA does not know where north is, so the raw plot has arbitrary directions. In the turned view we choose the rotation ourselves, knowing the true grid. The method is called Procrustes analysis. It turns, flips and scales the points to match the true places as closely as possible. The table gives the mean error in grid steps.
+
+
+**R code.** Change `migration` and run the chunk again. This takes about ten seconds.
+
+```{r}
+#| label: s5-1_dd_grid
+#| eval: false
+# Optional. Nothing here changes your results folder.
+source("R/pca_examples.R")
+# Change this migration rate (try 0.8, 0.25, 0.1 or 0.01) and run the chunk again.
+migration <- 0.25
+uniform <- demo_stepping_stone(migration, "uniform")
+corner <- demo_stepping_stone(migration, "corner")
+frames <- list(demo_stepping_frame(uniform, turned = FALSE), demo_stepping_frame(uniform, turned = TRUE),
+               demo_stepping_frame(corner, turned = TRUE))
+demo_plot_panels(frames, c("Raw PCA, uniform sampling", "Turned onto the grid, uniform sampling", "Turned onto the grid, corner sampling"),
+                 equal = TRUE, xlab = "East-west (grid steps)", ylab = "North-south (grid steps)")
+# Mean error of the population positions, in grid steps: raw, turned, turned with corner sampling.
+round(c(uniform$error_raw, uniform$error_turned, corner$error_turned), 2)
+```
+
+
+**What to observe.** With a moderate migration rate, the turned plot recovers the grid. With a very high rate, the populations are so alike that the grid blurs. With a very low rate, each population is nearly an island, and the neighbours no longer lie side by side. With corner sampling, many people come from four populations and few from the others. The sampled corner takes more room, and the rest of the grid is squeezed. The map depends on how we sample.
+
+**Quick check.** Can we say that PC1 points north?
+
+<details><summary>Show the answer</summary>
+
+No. PCA chooses its axes by variance, not by geography. The sign and the angle depend on the sample. We turned the plot ourselves, using the true grid.
+
+</details>
+
+**References.** Novembre J, et al. 2008. Genes mirror geography within Europe. Nature 456:98-101. [doi:10.1038/nature07331](https://doi.org/10.1038/nature07331). Novembre J, Stephens M. 2008. Interpreting principal component analyses of spatial population genetic variation. Nature Genetics 40:646-649. [doi:10.1038/ng.139](https://doi.org/10.1038/ng.139).
+
+:::
+
 ## Step 5.2 · Prepare variants for reference PCA {#step-5-2}
 
 We find and save the 48,615 sites present in both the cleaned study and the reference. We need the same sites to compare genetic patterns in the two groups.
@@ -4148,6 +4297,10 @@ No PLINK equivalent
 
 These entries repeat the course glossary so that every link in this notebook works offline.
 
+## Eigenvalue {#glossary-eigenvalue .unlisted}
+
+A number that tells how much variation one principal component explains. A large eigenvalue means that the component is important.
+
 ## FID / IID {#glossary-fid-iid .unlisted}
 
 The identifier pair used to match samples between files.
@@ -4164,6 +4317,10 @@ Summary of test-statistic inflation/deflation, not proof of a valid model.
 
 Under the null model, probability of a statistic at least as extreme as observed.
 
+## PCA / PC {#glossary-pca-pc .unlisted}
+
+Principal component analysis / a component summarising genetic variation.
+
 ## Plus strand {#glossary-plus-strand .unlisted}
 
 One of the two strands of the DNA double helix, used as the common reference for writing alleles. Using the plus strand for all sites avoids confusion between the two strands.
@@ -4171,6 +4328,10 @@ One of the two strands of the DNA double helix, used as the common reference for
 ## Reference allele {#glossary-reference-allele .unlisted}
 
 The allele that matches the reference genome at a site. It is often written REF. The other allele is often written ALT.
+
+## Scree plot {#glossary-scree-plot .unlisted}
+
+A plot of the eigenvalues in order, from the largest to the smallest. It shows how quickly the importance of the components falls.
 
 ## SHA-256 {#glossary-sha-256 .unlisted}
 
