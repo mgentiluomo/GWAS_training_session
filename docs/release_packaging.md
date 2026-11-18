@@ -83,7 +83,7 @@ in `config.R` after approval; the old local test ZIP remains a distinct artifact
 
 Do this on the author machine, in PowerShell, from `C:\GWAS_course`. Nothing here was run by the assistant: no archive exists and no password was used.
 
-1. Check that the staging folder is the verified one. Its manifest is `codex_work\classroom-stage-2026.2.MANIFEST.tsv` (111 files, 656,292,343 bytes). Its SHA-256 is in `classroom-stage-2026.2.MANIFEST.tsv.sha256`: `34c13296cf43a6576fa828bae31bccbf204341636a1855d608252c6c5b16c7d4`. The two files of the new folder `annotation` (the gene table `genes_gencode_v50_regions.tsv` and `README_genes.txt`) are in this count. They hold the protein-coding genes near the regional plots of step 7.6. The commands below do not change: the packaging script already includes the folder `annotation`, and its inventory check accepts the 111 files.
+1. Check that the staging folder is the verified one. Its manifest is `codex_work\classroom-stage-2026.2.MANIFEST.tsv` (111 files, 656,324,189 bytes). Its SHA-256 is in `classroom-stage-2026.2.MANIFEST.tsv.sha256`: `a93c0f8ee2d0ed04bcf6d31466b41e4bbeffd7e9956d6e5c940779a7ecb9b9da`. The two files of the new folder `annotation` (the gene table `genes_gencode_v50_regions.tsv` and `README_genes.txt`) are in this count. They hold the protein-coding genes near the regional plots of step 7.6. The commands below do not change: the packaging script already includes the folder `annotation`, and its inventory check accepts the 111 files.
 
 2. Type the password by hand into a secure prompt. It lives only in this PowerShell session.
 
