@@ -3800,6 +3800,8 @@ regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"
   expected = c(1L, 4L, 3L), stringsAsFactors = FALSE)
 stats <- guided_summary_stats(cfg)  # <2>
 regions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)
+# 2b. Read the protein-coding genes of the three regions. Without the gene file the plots have no gene track.
+genes <- guided_genes(cfg)
 for (i in seq_len(nrow(regions))) {  # <3>
   report <- guided_path(cfg, "7.6", regions$ld[i])
   run_plink(cfg, c("--pfile", guided_path(cfg, "5.7"), "--chr", regions$chromosome[i],
@@ -3811,9 +3813,10 @@ for (i in seq_len(nrow(regions))) {  # <3>
   stopifnot(length(r2_column) == 1L)
   r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])  # <6>
   r2[region$variant_id == regions$lead[i]] <- 1
-  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = 900, res = 150)  # <7>
+  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = if (is.null(genes)) 900 else 1150, res = 150)  # <7>
   plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],
-    paste0(regions$label[i], ": association and LD to the lead"))
+    paste0(regions$label[i], ": association and LD to the lead"), genes = genes,
+    window = regions$position[i] + c(-500000, 500000))
   invisible(dev.off())
   cat("The plot was saved to ", guided_path(cfg, "7.6", regions$picture[i]), "\n", sep = "")
   stopifnot(sum(region$p_value < 5e-8) == regions$expected[i])  # <8>
@@ -3879,7 +3882,7 @@ Every command also uses `--threads 2` (PLINK runs at most two tasks at the same 
 
 ::: {.callout-tip title="Expected result" collapse="true"}
 
-L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose "View File").
+L2 has four genome-wide significant variants. L1 has one and L3 has three. Together they are the eight variants that we found at step 7.3. Each plot shows LD as a continuous colour from pale yellow (r^2 of 0) to dark purple (r^2 of 1). The lead variant is a labelled black diamond: rs1994750 for L1, rs10820598 for L2 and rs7953249 for L3. If an LD value is missing, the legend says "LD unavailable". The value is not silently set to zero. R saves three pictures as PNG files and prints the path of each one. Under each plot, the gene track names the protein-coding genes of the window. Genes that would overlap are placed on separate rows, so no label covers another. The track of L1 reads "No protein-coding gene in this window". The gene positions come from GENCODE release 50 (GRCh38, basic annotation, https://www.gencodegenes.org/human/). The small table is part of the course data (`annotation/genes_gencode_v50_regions.tsv`). If the table is missing, R prints a message and draws the plots without the track. It does not show the pictures in the console. To see them, open the files from the Files pane of RStudio (click the file name, then choose "View File").
 
 :::
 

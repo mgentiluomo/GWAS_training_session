@@ -998,26 +998,72 @@ plot_manhattan <- function(x, title = "Manhattan plot", suggestive = FALSE, labe
 
 # Regional plot: association strength with the squared correlation (r2) to the lead as a continuous colour scale.
 # region needs base_pair_location and p_value. r2 has one value per row of region (NA when unavailable).
-plot_regional <- function(region, r2, lead_row, chromosome, lead_label, title) {
+plot_regional <- function(region, r2, lead_row, chromosome, lead_label, title, genes = NULL, window = NULL) {
   scale_colours <- hcl.colors(101, "viridis", rev = TRUE)
-  layout(matrix(1:2, nrow = 1), widths = c(6, 1)); on.exit(layout(1), add = TRUE)
-  par(mar = c(5, 4.5, 4, 1))
+  # Genes of this window (chr, start, end, gene_name, strand) are drawn in a second panel when a gene table is given.
+  window_mb <- if (is.null(window)) range(region$base_pair_location) / 1e6 else window / 1e6
+  region_genes <- NULL
+  if (!is.null(genes)) {
+    region_genes <- genes[as.character(genes$chr) == as.character(chromosome) & genes$end / 1e6 >= window_mb[1] & genes$start / 1e6 <= window_mb[2], , drop = FALSE]
+  }
+  with_genes <- !is.null(genes)
+  if (with_genes) {
+    layout(matrix(c(1, 2, 3, 4), nrow = 2, byrow = TRUE), widths = c(6, 1), heights = c(3.2, 1.5))
+  } else {
+    layout(matrix(1:2, nrow = 1), widths = c(6, 1))
+  }
+  on.exit(layout(1), add = TRUE)
+  par(mar = c(if (with_genes) 0.5 else 5, 4.5, 4, 1))
   colour <- ifelse(is.na(r2), "#666666", scale_colours[1 + round(100 * pmin(pmax(r2, 0), 1))])
   draw <- order(!is.na(r2), r2, na.last = FALSE)
   x <- region$base_pair_location / 1e6; y <- -log10(region$p_value)
   plot(x[draw], y[draw], col = colour[draw], pch = ifelse(is.na(r2[draw]), 4, 16), cex = 1.1,
-       xlab = paste0("GRCh38 chromosome ", chromosome, " position (Mb)"), ylab = "-log10(p)", main = title,
-       ylim = c(0, max(y) * 1.2))
+       xlab = if (with_genes) "" else paste0("GRCh38 chromosome ", chromosome, " position (Mb)"), ylab = "-log10(p)", main = title,
+       xlim = window_mb, ylim = c(0, max(y) * 1.2), xaxt = if (with_genes) "n" else "s")
   abline(h = -log10(5e-8), lty = 2, col = "#B91C1C")
   points(x[lead_row], y[lead_row], pch = 18, cex = 2.4, col = "#111111")
   text(x[lead_row], y[lead_row], lead_label, pos = 3, offset = 1, cex = 0.9, font = 2)
   legend("topleft", legend = c("Lead variant", "Genome-wide threshold: 5e-8", if (anyNA(r2)) "LD unavailable"),
          pch = c(18, NA, if (anyNA(r2)) 4), lty = c(NA, 2, if (anyNA(r2)) NA), col = c("#111111", "#B91C1C", if (anyNA(r2)) "#666666"),
          bty = "n", cex = 0.8)
-  par(mar = c(5, 0.5, 4, 4.5))
+  par(mar = c(if (with_genes) 0.5 else 5, 0.5, 4, 4.5))
   image(x = 1, y = seq(0, 1, length.out = 101), z = matrix(seq(0, 1, length.out = 101), nrow = 1), col = scale_colours,
         axes = FALSE, xlab = "", ylab = "")
   axis(4, at = seq(0, 1, 0.2), las = 1); mtext("r2 with the lead", side = 4, line = 3, cex = 0.8); box()
+  if (with_genes) {
+    par(mar = c(5.2, 4.5, 0.5, 1))
+    plot(NA, xlim = window_mb, ylim = c(0, 1), axes = FALSE, xlab = "", ylab = "")
+    axis(1)
+    mtext(paste0("GRCh38 chromosome ", chromosome, " position (Mb)"), side = 1, line = 2.4, cex = 0.9)
+    box()
+    if (nrow(region_genes) == 0L) {
+      text(mean(window_mb), 0.55, "No protein-coding gene in this window", cex = 0.9, col = "#444444")
+    } else {
+      region_genes <- region_genes[order(region_genes$start), , drop = FALSE]
+      from <- pmax(region_genes$start / 1e6, window_mb[1]); to <- pmin(region_genes$end / 1e6, window_mb[2])
+      # Place each gene in the first row where it does not touch another gene or label. Rows are staggered, so no label overlaps.
+      label_width <- strwidth(paste0(region_genes$gene_name, " >"), cex = 0.7, units = "user")
+      left <- pmin(from, (from + to) / 2 - label_width / 2); right <- pmax(to, (from + to) / 2 + label_width / 2)
+      left <- pmax(left, window_mb[1]); right <- pmin(right, window_mb[2])
+      row_end <- numeric(0); row_of <- integer(nrow(region_genes))
+      gap <- diff(window_mb) * 0.01
+      for (i in seq_len(nrow(region_genes))) {
+        free <- which(row_end + gap <= left[i])
+        row_of[i] <- if (length(free)) free[1] else length(row_end) + 1L
+        row_end[row_of[i]] <- right[i]
+      }
+      n_rows <- max(row_of)
+      step <- 1 / (n_rows + 0.3)
+      for (i in seq_len(nrow(region_genes))) {
+        y_gene <- 1 - (row_of[i] - 0.1) * step
+        arrow_char <- if (region_genes$strand[i] == "+") ">" else "<"
+        segments(from[i], y_gene - 0.18 * step, to[i], y_gene - 0.18 * step, lwd = 3, col = "#1D4E89")
+        text((from[i] + to[i]) / 2, y_gene + 0.12 * step, paste0(region_genes$gene_name[i], " ", arrow_char), cex = 0.7, col = "#111111")
+      }
+    }
+    mtext("Gene positions are real. The association signals are simulated, so these genes are not causal.", side = 1, line = 3.9, cex = 0.65, col = "#444444")
+    plot.new()
+  }
 }
 
 # Threshold trials (optional boxes in steps 3.1, 3.2, 3.5, 3.6, 4.1, 4.3 and 4.4).

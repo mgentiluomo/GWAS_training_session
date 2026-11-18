@@ -225,6 +225,23 @@ guided_summary_columns <- function() {
 # Look up the rs number of variants from the array annotation, by chromosome and GRCh38 position.
 # The array writes some names as "GSA-rs123"; the label is then "rs123". When no rs number exists
 # (for example for "chr1-914572"), the label is the course variant name and a note is printed.
+# Protein-coding genes near the three regional plots (GENCODE release 50, GRCh38). The small table comes with the course data:
+# annotation/genes_gencode_v50_regions.tsv (columns chr, start, end, gene_name, strand). If it is missing, the plots have no gene track.
+guided_genes <- function(cfg) {
+  path <- file.path(cfg$data_dir, "annotation", "genes_gencode_v50_regions.tsv")
+  if (!file.exists(path)) {
+    message("The gene file annotation/genes_gencode_v50_regions.tsv is not in your course data, so the plots are drawn without genes. ",
+            "The rest of the step does not change. Download the course data again (step 0.7) to add the genes.")
+    return(NULL)
+  }
+  genes <- tryCatch(suppressWarnings(read.delim(path, stringsAsFactors = FALSE, colClasses = c(chr = "character"))), error = function(e) NULL)
+  if (is.null(genes) || !all(c("chr", "start", "end", "gene_name", "strand") %in% names(genes))) {
+    message("The gene file could not be read, so the plots are drawn without genes.")
+    return(NULL)
+  }
+  genes
+}
+
 guided_variant_labels <- function(cfg, chromosome, position, variant_id) {
   annotation <- guided_table(file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"))
   hit <- match(paste(chromosome, position), paste(annotation$Chr, annotation$Position_GRCh38))

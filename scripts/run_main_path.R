@@ -824,7 +824,7 @@ guided_artifact_checkpoint(cfg, "6.7", c(stats_file, dictionary_file), parent = 
 check_step("6.7", data_dir = cfg$out, work_dir = cfg$out)
 
 # Source: lessons/module_07_plots_and_reporting.Rmd
-# SHA-256: b401fa7633d51197ebfc9a7e259dc739b428de0dccf605ed3bba44e57820b912
+# SHA-256: 0aca60a779b1eca716f567f1f0eb656267832366eb63b5934077933fd486a5a3
 
 # Chunk: setup
 source("R/guided.R")
@@ -929,6 +929,8 @@ regions <- data.frame(label = c("L1", "L2", "L3"), chromosome = c("3", "9", "12"
 # 2. Read the association results once and look up the rs number of each lead variant.
 stats <- guided_summary_stats(cfg)
 regions$rs <- guided_variant_labels(cfg, regions$chromosome, regions$position, regions$lead)
+# 2b. Read the protein-coding genes of the three regions. Without the gene file the plots have no gene track.
+genes <- guided_genes(cfg)
 # 3. For each region, measure correlations with the lead within 500,000 DNA positions and draw the plot.
 for (i in seq_len(nrow(regions))) {
   report <- guided_path(cfg, "7.6", regions$ld[i])
@@ -945,9 +947,10 @@ for (i in seq_len(nrow(regions))) {
   r2 <- as.numeric(ld[[r2_column]][match(region$variant_id, ld$ID_B)])
   r2[region$variant_id == regions$lead[i]] <- 1
   # 7. Draw and save the regional plot with a continuous colour scale, the lead label and the significance line.
-  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = 900, res = 150)
+  png(guided_path(cfg, "7.6", regions$picture[i]), width = 1500, height = if (is.null(genes)) 900 else 1150, res = 150)
   plot_regional(region, r2, match(regions$lead[i], region$variant_id), regions$chromosome[i], regions$rs[i],
-    paste0(regions$label[i], ": association and LD to the lead"))
+    paste0(regions$label[i], ": association and LD to the lead"), genes = genes,
+    window = regions$position[i] + c(-500000, 500000))
   invisible(dev.off())
   cat("The plot was saved to ", guided_path(cfg, "7.6", regions$picture[i]), "\n", sep = "")
   # 8. Check the number of regional variants with p-values below 0.00000005.
