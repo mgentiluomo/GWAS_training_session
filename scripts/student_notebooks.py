@@ -181,7 +181,10 @@ def render_steps_rmd(model: dict) -> list[str]:
         if record.get("approach"):
             lines.extend(["### Another approach (optional)", "", notebook_links(record["approach"]), ""])
         if record.get("deep_dive"):
-            lines.extend(["### Optional: deep dives", "", notebook_links(drop_example_lines(record["deep_dive"])), ""])
+            intro, sections = split_deep_dives(record["deep_dive"])
+            lines.extend(["### Optional: deep dives", "", notebook_links(intro), ""])
+            for title, body in sections:
+                lines.extend([f"#### {title}", "", notebook_links(drop_example_lines(body)), ""])
     return lines
 
 
@@ -241,6 +244,20 @@ def glossary_entries(root: Path = ROOT) -> dict[str, tuple[str, str]]:
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         entries[match[2]] = (match[1], text[match.end():end].strip())
     return entries
+
+
+DEEP_DIVE_HEADING = re.compile(r"^#### ", re.M)
+
+
+def split_deep_dives(text: str) -> tuple[str, list[tuple[str, str]]]:
+    """The deep_dive block holds a short introduction and then one section for each deep dive ("#### Deep dive: ..." or
+    "#### Debate: ..."). The website and the notebooks show each section as its own closed box."""
+    parts = DEEP_DIVE_HEADING.split(text)
+    sections = []
+    for part in parts[1:]:
+        title, _, body = part.partition("\n")
+        sections.append((title.strip(), body.strip("\n")))
+    return parts[0].strip("\n"), sections
 
 
 EXAMPLE_LINE = re.compile(r"^\{\{example:[a-z0-9-]+\}\}[ \t]*(?:\r?\n)?", re.M)
@@ -423,8 +440,12 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
             lines.extend(['::: {.callout-tip title="Another approach (optional)" collapse="true"}', "",
                           qmd_thresholds(record["approach"], used), "", ":::", ""])
         if record.get("deep_dive"):
-            lines.extend(['::: {.callout-tip title="Optional: deep dives" collapse="true"}', "",
-                          qmd_thresholds(drop_example_lines(record["deep_dive"]), used), "", ":::", ""])
+            intro, sections = split_deep_dives(record["deep_dive"])
+            if intro.strip():
+                lines.extend([qmd_thresholds(intro, used), ""])
+            for title, body in sections:
+                lines.extend([f'::: {{.callout-tip title={json.dumps(title)} collapse="true"}}', "",
+                              qmd_thresholds(drop_example_lines(body), used), "", ":::", ""])
     return lines
 
 
