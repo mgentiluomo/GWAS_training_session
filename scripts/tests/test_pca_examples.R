@@ -1,0 +1,48 @@
+source("R/pca_examples.R")
+local({
+  check <- function(ok, message) if (!isTRUE(ok)) stop("FAIL: ", message, call. = FALSE)
+  # D1: the line with the largest variance is PC1, and the perpendicular line has the least variance.
+  data <- demo_rotation_data()
+  pc1 <- demo_rotation_pc1_angle(data)
+  angles <- seq(0, 175, by = 5)
+  shares <- vapply(angles, function(a) demo_rotation_frame(data, a)$stats$share, numeric(1))
+  check(abs(angles[which.max(shares)] - pc1) <= 5, "the largest variance is not at the PC1 angle")
+  check(max(shares) > 0.9 && min(shares) < 0.1, "PC1 should hold most of the variance in the height and arm span example")
+  # D2: with no drift, PC1 does not separate the groups. With large drift it does. More variants help near the threshold.
+  none <- demo_fst_frames(0, 10000, seed = 11)[[1]]$stats$separation
+  big <- demo_fst_frames(0.05, 10000, seed = 11)[[1]]$stats$separation
+  check(none < 1, "with fst = 0 the groups should not separate on PC1")
+  check(big > 5, "with fst = 0.05 the groups should separate clearly on PC1")
+  edge <- demo_fst_frames(0.0005, c(1000, 100000), seed = 12)
+  check(edge[[2]]$stats$separation > edge[[1]]$stats$separation + 1, "more variants should help to separate weakly different populations")
+  # D2: mixed people lie between their sources, in the order of their ancestry share.
+  position <- vapply(c(0.1, 0.5, 0.9), function(s) demo_admixture_frame(s, seed = 3)$stats$mean_position, numeric(1))
+  check(all(diff(position) < 0), "the position of the mixed people should move from B towards A as the share of A grows")
+  check(all(abs(position - c(0.9, 0.5, 0.1)) < 0.2), "the position of the mixed people should follow their ancestry share")
+  # D2-bis: low migration gives a smaller Procrustes error than very high migration, and turning the axes helps.
+  low <- demo_stepping_stone(0.1, seed = 3001)
+  high <- demo_stepping_stone(0.8, seed = 3001)
+  check(low$error_turned < high$error_turned, "the Procrustes error should be smaller with lower migration")
+  check(low$error_turned < low$error_raw, "turning the axes onto the grid should reduce the error")
+  island <- demo_stepping_stone(0.01, seed = 3001)
+  check(low$error_turned < island$error_turned, "very low migration (islands) should give a larger error than moderate migration")
+  corner <- demo_stepping_stone(0.1, "corner", seed = 3001)
+  check(corner$error_turned > low$error_turned, "sampling mostly one corner should deform the map")
+  # D3: the first eigenvalue is largest when the sample is balanced.
+  eig <- vapply(c(0.1, 0.5, 0.9), function(s) demo_composition_frame(s, seed = 2)$stats$eigenvalue, numeric(1))
+  check(eig[2] > eig[1] && eig[2] > eig[3], "the first eigenvalue should be largest for a 50/50 sample")
+  # D5: more cases from one subpopulation inflate lambda, and PC1 as a covariate removes it.
+  lam <- lapply(c(0.5, 0.9), function(s) demo_confounding_frame(s, seed = 4)$stats)
+  check(lam[[2]]$lambda_none > 2 && lam[[2]]$lambda_none > lam[[1]]$lambda_none + 1, "lambda should grow with the case share of one subpopulation")
+  check(lam[[2]]$lambda_pc1 < 1.2, "PC1 as a covariate should bring lambda close to 1")
+  out0 <- demo_outlier_frame(0, seed = 6)$stats
+  out10 <- demo_outlier_frame(10, seed = 6)$stats
+  check(out0$separation_pc1 > 5 && out10$separation_pc1 < 1 && out10$separation_pc2 > 5, "ten distant people should take over PC1")
+  # D7: the position of Black among the colours changes with the sample sizes, though its data never change.
+  small <- demo_colour_frame(10, 20, 20)$stats$black_to_red
+  large <- demo_colour_frame(100, 20, 20)$stats$black_to_red
+  check(abs(small - large) > 0.05, "the distance from Black to Red should depend on the sample sizes")
+  # The same call gives the same numbers.
+  check(identical(demo_fst_frames(0.005, 1000, seed = 5), demo_fst_frames(0.005, 1000, seed = 5)), "a call must be reproducible")
+  cat("PCA example tests passed\n")
+})
