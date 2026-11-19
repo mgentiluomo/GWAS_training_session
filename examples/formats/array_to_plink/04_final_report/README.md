@@ -46,7 +46,7 @@ Look at `FinalReport_S02.txt`, variant `2:2000456`: Plus = `C T`, Top = `A G`. S
 
 ## Why we do not analyse it as it is
 
-With about 730,000 SNPs and one file per sample, 130 samples already produce about 4.5 GB of text in 130 files. PLINK binary files store the same genotypes in a few megabytes.
+With about 730,000 SNPs and one file per sample, 130 samples already produce about 4.5 GB of text in 130 files. A PLINK `.bed` file stores the same genotypes in about 24 MB: two bits for each genotype, so each variant takes `ceil(130 / 4) = 33` bytes, and 730,000 variants x 33 bytes is about 24 million bytes.
 
 ## Next step
 
