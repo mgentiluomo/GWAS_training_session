@@ -1102,12 +1102,15 @@ def write_grch37_exercise(b: Build, chain: core.Chain, sim: dict, sites: dict, k
 
 
 def write_imputation_truth(b: Build, sim: dict, roster: Roster, flow: dict, loci: dict) -> dict:
-    """Module A: the true phased genotypes of the final cohort (the samples left after every QC and ancestry
-    step) at every variant of the dense regions, one VCF per region, in instructor/. Nothing goes to students:
-    module A imputes for real against an independent reference panel, and this file is the answer."""
+    """Module A: the true phased genotypes of every study subject at every variant of the dense regions, one VCF
+    per region, in instructor/. Every subject, not only the expected final cohort: at step 3.6 the real QC may
+    keep the other member of a related pair, so the cohort of a run can differ from the expected one by a few
+    samples. Nothing goes to students: module A imputes for real against an independent reference panel, and
+    this file is the answer. The summary counts use the expected final cohort."""
     removed = {i for ids in flow["removed"].values() for i in ids}
-    final_subjects = [k for k, sub in enumerate(roster.subjects) if sub.sample_id not in removed]
-    samples = [roster.subjects[k].sample_id for k in final_subjects]
+    final_subjects = list(range(len(roster.subjects)))
+    samples = [sub.sample_id for sub in roster.subjects]
+    in_final = np.array([sub.sample_id not in removed for sub in roster.subjects])
     summary = {}
     for name, region in sim["regions"].items():
         chrom = region["ids"][0].split(":")[0]
@@ -1117,19 +1120,21 @@ def write_imputation_truth(b: Build, sim: dict, roster: Roster, flow: dict, loci
         path = b.instructor / f"imputation_truth_chr{chrom}.vcf.gz"
         with gzip.open(path, "wt", encoding="ascii", newline="\n", compresslevel=6) as fh:
             fh.writelines(core.truth_vcf_lines(chrom, region["ids"], region["is_array"], h1, h2, samples))
-        ac = h1.sum(axis=0).astype(int) + h2.sum(axis=0)
+        ac = h1[in_final].sum(axis=0).astype(int) + h2[in_final].sum(axis=0)
+        n_final = int(in_final.sum())
         snv = np.array([len(i.split(":")[2]) == 1 and len(i.split(":")[3]) == 1 for i in region["ids"]])
         summary[name] = {"chrom": chrom, "start": int(region["pos"].min()), "end": int(region["pos"].max()),
-                         "samples": len(samples), "variants": len(region["ids"]), "snvs": int(snv.sum()),
+                         "samples": len(samples), "expected_final_cohort": n_final,
+                         "variants": len(region["ids"]), "snvs": int(snv.sum()),
                          "indels": int((~snv).sum()), "array_sites": int(region["is_array"].sum()),
-                         "polymorphic_in_cohort": int(((ac > 0) & (ac < 2 * len(samples))).sum()),
+                         "polymorphic_in_cohort": int(((ac > 0) & (ac < 2 * n_final)).sum()),
                          "file": path.name, "sha256": sha256(path)}
         for lname, v in loci.items():
             vid = v["kg_id"]
             if vid in region["ids"]:
                 j = region["ids"].index(vid)
                 summary[name][f"{lname}_causal"] = {"id": f"chr{vid}", "on_array": bool(region["is_array"][j]),
-                                                    "alt_freq_cohort": round(float(ac[j]) / (2 * len(samples)), 4)}
+                                                    "alt_freq_cohort": round(float(ac[j]) / (2 * n_final), 4)}
     return summary
 
 
