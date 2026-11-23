@@ -1,6 +1,6 @@
 # Module A. Genotype imputation (draft for review)
 
-Status: fifth draft for the author, 23 November 2026. Not yet in the course repository.
+Status: sixth draft for the author, 24 November 2026. Not yet published to students.
 Language: UK English, short sentences, every term explained at first use.
 Facts marked **[open]** can only be confirmed when we run the course jobs on the servers or test the commands. Every reference in the list at the end has been checked on PubMed (PMID and DOI given).
 
@@ -15,6 +15,7 @@ Changes from the first draft (17 November):
 - A.2 and A.8 aligned with what the review says about dosages and the MACH r².
 - fourth draft: HMIS Data Processing Agreement found; TOPMed chromosome naming; Sanger status; build conversion risk (Sheng et al. 2023) and the two-server plan; sources for the R² thresholds (MaCH FAQ, Stahl et al. 2025); HapMap and Huang references completed.
 - fifth draft: A.7 command replaced by the one tested on the course data (chr9 and chr22 upload files), with the Windows line-end and PR-flag findings.
+- sixth draft (night of 23 to 24 November): the course examples now run a real imputation on the author's computer against an independent 1000 Genomes panel, not on the servers (new part "The data of this module" in A.0). A.7 gives the steps that were run, A.8 the measured quality by frequency class and the masking exercise, A.9 the tested association command and the result at locus L4. Details and all numbers: `docs/review/night_2026-11-23.md`.
 
 ---
 
@@ -38,7 +39,22 @@ In this module you will learn:
 
 The module is optional. The main path of the course (modules 0 to 7) works without it.
 
-**What you need:** the cleaned data from step 4.6 (variant QC summary). You do not need a server account to follow the module. We provide the imputed output for two chromosomes, so every step after the upload works offline.
+**What you need:** your data at step 5.7 (the final cohort of 1,811 samples) and the module A data (a separate data release). You do not need a server account. The module A data contain a reference panel, a genetic map and the imputed output for two regions, so every step works offline, even if you cannot run the imputation yourself.
+
+### The data of this module
+
+The course data are simulated. Each study genome is a mosaic of short segments copied from 1000 Genomes genomes (the "donors"). This gives the data a realistic linkage disequilibrium: on chromosome 22, the r² between nearby array SNPs correlates at 0.92 with the r² measured in real European genomes.
+
+This has one consequence for imputation. **A reference panel that contains the donors would contain the study haplotypes themselves.** The imputation would then look far better than it can ever be with real data. The 1000 Genomes panels of the servers contain the donors, and so may other panels built on 1000 Genomes. So the course examples do not use the servers.
+
+Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-coverage (30x) data set who are **not** donors and not related to anyone in the data set (AFR 344, AMR 351, EAS 255, EUR 313, SAS 258). It covers two regions of 2.5 Mb each on GRCh38:
+
+- chromosome 18, 36,792,715 to 39,292,715, around locus L4 (a simulated risk variant that is not on the array);
+- chromosome 22, 35,000,000 to 37,500,000.
+
+The panel holds 49,988 variants on chromosome 18 and 60,224 on chromosome 22, SNVs and indels, phased. Because the data are simulated, we also know the true genotypes of every study sample at every variant of these regions. That lets us measure how good the imputation really is, which no real study can do.
+
+The upload to a server is still explained (sections A.4 to A.7). You may upload the course data to practise, with no legal risk, but the quality you get back will be too good to learn from.
 
 ---
 
@@ -170,7 +186,7 @@ All the servers below are free after registration. They share the same software 
 ### Other services
 
 - **Sanger Imputation Service** (Wellcome Sanger Institute, United Kingdom). Still listed on the Sanger website. It was built for the HRC and uses the positional Burrows-Wheeler transform (PBWT) for imputation (McCarthy et al. 2016). The United Kingdom is outside the EU, but has an EU adequacy decision; check with your data protection officer.
-- **Running imputation yourself:** possible with public panels (1000 Genomes, including the 30x version) and free software (Minimac4, IMPUTE5, Beagle 5). It needs a computer cluster and good skills. Not covered in this course.
+- **Running imputation yourself:** possible with public panels (1000 Genomes, including the 30x version) and free software (Eagle2, Minimac4, IMPUTE5, Beagle 5). For a whole genome it needs a computer cluster. For two regions of 2.5 Mb, as in this module, a laptop is enough: phasing and imputation take about two minutes per region (section A.7).
 
 ### Comparison at a glance
 
@@ -205,7 +221,7 @@ This section is information, not legal advice. Before you upload real data, spea
 3. keep a record of what you uploaded, where and when;
 4. download the results promptly and keep the password safe.
 
-**In this course** the data are simulated. They describe no real person. You may upload them to any server to practise, with no legal risk.
+**In this course** the data are simulated. They describe no real person. You may upload them to any server to practise, with no legal risk. The course examples do not do so, for a scientific reason, not a legal one (see "The data of this module" in A.0).
 
 > Reference: Rayner NW, Park YC, Fuchsberger C, Barysenka A, Zeggini E. Toward GDPR compliance with the Helmholtz Munich genotype imputation server. Nat Genet. 2024;56:2580-2581. doi:10.1038/s41588-024-02012-1
 
@@ -305,16 +321,20 @@ This is where most imputation jobs fail. Do these checks in order.
 1. **Start from clean data.** Use the output of step 4.6. Imputation copies errors: a wrong genotype at a measured site can spread to the sites around it.
 2. **Check the genome build.** The course data are on GRCh38. The Michigan and HMIS panels use hg19 coordinates, so these servers convert your positions. TOPMed uses GRCh38. You learnt how to check the build at step 2.6.
    - **Why this matters.** Converting positions between builds is not always safe. Some stretches of the genome (about 2 to 5 Mb, depending on the array) are inverted between GRCh37 and GRCh38. There, A/T and C/G variants can end up with the wrong allele after conversion. Imputation accuracy and association power drop in those regions. This has been shown for the TOPMed server and for common in-house pipelines (Sheng et al. 2023).
-   - **What we do in the course.** We impute the same chromosomes twice. On TOPMed the data stay on GRCh38, so no conversion is needed. On HMIS the server converts them to hg19. Comparing the two shows students the effect of the panel and of the build conversion on the same data.
-   - **[open: in which build HMIS returns the imputed positions. The documentation does not say. We will see it in the course output and, if needed, convert back to GRCh38 before step A.9.]**
+   - **What we do in the course.** The course panel is on GRCh38, like the course data, so no conversion is needed. Students who try a server with an hg19 panel meet the conversion problem there.
+   - **[open, only for students who use a server: in which build HMIS returns the imputed positions. The documentation does not say.]**
 3. **Check strand and alleles.** The server compares your alleles with the panel. Sites on the wrong strand are flipped or removed. Ambiguous A/T and C/G sites are a risk, as you saw at step 2.5. Michigan recommends two tools: checkVCF, to check that the VCF files are valid, and the HRC or 1000G pre-imputation checks by Will Rayner.
 4. **Split by chromosome and write VCF.** Servers expect one VCF file per chromosome, compressed with bgzip and sorted by position. PLINK 2 can write them.
-5. **Use the right chromosome names.** TOPMed asks for the `chr` prefix on GRCh38 (`chr22`) and no prefix on GRCh37 (`22`). The HMIS and Michigan pages do not say; the same rule is a safe start. **[open: confirm on HMIS with the course job]**
+5. **Use the right chromosome names.** TOPMed asks for the `chr` prefix on GRCh38 (`chr22`) and no prefix on GRCh37 (`22`). The HMIS and Michigan pages do not say; the same rule is a safe start. The course panel uses `chr22`. **[open, only for students who use a server: confirm on HMIS]**
 
-Command for chromosome 22, tested on 23 November 2026 with PLINK v2.0.0-b.1.4 on Windows, on the step 4.6 state of data release data-2026.1:
+### The steps run for the course (24 November 2026)
+
+Tested with PLINK v2.0.0-b.1.4 on Windows, and Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the 1,811 samples of step 5.7.
+
+**Step 1. Write the input VCF, one per region.** Only the array sites inside the two regions: 161 on chromosome 18 and 277 on chromosome 22.
 
 ```
-bin/plink2 --pfile results/guided/s4-6_state --chr 22 --ref-allele results/imputation/ref_alleles_grch38.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/imputation/upload/chr22
+bin/plink2 --pfile results/guided/s5-7_state --extract bed1 results/imputation/regions.bed1 --chr 22 --ref-allele results/imputation/ref_alleles_grch38.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/imputation/input/chr22
 ```
 
 - `--chr 22` keeps chromosome 22 only.
@@ -322,14 +342,33 @@ bin/plink2 --pfile results/guided/s4-6_state --chr 22 --ref-allele results/imput
 - `--output-chr chrM` writes chromosome names with the `chr` prefix (`chr22`).
 - `--export vcf-4.2 bgz` writes a VCF version 4.2 compressed with bgzip. TOPMed accepts VCF 4.2 or lower; PLINK writes 4.3 by default.
 - `id-paste=iid` writes only the individual ID as the sample name.
+- `--extract bed1 <file>` keeps the sites inside the regions listed in the file (chromosome, start, end).
 
-What the test showed:
+What the tests showed:
 
 - **Ambiguous sites.** The course data have no A/T or C/G sites: step 2.5 removed them all. Real data prepared differently may have many.
-- **Windows line ends.** On Windows, PLINK 2 wrote each VCF line with a Windows line end (CRLF). The last genotype of every line then reads `0/0\r`, which is not valid VCF. The files had to be rewritten with plain line ends and compressed again as BGZF. **[to do: add this step to the course helpers, so students on Windows do not meet it]**
-- **PR flag.** Even after `--ref-allele`, the exported VCF kept the `PR` flag. It was removed after checking that every REF equals the GRCh38 reference allele. **[to do: the course helper should do the same check and removal]**
-- **Contig lines.** The `##contig` lines have no length, because PLINK does not know it without a FASTA file. **[open: see whether the servers accept this]**
-- **Checks.** chr9: 1,844 samples, 9,722 SNVs; chr22: 1,844 samples, 3,619 SNVs. Sorted, no duplicates, only GT, 0.16% missing genotypes. REF equals the GRCh38 plus-strand allele at every site, and the 1000 Genomes REF at every site the two share. Read back with PLINK, allele counts and missingness are identical to the 4.6 state.
+- **Windows line ends.** On Windows, PLINK 2 writes each VCF line with a Windows line end (CRLF). The last genotype of every line then reads `0/0\r`, which is not valid VCF. The files must be rewritten with plain line ends and compressed again as BGZF. The author script `scripts/author/module_a/make_upload.py` does it. **[to do: the same step in the course R helpers, so students on Windows do not meet it]**
+- **PR flag.** Even after `--ref-allele`, the exported VCF keeps the `PR` flag. The author script removes it after checking that every REF equals the GRCh38 reference allele. **[to do: the same in the course R helpers]**
+- **Contig lines.** The `##contig` lines have no length, because PLINK does not know it without a FASTA file. Eagle and Minimac4 accept this. **[open, only for students who use a server: whether the servers accept it]**
+- **Checks.** Sorted, no duplicates, only GT, REF equal to the GRCh38 plus-strand allele at every site and to the 1000 Genomes REF at every site the two share.
+
+**Step 2. Phase the input against the panel (Eagle2).**
+
+```
+eagle --vcfRef panel_chr22.vcf.gz --vcfTarget chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z
+```
+
+Every input site was also in the panel, so none was lost. About one minute per region, most of it spent writing the output file.
+
+**Step 3. Impute (Minimac4).** The panel is first converted once to the compact Minimac4 format (`minimac4 --compress-reference panel_chr22.vcf.gz -o panel_chr22.msav`; the module A data include the converted files).
+
+```
+minimac4 --map minimac4_chr22.map --format GT,DS,GP --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz
+```
+
+- `--format GT,DS,GP` writes the best-guess genotype, the dosage and the genotype probabilities (section A.2).
+- `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (section A.8).
+- About one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22. With GP the files are large (150 to 250 MB); the module A data keep GT and DS only.
 
 ---
 
@@ -353,21 +392,82 @@ Each imputed variant comes with a quality score. Minimac4 reports **R²** (writt
 
 **Measured sites get a second check.** For sites that were on the array, Minimac4 can hide each genotype in turn, impute it, and compare it with the true value. This gives an empirical R² (EmpRsq). It tells you how well imputation works in your data.
 
+### What the course imputation shows
+
+Because the data are simulated, we know the true genotypes. So we can compare the R² that Minimac4 reports with the true r²: the squared correlation between the dosage and the true number of alternate alleles. The table is for chromosome 22 (2.5 Mb, 1,811 samples), variants that vary in the samples and are not on the array, grouped by minor allele count (MAC) and frequency in the samples.
+
+| Class | Variants | In the panel | Median R² | Median true r² | R² below 0.3 | R² at least 0.8 | Mean R² minus true r² |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| MAC 2 to 4 | 368 | 81% | 0.33 | 0.00 | 45% | 4% | +0.28 |
+| below 0.5% | 6,244 | 83% | 0.37 | 0.00 | 40% | 5% | +0.22 |
+| 0.5 to 1% | 2,027 | 95% | 0.47 | 0.06 | 18% | 6% | +0.28 |
+| 1 to 5% | 3,358 | 100% | 0.65 | 0.35 | 3% | 20% | +0.25 |
+| at least 5% | 7,826 | 100% | 0.79 | 0.70 | 0% | 47% | +0.13 |
+| all | 19,832 | 94% | 0.62 | 0.35 | 14% | 26% | +0.19 |
+
+(Only 9 variants have a MAC of 1, so they are not shown; see the note below.) Chromosome 18 gives the same picture with slightly better values (at least 5%: median R² 0.85, true r² 0.85).
+
+What students should take from it:
+
+- Common variants are imputed well, and R² tracks the true r² closely (correlation 0.96 at 5% or more).
+- Rare variants are imputed poorly, and **R² overestimates their quality**: below 1%, the median R² is 0.37 to 0.47 while the median true r² is close to 0. The filter R² at least 0.3 removes 40% of the variants below 0.5%; the stricter 0.8 keeps only 5%.
+- About one in six variants below 0.5% is not in the panel at all, so it cannot be imputed.
+- Indels are imputed less well than SNVs (at 5% or more: true r² 0.61 against 0.72).
+- A note on the simulation: each donor haplotype was copied into several study genomes, so a variant carried once by a donor is carried by a few study samples. Almost no variant has a single carrier, and the rare end of the spectrum is less realistic than the rest.
+
+The empirical R² of the array sites (leave-one-out) has a median of 0.72 on chromosome 18 and 0.59 on chromosome 22. The array is sparse in these regions (about one site every 15 kb).
+
+### Exercise: hide some array sites and impute them
+
+You can measure imputation quality on your own data, without a truth file. Hide some of the sites you measured, impute them, and compare the dosages with the genotypes you know.
+
+1. Choose 5% of the array sites in the regions at random, with a fixed seed. In the course run: 22 of 438 sites.
+2. Write the input VCF without them (`--exclude` with the list of their IDs) and run steps 2 and 3 again.
+3. For each hidden site, compare the dosage with the measured genotype: true r², and the share of best-guess genotypes that match.
+
+The course result: all 22 sites were imputed. Median R² 0.70, median true r² 0.46, best-guess genotypes right in 89% of cases on average. R² and true r² correlate well (0.93), but R² is higher, most of all for sites below 5%. One site at 1.7% had R² 0.44 and a true r² of 0.08.
+
+> Figure placeholder A.8. Produced by R from the course output: R² against true r² for every imputed variant of chromosome 22, coloured by frequency class, with the 0.3 and 0.8 lines and the diagonal. No Gemini prompt needed.
+
 **Do not filter imputed variants for Hardy-Weinberg equilibrium** the same way as measured ones. Dosages are not hard genotypes, so the usual test does not apply. Hardy-Weinberg checks belong to the measured data, before imputation (step 4.4).
 
-> Figure placeholder A.8. This one is produced by R from the course output: histogram of R² by allele frequency class, with the 0.3 and 0.8 lines marked. No Gemini prompt needed.
 
 ---
 
 ## A.9 Testing imputed variants for association
 
-PLINK 2 reads dosages directly from the VCF files that the servers return.
+PLINK 2 reads dosages directly from the VCF files that Minimac4 (or a server) returns. Command tested on 24 November 2026 with PLINK v2.0.0-b.1.4, on the chromosome 18 output of section A.7:
 
 ```
-bin/plink2 --vcf chr22.dose.vcf.gz dosage=DS --psam results/guided/s5-7_state.psam --extract-if-info "R2 >= 0.8" --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback --out results/imputation/chr22_assoc
+bin/plink2 --vcf results/imputation/chr18.dose.vcf.gz dosage=DS --double-id --extract-if-info "R2 >= 0.3" --update-sex results/guided/s5-7_state.psam col-num=3 --pheno results/guided/s5-7_state.psam --pheno-name Disease --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback cols=+a1freq,+machr2 --out results/imputation/chr18_assoc
 ```
 
-**[to do: test this command; check the R² field name in Minimac4 output and the exact syntax of `--extract-if-info`; decide how sample IDs are matched; use the same covariates as the main analysis, with the step numbers of release 2026.5.]**
+- `dosage=DS` reads the dosage field. Without it, PLINK uses the best-guess genotypes in GT.
+- `--extract-if-info "R2 >= 0.3"` keeps the variants whose INFO field R2 is at least 0.3. Minimac4 writes the field as `R2`. Keep the quotes.
+- `--double-id` uses the sample name of the VCF as both family ID and individual ID. The course covariate file has the family ID equal to the individual ID, so this is what makes the rows match.
+- A VCF has no sex and no phenotype. `--update-sex <psam> col-num=3` takes the sex from column 3 of the step 5.7 sample file, and `--pheno <psam> --pheno-name Disease` takes the case-control status.
+- The covariates, the principal components and the model options are those of the main analysis (step 6.3 in release 2026.5, step 6.4 in 2026.4).
+- `cols=+machr2` adds the r² that PLINK computes from the dosages. It is a check on the R2 written by Minimac4.
+
+**[to do: put the step numbers and file names of release 2026.5 in the command once that release is out.]**
+
+### The result at locus L4
+
+Locus L4 is a simulated risk variant on chromosome 18 (`chr18:38042715:G:A`, odds ratio 1.4 by design) that is not on the array. In the main analysis the region did not reach genome-wide significance. Does imputation help?
+
+| Analysis | Variant | Frequency | R² | Odds ratio | p-value |
+| --- | --- | --- | --- | --- | --- |
+| Array sites (main analysis) | best: `18:38107932:C:A`, 65 kb away | 0.25 | measured | 1.49 | 6.6 × 10⁻⁷ |
+| Imputed | the L4 variant itself | 0.28 | 0.94 | 1.47 | 1.7 × 10⁻⁶ |
+| Imputed | best in the region: `chr18:38106879:G:C` | 0.41 | 0.81 | 1.54 | 4.2 × 10⁻⁸ |
+| True genotypes (only in a simulation) | the L4 variant | 0.29 | | 1.46 | 1.3 × 10⁻⁶ |
+| True genotypes (only in a simulation) | best in the region | 0.37 | | 1.46 | 1.6 × 10⁻⁷ |
+
+What it shows:
+
+- The L4 variant is imputed well (R² 0.94). Its result is almost the same as with its true genotype.
+- It is not the top of its region. Variants 50 to 80 kb away, in LD with it, give smaller p-values. This happens in real studies too: the lead variant is not necessarily the cause (step 7.6).
+- After imputation the best variant crosses 5 × 10⁻⁸. With the true genotypes, the region does not go below 1.6 × 10⁻⁷. So part of the "genome-wide significant" result comes from noise in the dosages of a variant with R² 0.81. This is why an imputed hit needs its R², a look at the measured neighbours and, ideally, confirmation by direct genotyping.
 
 Points to explain to students:
 
