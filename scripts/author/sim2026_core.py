@@ -617,7 +617,52 @@ def gc_scores(g: np.ndarray, rng: np.random.Generator) -> np.ndarray:
     return np.where(g >= 0, np.round(scores, 4), 0.0)
 
 
-# --- imputation-like dosages ---------------------------------------------------------------------------------
+# --- module A: dense regions and their true genotypes --------------------------------------------------------
+
+def region_rows_ok(rows: list[tuple[str, str, int, str, str]], max_allele_len: int) -> np.ndarray:
+    """Columns of a dense-region fileset that the build can use: an ID of the form chrom:pos:ref:alt (PLINK
+    writes '.' when an allele is longer than --new-id-max-allele-len), and two alleles made of A, C, G and T
+    only, each at most `max_allele_len` bases long."""
+    ok = []
+    for _, vid, _, a0, a1 in rows:
+        parts = vid.split(":")
+        ok.append(len(parts) == 4 and all(0 < len(a) <= max_allele_len and set(a) <= set("ACGT")
+                                          for a in (parts[2], parts[3], a0, a1)))
+    return np.array(ok, dtype=bool)
+
+
+def merge_columns(rows_a: list, haps_a: np.ndarray, rows_b: list, haps_b: np.ndarray) -> tuple[list, np.ndarray]:
+    """Add the columns of fileset b whose ID is not in fileset a, and order all columns by position.
+
+    The columns of a keep their relative order, and at one position they come before the added columns, so
+    the array sites and every random draw that depends on them are the same as without fileset b."""
+    seen = {r[1] for r in rows_a}
+    add = [k for k, r in enumerate(rows_b) if r[1] not in seen]
+    rows = list(rows_a) + [rows_b[k] for k in add]
+    haps = np.concatenate([haps_a, haps_b[:, add]], axis=1)
+    order = np.argsort(np.array([r[2] for r in rows], dtype=np.int64), kind="stable")
+    return [rows[k] for k in order], haps[:, order]
+
+
+def truth_vcf_lines(chrom: str, ids: list[str], on_array: np.ndarray, h1: np.ndarray, h2: np.ndarray,
+                    samples: list[str]):
+    """VCF 4.2 lines with the true phased genotypes: `ids` are chrom:pos:ref:alt, `h1` and `h2` are
+    [sample, variant] alleles 0/1 (h1 is written first). Sites on the array carry the INFO flag ARRAY."""
+    yield "##fileformat=VCFv4.2\n"
+    yield "##source=sim2026 true genotypes of the module A regions (instructor only)\n"
+    yield f"##contig=<ID=chr{chrom}>\n"
+    yield '##INFO=<ID=ARRAY,Number=0,Type=Flag,Description="Site on the simulated genotyping array">\n'
+    yield '##FORMAT=<ID=GT,Number=1,Type=String,Description="True phased genotype">\n'
+    yield "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join(samples) + "\n"
+    table = ("0|0", "0|1", "1|0", "1|1")
+    for j, vid in enumerate(ids):
+        _, pos, ref, alt = vid.split(":")
+        codes = (2 * h1[:, j].astype(np.int64) + h2[:, j]).tolist()
+        yield (f"chr{chrom}\t{pos}\tchr{vid}\t{ref}\t{alt}\t.\tPASS\t{'ARRAY' if on_array[j] else '.'}\tGT\t"
+               + "\t".join(map(table.__getitem__, codes)) + "\n")
+
+
+# --- imputation-like dosages (not used by the build since the module A truth of 24 November 2026) -----------
 
 def simulate_hap_dosages(haps: np.ndarray, target_r2: np.ndarray, rng: np.random.Generator,
                          concentration: float = 60.0) -> np.ndarray:

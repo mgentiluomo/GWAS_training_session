@@ -9,7 +9,8 @@ the 1000 Genomes callset, the GSA-like site list, the GRCh38 genetic map and PLI
 
 Output (outside the repository):
     <out>/student/      files for the encrypted course release
-    <out>/instructor/   answer key, build record with the seed, imputation truth: never given to students
+    <out>/instructor/   answer key, build record with the seed, the list of template donors and the true
+                        genotypes of the module A imputation regions: never given to students
     <out>/work/         intermediate files, safe to delete
 
 The pure parts (mosaics, meiosis, kinship, planting, writers) are in sim2026_core.py and are tested on a
@@ -25,6 +26,7 @@ import hashlib
 import json
 import platform
 import random
+import shutil
 import subprocess
 import sys
 import time
@@ -55,7 +57,9 @@ LOCI = {"L1": dict(chrom="3", freq=0.30, odds_ratio=1.8, on_array=True),
         "L4": dict(chrom="18", freq=0.25, odds_ratio=1.4, on_array=False)}
 FORCED_MARKERS = ("rs4988235", "rs1426654", "rs12913832")              # LCT, SLC24A5, HERC2
 PROTECTED = [("2", 134_000_000, 137_500_000), ("15", 27_300_000, 28_800_000), ("15", 47_600_000, 48_700_000)]
-IMPUTATION_CHR22 = ("22", 36_000_000, 36_500_000)
+IMPUTATION_CHR22 = ("22", 36_000_000, 36_500_000)    # also sets which array sites stay clean (plant_problems)
+TRUTH_MARGIN = 1_000_000              # module A: the truth regions are the regions above plus 1 Mb on each side
+MAX_INDEL_ALLELE = 50                 # module A: longest allele (bases) of a dense-region variant
 PLANTED = dict(strand_flip=400, palindromic=3000, palindromic_flipped=30, allele_mismatch=20, failed_variants=150,
                low_call_variants=800, differential_missingness=120, hwe_strong=150, hwe_mild=50, x_male_het=15,
                y_female_call=10, mt_het=8, duplicate_pairs=300, duplicate_discordant=20, par_sites=520)
@@ -66,8 +70,9 @@ KNOWN_SNPS = {"rs4988235": ("2", 136608646), "rs7903146": ("10", 114758349), "rs
               "rs6025": ("1", 169519049), "rs16891982": ("5", 33951693), "rs1800562": ("6", 26093141),
               "rs713598": ("7", 141673345), "rs671": ("12", 112241766), "rs1042522": ("17", 7579472),
               "rs2187668": ("6", 32605884), "rs334": ("11", 5248232)}
-STUDENT_DIRS = ("lab_export", "phenotypes", "array", "pca_reference", "final_report", "grch37_exercise",
-                "imputation")
+# No imputation folder: module A imputes for real against an independent panel (its own data release). The
+# build only writes the true genotypes of the imputation regions, for the instructor.
+STUDENT_DIRS = ("lab_export", "phenotypes", "array", "pca_reference", "final_report", "grch37_exercise")
 
 
 @dataclass
@@ -545,6 +550,18 @@ def extract_donors(b: Build, sites: dict, hidden_points: list[tuple[str, int]],
                               "--make-pgen", "--out", b.work / "donors"])
 
 
+def extract_region_donors(b: Build, regions: list[tuple[str, int, int]]) -> None:
+    """Module A: a separate PLINK 2 fileset with the donors in the dense regions only, biallelic SNVs and indels.
+    The fileset of the array sites (extract_donors) stays exactly as it was. Variant IDs are chrom:pos:ref:alt;
+    an allele longer than MAX_INDEL_ALLELE gets the ID '.', and simulate_genomes leaves such variants out."""
+    bed = b.work / "donor_regions_module_a.bed1"
+    ranges = sorted(regions, key=lambda r: (CHROM_ORDER[r[0]], r[1]))
+    bed.write_text("".join(f"{c}\t{lo}\t{hi}\n" for c, lo, hi in ranges), encoding="ascii")
+    b.plink(b.full_callset + ["--keep", b.work / "donors_all.keep", "--extract", "bed1", bed, "--max-alleles", "2",
+                              "--set-all-var-ids", "@:#:$r:$a", "--new-id-max-allele-len", str(MAX_INDEL_ALLELE),
+                              "missing", "--make-pgen", "--out", b.work / "donors_regions"])
+
+
 # --- genomes ---------------------------------------------------------------------------------------------------
 
 def read_map(map_dir: Path, name: str) -> tuple[np.ndarray, np.ndarray]:
@@ -587,6 +604,19 @@ def simulate_genomes(b: Build, donors: dict, sites: dict, roster: Roster, loci: 
         b.plink(["--pfile", b.work / "donors", "--chr", chrom, "--export", "haps", "--out", prefix])
         rows, samples, haps = core.read_haps(str(prefix))
         prefix.with_suffix(".haps").unlink()
+        if any(c == chrom for c, _, _ in regions.values()):
+            # module A: add the SNVs and indels of the separate dense-region fileset (array columns unchanged)
+            rprefix = b.work / f"donors_regions_chr{chrom}"
+            b.plink(["--pfile", b.work / "donors_regions", "--chr", chrom, "--export", "haps", "--out", rprefix])
+            rrows, rsamples, rhaps = core.read_haps(str(rprefix))
+            rprefix.with_suffix(".haps").unlink()
+            if rsamples != samples:
+                raise RuntimeError(f"chr{chrom}: the dense-region fileset has another sample order")
+            usable = core.region_rows_ok(rrows, MAX_INDEL_ALLELE)
+            n_before = len(rows)
+            rows, haps = core.merge_columns(rows, haps, [r for r, ok in zip(rrows, usable) if ok], rhaps[:, usable])
+            b.notes.setdefault("dense_regions", {})[chrom] = {
+                "fileset_variants": len(rrows), "usable": int(usable.sum()), "added_columns": len(rows) - n_before}
         pos_all = np.array([r[2] for r in rows])
         maf_t = None
         order = {sid: k for k, sid in enumerate(samples)}
@@ -597,9 +627,18 @@ def simulate_genomes(b: Build, donors: dict, sites: dict, roster: Roster, loci: 
             f_t = haps[templates].mean(axis=0)
             maf_t = np.minimum(f_t, 1 - f_t)
         in_region = {name: (pos_all >= lo) & (pos_all <= hi) for name, (c, lo, hi) in regions.items() if c == chrom}
+        # module A: in a region, every variant with both alleles among the haplotypes of the donor pools
+        pool_haps = haps[np.concatenate(list(hap_rows.values()))]
+        polymorphic = (pool_haps == 0).any(axis=0) & (pool_haps == 1).any(axis=0)
         keep = np.array([r[1] in array_index or r[1] in hidden_ids
-                         or any(mask[k] and maf_t[k] >= 0.01 for mask in in_region.values())
+                         or any(mask[k] and polymorphic[k] for mask in in_region.values())
                          for k, r in enumerate(rows)])
+        if in_region:
+            region_only = keep & ~np.array([r[1] in array_index or r[1] in hidden_ids for r in rows])
+            base = pos_all[keep & ~region_only]
+            if pos_all[keep].min() != base.min() or pos_all[keep].max() != base.max():
+                raise RuntimeError(f"chr{chrom}: a dense region changes the first or last site, so the mosaic "
+                                   "breakpoints (and the main-path data) would change")
         rows = [r for r, ok in zip(rows, keep) if ok]
         haps = haps[:, keep]
         in_region = {name: mask[keep] for name, mask in in_region.items()}   # same columns as `haps` now
@@ -1062,100 +1101,35 @@ def write_grch37_exercise(b: Build, chain: core.Chain, sim: dict, sites: dict, k
             "not_convertible": [r[2] for r in unconvertible[:24]], "change_chromosome": [r[2] for r in moved[:6]]}
 
 
-def write_imputation(b: Build, sim: dict, table: dict, roster: Roster, flow: dict, loci: dict) -> dict:
-    """Simulated imputation server output for two regions, in the Minimac4 layout of the Michigan and HMIS
-    servers: dosage VCF (GT:DS:GP) and info file. The true genotypes go to the instructor folder."""
-    rng = b.rng(7)
+def write_imputation_truth(b: Build, sim: dict, roster: Roster, flow: dict, loci: dict) -> dict:
+    """Module A: the true phased genotypes of the final cohort (the samples left after every QC and ancestry
+    step) at every variant of the dense regions, one VCF per region, in instructor/. Nothing goes to students:
+    module A imputes for real against an independent reference panel, and this file is the answer."""
     removed = {i for ids in flow["removed"].values() for i in ids}
     final_subjects = [k for k, sub in enumerate(roster.subjects) if sub.sample_id not in removed]
-    planted = {(c, int(p)) for c, p, pl, r, a in zip(table["chrom"], table["pos"], table["planted"], table["ref"],
-                                                     table["alt"]) if pl or core.is_palindromic(r, a)}
+    samples = [roster.subjects[k].sample_id for k in final_subjects]
     summary = {}
     for name, region in sim["regions"].items():
         chrom = region["ids"][0].split(":")[0]
         row_of = {int(p): k for k, p in enumerate(region["people"])}
         rows = np.array([row_of[roster.subjects[k].person] for k in final_subjects])
-        haps = np.concatenate([region["h1"][rows], region["h2"][rows]], axis=0)       # [2n, variant]
-        n = len(rows)
-        freq = haps.mean(axis=0)
-        maf = np.minimum(freq, 1 - freq)
-        pos = region["pos"]
-        typed = region["is_array"] & (maf >= 0.01) & np.array([(chrom, int(p)) not in planted for p in pos])
-        keep = typed | (~region["is_array"] & (maf >= 0.01))
-        x = haps[:, keep].astype(np.float32)
-        x -= x.mean(axis=0)
-        x /= np.where(x.std(axis=0) > 0, x.std(axis=0), 1)
-        typed_k = typed[keep]
-        r2 = (x.T @ x[:, typed_k] / x.shape[0]) ** 2                              # [variant, typed]
-        r2[np.flatnonzero(typed_k), np.arange(typed_k.sum())] = 0.0               # a typed site: best other site
-        best = r2.max(axis=1) if typed_k.any() else np.zeros(keep.sum())
-        maf_k = maf[keep]
-        target = np.clip((0.30 + 0.69 * np.sqrt(best)) * (1 - 0.5 * np.exp(-maf_k / 0.01)), 0.03, 0.99)
-        true = haps[:, keep]
-        dose = core.simulate_hap_dosages(true, target, rng)
-        typed_only = np.zeros(keep.sum(), dtype=bool)
-        t_idx = np.flatnonzero(typed_k)
-        if len(t_idx):
-            typed_only[rng.choice(t_idx, size=max(1, len(t_idx) // 50), replace=False)] = True
-        loo = minimac = core.minimac_r2(dose)
-        out_dose = np.where(typed_k[None, :], true.astype(np.float32), dose)
-        ids = [f"chr{i}" for i, k in zip(region["ids"], keep) if k]
-        samples = [roster.subjects[k].sample_id for k in final_subjects]
-        d = b.student / "imputation"
-        with gzip.open(d / f"chr{chrom}.dose.vcf.gz", "wt", encoding="ascii", newline="\n", compresslevel=6) as fh, \
-                gzip.open(b.instructor / f"imputation_truth_chr{chrom}.vcf.gz", "wt", encoding="ascii", newline="\n") as tr, \
-                gzip.open(d / f"chr{chrom}.info.gz", "wt", encoding="ascii", newline="\n") as info:
-            head = ["##fileformat=VCFv4.1", "##source=simulated for the GWAS practical course (Minimac4 layout)",
-                    f"##contig=<ID=chr{chrom}>", '##INFO=<ID=AF,Number=1,Type=Float,Description="Estimated Alternate Allele Frequency">',
-                    '##INFO=<ID=MAF,Number=1,Type=Float,Description="Estimated Minor Allele Frequency">',
-                    '##INFO=<ID=R2,Number=1,Type=Float,Description="Estimated Imputation Accuracy (R-square)">',
-                    '##INFO=<ID=ER2,Number=1,Type=Float,Description="Empirical (Leave-One-Out) R-square (available only for genotyped variants)">',
-                    '##INFO=<ID=IMPUTED,Number=0,Type=Flag,Description="Marker was imputed but NOT genotyped">',
-                    '##INFO=<ID=TYPED,Number=0,Type=Flag,Description="Marker was genotyped AND imputed">',
-                    '##INFO=<ID=TYPED_ONLY,Number=0,Type=Flag,Description="Marker was genotyped but NOT imputed">',
-                    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
-                    '##FORMAT=<ID=DS,Number=1,Type=Float,Description="Estimated Alternate Allele Dosage : [P(0/1)+2*P(1/1)]">',
-                    '##FORMAT=<ID=GP,Number=3,Type=Float,Description="Estimated Posterior Probabilities for Genotypes 0/0, 0/1 and 1/1">']
-            columns = "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + "\t".join(samples)
-            fh.write("\n".join(head) + "\n" + columns + "\n")
-            tr.write("##fileformat=VCFv4.1\n##source=simulated truth (instructor only)\n"
-                     '##FORMAT=<ID=GT,Number=1,Type=String,Description="True genotype">\n' + columns + "\n")
-            info.write("SNP\tREF(0)\tALT(1)\tALT_Frq\tMAF\tAvgCall\tRsq\tGenotyped\tLooRsq\tEmpR\tEmpRsq\tDose0\tDose1\n")
-            for j, vid in enumerate(ids):
-                _, p, ref, alt = vid.split(":")
-                d1, d2 = out_dose[:n, j], out_dose[n:, j]
-                af = float(out_dose[:, j].mean())
-                call = float(np.maximum(out_dose[:, j], 1 - out_dose[:, j]).mean())
-                if typed_only[j]:
-                    flag, rsq, kind, loo_txt = "TYPED_ONLY", "-", "Typed_Only", "-\t-\t-\t-\t-"
-                    info_field = f"AF={af:.5f};MAF={min(af, 1 - af):.5f};TYPED_ONLY"
-                elif typed_k[j]:
-                    emp = float(np.clip(loo[j], 0, 1))
-                    flag, rsq, kind = "TYPED", f"{min(0.99999, 0.9 + 0.1 * emp):.5f}", "Genotyped"
-                    loo_txt = f"{emp:.5f}\t{emp ** 0.5:.5f}\t{emp:.5f}\t{0.5 - 0.4 * emp:.5f}\t{0.5 + 0.4 * emp:.5f}"
-                    info_field = f"AF={af:.5f};MAF={min(af, 1 - af):.5f};R2={rsq};ER2={emp:.5f};TYPED"
-                else:
-                    flag, rsq, kind, loo_txt = "IMPUTED", f"{float(np.clip(minimac[j], 0, 1)):.5f}", "Imputed", "-\t-\t-\t-\t-"
-                    info_field = f"AF={af:.5f};MAF={min(af, 1 - af):.5f};R2={rsq};IMPUTED"
-                fh.write(f"chr{chrom}\t{p}\t{vid}\t{ref}\t{alt}\t.\tPASS\t{info_field}\tGT:DS:GP\t"
-                         + "\t".join(core.dosage_fields(d1, d2)) + "\n")
-                tr.write(f"chr{chrom}\t{p}\t{vid}\t{ref}\t{alt}\t.\tPASS\t{flag}\tGT\t"
-                         + "\t".join(f"{a}|{c}" for a, c in zip(true[:n, j], true[n:, j])) + "\n")
-                info.write(f"{vid}\t{ref}\t{alt}\t{af:.5f}\t{min(af, 1 - af):.5f}\t{call:.5f}\t{rsq}\t{kind}\t{loo_txt}\n")
-        imputed = ~typed_k
-        ds = out_dose[:n] + out_dose[n:]
-        tg = (true[:n] + true[n:]).astype(float)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            emp = np.array([np.corrcoef(ds[:, j], tg[:, j])[0, 1] ** 2 if tg[:, j].std() > 0 else 0 for j in range(ds.shape[1])])
-        summary[name] = {"chrom": chrom, "start": int(pos[keep].min()), "end": int(pos[keep].max()), "samples": n,
-                         "genotyped": int((typed_k & ~typed_only).sum()), "typed_only": int(typed_only.sum()),
-                         "imputed": int(imputed.sum()), "median_rsq_imputed": round(float(np.median(minimac[imputed])), 3),
-                         "median_true_r2_imputed": round(float(np.nanmedian(emp[imputed])), 3)}
+        h1, h2 = region["h1"][rows], region["h2"][rows]
+        path = b.instructor / f"imputation_truth_chr{chrom}.vcf.gz"
+        with gzip.open(path, "wt", encoding="ascii", newline="\n", compresslevel=6) as fh:
+            fh.writelines(core.truth_vcf_lines(chrom, region["ids"], region["is_array"], h1, h2, samples))
+        ac = h1.sum(axis=0).astype(int) + h2.sum(axis=0)
+        snv = np.array([len(i.split(":")[2]) == 1 and len(i.split(":")[3]) == 1 for i in region["ids"]])
+        summary[name] = {"chrom": chrom, "start": int(region["pos"].min()), "end": int(region["pos"].max()),
+                         "samples": len(samples), "variants": len(region["ids"]), "snvs": int(snv.sum()),
+                         "indels": int((~snv).sum()), "array_sites": int(region["is_array"].sum()),
+                         "polymorphic_in_cohort": int(((ac > 0) & (ac < 2 * len(samples))).sum()),
+                         "file": path.name, "sha256": sha256(path)}
         for lname, v in loci.items():
-            if f"chr{v['kg_id']}" in ids:
-                j = ids.index(f"chr{v['kg_id']}")
-                summary[name][f"{lname}_causal"] = {"id": ids[j], "rsq": round(float(minimac[j]), 3),
-                                                    "true_r2": round(float(emp[j]), 3), "typed": bool(typed_k[j])}
+            vid = v["kg_id"]
+            if vid in region["ids"]:
+                j = region["ids"].index(vid)
+                summary[name][f"{lname}_causal"] = {"id": f"chr{vid}", "on_array": bool(region["is_array"][j]),
+                                                    "alt_freq_cohort": round(float(ac[j]) / (2 * len(samples)), 4)}
     return summary
 
 
@@ -1270,13 +1244,18 @@ def build(s: Settings) -> dict:
         regions["L4"] = ("18", loci["L4"]["pos"] - 250_000, loci["L4"]["pos"] + 250_000)
     if not s.only_chromosomes or "22" in s.only_chromosomes:
         regions["chr22"] = IMPUTATION_CHR22
+    # module A: the true genotypes cover each region plus TRUTH_MARGIN on each side. `regions` itself is
+    # unchanged: extract_donors and plant_problems use it, so the main-path data do not change.
+    truth_regions = {name: (c, lo - TRUTH_MARGIN, hi + TRUTH_MARGIN) for name, (c, lo, hi) in regions.items()}
     hidden_ids = {v["kg_id"] for v in loci.values()} | {v["kg_id"] for v in known.values()}
     hidden_points = [(i.split(":")[0], int(i.split(":")[1])) for i in hidden_ids]
     extract_donors(b, sites, hidden_points, list(regions.values()))
+    extract_region_donors(b, list(truth_regions.values()))
+    shutil.copy2(b.work / "donors_all.keep", b.instructor / "donors_all.keep")
     b.lap("donor fileset")
     roster = make_roster(b.rng(2))
     flow = expected_flow(roster)
-    sim = simulate_genomes(b, donors, sites, roster, loci, hidden_ids, regions)
+    sim = simulate_genomes(b, donors, sites, roster, loci, hidden_ids, truth_regions)
     check = copy_check(sim, roster, donors, partial=bool(s.only_chromosomes))
     print(json.dumps(check, indent=1), flush=True)
     if check["failures"] or check["longest_copied_stretch_cm"] > s.max_copy_cm + 1e-6:
@@ -1295,8 +1274,8 @@ def build(s: Settings) -> dict:
     reference = write_pca_reference(b, donors)
     b.lap("final reports and PCA reference")
     grch37 = write_grch37_exercise(b, chain, sim, sites, known, table, roster)
-    imputation = write_imputation(b, sim, table, roster, flow, loci)
-    b.lap("GRCh37 exercise and imputation")
+    imputation = write_imputation_truth(b, sim, roster, flow, loci)
+    b.lap("GRCh37 exercise and imputation truth")
 
     status = np.array([p.status for p in roster.people])
     plain = np.array([p.founder and p.pool in ("N", "S") and p.status > 0 for p in roster.people])
@@ -1333,7 +1312,7 @@ def build(s: Settings) -> dict:
             "missing_share": donors.get("y_incomplete_missing", {})},
         "subjects": subjects, **planted["key"],
         "palindromic_dropped_from_design": sites["palindromic_dropped"],
-        "final_reports": reports, "pca_reference": reference, "grch37_exercise": grch37, "imputation": imputation,
+        "final_reports": reports, "pca_reference": reference, "grch37_exercise": grch37, "imputation_truth": imputation,
     }
     (b.instructor / "answer_key.json").write_text(json.dumps(key, indent=1) + "\n", encoding="utf-8")
     (b.instructor / "answer_key.md").write_text(answer_key_markdown(key), encoding="utf-8")
@@ -1344,7 +1323,10 @@ def build(s: Settings) -> dict:
               "numpy": np.__version__, "platform": platform.platform(), "timings_s": b.timings,
               "y_incomplete_donors": donors.get("y_incomplete_missing", {}),
               "haploid_sites_excluded": sites["haploid_sites_excluded"],
-              "plink_commands": b.commands, "student_files": files}
+              "plink_commands": b.commands, "student_files": files,
+              "module_a": {"truth_regions": {k: list(v) for k, v in truth_regions.items()},
+                           "dense_regions": b.notes.get("dense_regions", {}), "imputation_truth": imputation,
+                           "donors_all_keep_sha256": sha256(b.instructor / "donors_all.keep")}}
     (b.instructor / "build_record.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     (b.student / "README_simulated.txt").write_text(README, encoding="ascii", newline="\n")
     return key
@@ -1391,6 +1373,8 @@ def copy_check_markdown(c: dict) -> list[str]:
     return lines
 
 
+# The text still mentions imputation output, which the build no longer writes. It is kept word for word because
+# this file is part of the student data, which must stay byte-identical to the build of 11 November 2026.
 README = """\
 Simulated data for the GWAS practical course (2026)
 

@@ -536,6 +536,53 @@ def test_the_generator_refuses_an_output_folder_inside_the_repository():
     assert not (gen.REPO / "sim_out").exists()
 
 
+# --- module A: dense regions and the truth file ----------------------------------------------------------------
+
+def test_region_rows_ok_keeps_biallelic_acgt_snvs_and_short_indels_only():
+    rows = [("22", "22:100:A:G", 100, "A", "G"), ("22", "22:101:AT:A", 101, "AT", "A"),
+            ("22", ".", 102, "A" * 60, "A"), ("22", "22:103:A:N", 103, "A", "N"),
+            ("22", "22:104:A:" + "C" * 51, 104, "A", "C" * 51), ("22", "22:105:C:T", 105, "T", "C")]
+    assert m.region_rows_ok(rows, 50).tolist() == [True, True, False, False, False, True]
+
+
+def test_merge_columns_keeps_the_array_columns_and_orders_by_position():
+    rows_a = [("22", "22:10:A:G", 10, "A", "G"), ("22", "22:30:C:T", 30, "C", "T"), ("22", "22:50:G:A", 50, "G", "A")]
+    haps_a = np.array([[0, 1, 0], [1, 1, 0]], dtype=np.uint8)
+    rows_b = [("22", "22:20:T:TA", 20, "T", "TA"), ("22", "22:30:C:T", 30, "C", "T"), ("22", "22:30:C:CG", 30, "C", "CG"),
+              ("22", "22:60:A:C", 60, "A", "C")]
+    haps_b = np.array([[1, 9, 0, 1], [0, 9, 1, 1]], dtype=np.uint8)
+    rows, haps = m.merge_columns(rows_a, haps_a, rows_b, haps_b)
+    assert [r[1] for r in rows] == ["22:10:A:G", "22:20:T:TA", "22:30:C:T", "22:30:C:CG", "22:50:G:A", "22:60:A:C"]
+    # the duplicated ID comes from fileset a (its values, not the 9s of fileset b)
+    assert haps[:, 2].tolist() == [1, 1]
+    # the columns of a keep their values and their relative order
+    a_cols = [k for k, r in enumerate(rows) if r[1] in {x[1] for x in rows_a}]
+    assert np.array_equal(haps[:, a_cols], haps_a)
+    assert haps[:, 1].tolist() == [1, 0] and haps[:, 3].tolist() == [0, 1] and haps[:, 5].tolist() == [1, 1]
+
+
+def test_truth_vcf_lines_write_phased_genotypes_and_array_flags():
+    ids = ["22:100:A:G", "22:200:AT:A"]
+    h1 = np.array([[0, 1], [1, 1], [0, 0]], dtype=np.uint8)     # [sample, variant]
+    h2 = np.array([[1, 1], [0, 0], [0, 1]], dtype=np.uint8)
+    lines = list(m.truth_vcf_lines("22", ids, np.array([True, False]), h1, h2, ["S1", "S2", "S3"]))
+    assert lines[0] == "##fileformat=VCFv4.2\n"
+    assert any(line.startswith("##INFO=<ID=ARRAY") for line in lines)
+    assert lines[5].rstrip("\n").split("\t")[9:] == ["S1", "S2", "S3"]
+    v1 = lines[6].rstrip("\n").split("\t")
+    v2 = lines[7].rstrip("\n").split("\t")
+    assert v1[:9] == ["chr22", "100", "chr22:100:A:G", "A", "G", ".", "PASS", "ARRAY", "GT"]
+    assert v1[9:] == ["0|1", "1|0", "0|0"]
+    assert v2[3:5] == ["AT", "A"] and v2[7] == "." and v2[9:] == ["1|1", "1|0", "0|1"]
+    assert all(line.endswith("\n") and "\r" not in line for line in lines)
+
+
+def test_students_get_no_imputation_folder_and_the_truth_regions_are_wider():
+    assert "imputation" not in gen.STUDENT_DIRS
+    assert gen.TRUTH_MARGIN == 1_000_000
+    assert gen.IMPUTATION_CHR22 == ("22", 36_000_000, 36_500_000)    # planting zones of the main path unchanged
+
+
 if __name__ == "__main__":
     tests = [(name, fn) for name, fn in sorted(globals().items()) if name.startswith("test_") and callable(fn)]
     failed = 0
