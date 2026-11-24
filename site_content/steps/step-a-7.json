@@ -6,7 +6,7 @@
   "anchor": "step-a-7",
   "title": "Prepare the input files",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4",
+  "source_sha256": "144d2d7bb53df6e969f2959dd45018ca38c9c30b59938a347468201a3bcc97d8",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Write the measured genotypes of the two regions as one VCF file per region, ready for phasing and imputation. Then check every reference allele against the GRCh38 genome.",

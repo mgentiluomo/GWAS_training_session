@@ -6,7 +6,7 @@
   "anchor": "step-a-6",
   "title": "Reading the classic review",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4",
+  "source_sha256": "144d2d7bb53df6e969f2959dd45018ca38c9c30b59938a347468201a3bcc97d8",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 5 minutes. You can come back to it later.\n\nRead Marchini J, Howie B. Genotype imputation for genome-wide association studies. Nat Rev Genet. 2010;11:499-511 ([doi:10.1038/nrg2796](https://doi.org/10.1038/nrg2796)), with the guide below.",

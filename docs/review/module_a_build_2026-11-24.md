@@ -455,3 +455,25 @@ Checks:
 - The copy of `R/imputation.R` in `module-a-data-2026.1.zip` still says "Extract the module A data into ..."
   when files are missing (`imputation_check_module()`, `imputation_data_dir()`). The notebook and the lesson
   no longer say it. Change the messages when the module A package is made again.
+
+## No direct link to an encrypted data ZIP
+
+Step A.1 loses its "Module A data release" button; a small line under "Files created" links the release page
+for the checksums and licence and says that nothing is downloaded there. A.1 reading time: 4 minutes. The
+website module page now sends to step A.1 instead of linking the ZIP (website branch `course/data-button`).
+
+Search for encrypted data ZIPs (`course-data-*.zip`, `module-a-data-*.zip`) in the course and on the website:
+
+- Clickable links for students: none left after this change.
+- Inside R code, as intended: `config.R` (`archive_url` of `data-2026.1`, read by `download_course_data()`) and
+  the command of step A.1 (`module-a-data-2026.1.zip`).
+- Named in text, not linked: step 0.7 ("downloads `course-data-2026.1.zip`"; the local fallback "open the
+  release page linked above. Save `course-data-2026.1.zip` and `MANIFEST.tsv` together", then
+  `download_course_data(zip_path = ...)`), `docs/troubleshooting.md` line 91 (the same fallback), and author
+  documents (`docs/release_checklist.md`, `docs/release_packaging.md`, `docs/student_rehearsal.md`).
+- Project ZIP `GWAS_course-2026.4.zip` (not encrypted) at step 0.3, in `README.md` and in the notebooks: a
+  normal download, correct as it is.
+
+**For 2026.5.** Step 0.7 and `docs/troubleshooting.md`: say in the local fallback that the saved ZIP is opened
+by `download_course_data(zip_path = ...)` only, never with a double click (File Explorer cannot open AES-256).
+The JSON of modules 0 to 7 are not changed now.
