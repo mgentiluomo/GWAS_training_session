@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.1",
+  "id": "A.2",
+  "module": "A",
+  "step": 2,
+  "anchor": "step-a-2",
+  "title": "Phasing, then imputation",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "0d4e969988d40ee6170569f946c346240877f83d388d44e7f524a109e354a0d6",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nLearn the two stages of the process and the three ways to write an imputed genotype.",
+    "why": "An array tells you that a person is heterozygous A/G at a site. It does not tell you which allele sits on the chromosome from the mother and which on the chromosome from the father. Imputation needs that information, because it works on haplotypes.\n\n**Stage 1. Phasing.** [Phasing](docs/glossary.md#phasing) estimates the two haplotypes of each person from their genotypes. Software such as Eagle2 ([Loh et al. 2016](https://doi.org/10.1038/ng.3679)), SHAPEIT and Beagle does this. It compares each person with many others and with the reference panel, and finds the most likely pair of haplotypes.\n\n**Stage 2. Imputation.** Each study haplotype is compared with the reference haplotypes. The software looks for reference haplotypes that match it at the measured sites. It then predicts the alleles at the other sites from those matches. Software such as Minimac4, IMPUTE5 and Beagle 5 does this.\n\nRunning phasing first and imputation second is called pre-phasing. It made imputation with large panels fast enough for routine use ([Howie et al. 2012](https://doi.org/10.1038/ng.2354)).\n\n**How the software finds a match.** Most methods use a model proposed by Li and Stephens ([2003](https://doi.org/10.1093/genetics/165.4.2213)). It describes a study haplotype as a mosaic: a patchwork of short pieces copied from different reference haplotypes. Along the chromosome, the copy can switch from one reference haplotype to another. Switches are more likely where recombination is frequent. Small differences are allowed, to account for mutations and genotyping errors. The software does not pick one mosaic. It weighs all possible mosaics by how well they fit. The result at each site is a probability for each genotype, not a certain answer.\n\n\n\n**Three ways to write an imputed genotype.**\n\n| Form | Example for one person at one site | When to use it |\n| --- | --- | --- |\n| Genotype probabilities | P(AA) = 0.02, P(AG) = 0.90, P(GG) = 0.08 | Complete information, used by some tests |\n| Dosage | 0.02 × 0 + 0.90 × 1 + 0.08 × 2 = 1.06 | The usual input for association tests |\n| Best-guess (hard) call | AG | Only when a tool cannot read dosages |\n\nThe [dosage](docs/glossary.md#dosage) is the expected number of copies of the alternate allele. It runs from 0 to 2. It keeps the uncertainty: a dosage of 1.06 says \"almost certainly one copy\". A hard call throws that information away. Marchini and Howie ([2010](https://doi.org/10.1038/nrg2796)) advise against testing hard calls: it can cause both false positives and a loss of power.",
+    "you_need": "Step A.1.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can name the two stages and say why a dosage keeps more information than a hard call.",
+    "troubleshooting": "If phasing is not clear, think of a person who is heterozygous at two nearby sites. The genotypes do not say whether the two less common alleles sit on the same chromosome copy or on different copies. Phasing estimates that.",
+    "quick_check": "A person has the genotype probabilities P(AA) = 0.10, P(AG) = 0.20 and P(GG) = 0.70, with G as the alternate allele. What is the dosage?\n\n<details><summary>Show the answer</summary>\n\n0.10 × 0 + 0.20 × 1 + 0.70 × 2 = 1.60 copies of G.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [
+    {
+      "kind": "placeholder",
+      "asset": null,
+      "gemini_prompt": "Flat scientific diagram, white background. One study haplotype at the bottom drawn as a horizontal bar made of 4 segments with different fill patterns. Above it, six reference haplotypes as thin horizontal bars, each with its own fill pattern. Dotted vertical lines show that segment 1 of the study haplotype is copied from reference 2, segment 2 from reference 5, segment 3 from reference 1 and segment 4 from reference 5. Small marks at the switch points labelled 'recombination'. Title: 'A haplotype as a mosaic of reference haplotypes'. Colour-blind-safe palette.",
+      "alt_text": "Teaching schematic: Phasing, then imputation.",
+      "reviewed": false
+    }
+  ],
+  "student_summary": "We see the two stages of imputation. First the software estimates which alleles lie together on each chromosome copy (phasing). Then it compares each copy with the reference panel and predicts the missing sites, as probabilities.",
+  "student_kind": "reading",
+  "student_expected_result": "You can name the two stages and say why a dosage keeps more information than a hard call."
+}
