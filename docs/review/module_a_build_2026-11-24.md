@@ -203,3 +203,36 @@ Module A adds `step-a-1.json` to `step-a-10.json` and `module-a.json`.
 - The 2026.5 exporter already has the "Another approach" block; keep one copy when the branches meet.
 - The packaging fix for additional modules (`scripts/package_project.py`) is needed on 2026.5 too.
 - The module A data package is made again for 2026.5, with its own version, and the website link changes.
+
+## Phase 3. Website
+
+Website branch `course/module-a`, from `origin/main` (`4b54b05`), commit `09e3632`, pushed. No merge.
+
+- `scripts/sync-gwas-content.mjs` copies the additional modules (`step-a-1.json` to `step-a-10.json`,
+  `module-a.json`), their notebook and the result figures (`public/gwas/figures/`). They are listed apart in
+  `index.json`. The main-path checks and counts do not change. The JSON of modules 0 to 7 have no content change.
+- `release.ts`: `PUBLISHED_ADDITIONAL_MODULES` is empty, so module A is built in review builds only (local
+  development, Vercel preview, `GWAS_REVIEW_BUILD=1`). The production build generates no module A page and the
+  course map shows module A as "Not yet available", as before.
+- Data link placeholder: `ADDITIONAL_MODULE_DATA.A.url` in `release.ts` is `null`. The module page then says
+  "not published yet". To publish: set the https URL of the module-a package there, then add "A" to
+  `PUBLISHED_ADDITIONAL_MODULES`.
+- Step page: new "Another approach (optional)" box; result figures (kind `result`) shown with alt text and
+  caption inside the expected result. Module page: "Where the module ends" says to go back to step 6.4.
+- The notebook and the PNG are static files: in production they are not linked, but they can be reached by
+  their URL.
+- `index.json` names the source branch `course/module-a-2026.4`, used for links to course documents. After the
+  course branch is merged, run the sync again from the merged branch.
+
+### Checks
+
+- `tsc --noEmit`: 0 errors. ESLint: 0 errors (11 old warnings in other files).
+- `next build` (production): exit 0, no module A page. `GWAS_REVIEW_BUILD=1 next build`: exit 0, module A and
+  its 10 steps generated.
+- axe-core 4.14.1 (WCAG 2.0, 2.1, 2.2 AA and best practice), light and dark, 390 and 1280 px, every `details`
+  open: course home, module A, steps A.1 to A.10, step 6.4. 52 runs, 0 violations, no horizontal overflow, no
+  broken image. The first run found an empty table header in A.4; the lesson now heads it "Feature" (`49d5014`).
+- Screenshots of A.6 and A.8 at 390 and 1280 px (light theme, full page):
+  `C:\WEB_site\data_sources\codex_work\module-a-build-20261124\screenshots\`.
+- Vercel preview: built (status success). It is behind Vercel login, so the checks above ran on the local
+  review build of the same commit.
