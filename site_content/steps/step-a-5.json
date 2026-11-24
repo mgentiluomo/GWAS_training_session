@@ -6,7 +6,7 @@
   "anchor": "step-a-5",
   "title": "Genetic data and the law",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 2 minutes. You can come back to it later.\n\nLearn the main legal points before you upload genetic data. This step is information, not legal advice.",

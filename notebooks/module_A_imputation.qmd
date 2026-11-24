@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1"
+course_source_sha256: "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -55,13 +55,16 @@ The linked step pages explain the ideas and provide troubleshooting.
 ```{r}
 #| label: moduleA_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
-source("R/guided.R"); guided_check_module("A")
+module_dir <- Sys.getenv("COURSE_MODULE_A_DIR", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "module_a"))
+helpers <- c("R/imputation.R", file.path(module_dir, "R", "imputation.R"))
+if (!any(file.exists(helpers))) stop("R/imputation.R was not found in the project or in the module A data. Extract the module A data into ", module_dir, " and run this chunk again.", call. = FALSE)
+source(helpers[file.exists(helpers)][1])
+imputation_check_module()
 ```
 
 ```{r}
 #| label: moduleA_setup
 source("R/guided.R")
-source("R/imputation.R")
 cfg <- guided_init()
 ```
 

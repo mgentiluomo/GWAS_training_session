@@ -36,11 +36,7 @@ guided_module_inputs <- list(
 `7` = list(
   checkpoint = "6.8", restart_step = "7.1",
   data = c("lab_export/sample_sheet.csv", "phenotypes/sim2026_phenotypes.tsv", "checkpoints/2.8/state.pgen", "checkpoints/2.8/state.pvar", "checkpoints/2.8/state.psam"),
-  output = c("s6-4_association.Disease.glm.logistic.hybrid", "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv")),
-`A` = list(
-  checkpoint = "6.3", restart_step = "6.4",
-  data = c("array/sim2026_array_annotation.tsv", "module_a/imputed/chr18.dose.vcf.gz", "module_a/imputed/chr22.dose.vcf.gz", "module_a/true_genotypes/chr22_true_genotypes.vcf.gz", "module_a/reference_panel/panel_chr22.vcf.gz"),
-  output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv"))
+  output = c("s6-4_association.Disease.glm.logistic.hybrid", "s6-8_gwas_summary_statistics.tsv", "s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv", "step_counts.tsv", "checkpoints/index.tsv"))
 )
 guided_check_project_root <- function() {
   if (!file.exists("config.R") || !file.exists("R/guided.R")) {
@@ -70,8 +66,7 @@ guided_check_module <- function(module) {
     restart <- paste0("restore_checkpoint(", paste(arguments, collapse = ", "), ")")
     finished <- sub("\\..*$", "", spec$checkpoint)
     # When the restart step belongs to the module that makes the files, the student must run that module again.
-    # An additional module (A, B) starts from the main path, so restoring the checkpoint is enough there.
-    advice <- if (grepl("^[0-9]+$", module) && sub("\\..*$", "", spec$restart_step) == finished) {
+    advice <- if (sub("\\..*$", "", spec$restart_step) == finished) {
       paste0(". Finish module ", finished, " first. Or restart with: ", restart,
              " and run module ", finished, " again (use an empty folder).")
     } else {

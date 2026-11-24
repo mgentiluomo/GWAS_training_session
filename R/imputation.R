@@ -1,4 +1,6 @@
-# Helpers for module A (genotype imputation). Source R/guided.R first.
+# Helpers for module A (genotype imputation). Source R/guided.R first, except for imputation_check_module().
+# This file ships in the module A data (R/imputation.R inside data/course/module_a). The first chunk of the
+# module A notebook sources R/imputation.R of the project if it is there, otherwise that copy.
 # The imputation itself (Eagle and Minimac4) runs outside R. These helpers prepare its input, read its output,
 # compare it with the true genotypes of the simulation and test the imputed dosages for association.
 
@@ -13,6 +15,52 @@ imputation_data_dir <- function(cfg) {
   path <- Sys.getenv("COURSE_MODULE_A_DIR", unset = file.path(cfg$data_dir, "module_a"))
   if (!dir.exists(path)) stop("The module A data were not found in ", path, ". Extract them there or set COURSE_MODULE_A_DIR.")
   normalizePath(path, winslash = "/", mustWork = TRUE)
+}
+
+# Files module A needs. The same list is in module_meta of lessons/module_A_imputation.Rmd: a test checks that
+# they agree. data: under the course data folder. module_a: under the module A data folder. output: the
+# student's saved files of the main path (checkpoint 6.3).
+imputation_module_inputs <- list(
+  checkpoint = "6.3", restart_step = "6.4",
+  data = "array/sim2026_array_annotation.tsv",
+  module_a = c("imputed/chr18.dose.vcf.gz", "imputed/chr22.dose.vcf.gz", "true_genotypes/chr22_true_genotypes.vcf.gz",
+    "reference_panel/panel_chr22.vcf.gz"),
+  output = c("s5-7_state.pgen", "s5-7_state.pvar", "s5-7_state.psam", "s6-3_covariates.tsv"))
+
+# The input check of module A, run by the first chunk of its notebook. It needs only base R, so it works with the
+# R/guided.R of any course version. The messages follow guided_check_module().
+imputation_check_module <- function() {
+  if (!file.exists("config.R") || !file.exists("R/guided.R")) {
+    stop("Open GWAS_course.Rproj and run this notebook from the project root.", call. = FALSE)
+  }
+  if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = normalizePath("."))
+  spec <- imputation_module_inputs
+  data_dir <- Sys.getenv("COURSE_DATA_DIR", unset = "data/course")
+  module_a_dir <- Sys.getenv("COURSE_MODULE_A_DIR", unset = file.path(data_dir, "module_a"))
+  output_dir <- Sys.getenv("COURSE_OUTPUT_DIR", unset = "results/guided")
+  data_files <- file.path(data_dir, spec$data)
+  if (any(!file.exists(data_files))) {
+    stop("Course metadata are missing. Complete step 0.7 before module A. Missing: ",
+         paste(data_files[!file.exists(data_files)], collapse = ", "), call. = FALSE)
+  }
+  module_a_files <- file.path(module_a_dir, spec$module_a)
+  if (any(!file.exists(module_a_files))) {
+    stop("Some module A data are missing. Extract the module A data into ", module_a_dir, ". Missing: ",
+         paste(module_a_files[!file.exists(module_a_files)], collapse = ", "), call. = FALSE)
+  }
+  output_files <- file.path(output_dir, spec$output)
+  if (any(!file.exists(output_files))) {
+    arguments <- encodeString(spec$restart_step, quote = '"')
+    if (data_dir != "data/course") arguments <- c(arguments, paste0("data_dir = ", encodeString(data_dir, quote = '"')))
+    if (output_dir != "results/guided") arguments <- c(arguments, paste0("work_dir = ", encodeString(output_dir, quote = '"')))
+    restart <- paste0("restore_checkpoint(", paste(arguments, collapse = ", "), ")")
+    stop("Some saved files from step ", spec$checkpoint, " are missing: ",
+         paste(output_files[!file.exists(output_files)], collapse = ", "),
+         ". Finish module 6 up to step ", spec$checkpoint, " first. Or restore them with: ", restart,
+         " (use an empty folder).", call. = FALSE)
+  }
+  cat("Module A input files are present.\n")
+  invisible(TRUE)
 }
 
 # Write text lines as a BGZF file (blocked gzip), the compression that VCF tools and imputation servers expect.

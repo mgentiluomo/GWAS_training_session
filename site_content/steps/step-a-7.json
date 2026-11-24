@@ -6,7 +6,7 @@
   "anchor": "step-a-7",
   "title": "Prepare the input files",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Write the measured genotypes of the two regions as one VCF file per region, ready for phasing and imputation. Then check every reference allele against the GRCh38 genome.",
@@ -19,7 +19,7 @@
     "files_created": "`sA-7_chr18.vcf.gz` and `sA-7_chr22.vcf.gz` (the input for imputation), `sA-7_regions.bed1`, `sA-7_ref_alleles_chr18.tsv`, `sA-7_ref_alleles_chr22.tsv` and the log files.",
     "another_approach": "**Run the imputation yourself.** The module A data already hold the imputed output, so this box is optional. Eagle2 and Minimac4 run on Linux and macOS, and on Windows only inside the Windows Subsystem for Linux (WSL). They are not part of the course setup. The commands below were tested on 24 November 2026 with Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the files of the module A data and the input of this step. Download the programs only from their official pages: [Eagle](https://alkesgroup.broadinstitute.org/Eagle/) and [Minimac4](https://github.com/statgen/Minimac4).\n\nPhase the input against the panel (Eagle2). Every input site is also in the panel, so none is lost. It takes about one minute per region.\n\n```sh\neagle --vcfRef panel_chr22.vcf.gz --vcfTarget sA-7_chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z\n```\n\nImpute (Minimac4). The module A data hold the panel in the compact Minimac4 format (`.msav`).\n\n```sh\nminimac4 --map minimac4_chr22.map --format GT,DS --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz\n```\n\n`--format GT,DS` writes the best-guess genotype and the dosage. Add `GP` for the genotype probabilities; the files then grow to 150 to 250 MB per region. `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (step A.8). It takes about one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22.\n\n**Expected result.** Files like those in `data/course/module_a/imputed/`. Compare a few R2 values of the INFO column with the files of the module A data.\n\n**Reference.** [Loh et al. 2016](https://doi.org/10.1038/ng.3679) for Eagle2; [Das et al. 2016](https://doi.org/10.1038/ng.3656) for Minimac."
   },
-  "setup_code": "source(\"R/guided.R\")\nsource(\"R/imputation.R\")\ncfg <- guided_init()",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "sA-7",

@@ -163,5 +163,54 @@ local({
   Sys.setenv(COURSE_MODULE_A_DIR = root)
   stopifnot(identical(imputation_data_dir(cfg), normalizePath(root, winslash = "/")))
   if (is.na(old)) Sys.unsetenv("COURSE_MODULE_A_DIR") else Sys.setenv(COURSE_MODULE_A_DIR = old)
+
+  # 7. The first chunk of the module A notebook, in a project of the 2026.4 kind (no R/imputation.R, R/guided.R
+  # without module A): it loads the helpers from the module A data and runs the input check.
+  repo <- getwd()
+  chunk <- readLines(file.path(repo, "notebooks", "module_A_imputation.qmd"), encoding = "UTF-8")
+  first <- which(chunk == "#| label: moduleA_check")
+  chunk <- chunk[(first + 1L):(first + which(chunk[-seq_len(first)] == "```")[1] - 1L)]
+  project <- file.path(root, "project")
+  dir.create(file.path(project, "R"), recursive = TRUE)
+  writeLines("# project", file.path(project, "config.R"))
+  writeLines("# 2026.4 guided.R", file.path(project, "R", "guided.R"))
+  run_chunk <- function() {
+    env <- new.env(parent = globalenv())
+    owd <- setwd(project)
+    on.exit(setwd(owd))
+    capture.output(eval(parse(text = chunk), envir = env))
+  }
+  saved <- Sys.getenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR", "COURSE_MODULE_A_DIR"), unset = NA)
+  Sys.unsetenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR", "COURSE_MODULE_A_DIR"))
+  on.exit(for (n in names(saved)) if (is.na(saved[[n]])) Sys.unsetenv(n) else do.call(Sys.setenv, as.list(saved[n])), add = TRUE)
+  # No helpers anywhere: one clear sentence.
+  expect_error(run_chunk(), "R/imputation.R was not found in the project or in the module A data. Extract the module A data into data/course/module_a")
+  # The helpers in the module A data, but no data files yet.
+  module_a <- file.path(project, "data", "course", "module_a")
+  dir.create(file.path(module_a, "R"), recursive = TRUE)
+  file.copy(file.path(repo, "R", "imputation.R"), file.path(module_a, "R", "imputation.R"))
+  dir.create(file.path(project, "data", "course", "array"))
+  writeLines("x", file.path(project, "data", "course", "array", "sim2026_array_annotation.tsv"))
+  expect_error(run_chunk(), "Some module A data are missing. Extract the module A data into data/course/module_a. Missing: data/course/module_a/imputed/chr18.dose.vcf.gz")
+  for (f in imputation_module_inputs$module_a) {
+    dir.create(dirname(file.path(module_a, f)), recursive = TRUE, showWarnings = FALSE)
+    writeLines("x", file.path(module_a, f))
+  }
+  # The data are there, the files of step 6.3 are not.
+  expect_error(run_chunk(), "Some saved files from step 6.3 are missing: results/guided/s5-7_state.pgen")
+  expect_error(run_chunk(), 'Or restore them with: restore_checkpoint("6.4") (use an empty folder).')
+  dir.create(file.path(project, "results", "guided"), recursive = TRUE)
+  for (f in imputation_module_inputs$output) writeLines("x", file.path(project, "results", "guided", f))
+  stopifnot(identical(run_chunk(), "Module A input files are present."))
+  # A project copy of R/imputation.R comes first.
+  writeLines('imputation_check_module <- function() cat("project copy\\n")', file.path(project, "R", "imputation.R"))
+  stopifnot(identical(run_chunk(), "project copy"))
+  # The module A data in another folder.
+  unlink(file.path(project, "R", "imputation.R"))
+  moved <- file.path(root, "elsewhere")
+  file.rename(module_a, moved)
+  Sys.setenv(COURSE_MODULE_A_DIR = moved)
+  stopifnot(identical(run_chunk(), "Module A input files are present."))
+  Sys.unsetenv("COURSE_MODULE_A_DIR")
   cat("Module A imputation helper checks passed.\n")
 })

@@ -6,7 +6,7 @@
   "anchor": "step-a-8",
   "title": "Is the imputed variant good?",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Read the quality measures of the imputed output on chromosome 22. Then compare the quality that Minimac4 reports with the true quality, measured against the true genotypes of the simulation.",
@@ -19,7 +19,7 @@
     "files_created": "`sA-8_quality_chr22.tsv` (one row per variant: class, R2, true r²) and `sA-8_r2_chr22.png` (the figure).",
     "another_approach": "**Hide some array sites and impute them.** You can measure imputation quality on your own data, without a truth file. Hide some of the sites you measured, impute them, and compare the dosages with the genotypes you know. This needs Eagle2 and Minimac4 (the box of step A.7).\n\n1. Choose 5% of the array sites in the regions at random, with a fixed seed. In the course run: 22 of 438 sites.\n2. Write the input VCF without them (PLINK `--exclude` with the list of their IDs) and run phasing and imputation again.\n3. For each hidden site, compare the dosage with the measured genotype: true r², and the share of best-guess genotypes that match.\n\n**Expected result.** In the course run all 22 sites were imputed. Median R2 0.70, median true r² 0.46. The best-guess genotypes were right in 89% of cases on average. R2 and true r² correlate well (0.93), but R2 is higher, most of all for sites below 5%. One site at 1.7% had an R2 of 0.44 and a true r² of 0.08.\n\n**Reference.** [Marchini and Howie 2010](https://doi.org/10.1038/nrg2796), section on information measures."
   },
-  "setup_code": "source(\"R/guided.R\")\nsource(\"R/imputation.R\")\ncfg <- guided_init()",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "sA-8",

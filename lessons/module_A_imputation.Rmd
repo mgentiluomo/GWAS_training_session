@@ -21,7 +21,6 @@ setwd(start_dir)
 
 ```{r setup, include=FALSE}
 source("R/guided.R")
-source("R/imputation.R")
 cfg <- guided_init()
 ```
 
@@ -42,7 +41,7 @@ cfg <- guided_init()
 
 **How long it takes.** About 2 hours. Steps A.1 to A.6 and A.10 are reading. The slowest code step is A.8, about two minutes.
 
-**What you need.** Your files at step 6.3: the final cohort of 1,811 samples from step 5.7 and the covariates from step 6.3. You also need the module A data, a separate data release. Extract them into the folder `data/course/module_a`. You do not need a server account.
+**What you need.** Your files at step 6.3: the final cohort of 1,811 samples from step 5.7 and the covariates from step 6.3. You also need the module A data, a separate data release. Extract them into the folder `data/course/module_a`. They also hold `R/imputation.R`, the R functions of this module. Do not copy it into your project: the first chunk of the module notebook loads it from the data folder. You do not need a server account.
 
 **The data of this module.** The course data are simulated. Each study genome is a mosaic of short segments copied from genomes of the 1000 Genomes Project, the "donors". A reference panel that contains the donors would contain the study haplotypes themselves. Imputation would then look far better than it can be with real data. The 1000 Genomes panels of the imputation servers contain the donors. So does the HRC panel, which includes the 1000 Genomes Phase 3 samples ([McCarthy et al. 2016](https://doi.org/10.1038/ng.3643)). So the course examples do not use the servers.
 
@@ -50,7 +49,7 @@ Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-co
 
 ## A.1 Why imputation works: haplotypes {#step-a-1}
 
-Reading, about 2 minutes. You can come back to it later.
+Reading, about 3 minutes. You can come back to it later.
 
 <!-- step_meta: {"student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.", "student_kind": "reading"} -->
 
@@ -72,7 +71,16 @@ Imputation uses the same idea in the opposite direction. Pruning removes sites t
 
 ### You need
 
-LD pruning at step 3.4 helps, but it is not required. No data are needed.
+LD pruning at step 3.4 helps, but it is not required. No data are needed for this step.
+
+Before the code steps (A.7 to A.9), get the module A data ready:
+
+1. Download the module A data from the module page of the course website. Like the course data of step 0.7, it is an [encrypted archive](../docs/glossary.md#encrypted-archive). Ask your teacher for its password.
+2. Extract it into the folder `data/course/module_a` of your project. The folder then holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.
+3. Download the module A notebook and open it in RStudio from the project root.
+4. Run its first chunk. It loads `R/imputation.R` from the module A data and checks the files of this module. You should see `Module A input files are present.`
+
+You do not change any file of your project. Your project stays as you downloaded it at step 0.3.
 
 ### Command
 

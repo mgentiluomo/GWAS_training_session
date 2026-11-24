@@ -6,7 +6,7 @@
   "anchor": "step-a-9",
   "title": "Test imputed variants for association",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Test the imputed variants of the region around locus L4 for association, with the model of the main analysis. Then compare the simulated risk variant of L4 with the best variant of the region.",
@@ -18,7 +18,7 @@
     "quick_check": "After imputation, a variant with R2 0.81 crosses the genome-wide threshold, while the array site next to it does not. Is the imputed result a discovery?\n\n<details><summary>Show the answer</summary>\n\nNot yet. In this example the true genotypes do not reach the threshold: part of the result comes from noise in the dosages. Report the R2 of every variant you discuss, look at the measured neighbours, and confirm by direct genotyping or in another study.\n\n</details>",
     "files_created": "`sA-9_chr18_assoc.Disease.glm.logistic.hybrid` and the log files."
   },
-  "setup_code": "source(\"R/guided.R\")\nsource(\"R/imputation.R\")\ncfg <- guided_init()",
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
   "r_commands": [
     {
       "label": "sA-9",

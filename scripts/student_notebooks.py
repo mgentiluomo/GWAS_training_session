@@ -86,12 +86,34 @@ ROOT_CHECK = [
 ]
 
 
+# Additional modules bring their own helpers in their data release, so that the student project (and its
+# R/guided.R) stays as released. The first chunk sources R/<helpers> of the project if it is there, otherwise the
+# copy in the module data, and runs the input check defined in that file.
+ADDITIONAL_HELPERS = {"A": {"file": "imputation.R", "folder": "module_a", "variable": "COURSE_MODULE_A_DIR",
+                            "check": "imputation_check_module()"}}
+
+
+def additional_loader(code: str) -> list[str]:
+    spec = ADDITIONAL_HELPERS[code]
+    return [
+        f'module_dir <- Sys.getenv("{spec["variable"]}", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "{spec["folder"]}"))',
+        f'helpers <- c("R/{spec["file"]}", file.path(module_dir, "R", "{spec["file"]}"))',
+        f'if (!any(file.exists(helpers))) stop("R/{spec["file"]} was not found in the project or in the module {code} data. '
+        f'Extract the module {code} data into ", module_dir, " and run this chunk again.", call. = FALSE)',
+        "source(helpers[file.exists(helpers)][1])",
+        spec["check"],
+    ]
+
+
 def check_chunk(model: dict) -> list[str]:
     number = model["module"]
-    argument = number if isinstance(number, int) else json.dumps(number)
+    if isinstance(number, int):
+        body = ROOT_CHECK if number == 0 else [f'source("R/guided.R"); guided_check_module({number})']
+    else:
+        body = additional_loader(number)
     return [f"```{{r module{number}_check}}",
             'if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")',
-            *(ROOT_CHECK if number == 0 else [f'source("R/guided.R"); guided_check_module({argument})']),
+            *body,
             "```", ""]
 
 
@@ -445,8 +467,10 @@ def module_three(root: Path = ROOT) -> tuple[str, str]:
 
 
 def module_check_table(root: Path = ROOT, models: list[dict] | None = None) -> str:
-    """Generate the small R prerequisite table from the lesson's module_meta."""
-    models = build_models(root) + build_models(root, additional=True) if models is None else models
+    """Generate the small R prerequisite table from the lesson's module_meta (modules 0 to 7).
+
+    Additional modules are not in it: their check is in their own helpers (ADDITIONAL_HELPERS)."""
+    models = build_models(root) if models is None else models
     quote = lambda value: "NULL" if value is None else json.dumps(value, ensure_ascii=False)
     rows = ["# BEGIN GENERATED MODULE INPUTS", "# Sources: module_meta in enabled lessons (module 0 needs only the project root).",
             "# Regenerate with --export-notebooks; do not edit this table.",
@@ -486,7 +510,7 @@ def export_notebooks(destination: Path, check: bool = False, root: Path = ROOT, 
     # Additional modules get their own notebook. They are not part of the complete notebook of modules 0 to 7.
     extra = build_models(root, additional=True)
     outputs.update(notebook_outputs(extra, format))
-    sync_module_check(root, check, models + extra)
+    sync_module_check(root, check, models)
     # Generated notebooks of any known format that are not in the current output are unexpected,
     # for example R Markdown files that remain after the student format changed to Quarto.
     generated_name = re.compile(r"(?:module_(?:0[0-7]|[A-Z])_.+|gwas_course_complete)(?:" + "|".join(re.escape(s) for s in SUFFIXES.values()) + ")")
