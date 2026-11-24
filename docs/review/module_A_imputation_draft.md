@@ -442,7 +442,7 @@ You can measure imputation quality on your own data, without a truth file. Hide 
 
 The course result: all 22 sites were imputed. Median R² 0.70, median true r² 0.46, best-guess genotypes right in 89% of cases on average. R² and true r² correlate well (0.93), but R² is higher, most of all for sites below 5%. One site at 1.7% had R² 0.44 and a true r² of 0.08.
 
-> Figure placeholder A.8. Produced by R from the course output: R² against true r² for every imputed variant of chromosome 22, coloured by frequency class, with the 0.3 and 0.8 lines and the diagonal. No Gemini prompt needed.
+> Figure A.8 (draft PNG: `figures/figure_A8_r2_chr22.png` in the module A staging; script `scripts/author/module_a/figure_a8_r2.R`). R² against true r² on chromosome 22, one panel per frequency class, with the 0.3 and 0.8 lines and the diagonal R² = true r². Only imputed variants that vary in the samples are drawn (18,569), so the counts are lower than in the table above; the medians are the same. Points below the diagonal are variants whose R² is too optimistic.
 
 **Do not filter imputed variants for Hardy-Weinberg equilibrium** the same way as measured ones. Dosages are not hard genotypes, so the usual test does not apply. Hardy-Weinberg checks belong to the measured data, before imputation (step 4.4).
 
