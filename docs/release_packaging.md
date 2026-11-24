@@ -111,6 +111,17 @@ Repositories and branches:
 
 ### 1. Encrypt the module A package (author)
 
+The packager stops if `R/imputation.R` of the stage differs from the file on
+`course/module-a-2026.4`. `stage-module-a-2026.1.MANIFEST.tsv` lists the 22
+files of the package (no logs) and equals the dry run of step 0.
+
+The author script
+`codex_work/module-a-build-20261124/encrypt/encrypt_module_a_2026.1.ps1` does
+this step in a temporary worktree of the branch. It runs the dry run and
+compares it with the stage MANIFEST, asks for the password twice (hidden),
+encrypts, tests the ZIP with the password and with a wrong one, and prints the
+name, size and SHA-256 of the ZIP. By hand, the commands are:
+
 Run the packager on the author machine. Set the password in
 `COURSE_RELEASE_PASSWORD`. Never type it in a command or a file.
 
