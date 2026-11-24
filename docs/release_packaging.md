@@ -92,13 +92,22 @@ Repositories and branches:
 - Module A data, staged and verified: `codex_work/stage-module-a-2026.1/`, with
   `stage-module-a-2026.1.MANIFEST.tsv` beside it.
 
-### 0. Before you start
+### 0. Before you start (done, 24 November 2026)
 
-- Decide how students get `R/imputation.R` and the new `R/guided.R`. They are
-  not in the 2026.4 project ZIP. See the review diary of 24 November 2026.
-- `scripts/package_release.py` accepts only `sim2026/student` or a
-  `classroom-stage-*` folder. It refuses `stage-module-a-2026.1`. Allow that
-  source first, in its own commit, with a test.
+- Student code. The 2026.4 project does not change. `R/imputation.R` ships in
+  the module A package, as `R/imputation.R` inside `data/course/module_a`. The
+  first chunk of the module A notebook loads `R/imputation.R` of the project if
+  it is there, otherwise the copy in the module A data. `R/guided.R` stays the
+  2026.4 file.
+- Packaging rule. `scripts/package_release.py --package module-a` accepts a
+  `stage-module-a-*` folder under `codex_work`: the folders `reference_panel`,
+  `genetic_map`, `imputed` and `true_genotypes`, the files
+  `README_simulated.txt` and `panel_samples.tsv`, and `R/imputation.R`.
+  `R/imputation.R` of the course branch is in `stage-module-a-2026.1/R/`.
+- Dry run (no ZIP, no password): 22 files, 229,691,213 bytes, MANIFEST.tsv
+  SHA-256 `46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4`,
+  in `codex_work/dryrun-module-a-2026.1/`. If `R/imputation.R` changes on the
+  branch, copy it into the stage again and repeat the dry run.
 
 ### 1. Encrypt the module A package (author)
 
@@ -106,12 +115,16 @@ Run the packager on the author machine. Set the password in
 `COURSE_RELEASE_PASSWORD`. Never type it in a command or a file.
 
 ```sh
-python -B scripts/package_release.py --source PATH_TO/codex_work/stage-module-a-2026.1 --output PATH_TO/codex_work/release-module-a-2026.1
+python -B scripts/package_release.py --package module-a --dry-run --output PATH_TO/codex_work/dryrun-module-a-CHECK
+python -B scripts/package_release.py --package module-a
 ```
 
-The output folder must be new. Keep the printed archive SHA-256 and manifest
-SHA-256. Check them with `sha256sum -c SHA256SUMS.txt` in the output folder.
-Students extract the archive into `data/course/module_a`.
+The first command lists the files again. Its MANIFEST.tsv must equal the dry
+run of step 0. The second command reads `codex_work/stage-module-a-2026.1` and
+writes `codex_work/release-module-a-2026.1/module-a-data-2026.1.zip`. The output
+folder must be new. Keep the printed archive SHA-256 and manifest SHA-256.
+Check them with `sha256sum -c SHA256SUMS.txt` in the output folder. Students
+extract the archive into `data/course/module_a`.
 
 ### 2. GitHub release `module-a-2026.1`
 
@@ -143,7 +156,8 @@ module A branch.
    `course/2026-guided-training`, `commit` is the merge commit, `dirty` is false.
 4. Check that the JSON of modules 0 to 7 have not changed (`git diff --stat
    src/content/gwas/steps src/content/gwas/modules` lists only module A files,
-   if any).
+   if any). The module A notebook in `src/content/gwas/additional-public/` must
+   equal `notebooks/module_A_imputation.qmd` of the merged branch.
 
 ### 5. Data URL and publication switch in `release.ts`
 
@@ -171,8 +185,10 @@ log of the deployment. It must show the same two lines as in step 5.
   A.8 (`/gwas/figures/module_a/figure_A8_r2_chr22.png`) answer 200.
 - Links to course documents open on `course/2026-guided-training`.
 - Modules 0 to 7 look as before.
-- In a fresh project folder with the downloaded data, run A.7 to A.9. Check the
-  numbers of the lesson: 161 and 277 sites, 1,811 samples, L4 OR 1.47, p 1.65e-6.
+- In a fresh 2026.4 project with the downloaded data extracted into
+  `data/course/module_a`, run the module A notebook. The first chunk prints
+  `Module A input files are present.` Check the numbers of the lesson: 161 and
+  277 sites, 1,811 samples, L4 OR 1.47, p 1.65e-6.
 
 If a check fails, remove `"A"` from `PUBLISHED_ADDITIONAL_MODULES` and deploy
 again. The build then leaves module A out, and its check confirms it.
