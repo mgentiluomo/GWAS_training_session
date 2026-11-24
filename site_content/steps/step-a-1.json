@@ -6,20 +6,27 @@
   "anchor": "step-a-1",
   "title": "Why imputation works: haplotypes",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "source_sha256": "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nLearn the idea behind imputation: long shared stretches of chromosome, called haplotypes.",
     "why": "You inherit one copy of each chromosome from each parent. The sequence of alleles along one copy is called a [haplotype](docs/glossary.md#haplotype).\n\nChromosomes are passed on in large blocks. Recombination cuts and rejoins them only a few times per chromosome in each generation. So people who are distantly related share long stretches of the same haplotype. Everybody in a population is distantly related to everybody else.\n\nBecause of this, alleles at nearby sites are not independent. If you know the alleles at a few sites, you can often predict the alleles at the sites in between. This non-random association between alleles at nearby sites is called linkage disequilibrium ([LD](docs/glossary.md#ld)). You met LD at step 3.4, when we pruned variants that carry the same information.\n\nImputation uses the same idea in the opposite direction. Pruning removes sites that we can predict from their neighbours. Imputation adds sites that we can predict from their neighbours. It uses a [reference panel](docs/glossary.md#reference-panel): a large group of people whose whole genome was sequenced. If the measured sites of your sample match a stretch in the panel, the panel tells us what lies in the gaps.",
-    "you_need": "LD pruning at step 3.4 helps, but it is not required. No data are needed for this step.\n\nBefore the code steps (A.7 to A.9), get the module A data ready:\n\n1. Download the module A data from the module page of the course website. Like the course data of step 0.7, it is an [encrypted archive](docs/glossary.md#encrypted-archive). Ask your teacher for its password.\n2. Extract it into the folder `data/course/module_a` of your project. The folder then holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.\n3. Download the module A notebook and open it in RStudio from the project root.\n4. Run its first chunk. It loads `R/imputation.R` from the module A data and checks the files of this module. You should see `Module A input files are present.`\n\nYou do not change any file of your project. Your project stays as you downloaded it at step 0.3.",
-    "command": "No code to run. This is a reading-only step.",
-    "expected_result": "You can explain why a few measured sites can predict the sites between them.",
-    "troubleshooting": "If the idea is not clear, read the glossary entries for haplotype and LD, then read the step again.",
+    "you_need": "LD pruning at step 3.4 helps, but it is not required. The reading needs no data.\n\nThe code steps A.7 to A.9 need the module A data. Get them now, once:\n\n1. Request the password on the [data access page](https://www.manuelgentiluomo.it/teaching/gwas/data-access). The same email gives the password of the course data and the password of module A.\n2. Open your project in RStudio and run the command below in the Console. It downloads the module A data, checks them, asks for the password and puts them in the folder `data/course/module_a`. Like the course data of step 0.7, the data are an [encrypted archive](docs/glossary.md#encrypted-archive).\n\nThe password window says \"Course data password:\". Enter the module A password from the email, not the course data password.\n\nDo not open or extract the ZIP file with File Explorer or Finder. They cannot open this kind of encrypted file. The command does everything.\n\nYou do not change any file of your project. Your project stays as you downloaded it at step 0.3.",
+    "command": "```{r sA-1_data, eval=FALSE}\n# 1. Load the course download function.\nsource(\"R/course.R\")\n# 2. Download the module A data, check them and put them in data/course/module_a.\ndownload_course_data(destination = \"data/course/module_a\", release = list(\n  archive_url = \"https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/module-a-data-2026.1.zip\",\n  manifest_url = \"https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/MANIFEST.tsv\",\n  archive_sha256 = \"623e15a87a3f9a8e4fd743b6b31ff352840e841fbea2921f004a9e0df123770b\",\n  manifest_sha256 = \"46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4\"))\n```",
+    "expected_result": "You can explain why a few measured sites can predict the sites between them.\n\nThe command prints `Course data are ready: 22 files verified.` The folder `data/course/module_a` holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.",
+    "troubleshooting": "If the idea is not clear, read the glossary entries for haplotype and LD, then read the step again.\n\n\"The password is wrong\": you probably entered the course data password. Run the command again and enter the module A password from the email.\n\n\"The download stopped before the end\": the connection was slow or broken. Run the same command again.\n\n\"Existing course data at data/course/module_a could not be verified\": an earlier attempt left the folder incomplete. Run the command again with `overwrite = TRUE` after `destination = \"data/course/module_a\"`. The old folder is kept as a dated backup.",
     "quick_check": "Why can imputation predict a site that the array did not measure, but not a site where nobody in the reference panel carries the variant?\n\n<details><summary>Show the answer</summary>\n\nImputation copies alleles from matching haplotypes in the reference panel. If no reference haplotype carries the variant, there is nothing to copy. Imputation can only predict variants that exist in the panel.\n\n</details>",
-    "files_created": "None."
+    "files_created": "The folder `data/course/module_a` (22 files) and `data/course/module_a.MANIFEST.tsv`, the list of the files with their checksums."
   },
-  "setup_code": "",
-  "r_commands": [],
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "sA-1_data",
+      "code": "# 1. Load the course download function.\nsource(\"R/course.R\")\n# 2. Download the module A data, check them and put them in data/course/module_a.\ndownload_course_data(destination = \"data/course/module_a\", release = list(\n  archive_url = \"https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/module-a-data-2026.1.zip\",\n  manifest_url = \"https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/MANIFEST.tsv\",\n  archive_sha256 = \"623e15a87a3f9a8e4fd743b6b31ff352840e841fbea2921f004a9e0df123770b\",\n  manifest_sha256 = \"46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4\"))",
+      "run_by_default": true,
+      "where": "console"
+    }
+  ],
   "notebook_only_expected_code": [],
   "plink": {
     "applicable": false,
@@ -35,7 +42,20 @@
       "reviewed": false
     }
   ],
-  "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.",
-  "student_kind": "reading",
-  "student_expected_result": "You can explain why a few measured sites can predict the sites between them."
+  "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between. We also download the module A data with one R command.",
+  "student_plink_options": [],
+  "actions": [
+    {
+      "label": "Request the password",
+      "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access",
+      "kind": "page"
+    },
+    {
+      "label": "Module A data release",
+      "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/module-a-2026.1",
+      "kind": "page"
+    }
+  ],
+  "success_line": "Course data are ready: 22 files verified.",
+  "student_expected_result": "You can explain why a few measured sites can predict the sites between them.\n\nThe command prints `Course data are ready: 22 files verified.` The folder `data/course/module_a` holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`."
 }

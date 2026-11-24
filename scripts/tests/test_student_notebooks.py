@@ -547,6 +547,10 @@ class QuartoRendererTests(unittest.TestCase):
         self.assertIn('helpers <- c("R/imputation.R", file.path(module_dir, "R", "imputation.R"))', chunk)
         self.assertIn('Sys.getenv("COURSE_MODULE_A_DIR"', chunk)
         self.assertIn("R/imputation.R was not found in the project or in the module A data.", chunk)
+        # A missing data folder points to the download command of step A.1; the chunk never downloads.
+        self.assertIn("Run the download command of step A.1 in the Console", chunk)
+        self.assertNotIn("download_course_data", chunk)
+        self.assertNotIn("Extract the module A data", notebook)
         self.assertTrue(chunk.rstrip().endswith("imputation_check_module()"))
 
     def test_module_a_inputs_match_module_meta(self):

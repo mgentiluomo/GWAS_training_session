@@ -6,7 +6,7 @@
   "anchor": "step-a-4",
   "title": "Imputation servers",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "source_sha256": "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nCompare the three main imputation servers.",

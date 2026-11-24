@@ -89,17 +89,20 @@ ROOT_CHECK = [
 # Additional modules bring their own helpers in their data release, so that the student project (and its
 # R/guided.R) stays as released. The first chunk sources R/<helpers> of the project if it is there, otherwise the
 # copy in the module data, and runs the input check defined in that file.
+# The chunk never downloads: when the data folder is missing it points to the download command of its step.
 ADDITIONAL_HELPERS = {"A": {"file": "imputation.R", "folder": "module_a", "variable": "COURSE_MODULE_A_DIR",
-                            "check": "imputation_check_module()"}}
+                            "check": "imputation_check_module()", "download_step": "A.1"}}
 
 
 def additional_loader(code: str) -> list[str]:
     spec = ADDITIONAL_HELPERS[code]
     return [
         f'module_dir <- Sys.getenv("{spec["variable"]}", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "{spec["folder"]}"))',
+        f'if (!dir.exists(module_dir)) stop("The module {code} data are not in ", module_dir, ". Run the download command of step '
+        f'{spec["download_step"]} in the Console, then run this chunk again.", call. = FALSE)',
         f'helpers <- c("R/{spec["file"]}", file.path(module_dir, "R", "{spec["file"]}"))',
         f'if (!any(file.exists(helpers))) stop("R/{spec["file"]} was not found in the project or in the module {code} data. '
-        f'Extract the module {code} data into ", module_dir, " and run this chunk again.", call. = FALSE)',
+        f'Run the download command of step {spec["download_step"]} again with overwrite = TRUE, then run this chunk again.", call. = FALSE)',
         "source(helpers[file.exists(helpers)][1])",
         spec["check"],
     ]

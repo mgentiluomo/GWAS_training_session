@@ -403,3 +403,55 @@ PLINK logs and command and console texts (paths and times). L4: R2 0.95, OR 1.47
   the data button points to the release asset; axe 52 runs, 0 violations. ZIP link 200 (HEAD only). Step 0.3
   still links `GWAS_course-2026.4.zip` (release checksum `dba5184b...0facaa`); step 0.7 answers 200.
   Vercel preview built. No website merge.
+
+## After publication: the module A ZIP does not open with File Explorer
+
+Module A was published (website PR #12). Then the author found that File Explorer cannot extract
+`module-a-data-2026.1.zip` (error 0x80004005, no password prompt): it does not support ZIP AES-256.
+
+Tests on Windows 11 with synthetic ZIPs and a throwaway password:
+
+| Tool | AES-256 | ZipCrypto |
+| --- | --- | --- |
+| File Explorer | no (author report) | yes, asks for the password (known behaviour, not tested) |
+| `Expand-Archive` | no | no |
+| `tar.exe` (bsdtar 3.8.9) with `--passphrase` | yes | yes |
+| R `utils::unzip` | no | no |
+| R `archive::archive_extract` (in the project) | yes; wrong password refused | yes |
+
+ZipCrypto was not chosen: the package holds files that are public on GitHub (`R/imputation.R`,
+`README_simulated.txt`) without compression, so a known-plaintext attack breaks it quickly.
+
+Decision (way A): students use `download_course_data()` of the 2026.4 project, the function of step 0.7, with
+the module A release. No new program, the same on Windows and macOS, AES-256 unchanged, SHA-256 and manifest
+checks included. The ZIP, the release assets and the project ZIP are unchanged.
+
+- Lesson: "What you need" points to step A.1. Step A.1 has the command (`sA-1_data`, console, not run when the
+  notebook is rendered), buttons to the data access page and to the release, the success line "Course data
+  are ready: 22 files verified.", troubleshooting (wrong password, broken download, `overwrite = TRUE`) and the
+  files created. It says that the window shows "Course data password:" and that the module A password from
+  the same email goes there, and that File Explorer and Finder cannot open the ZIP. Every instruction to
+  extract by hand is removed (also in the troubleshooting of A.8).
+- Notebook, first chunk: when `data/course/module_a` is missing it stops with "The module A data are not in
+  data/course/module_a. Run the download command of step A.1 in the Console, then run this chunk again." It
+  never downloads.
+- Release notes of `module-a-2026.1`: the command replaces the extraction instructions. Assets unchanged.
+
+Checks:
+
+- In a clean copy of the published `GWAS_course-2026.4.zip`, the command of step A.1, taken from the
+  notebook: without a password it downloads and checks the real release and stops at the password request;
+  with a fake password it stops with "The password is wrong". No folder is created.
+- Render of the new notebook in that project without module A data: stops at the first chunk with the
+  sentence above. With the data (the 22 files of the stage) and the files of step 6.3: exit 0, the 8 data
+  outputs byte-identical to the earlier render, L4 R2 0.95, OR 1.47, p 1.7e-06.
+- R 15 of 15 exit 0; Python 97 tests OK, 2 skipped; `test_sim2026.py` exit 0; `check_text` 0 errors;
+  notebooks up to date. JSON of modules 0 to 7: 72 of 72 identical to the website production.
+
+**For 2026.5.**
+
+- Add `download_module_a_data()` to the project, with its own password prompt ("Module A data password:").
+  Then step A.1 shows one short call instead of the long `download_course_data()` command.
+- The copy of `R/imputation.R` in `module-a-data-2026.1.zip` still says "Extract the module A data into ..."
+  when files are missing (`imputation_check_module()`, `imputation_data_dir()`). The notebook and the lesson
+  no longer say it. Change the messages when the module A package is made again.
