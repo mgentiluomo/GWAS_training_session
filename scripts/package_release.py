@@ -136,6 +136,14 @@ def aes256_members(path: Path) -> list[str]:
     return names
 
 
+def write_sums(output: Path, archive_name: str, checksum: str, manifest_checksum: str) -> Path:
+    """SHA256SUMS.txt in GNU format with Unix line ends, so `sha256sum -c SHA256SUMS.txt` works beside the
+    files on Linux and macOS too. On Windows, Python would otherwise write CRLF."""
+    path = output / "SHA256SUMS.txt"
+    path.write_text(f"{checksum}  {archive_name}\n{manifest_checksum}  MANIFEST.tsv\n", encoding="ascii", newline="\n")
+    return path
+
+
 def dry_run(source: Path, output: Path, package: str = "main") -> dict:
     """List the files the package would hold and write their MANIFEST.tsv. No copy, no ZIP, no password.
 
@@ -210,9 +218,7 @@ def build(source: Path, output: Path, sevenzip: Path, package: str = "main") -> 
         raise RuntimeError("The finished archive failed its own 7-Zip test. Exit code: " + str(check.returncode))
     checksum = sha256(archive)
     manifest_checksum = sha256(output / "MANIFEST.tsv")
-    # Both lines are in GNU format, so `sha256sum -c SHA256SUMS.txt` works beside the files.
-    (output / "SHA256SUMS.txt").write_text(
-        f"{checksum}  {archive.name}\n{manifest_checksum}  MANIFEST.tsv\n", encoding="ascii")
+    write_sums(output, archive.name, checksum, manifest_checksum)
     return {"archive": str(archive), "files": len(rows), "input_bytes": sum(r[1] for r in rows),
             "zip_bytes": archive.stat().st_size, "archive_sha256": checksum,
             "manifest_sha256": manifest_checksum, "sha256": checksum,

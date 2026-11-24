@@ -125,6 +125,11 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "was not found"):
             release.committed_file("missing", "R/imputation.R", repo)
 
+    def test_sums_have_unix_line_ends(self):
+        output = Path(tempfile.mkdtemp(prefix="sums-", dir=self.root))
+        path = release.write_sums(output, "x.zip", "a" * 64, "b" * 64)
+        self.assertEqual(path.read_bytes(), b"a" * 64 + b"  x.zip\n" + b"b" * 64 + b"  MANIFEST.tsv\n")
+
     def test_main_rule_unchanged(self):
         # The main package keeps its folders and README, and still refuses module A material.
         self.assertEqual(release.PACKAGES["main"]["stage_prefix"], "classroom-stage-")
@@ -185,6 +190,7 @@ class PackagingTests(unittest.TestCase):
         with (output / "MANIFEST.tsv").open(encoding="utf-8") as stream:
             rows = list(csv.DictReader(stream, delimiter="\t"))
         self.assertEqual(rows[0]["sha256"], release.sha256(self.source / rows[0]["path"]))
+        self.assertNotIn(b"\r", (output / "SHA256SUMS.txt").read_bytes())
         sums = (output / "SHA256SUMS.txt").read_text(encoding="ascii").splitlines()
         self.assertEqual(sums, [f"{result['archive_sha256']}  {archive.name}",
                                 f"{result['manifest_sha256']}  MANIFEST.tsv"])
