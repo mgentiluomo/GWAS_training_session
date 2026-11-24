@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f"
+course_source_sha256: "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -56,8 +56,9 @@ The linked step pages explain the ideas and provide troubleshooting.
 #| label: moduleA_check
 if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
 module_dir <- Sys.getenv("COURSE_MODULE_A_DIR", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "module_a"))
+if (!dir.exists(module_dir)) stop("The module A data are not in ", module_dir, ". Run the download command of step A.1 in the Console, then run this chunk again.", call. = FALSE)
 helpers <- c("R/imputation.R", file.path(module_dir, "R", "imputation.R"))
-if (!any(file.exists(helpers))) stop("R/imputation.R was not found in the project or in the module A data. Extract the module A data into ", module_dir, " and run this chunk again.", call. = FALSE)
+if (!any(file.exists(helpers))) stop("R/imputation.R was not found in the project or in the module A data. Run the download command of step A.1 again with overwrite = TRUE, then run this chunk again.", call. = FALSE)
 source(helpers[file.exists(helpers)][1])
 imputation_check_module()
 ```
@@ -70,13 +71,39 @@ cfg <- guided_init()
 
 ## Step A.1 · Why imputation works: haplotypes {#step-a-1}
 
-We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.
+We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between. We also download the module A data with one R command.
 
 [Read step A.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-1).
 
-::: {.callout-note title="What you do"}
+```{r}
+#| label: sA-1_data
+#| eval: false
+source("R/course.R")  # <1>
+download_course_data(destination = "data/course/module_a", release = list(  # <2>
+  archive_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/module-a-data-2026.1.zip",
+  manifest_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/MANIFEST.tsv",
+  archive_sha256 = "623e15a87a3f9a8e4fd743b6b31ff352840e841fbea2921f004a9e0df123770b",
+  manifest_sha256 = "46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4"))
+```
 
-Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-1). There is no code to run.
+1. Load the course download function.
+2. Download the module A data, check them and put them in data/course/module_a.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+You can explain why a few measured sites can predict the sites between them.
+
+The command prints `Course data are ready: 22 files verified.` The folder `data/course/module_a` holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
 
 :::
 

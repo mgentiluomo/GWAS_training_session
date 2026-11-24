@@ -41,7 +41,7 @@ cfg <- guided_init()
 
 **How long it takes.** About 2 hours. Steps A.1 to A.6 and A.10 are reading. The slowest code step is A.8, about two minutes.
 
-**What you need.** Your files at step 6.3: the final cohort of 1,811 samples from step 5.7 and the covariates from step 6.3. You also need the module A data, a separate data release. Extract them into the folder `data/course/module_a`. They also hold `R/imputation.R`, the R functions of this module. Do not copy it into your project: the first chunk of the module notebook loads it from the data folder. You do not need a server account.
+**What you need.** Your files at step 6.3: the final cohort of 1,811 samples from step 5.7 and the covariates from step 6.3. You also need the module A data, a separate data release. Step A.1 gives the R command that downloads them, checks them and puts them in the folder `data/course/module_a`. Do not extract the ZIP file by hand. The data also hold `R/imputation.R`, the R functions of this module. Do not copy it into your project: the first chunk of the module notebook loads it from the data folder. You do not need a server account.
 
 **The data of this module.** The course data are simulated. Each study genome is a mosaic of short segments copied from genomes of the 1000 Genomes Project, the "donors". A reference panel that contains the donors would contain the study haplotypes themselves. Imputation would then look far better than it can be with real data. The 1000 Genomes panels of the imputation servers contain the donors. So does the HRC panel, which includes the 1000 Genomes Phase 3 samples ([McCarthy et al. 2016](https://doi.org/10.1038/ng.3643)). So the course examples do not use the servers.
 
@@ -51,7 +51,7 @@ Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-co
 
 Reading, about 3 minutes. You can come back to it later.
 
-<!-- step_meta: {"student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.", "student_kind": "reading"} -->
+<!-- step_meta: {"actions": [{"label": "Request the password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Module A data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/module-a-2026.1", "kind": "page"}], "required_commands": ["sA-1_data"], "where": {"sA-1_data": "console"}, "success_line": "Course data are ready: 22 files verified.", "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between. We also download the module A data with one R command.", "student_plink_options": []} -->
 
 ### What we do
 
@@ -71,30 +71,49 @@ Imputation uses the same idea in the opposite direction. Pruning removes sites t
 
 ### You need
 
-LD pruning at step 3.4 helps, but it is not required. No data are needed for this step.
+LD pruning at step 3.4 helps, but it is not required. The reading needs no data.
 
-Before the code steps (A.7 to A.9), get the module A data ready:
+The code steps A.7 to A.9 need the module A data. Get them now, once:
 
-1. Download the module A data from the module page of the course website. Like the course data of step 0.7, it is an [encrypted archive](../docs/glossary.md#encrypted-archive). Ask your teacher for its password.
-2. Extract it into the folder `data/course/module_a` of your project. The folder then holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.
-3. Download the module A notebook and open it in RStudio from the project root.
-4. Run its first chunk. It loads `R/imputation.R` from the module A data and checks the files of this module. You should see `Module A input files are present.`
+1. Request the password on the [data access page](https://www.manuelgentiluomo.it/teaching/gwas/data-access). The same email gives the password of the course data and the password of module A.
+2. Open your project in RStudio and run the command below in the Console. It downloads the module A data, checks them, asks for the password and puts them in the folder `data/course/module_a`. Like the course data of step 0.7, the data are an [encrypted archive](../docs/glossary.md#encrypted-archive).
+
+The password window says "Course data password:". Enter the module A password from the email, not the course data password.
+
+Do not open or extract the ZIP file with File Explorer or Finder. They cannot open this kind of encrypted file. The command does everything.
 
 You do not change any file of your project. Your project stays as you downloaded it at step 0.3.
 
 ### Command
 
-No code to run. This is a reading-only step.
+```{r sA-1_data, eval=FALSE}
+# 1. Load the course download function.
+source("R/course.R")
+# 2. Download the module A data, check them and put them in data/course/module_a.
+download_course_data(destination = "data/course/module_a", release = list(
+  archive_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/module-a-data-2026.1.zip",
+  manifest_url = "https://github.com/mgentiluomo/GWAS_training_session/releases/download/module-a-2026.1/MANIFEST.tsv",
+  archive_sha256 = "623e15a87a3f9a8e4fd743b6b31ff352840e841fbea2921f004a9e0df123770b",
+  manifest_sha256 = "46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4"))
+```
 
 <details><summary>Show the expected result</summary>
 
 You can explain why a few measured sites can predict the sites between them.
+
+The command prints `Course data are ready: 22 files verified.` The folder `data/course/module_a` holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.
 
 </details>
 
 <details><summary>If something goes wrong</summary>
 
 If the idea is not clear, read the glossary entries for haplotype and LD, then read the step again.
+
+"The password is wrong": you probably entered the course data password. Run the command again and enter the module A password from the email.
+
+"The download stopped before the end": the connection was slow or broken. Run the same command again.
+
+"Existing course data at data/course/module_a could not be verified": an earlier attempt left the folder incomplete. Run the command again with `overwrite = TRUE` after `destination = "data/course/module_a"`. The old folder is kept as a dated backup.
 
 </details>
 
@@ -110,7 +129,7 @@ Imputation copies alleles from matching haplotypes in the reference panel. If no
 
 ### Files created
 
-None.
+The folder `data/course/module_a` (22 files) and `data/course/module_a.MANIFEST.tsv`, the list of the files with their checksums.
 
 ## A.2 Phasing, then imputation {#step-a-2}
 
@@ -673,7 +692,7 @@ Validation: executable chunks passed on Windows with R 4.5.2 on the module A dat
 
 <details><summary>If something goes wrong</summary>
 
-"The module A data were not found" or missing files in the first chunk: extract the module A data into `data/course/module_a`. "samples of the dosage file are not in the truth file": the dosage and truth files come from different releases; use the files of one module A release. The comparison needs about 1 GB of memory and two minutes. Close other programs if R stops with a memory error.
+"The module A data were not found", "Some module A data are missing" or another stop in the first chunk: run the download command of step A.1 in the Console. Do not extract the ZIP file by hand. "samples of the dosage file are not in the truth file": the dosage and truth files come from different releases; use the files of one module A release. The comparison needs about 1 GB of memory and two minutes. Close other programs if R stops with a memory error.
 
 </details>
 

@@ -183,10 +183,14 @@ local({
   saved <- Sys.getenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR", "COURSE_MODULE_A_DIR"), unset = NA)
   Sys.unsetenv(c("COURSE_DATA_DIR", "COURSE_OUTPUT_DIR", "COURSE_MODULE_A_DIR"))
   on.exit(for (n in names(saved)) if (is.na(saved[[n]])) Sys.unsetenv(n) else do.call(Sys.setenv, as.list(saved[n])), add = TRUE)
-  # No helpers anywhere: one clear sentence.
-  expect_error(run_chunk(), "R/imputation.R was not found in the project or in the module A data. Extract the module A data into data/course/module_a")
-  # The helpers in the module A data, but no data files yet.
+  # No module A data folder: one sentence pointing to the download command of step A.1. Nothing is downloaded.
+  expect_error(run_chunk(), "The module A data are not in data/course/module_a. Run the download command of step A.1 in the Console, then run this chunk again.")
   module_a <- file.path(project, "data", "course", "module_a")
+  stopifnot(!dir.exists(module_a))
+  # A folder without the helpers (an incomplete copy): download again.
+  dir.create(module_a, recursive = TRUE)
+  expect_error(run_chunk(), "R/imputation.R was not found in the project or in the module A data. Run the download command of step A.1 again with overwrite = TRUE")
+  # The helpers in the module A data, but no data files yet.
   dir.create(file.path(module_a, "R"), recursive = TRUE)
   file.copy(file.path(repo, "R", "imputation.R"), file.path(module_a, "R", "imputation.R"))
   dir.create(file.path(project, "data", "course", "array"))
