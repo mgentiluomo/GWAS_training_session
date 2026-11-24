@@ -361,3 +361,20 @@ PLINK logs and command and console texts (paths and times). L4: R2 0.95, OR 1.47
   without a password).
 - `python -I scripts/author/tests/test_sim2026.py`: exit 0.
 - `python -B scripts/check_text.py`: 0 errors, 0 warnings. `--check-notebooks`: up to date, 10 files.
+
+## Before encryption
+
+- `stage-module-a-2026.1.MANIFEST.tsv` regenerated from the stage with the rules of the package: 22 rows, no
+  logs, byte-identical to `dryrun-module-a-2026.1/MANIFEST.tsv` (SHA-256 `46d63ba7...74ac4`). The old file
+  (25 rows: 21 files and 4 logs, no `R/imputation.R`) is kept as
+  `module-a-build-20261124/stage-module-a-2026.1.MANIFEST.before-20261124.tsv`.
+- Packaging (`bc8a7b0`): the module A rule pins `R/imputation.R` to `course/module-a-2026.4`. `build()` and
+  `dry_run()` read the committed file with git (line ends of the working tree do not matter) and stop with
+  "Copy it again" when the stage copy is missing or different. Three new tests; 96 Python tests OK, 2 skipped.
+  The dry run on the stage passes the check and gives the same MANIFEST.
+- Author script, outside the repositories: `codex_work/module-a-build-20261124/encrypt/encrypt_module_a_2026.1.ps1`
+  with `test_open_zip.py`. Not run. Syntax checked with the PowerShell parser. The open-test helper was
+  checked on a synthetic ZIP with a throwaway password: right password OK, wrong password refused, password
+  not in the output.
+- The pin names the branch `course/module-a-2026.4`. After the merge into `course/2026-guided-training`,
+  change it in `PACKAGES["module-a"]["pinned"]` before packaging again.
