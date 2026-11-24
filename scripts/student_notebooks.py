@@ -9,7 +9,8 @@ import json
 from pathlib import Path
 import re
 
-from course_exports import CHUNK, ROOT, export_modules, export_steps, student_plink_resources
+from course_exports import (CHUNK, ROOT, export_additional_steps, export_modules, export_steps, module_slug,
+                            student_plink_resources)
 
 
 def notebook_links(text: str) -> str:
@@ -17,15 +18,16 @@ def notebook_links(text: str) -> str:
     return re.sub(r"(\]\()((?:docs|examples|lessons)/[^)\s]+)(\))", r"\1../\2\3", text)
 
 
-def build_models(root: Path = ROOT) -> list[dict]:
+def build_models(root: Path = ROOT, additional: bool = False) -> list[dict]:
     """Return plain structured models, independent of the output format.
 
     Incomplete modules stay disabled while authors add fields step by step.
     Module 0 has no inputs beyond the project root.
+    With additional=True: the additional modules (A, B), which are not part of the main path.
     """
-    records = export_steps(root)
+    records = export_additional_steps(root) if additional else export_steps(root)
     models = []
-    for module in sorted(export_modules(root), key=lambda m: m["module"]):
+    for module in sorted(export_modules(root, additional=additional), key=lambda m: str(m["module"]).zfill(2)):
         steps = [r for r in records if r["module"] == module["module"]]
         def ready(record):
             kind = record.get("student_kind", "code" if record["r_commands"] else None)
@@ -60,6 +62,7 @@ def build_models(root: Path = ROOT) -> list[dict]:
                 "expected_result": record.get("student_expected_result", ""),
                 "terminal_commands": record["plink"]["commands"],
                 "thresholds": (record.get("blocks") or {}).get("try_other_thresholds", ""),
+                "approach": (record.get("blocks") or {}).get("another_approach", ""),
             })
         models.append({"module": number, "title": module["title"], "prerequisites": spec,
                        "time": re.match(r"[^.]*\.", time_line[1])[0] if time_line else "",
@@ -83,11 +86,34 @@ ROOT_CHECK = [
 ]
 
 
+# Additional modules bring their own helpers in their data release, so that the student project (and its
+# R/guided.R) stays as released. The first chunk sources R/<helpers> of the project if it is there, otherwise the
+# copy in the module data, and runs the input check defined in that file.
+ADDITIONAL_HELPERS = {"A": {"file": "imputation.R", "folder": "module_a", "variable": "COURSE_MODULE_A_DIR",
+                            "check": "imputation_check_module()"}}
+
+
+def additional_loader(code: str) -> list[str]:
+    spec = ADDITIONAL_HELPERS[code]
+    return [
+        f'module_dir <- Sys.getenv("{spec["variable"]}", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "{spec["folder"]}"))',
+        f'helpers <- c("R/{spec["file"]}", file.path(module_dir, "R", "{spec["file"]}"))',
+        f'if (!any(file.exists(helpers))) stop("R/{spec["file"]} was not found in the project or in the module {code} data. '
+        f'Extract the module {code} data into ", module_dir, " and run this chunk again.", call. = FALSE)',
+        "source(helpers[file.exists(helpers)][1])",
+        spec["check"],
+    ]
+
+
 def check_chunk(model: dict) -> list[str]:
     number = model["module"]
+    if isinstance(number, int):
+        body = ROOT_CHECK if number == 0 else [f'source("R/guided.R"); guided_check_module({number})']
+    else:
+        body = additional_loader(number)
     return [f"```{{r module{number}_check}}",
             'if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")',
-            *(ROOT_CHECK if number == 0 else [f'source("R/guided.R"); guided_check_module({number})']),
+            *body,
             "```", ""]
 
 
@@ -176,6 +202,8 @@ def render_steps_rmd(model: dict) -> list[str]:
             lines.extend(["No PLINK equivalent", ""])
         if record.get("thresholds"):
             lines.extend(["### Try other thresholds (optional)", "", notebook_links(record["thresholds"]), ""])
+        if record.get("approach"):
+            lines.extend(["### Another approach (optional)", "", notebook_links(record["approach"]), ""])
     return lines
 
 
@@ -306,6 +334,11 @@ def where_next(model: dict, complete: bool) -> list[str]:
     def target(info: dict) -> str:
         return f'#module-{info["module"]}' if complete else info["file"]
     lines = []
+    if not isinstance(model["module"], int):
+        # An additional module stands beside the main path: no previous or next module.
+        return [f'- Module {model["module"]} is an additional module. The main path is modules 0 to 7: '
+                f'[course home]({SITE}).',
+                f'- This module on the course website: [Module {model["module"]}]({SITE}/module-{module_slug(model["module"])})']
     if previous:
         lines.append(f'- Previous: [Module {previous["module"]}: {previous["title"]}]({target(previous)})')
     if following:
@@ -379,7 +412,7 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
     used = set() if used is None else used
     lines = []
     for record in model["steps"]:
-        url = f'{SITE}/module-{model["module"]}/{record["anchor"]}'
+        url = f'{SITE}/module-{module_slug(model["module"])}/{record["anchor"]}'
         lines.extend([
             f'## Step {record["id"]} · {record["title"]} {{#{record["anchor"]}}}', "", record["summary"], "",
             f'[Read step {record["id"]} on the course website]({url}).', "",
@@ -405,6 +438,9 @@ def render_steps_qmd(model: dict, used: set[str] | None = None) -> list[str]:
         if record.get("thresholds"):
             lines.extend(['::: {.callout-tip title="Try other thresholds (optional)" collapse="true"}', "",
                           qmd_thresholds(record["thresholds"], used), "", ":::", ""])
+        if record.get("approach"):
+            lines.extend(['::: {.callout-tip title="Another approach (optional)" collapse="true"}', "",
+                          qmd_thresholds(record["approach"], used), "", ":::", ""])
     return lines
 
 
@@ -431,7 +467,9 @@ def module_three(root: Path = ROOT) -> tuple[str, str]:
 
 
 def module_check_table(root: Path = ROOT, models: list[dict] | None = None) -> str:
-    """Generate the small R prerequisite table from the lesson's module_meta."""
+    """Generate the small R prerequisite table from the lesson's module_meta (modules 0 to 7).
+
+    Additional modules are not in it: their check is in their own helpers (ADDITIONAL_HELPERS)."""
     models = build_models(root) if models is None else models
     quote = lambda value: "NULL" if value is None else json.dumps(value, ensure_ascii=False)
     rows = ["# BEGIN GENERATED MODULE INPUTS", "# Sources: module_meta in enabled lessons (module 0 needs only the project root).",
@@ -469,10 +507,13 @@ def sync_module_check(root: Path, check: bool, models: list[dict] | None = None)
 def export_notebooks(destination: Path, check: bool = False, root: Path = ROOT, format: str = DEFAULT_FORMAT) -> None:
     models = build_models(root)
     outputs = notebook_outputs(models, format)
+    # Additional modules get their own notebook. They are not part of the complete notebook of modules 0 to 7.
+    extra = build_models(root, additional=True)
+    outputs.update(notebook_outputs(extra, format))
     sync_module_check(root, check, models)
     # Generated notebooks of any known format that are not in the current output are unexpected,
     # for example R Markdown files that remain after the student format changed to Quarto.
-    generated_name = re.compile(r"(?:module_0[0-7]_.+|gwas_course_complete)(?:" + "|".join(re.escape(s) for s in SUFFIXES.values()) + ")")
+    generated_name = re.compile(r"(?:module_(?:0[0-7]|[A-Z])_.+|gwas_course_complete)(?:" + "|".join(re.escape(s) for s in SUFFIXES.values()) + ")")
     unexpected = sorted(p.name for p in (destination.iterdir() if destination.is_dir() else [])
                         if p.is_file() and generated_name.fullmatch(p.name) and p.name not in outputs)
     if check:

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.1",
+  "id": "A.3",
+  "module": "A",
+  "step": 3,
+  "anchor": "step-a-3",
+  "title": "Reference panels",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nCompare the reference panels you will meet, and learn how to choose one.",
+    "why": "The [reference panel](docs/glossary.md#reference-panel) decides what you can impute and how well. Three properties matter most.\n\n1. **Size.** More haplotypes mean more chances to find a close match. This matters most for low-frequency variants. A variant carried by 1 in 1,000 people needs thousands of reference haplotypes to appear often enough.\n2. **Ancestry match.** The panel must contain people whose [ancestry](docs/glossary.md#ancestry) is close to that of your samples. Haplotypes differ between populations. A panel made only of Europeans imputes African or South Asian samples poorly.\n3. **Genome build and content.** The panel uses one [genome build](docs/glossary.md#genome-build). If your data use another build, the server must convert your positions (step A.7). Some panels contain only SNPs; others contain indels too.\n\n**Panels you will meet.** Sample counts are those on the server documentation pages, checked on 23 November 2026.\n\n| Panel | People | Ancestry | Notes | Reference |\n| --- | --- | --- | --- | --- |\n| HapMap 2 | 60 | European (CEU) | Historical. Do not use it for new studies. | [Frazer et al. 2007](https://doi.org/10.1038/nature06258) |\n| 1000 Genomes Phase 3 (v5) | 2,504 (5,008 haplotypes) | 26 populations on five continents | Small, but diverse and public. hg19. | [1000 Genomes Project Consortium 2015](https://doi.org/10.1038/nature15393) |\n| 1000 Genomes high coverage (30x) | 3,202, including 602 trios | The same populations, plus relatives | Public, sequenced at high depth on GRCh38. Not offered by the servers of step A.4. | [Byrska-Bishop et al. 2022](https://doi.org/10.1016/j.cell.2022.08.004) |\n| Haplotype Reference Consortium (HRC) r1.1 | 32,470 on Michigan; 27,165 on HMIS | Mainly European | Controlled access: only usable through a server. hg19. | [McCarthy et al. 2016](https://doi.org/10.1038/ng.3643) |\n| TOPMed r3 | 133,597 | Many ancestries, many US cohorts | GRCh38. 445,600,184 sites on chromosomes 1 to 22. Only on the TOPMed Imputation Server. | [Taliun et al. 2021](https://doi.org/10.1038/s41586-021-03205-y) |\n\n**Why two numbers for HRC?** The Michigan page gives 32,470 samples, the HMIS page 27,165. The HMIS documentation does not explain the difference. The course gives both numbers with their source.\n\n**Why can't I download HRC or TOPMed?** These panels are built from research participants who gave consent for controlled use. They cannot be shared openly. A server keeps the panel and runs the imputation for you. You send your data to the panel, not the panel to you.\n\n**How to choose.**\n\n- European ancestry: TOPMed or HRC give the best accuracy for rare variants. 1000 Genomes is enough for common variants.\n- Mixed or non-European ancestry: TOPMed, which is very diverse, or 1000 Genomes. Choose a population-specific panel if one exists for your group.\n- You must keep data in the EU: choose among the panels of an EU server (step A.5).\n- Always check the terms of the server. Some panels allow only academic use, or require you to acknowledge the consortium.",
+    "you_need": "Steps A.1 and A.2.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can choose a panel for a study, from its size, its ancestry and its genome build.",
+    "troubleshooting": "The numbers of people change with each panel release. Always take them from the documentation page of the server you use, and write down the date.",
+    "quick_check": "Your study has 3,000 people of South Asian ancestry. Which panel of the table would you try first, and why?\n\n<details><summary>Show the answer</summary>\n\nTOPMed, because it is the largest and has many ancestries. 1000 Genomes is a public alternative that includes South Asian populations, but it is small, so rare variants will be imputed poorly. HRC is mainly European.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [],
+  "student_summary": "We compare the reference panels used for imputation: their size, the ancestry of their people and the genome build. The panel decides which variants can be imputed and how well.",
+  "student_kind": "reading",
+  "student_expected_result": "You can choose a panel for a study, from its size, its ancestry and its genome build."
+}

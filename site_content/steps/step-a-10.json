@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.1",
+  "id": "A.10",
+  "module": "A",
+  "step": 10,
+  "anchor": "step-a-10",
+  "title": "What can go wrong",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Collect the common problems of imputation in one table.",
+    "why": "| Problem | Likely cause | What to do |\n| --- | --- | --- |\n| Many sites removed for allele mismatch | Strand problems or wrong genome build | Repeat steps 2.5 and 2.6; check the REF alleles (step A.7) |\n| Low R2 everywhere | The panel does not match the ancestry, or wrong build | Choose another panel; check the build |\n| The job fails on upload | File not compressed with bgzip, unsorted, or wrong chromosome names | Write the VCF again (step A.7) |\n| Lost results password | Password not saved | The server does not keep it: run the job again |\n| Job deleted before download | Results are kept for 7 days | Download as soon as you get the email |\n| Imputed hit not seen in the measured data | Low R2, or a real signal at an unmeasured site | Check R2; look at LD with measured neighbours; confirm by direct genotyping |",
+    "you_need": "Steps A.1 to A.9.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can match each problem with its likely cause.",
+    "troubleshooting": "For a problem that is not in the table, read the documentation page of your server and the log files of the job.",
+    "quick_check": "A colleague gets a low R2 for almost every variant, common ones too. What two causes would you check first?\n\n<details><summary>Show the answer</summary>\n\nThe genome build of the input against that of the panel, and the ancestry of the study against that of the panel.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [],
+  "student_summary": "We list the common problems of imputation, their likely causes and what to do about each one.",
+  "student_kind": "reading",
+  "student_expected_result": "You can match each problem with its likely cause."
+}

@@ -1,0 +1,384 @@
+---
+title: "Module A: Genotype imputation"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Contents"
+    toc-location: left
+    toc-expand: true
+    anchor-sections: true
+    code-copy: true
+    code-fold: false
+    code-overflow: wrap
+    embed-resources: true
+    include-after-body:
+      text: |
+        <script>
+        document.querySelectorAll('a[href$=".qmd"]').forEach(function (a) {
+          a.setAttribute('href', a.getAttribute('href').replace(/[.]qmd$/, '.html'));
+        });
+        </script>
+editor: visual
+editor_options:
+  chunk_output_type: console
+course_source_sha256: "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f"
+---
+
+Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
+All data are simulated. Read each summary, run its chunk and compare your result with the expected result.
+The linked step pages explain the ideas and provide troubleshooting.
+
+::: {.callout-note title="In this module"}
+
+**Time.** About 2 hours.
+
+**Before you start.** You need the full [checkpoint at step 6.3](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-3). The first code chunk checks the files that this module needs.
+
+**Steps.**
+
+- [A.1 Why imputation works: haplotypes](#step-a-1)
+- [A.2 Phasing, then imputation](#step-a-2)
+- [A.3 Reference panels](#step-a-3)
+- [A.4 Imputation servers](#step-a-4)
+- [A.5 Genetic data and the law](#step-a-5)
+- [A.6 Reading the classic review](#step-a-6)
+- [A.7 Prepare the input files](#step-a-7)
+- [A.8 Is the imputed variant good?](#step-a-8)
+- [A.9 Test imputed variants for association](#step-a-9)
+- [A.10 What can go wrong](#step-a-10)
+
+**Where the module ends.** This module has no checkpoint.
+
+:::
+
+```{r}
+#| label: moduleA_check
+if (!file.exists("config.R") && file.exists("../config.R")) setwd("..")
+module_dir <- Sys.getenv("COURSE_MODULE_A_DIR", unset = file.path(Sys.getenv("COURSE_DATA_DIR", unset = "data/course"), "module_a"))
+helpers <- c("R/imputation.R", file.path(module_dir, "R", "imputation.R"))
+if (!any(file.exists(helpers))) stop("R/imputation.R was not found in the project or in the module A data. Extract the module A data into ", module_dir, " and run this chunk again.", call. = FALSE)
+source(helpers[file.exists(helpers)][1])
+imputation_check_module()
+```
+
+```{r}
+#| label: moduleA_setup
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+## Step A.1 · Why imputation works: haplotypes {#step-a-1}
+
+We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.
+
+[Read step A.1 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-1).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-1). There is no code to run.
+
+:::
+
+## Step A.2 · Phasing, then imputation {#step-a-2}
+
+We see the two stages of imputation. First the software estimates which alleles lie together on each chromosome copy (phasing). Then it compares each copy with the reference panel and predicts the missing sites, as probabilities.
+
+[Read step A.2 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-2).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-2). There is no code to run.
+
+:::
+
+## Step A.3 · Reference panels {#step-a-3}
+
+We compare the reference panels used for imputation: their size, the ancestry of their people and the genome build. The panel decides which variants can be imputed and how well.
+
+[Read step A.3 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-3).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-3). There is no code to run.
+
+:::
+
+## Step A.4 · Imputation servers {#step-a-4}
+
+We compare three free online imputation servers: where they keep the data, which panels they offer, which files they accept and how long they keep the results.
+
+[Read step A.4 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-4).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-4). There is no code to run.
+
+:::
+
+## Step A.5 · Genetic data and the law {#step-a-5}
+
+We see why genotypes are personal data under the European General Data Protection Regulation, what a transfer outside the EU needs, and what to do before any upload.
+
+[Read step A.5 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-5).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-5). There is no code to run.
+
+:::
+
+## Step A.6 · Reading the classic review {#step-a-6}
+
+We read a classic review of imputation, Marchini and Howie (2010), with a guide to its sections. We see what is still true today and what has changed with larger panels and faster software.
+
+[Read step A.6 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-6).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-6). There is no code to run.
+
+:::
+
+## Step A.7 · Prepare the input files {#step-a-7}
+
+We write the measured genotypes of the two regions of the module as one compressed VCF file per region, the file format that imputation software and servers read. We check that every reference allele matches the GRCh38 genome and fix two problems of PLINK files on Windows.
+
+[Read step A.7 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-7).
+
+```{r}
+#| label: sA-7
+input <- prepare_imputation_input(cfg)  # <1>
+print(input[, c("chr", "sites", "samples", "crlf_lines", "pr_flags")])  # <2>
+stopifnot(identical(input$sites, c(161L, 277L)), all(input$samples == 1811L))  # <3>
+```
+
+1. Write one VCF per region from your final cohort, then check and fix it.
+2. Show the sites and samples of each file, and what was fixed.
+3. Check the counts: 161 and 277 array sites, 1,811 samples in each file.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--pfile` | Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details. |
+| `--extract` | Keeps only the variants inside the regions listed in sA-7_regions.bed1. |
+| &nbsp;&nbsp;&rarr; `bed1` | Says that the region file has a chromosome, a start and an end on each line, with positions counted from 1. |
+| `--chr` | Keeps chromosome 22 only. R runs the same command for chromosome 18. |
+| `--ref-allele` | Sets the reference allele (REF) of each variant from sA-7_ref_alleles_chr22.tsv. The number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1. |
+| `--output-chr` | Uses chrM to write chromosome names with the chr prefix, for example chr22, as imputation software expects on GRCh38. |
+| `--export` | Writes the genotypes in the VCF format, one line per variant and one column per sample. |
+| &nbsp;&nbsp;&rarr; `vcf-4.2` | Writes version 4.2 of the VCF format, which every imputation server accepts. |
+| &nbsp;&nbsp;&rarr; `bgz` | Compresses the file with bgzip, the block compression that VCF tools need. |
+| &nbsp;&nbsp;&rarr; `id-paste` | With iid, writes only the individual ID as the sample name. |
+| `--out` | Starts output file names with sA-7_chr22, including sA-7_chr22.vcf.gz. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples. PLINK reports "--ref-allele: No variants changed": the REF alleles of the course data were already right. On Windows the helper reports 168 and 284 lines with a Windows line end (the header lines count too); on macOS and Linux it reports 0. It removed 161 and 277 PR flags.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --extract bed1 results/guided/sA-7_regions.bed1 --chr 22 --ref-allele results/guided/sA-7_ref_alleles_chr22.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/guided/sA-7_chr22 --threads 2 --memory 2048
+```
+
+:::
+
+::: {.callout-tip title="Another approach (optional)" collapse="true"}
+
+**Run the imputation yourself.** The module A data already hold the imputed output, so this box is optional. Eagle2 and Minimac4 run on Linux and macOS, and on Windows only inside the Windows Subsystem for Linux (WSL). They are not part of the course setup. The commands below were tested on 24 November 2026 with Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the files of the module A data and the input of this step. Download the programs only from their official pages: [Eagle](https://alkesgroup.broadinstitute.org/Eagle/) and [Minimac4](https://github.com/statgen/Minimac4).
+
+Phase the input against the panel (Eagle2). Every input site is also in the panel, so none is lost. It takes about one minute per region.
+
+```sh
+eagle --vcfRef panel_chr22.vcf.gz --vcfTarget sA-7_chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z
+```
+
+Impute (Minimac4). The module A data hold the panel in the compact Minimac4 format (`.msav`).
+
+```sh
+minimac4 --map minimac4_chr22.map --format GT,DS --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz
+```
+
+`--format GT,DS` writes the best-guess genotype and the dosage. Add `GP` for the genotype probabilities; the files then grow to 150 to 250 MB per region. `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (step A.8). It takes about one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22.
+
+**Expected result.** Files like those in `data/course/module_a/imputed/`. Compare a few R2 values of the INFO column with the files of the module A data.
+
+**Reference.** [Loh et al. 2016](https://doi.org/10.1038/ng.3679) for Eagle2; [Das et al. 2016](https://doi.org/10.1038/ng.3656) for Minimac.
+
+:::
+
+## Step A.8 · Is the imputed variant good? {#step-a-8}
+
+We read the quality score that the imputation software gives to every imputed variant on chromosome 22. Because the data are simulated, we can compare it with the true quality, measured against the true genotypes, for common and rare variants.
+
+[Read step A.8 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-8).
+
+```{r}
+#| label: sA-8
+module_a <- file.path(cfg$data_dir, "module_a")  # <1>
+info <- read_imputation_info(file.path(module_a, "imputed", "chr22.dose.vcf.gz"))
+print(data.frame(variants = nrow(info), measured_sites = sum(info$TYPED), median_ER2 = round(median(info$ER2[info$TYPED]), 2)))
+quality <- compare_with_truth(file.path(module_a, "imputed", "chr22.dose.vcf.gz"),  # <2>
+  file.path(module_a, "true_genotypes", "chr22_true_genotypes.vcf.gz"),
+  panel = file.path(module_a, "reference_panel", "panel_chr22.vcf.gz"))
+table_a8 <- imputation_quality_table(quality)  # <3>
+print(cbind(table_a8[1:2], round(table_a8[-(1:2)], 2)), row.names = FALSE)
+stopifnot(nrow(info) == 60224L, sum(info$TYPED) == 277L, nrow(quality) == 19832L)
+guided_write(quality, guided_path(cfg, "A.8", "quality_chr22.tsv"))  # <4>
+plot_imputation_quality(quality, guided_path(cfg, "A.8", "r2_chr22.png"))
+```
+
+1. Read the quality measures of every variant of the imputed output on chromosome 22.
+2. Compare the reported R2 with the true r2, for every variant that varies in the samples.
+3. Summarise by frequency class and check the number of variants.
+4. Save the table and the figure.
+
+### What each option does
+
+No PLINK options are used in this step.
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+60,224 variants in the dosage file, 277 of them measured on the array, with a median ER2 of 0.59. 19,832 variants in the comparison with the truth; median R2 0.62, median true r2 0.35.
+
+| Class | Variants | In the panel | Median R2 | Median true r² | R2 below 0.3 | R2 at least 0.8 | Mean R2 minus true r² |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| MAC 1 | 9 | 89% | 0.22 | 0.35 | 88% | 0% | -0.16 |
+| MAC 2 to 4 | 368 | 81% | 0.33 | 0.00 | 45% | 4% | +0.28 |
+| below 0.5% | 6,244 | 83% | 0.37 | 0.00 | 40% | 5% | +0.22 |
+| 0.5 to 1% | 2,027 | 95% | 0.47 | 0.06 | 18% | 6% | +0.28 |
+| 1 to 5% | 3,358 | 100% | 0.65 | 0.35 | 3% | 20% | +0.25 |
+| at least 5% | 7,826 | 100% | 0.79 | 0.70 | 0% | 47% | +0.13 |
+| all | 19,832 | 94% | 0.62 | 0.35 | 14% | 26% | +0.19 |
+
+How to read it:
+
+- Common variants are imputed well, and R2 follows the true r² closely.
+- Rare variants are imputed poorly, and R2 overestimates their quality. Below 1%, the median R2 is 0.37 to 0.47, while the median true r² is close to 0. The filter R2 at least 0.3 removes 40% of the variants below 0.5%.
+- About one in six variants below 0.5% is not in the panel at all, so it cannot be imputed.
+
+The figure `sA-8_r2_chr22.png` shows the same comparison, variant by variant. Points below the orange diagonal are variants whose R2 is too optimistic.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+No PLINK equivalent
+
+:::
+
+::: {.callout-tip title="Another approach (optional)" collapse="true"}
+
+**Hide some array sites and impute them.** You can measure imputation quality on your own data, without a truth file. Hide some of the sites you measured, impute them, and compare the dosages with the genotypes you know. This needs Eagle2 and Minimac4 (the box of step A.7).
+
+1. Choose 5% of the array sites in the regions at random, with a fixed seed. In the course run: 22 of 438 sites.
+2. Write the input VCF without them (PLINK `--exclude` with the list of their IDs) and run phasing and imputation again.
+3. For each hidden site, compare the dosage with the measured genotype: true r², and the share of best-guess genotypes that match.
+
+**Expected result.** In the course run all 22 sites were imputed. Median R2 0.70, median true r² 0.46. The best-guess genotypes were right in 89% of cases on average. R2 and true r² correlate well (0.93), but R2 is higher, most of all for sites below 5%. One site at 1.7% had an R2 of 0.44 and a true r² of 0.08.
+
+**Reference.** [Marchini and Howie 2010](https://doi.org/10.1038/nrg2796), section on information measures.
+
+:::
+
+## Step A.9 · Test imputed variants for association {#step-a-9}
+
+We test the imputed variants of the region around locus L4 for association with disease, with the same model as the main analysis. We compare the result of the simulated risk variant, which is not on the array, with the best variant of the region.
+
+[Read step A.9 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-9).
+
+```{r}
+#| label: sA-9
+module_a <- file.path(cfg$data_dir, "module_a")  # <1>
+assoc <- imputation_association(cfg, file.path(module_a, "imputed", "chr18.dose.vcf.gz"))
+stopifnot(nrow(assoc) == 8334L)  # <2>
+print(imputation_l4(assoc))  # <3>
+```
+
+1. Test the imputed dosages of chromosome 18 with the model of the main analysis.
+2. Check the number of tested variants.
+3. Compare the L4 variant with the best variant of the region.
+
+### What each option does
+
+| Option or modifier | What it does |
+| --- | --- |
+| `--vcf` | Reads the imputed output of chromosome 18 from the module A data. |
+| &nbsp;&nbsp;&rarr; `dosage` | With DS, reads the dosage field: the expected number of copies of the alternate allele, from 0 to 2. |
+| `--double-id` | Uses the sample name of the VCF file as both family ID and individual ID, so that the rows match the covariate file. |
+| `--extract-if-info` | Keeps the variants whose imputation quality R2, in the INFO column, is at least 0.3. |
+| `--update-sex` | Takes the recorded sex of each sample from s5-7_state.psam, because a VCF file has no sex. |
+| &nbsp;&nbsp;&rarr; `col-num` | With 3, reads the sex from column 3 of that file. |
+| `--pheno` | Reads the case and control status from s5-7_state.psam, because a VCF file has no phenotype. |
+| `--pheno-name` | Selects the column Disease of that file. |
+| `--maf` | Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the study group. |
+| `--covar` | Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
+| `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
+| `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
+| `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. |
+| &nbsp;&nbsp;&rarr; `sex` | Adds the recorded sex as an adjustment factor in the model. |
+| &nbsp;&nbsp;&rarr; `hide-covar` | Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores. |
+| &nbsp;&nbsp;&rarr; `firth-fallback` | Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails. |
+| &nbsp;&nbsp;&rarr; `cols` | With +a1freq,+machr2, adds the allele frequency and the imputation quality that PLINK computes from the dosages. |
+| `--out` | Starts output file names with sA-9_chr18_assoc, including sA-9_chr18_assoc.Disease.glm.logistic.hybrid. |
+
+Every command also uses `--threads 2` (PLINK runs at most two tasks at the same time) and `--memory 2048` (PLINK uses at most about 2 GB of memory).
+
+::: {.callout-tip title="Expected result" collapse="true"}
+
+8,334 variants tested. The L4 variant chr18:38042715:G:A: imputation R2 0.95, odds ratio 1.47, p-value 1.7e-06.
+
+| Analysis | Variant | Frequency | R2 | Odds ratio | p-value |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Array sites (main analysis) | best: `18:38107932:C:A`, 65 kb away | 0.25 | measured | 1.49 | 6.6e-07 |
+| Imputed | the L4 variant itself | 0.28 | 0.95 | 1.47 | 1.7e-06 |
+| Imputed | best in the region: `chr18:38106879:G:C` | 0.41 | 0.81 | 1.54 | 4.2e-08 |
+| True genotypes (only in a simulation) | the L4 variant | 0.29 | | 1.46 | 1.3e-06 |
+| True genotypes (only in a simulation) | best in the region | 0.37 | | 1.46 | 1.6e-07 |
+
+The rows of the array sites and of the true genotypes come from the author's run, not from this chunk.
+
+What this example shows:
+
+- The L4 variant is imputed well. Its result is almost the same as with its true genotype.
+- It is not the top of its region. Variants 50 to 80 kb away, in LD with it, give smaller p-values. This happens in real studies too: the lead variant is not necessarily the cause (step 7.6).
+- After imputation the best variant crosses 5e-08. With the true genotypes, the region does not go below 1.6e-07. Here, part of the "genome-wide significant" result comes from noise in the dosages of a variant with R2 0.81. Noise can push a p-value up as well as down; in this region it pushed it down.
+
+:::
+
+::: {.callout-note title="PLINK terminal equivalent"}
+
+These commands are shown for reference. Run the R chunk above to follow the course.
+R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
+
+```sh
+bin/plink2 --vcf data/course/module_a/imputed/chr18.dose.vcf.gz dosage=DS --double-id --extract-if-info "R2 >= 0.3" --update-sex results/guided/s5-7_state.psam col-num=3 --pheno results/guided/s5-7_state.psam --pheno-name Disease --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback cols=+a1freq,+machr2 --out results/guided/sA-9_chr18_assoc --threads 2 --memory 2048
+```
+
+:::
+
+## Step A.10 · What can go wrong {#step-a-10}
+
+We list the common problems of imputation, their likely causes and what to do about each one.
+
+[Read step A.10 on the course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-10).
+
+::: {.callout-note title="What you do"}
+
+Read this step on the [course website](https://www.manuelgentiluomo.it/teaching/gwas/module-a/step-a-10). There is no code to run.
+
+:::
+
+## Where next {#where-next}
+
+- Module A is an additional module. The main path is modules 0 to 7: [course home](https://www.manuelgentiluomo.it/teaching/gwas).
+- This module on the course website: [Module A](https://www.manuelgentiluomo.it/teaching/gwas/module-a)

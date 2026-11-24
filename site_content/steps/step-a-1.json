@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.1",
+  "id": "A.1",
+  "module": "A",
+  "step": 1,
+  "anchor": "step-a-1",
+  "title": "Why imputation works: haplotypes",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nLearn the idea behind imputation: long shared stretches of chromosome, called haplotypes.",
+    "why": "You inherit one copy of each chromosome from each parent. The sequence of alleles along one copy is called a [haplotype](docs/glossary.md#haplotype).\n\nChromosomes are passed on in large blocks. Recombination cuts and rejoins them only a few times per chromosome in each generation. So people who are distantly related share long stretches of the same haplotype. Everybody in a population is distantly related to everybody else.\n\nBecause of this, alleles at nearby sites are not independent. If you know the alleles at a few sites, you can often predict the alleles at the sites in between. This non-random association between alleles at nearby sites is called linkage disequilibrium ([LD](docs/glossary.md#ld)). You met LD at step 3.4, when we pruned variants that carry the same information.\n\nImputation uses the same idea in the opposite direction. Pruning removes sites that we can predict from their neighbours. Imputation adds sites that we can predict from their neighbours. It uses a [reference panel](docs/glossary.md#reference-panel): a large group of people whose whole genome was sequenced. If the measured sites of your sample match a stretch in the panel, the panel tells us what lies in the gaps.",
+    "you_need": "LD pruning at step 3.4 helps, but it is not required. No data are needed for this step.\n\nBefore the code steps (A.7 to A.9), get the module A data ready:\n\n1. Download the module A data from the module page of the course website. Like the course data of step 0.7, it is an [encrypted archive](docs/glossary.md#encrypted-archive). Ask your teacher for its password.\n2. Extract it into the folder `data/course/module_a` of your project. The folder then holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.\n3. Download the module A notebook and open it in RStudio from the project root.\n4. Run its first chunk. It loads `R/imputation.R` from the module A data and checks the files of this module. You should see `Module A input files are present.`\n\nYou do not change any file of your project. Your project stays as you downloaded it at step 0.3.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can explain why a few measured sites can predict the sites between them.",
+    "troubleshooting": "If the idea is not clear, read the glossary entries for haplotype and LD, then read the step again.",
+    "quick_check": "Why can imputation predict a site that the array did not measure, but not a site where nobody in the reference panel carries the variant?\n\n<details><summary>Show the answer</summary>\n\nImputation copies alleles from matching haplotypes in the reference panel. If no reference haplotype carries the variant, there is nothing to copy. Imputation can only predict variants that exist in the panel.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [
+    {
+      "kind": "placeholder",
+      "asset": null,
+      "gemini_prompt": "Clean scientific illustration, flat style, white background. Top: one chromosome copy from a study sample drawn as a horizontal bar with 8 coloured dots (measured sites) and grey gaps between them. Below: five chromosome copies from a reference panel, drawn as bars with dots at every position. One reference copy matches the study sample at all coloured dots and is highlighted with a thick outline. Arrows show the alleles of the highlighted copy filling the grey gaps of the study sample. Labels: 'study sample (array)', 'reference panel (sequenced)', 'matching haplotype', 'imputed sites'. Colour-blind-safe palette, shapes as well as colour, no text other than labels.",
+      "alt_text": "Teaching schematic: Why imputation works: haplotypes.",
+      "reviewed": false
+    }
+  ],
+  "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.",
+  "student_kind": "reading",
+  "student_expected_result": "You can explain why a few measured sites can predict the sites between them."
+}

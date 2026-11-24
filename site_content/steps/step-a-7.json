@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.1",
+  "id": "A.7",
+  "module": "A",
+  "step": 7,
+  "anchor": "step-a-7",
+  "title": "Prepare the input files",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "windows_executed",
+  "blocks": {
+    "what_we_do": "Write the measured genotypes of the two regions as one VCF file per region, ready for phasing and imputation. Then check every reference allele against the GRCh38 genome.",
+    "why": "This is where most imputation jobs fail, so we do the checks in order.\n\n1. **Start from clean data.** Imputation copies errors: a wrong genotype at a measured site can spread to the sites around it. We start from the final cohort of step 5.7.\n2. **Check the genome build.** The course data are on [GRCh38](docs/glossary.md#grch38), like the module panel. The Michigan and HMIS panels use hg19, so these servers convert your positions. In some stretches of the genome the conversion can give the wrong allele at A/T and C/G sites ([Sheng et al. 2023](https://doi.org/10.1016/j.xhgg.2022.100159)).\n3. **Check strand and alleles.** The software compares your alleles with the panel. Sites on the wrong strand are flipped or removed. Step 2.5 removed all the ambiguous A/T and C/G sites of the course data. The REF allele of every site must be the GRCh38 [plus-strand](docs/glossary.md#plus-strand) allele.\n4. **Write one VCF per chromosome**, compressed with bgzip and sorted by position. PLINK 2 can write it.\n5. **Use the chromosome names of the panel.** The module panel uses `chr22`. TOPMed asks for the `chr` prefix on GRCh38.\n\nThe R helper `prepare_imputation_input()` runs PLINK once for each region, then checks and fixes the files. PLINK does not know the reference genome, so it marks every REF allele as \"provisional\" with the flag PR in the INFO column. The helper removes the flag only after it has checked that every REF equals the GRCh38 plus-strand allele of the array annotation (column Ref_Plus). On Windows, PLINK 2 ends each line with a Windows line end (CR LF). The last genotype of every line then reads `0/0\\r`, which is not valid VCF. The helper writes the file again with plain line ends, compressed with bgzip.",
+    "you_need": "Your final cohort from 5.7 and the array annotation from the course data.",
+    "command": "```{r sA-7}\n# 1. Write one VCF per region from your final cohort, then check and fix it.\ninput <- prepare_imputation_input(cfg)\n# 2. Show the sites and samples of each file, and what was fixed.\nprint(input[, c(\"chr\", \"sites\", \"samples\", \"crlf_lines\", \"pr_flags\")])\n# 3. Check the counts: 161 and 277 array sites, 1,811 samples in each file.\nstopifnot(identical(input$sites, c(161L, 277L)), all(input$samples == 1811L))\n```\n\nPlain PLINK 2 command for chromosome 22 (use `bin\\plink2.exe` on Windows):\n\n```sh\nbin/plink2 --pfile results/guided/s5-7_state --extract bed1 results/guided/sA-7_regions.bed1 --chr 22 --ref-allele results/guided/sA-7_ref_alleles_chr22.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/guided/sA-7_chr22 --threads 2 --memory 2048\n```\n\n`--pfile` reads the final genotype files. `--extract bed1` keeps the variants inside the regions of the file `sA-7_regions.bed1`, which lists a chromosome, a start and an end on each line. `--chr 22` keeps chromosome 22 only; R runs the same command for chromosome 18. `--ref-allele` sets the REF allele from a list: the number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1. `--output-chr chrM` writes chromosome names with the `chr` prefix, for example `chr22`. `--export vcf-4.2 bgz` writes a VCF file of version 4.2, compressed with bgzip; `id-paste=iid` writes only the individual ID as the sample name. `--out` sets the start of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.\n\nA terminal command does not remove the PR flag or the Windows line ends. Use the R helper to make the files you upload.",
+    "expected_result": "Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples. PLINK reports \"--ref-allele: No variants changed\": the REF alleles of the course data were already right. On Windows the helper reports 168 and 284 lines with a Windows line end (the header lines count too); on macOS and Linux it reports 0. It removed 161 and 277 PR flags.\n\n\nValidation: executable chunks passed on Windows with PLINK 2.0 b.1.4 on the 1,811 samples of the course cohort (data release 2026.1). The genotypes are identical to the input of the imputation in the module A data. bgzip, tabix and bcftools 1.25 read both files.",
+    "troubleshooting": "\"A REF allele differs from the GRCh38 plus-strand allele\": a site is on the wrong strand or has the wrong alleles. Do not upload the file. Check step 2.5 and the annotation. \"The selected executable is not a working PLINK 2 binary\": see step 0.6. Missing files from step 5.7: restore the checkpoint, as the first chunk of the module explains.",
+    "quick_check": "Why does the helper check every REF allele before it removes the PR flag?\n\n<details><summary>Show the answer</summary>\n\nThe flag says that PLINK does not know whether REF is the reference genome allele. Removing it without a check would claim something nobody verified. The imputation compares your alleles with the panel, so a wrong REF would give wrong or missing results at that site.\n\n</details>",
+    "files_created": "`sA-7_chr18.vcf.gz` and `sA-7_chr22.vcf.gz` (the input for imputation), `sA-7_regions.bed1`, `sA-7_ref_alleles_chr18.tsv`, `sA-7_ref_alleles_chr22.tsv` and the log files.",
+    "another_approach": "**Run the imputation yourself.** The module A data already hold the imputed output, so this box is optional. Eagle2 and Minimac4 run on Linux and macOS, and on Windows only inside the Windows Subsystem for Linux (WSL). They are not part of the course setup. The commands below were tested on 24 November 2026 with Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the files of the module A data and the input of this step. Download the programs only from their official pages: [Eagle](https://alkesgroup.broadinstitute.org/Eagle/) and [Minimac4](https://github.com/statgen/Minimac4).\n\nPhase the input against the panel (Eagle2). Every input site is also in the panel, so none is lost. It takes about one minute per region.\n\n```sh\neagle --vcfRef panel_chr22.vcf.gz --vcfTarget sA-7_chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z\n```\n\nImpute (Minimac4). The module A data hold the panel in the compact Minimac4 format (`.msav`).\n\n```sh\nminimac4 --map minimac4_chr22.map --format GT,DS --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz\n```\n\n`--format GT,DS` writes the best-guess genotype and the dosage. Add `GP` for the genotype probabilities; the files then grow to 150 to 250 MB per region. `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (step A.8). It takes about one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22.\n\n**Expected result.** Files like those in `data/course/module_a/imputed/`. Compare a few R2 values of the INFO column with the files of the module A data.\n\n**Reference.** [Loh et al. 2016](https://doi.org/10.1038/ng.3679) for Eagle2; [Das et al. 2016](https://doi.org/10.1038/ng.3656) for Minimac."
+  },
+  "setup_code": "source(\"R/guided.R\")\ncfg <- guided_init()",
+  "r_commands": [
+    {
+      "label": "sA-7",
+      "code": "# 1. Write one VCF per region from your final cohort, then check and fix it.\ninput <- prepare_imputation_input(cfg)\n# 2. Show the sites and samples of each file, and what was fixed.\nprint(input[, c(\"chr\", \"sites\", \"samples\", \"crlf_lines\", \"pr_flags\")])\n# 3. Check the counts: 161 and 277 array sites, 1,811 samples in each file.\nstopifnot(identical(input$sites, c(161L, 277L)), all(input$samples == 1811L))",
+      "run_by_default": true
+    }
+  ],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": true,
+    "commands": [
+      "bin/plink2 --pfile results/guided/s5-7_state --extract bed1 results/guided/sA-7_regions.bed1 --chr 22 --ref-allele results/guided/sA-7_ref_alleles_chr22.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/guided/sA-7_chr22 --threads 2 --memory 2048"
+    ],
+    "options": [
+      {
+        "name": "--chr",
+        "explanation_markdown": "`--chr 22` keeps chromosome 22 only"
+      },
+      {
+        "name": "--export",
+        "explanation_markdown": "`--export vcf-4.2 bgz` writes a VCF file of version 4.2, compressed with bgzip"
+      },
+      {
+        "name": "--extract",
+        "explanation_markdown": "`--extract bed1` keeps the variants inside the regions of the file `sA-7_regions.bed1`, which lists a chromosome, a start and an end on each line."
+      },
+      {
+        "name": "--memory",
+        "explanation_markdown": "`--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory."
+      },
+      {
+        "name": "--out",
+        "explanation_markdown": "`--out` sets the start of the output file names."
+      },
+      {
+        "name": "--output-chr",
+        "explanation_markdown": "`--output-chr chrM` writes chromosome names with the `chr` prefix, for example `chr22`."
+      },
+      {
+        "name": "--pfile",
+        "explanation_markdown": "`--pfile` reads the final genotype files."
+      },
+      {
+        "name": "--ref-allele",
+        "explanation_markdown": "`--ref-allele` sets the REF allele from a list: the number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1."
+      },
+      {
+        "name": "--threads",
+        "explanation_markdown": "`--threads 2` limits PLINK to two worker threads."
+      }
+    ]
+  },
+  "figures": [],
+  "student_summary": "We write the measured genotypes of the two regions of the module as one compressed VCF file per region, the file format that imputation software and servers read. We check that every reference allele matches the GRCh38 genome and fix two problems of PLINK files on Windows.",
+  "student_plink_options": [
+    {
+      "label": "write the imputation input for chromosome 22",
+      "options": [
+        {
+          "name": "--pfile",
+          "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."
+        },
+        {
+          "name": "--extract",
+          "explanation": "Keeps only the variants inside the regions listed in sA-7_regions.bed1.",
+          "modifiers": [
+            {
+              "name": "bed1",
+              "explanation": "Says that the region file has a chromosome, a start and an end on each line, with positions counted from 1."
+            }
+          ]
+        },
+        {
+          "name": "--chr",
+          "explanation": "Keeps chromosome 22 only. R runs the same command for chromosome 18."
+        },
+        {
+          "name": "--ref-allele",
+          "explanation": "Sets the reference allele (REF) of each variant from sA-7_ref_alleles_chr22.tsv. The number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1."
+        },
+        {
+          "name": "--output-chr",
+          "explanation": "Uses chrM to write chromosome names with the chr prefix, for example chr22, as imputation software expects on GRCh38."
+        },
+        {
+          "name": "--export",
+          "explanation": "Writes the genotypes in the VCF format, one line per variant and one column per sample.",
+          "modifiers": [
+            {
+              "name": "vcf-4.2",
+              "explanation": "Writes version 4.2 of the VCF format, which every imputation server accepts."
+            },
+            {
+              "name": "bgz",
+              "explanation": "Compresses the file with bgzip, the block compression that VCF tools need."
+            },
+            {
+              "name": "id-paste",
+              "explanation": "With iid, writes only the individual ID as the sample name."
+            }
+          ]
+        },
+        {
+          "name": "--out",
+          "explanation": "Starts output file names with sA-7_chr22, including sA-7_chr22.vcf.gz."
+        }
+      ]
+    }
+  ],
+  "success_line": "Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples.",
+  "verification_notes": [
+    "\nValidation: executable chunks passed on Windows with PLINK 2.0 b.1.4 on the 1,811 samples of the course cohort (data release 2026.1). The genotypes are identical to the input of the imputation in the module A data. bgzip, tabix and bcftools 1.25 read both files.\n"
+  ],
+  "student_expected_result": "Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples. PLINK reports \"--ref-allele: No variants changed\": the REF alleles of the course data were already right. On Windows the helper reports 168 and 284 lines with a Windows line end (the header lines count too); on macOS and Linux it reports 0. It removed 161 and 277 PR flags."
+}

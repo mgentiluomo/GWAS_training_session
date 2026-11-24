@@ -1,0 +1,857 @@
+---
+title: "Module A: Genotype imputation"
+author: "Manuel Gentiluomo, University of Pisa"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+    theme: readable
+---
+
+Work from the project root, the main folder of the course. Read each step before you run its R chunk. All data are simulated. These exercises cannot show a finding about a real disease.
+
+The [glossary](../docs/glossary.md) explains the course words. Module A is an additional module. The main path of the course (modules 0 to 7) works without it.
+
+```{r knit_setup, include=FALSE}
+start_dir <- setwd(if (file.exists("config.R")) "." else "..")
+if (requireNamespace("knitr", quietly = TRUE)) knitr::opts_knit$set(root.dir = getwd())
+setwd(start_dir)
+```
+
+```{r setup, include=FALSE}
+source("R/guided.R")
+cfg <- guided_init()
+```
+
+<!-- module_meta: {"prerequisites": {"checkpoint": "6.3", "restart_step": "6.4", "files": [{"base": "output", "path": "s5-7_state.pgen"}, {"base": "output", "path": "s5-7_state.pvar"}, {"base": "output", "path": "s5-7_state.psam"}, {"base": "output", "path": "s6-3_covariates.tsv"}, {"base": "data", "path": "array/sim2026_array_annotation.tsv"}, {"base": "data", "path": "module_a/imputed/chr18.dose.vcf.gz"}, {"base": "data", "path": "module_a/imputed/chr22.dose.vcf.gz"}, {"base": "data", "path": "module_a/true_genotypes/chr22_true_genotypes.vcf.gz"}, {"base": "data", "path": "module_a/reference_panel/panel_chr22.vcf.gz"}]}} -->
+
+## Module A at a glance {#module-a-overview}
+
+**What you will do.** A genotyping array measures a few hundred thousand DNA sites. The human genome has tens of millions of variable sites. [Imputation](../docs/glossary.md#imputation) fills the gap: it predicts the genotypes at sites that the array did not measure. You will learn how it works, which reference panels and servers exist, and what the law says about uploading genetic data. Then you will prepare the input files from your own data, read the quality of an imputation of two regions, and test the imputed variants for association.
+
+**What you will learn.**
+
+- Why alleles at nearby sites can be predicted from each other: [haplotypes](../docs/glossary.md#haplotype) and [LD](../docs/glossary.md#ld).
+- The two stages of the process: [phasing](../docs/glossary.md#phasing), then imputation.
+- How to choose a [reference panel](../docs/glossary.md#reference-panel) and an imputation server.
+- What the General Data Protection Regulation (GDPR) means for genetic data.
+- How to read the [imputation quality](../docs/glossary.md#imputation-r2) of each variant, and why it can be too optimistic for rare variants.
+- How to test imputed [dosages](../docs/glossary.md#dosage) for association.
+
+**How long it takes.** About 2 hours. Steps A.1 to A.6 and A.10 are reading. The slowest code step is A.8, about two minutes.
+
+**What you need.** Your files at step 6.3: the final cohort of 1,811 samples from step 5.7 and the covariates from step 6.3. You also need the module A data, a separate data release. Extract them into the folder `data/course/module_a`. They also hold `R/imputation.R`, the R functions of this module. Do not copy it into your project: the first chunk of the module notebook loads it from the data folder. You do not need a server account.
+
+**The data of this module.** The course data are simulated. Each study genome is a mosaic of short segments copied from genomes of the 1000 Genomes Project, the "donors". A reference panel that contains the donors would contain the study haplotypes themselves. Imputation would then look far better than it can be with real data. The 1000 Genomes panels of the imputation servers contain the donors. So does the HRC panel, which includes the 1000 Genomes Phase 3 samples ([McCarthy et al. 2016](https://doi.org/10.1038/ng.3643)). So the course examples do not use the servers.
+
+Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-coverage (30x) data set ([Byrska-Bishop et al. 2022](https://doi.org/10.1016/j.cell.2022.08.004)) who are not donors and not related to anyone in the data set. It covers two regions of 2.5 Mb on GRCh38: chromosome 18 from 36,792,715 to 39,292,715, around the simulated risk locus L4, and chromosome 22 from 35,000,000 to 37,500,000. The author ran the imputation (Eagle2 and Minimac4) for the 1,811 samples of the course cohort. The module A data contain the panel, the genetic map, the imputed output and the true genotypes of chromosome 22. Only a simulation can give true genotypes: they let you measure how good the imputation really is.
+
+## A.1 Why imputation works: haplotypes {#step-a-1}
+
+Reading, about 3 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between.", "student_kind": "reading"} -->
+
+### What we do
+
+Learn the idea behind imputation: long shared stretches of chromosome, called haplotypes.
+
+### Why
+
+You inherit one copy of each chromosome from each parent. The sequence of alleles along one copy is called a [haplotype](../docs/glossary.md#haplotype).
+
+Chromosomes are passed on in large blocks. Recombination cuts and rejoins them only a few times per chromosome in each generation. So people who are distantly related share long stretches of the same haplotype. Everybody in a population is distantly related to everybody else.
+
+Because of this, alleles at nearby sites are not independent. If you know the alleles at a few sites, you can often predict the alleles at the sites in between. This non-random association between alleles at nearby sites is called linkage disequilibrium ([LD](../docs/glossary.md#ld)). You met LD at step 3.4, when we pruned variants that carry the same information.
+
+Imputation uses the same idea in the opposite direction. Pruning removes sites that we can predict from their neighbours. Imputation adds sites that we can predict from their neighbours. It uses a [reference panel](../docs/glossary.md#reference-panel): a large group of people whose whole genome was sequenced. If the measured sites of your sample match a stretch in the panel, the panel tells us what lies in the gaps.
+
+<!-- Figure placeholder. Gemini prompt: Clean scientific illustration, flat style, white background. Top: one chromosome copy from a study sample drawn as a horizontal bar with 8 coloured dots (measured sites) and grey gaps between them. Below: five chromosome copies from a reference panel, drawn as bars with dots at every position. One reference copy matches the study sample at all coloured dots and is highlighted with a thick outline. Arrows show the alleles of the highlighted copy filling the grey gaps of the study sample. Labels: 'study sample (array)', 'reference panel (sequenced)', 'matching haplotype', 'imputed sites'. Colour-blind-safe palette, shapes as well as colour, no text other than labels. -->
+
+### You need
+
+LD pruning at step 3.4 helps, but it is not required. No data are needed for this step.
+
+Before the code steps (A.7 to A.9), get the module A data ready:
+
+1. Download the module A data from the module page of the course website. Like the course data of step 0.7, it is an [encrypted archive](../docs/glossary.md#encrypted-archive). Ask your teacher for its password.
+2. Extract it into the folder `data/course/module_a` of your project. The folder then holds `imputed`, `reference_panel`, `genetic_map`, `true_genotypes` and `R`.
+3. Download the module A notebook and open it in RStudio from the project root.
+4. Run its first chunk. It loads `R/imputation.R` from the module A data and checks the files of this module. You should see `Module A input files are present.`
+
+You do not change any file of your project. Your project stays as you downloaded it at step 0.3.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can explain why a few measured sites can predict the sites between them.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+If the idea is not clear, read the glossary entries for haplotype and LD, then read the step again.
+
+</details>
+
+### Quick check
+
+Why can imputation predict a site that the array did not measure, but not a site where nobody in the reference panel carries the variant?
+
+<details><summary>Show the answer</summary>
+
+Imputation copies alleles from matching haplotypes in the reference panel. If no reference haplotype carries the variant, there is nothing to copy. Imputation can only predict variants that exist in the panel.
+
+</details>
+
+### Files created
+
+None.
+
+## A.2 Phasing, then imputation {#step-a-2}
+
+Reading, about 3 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We see the two stages of imputation. First the software estimates which alleles lie together on each chromosome copy (phasing). Then it compares each copy with the reference panel and predicts the missing sites, as probabilities.", "student_kind": "reading"} -->
+
+### What we do
+
+Learn the two stages of the process and the three ways to write an imputed genotype.
+
+### Why
+
+An array tells you that a person is heterozygous A/G at a site. It does not tell you which allele sits on the chromosome from the mother and which on the chromosome from the father. Imputation needs that information, because it works on haplotypes.
+
+**Stage 1. Phasing.** [Phasing](../docs/glossary.md#phasing) estimates the two haplotypes of each person from their genotypes. Software such as Eagle2 ([Loh et al. 2016](https://doi.org/10.1038/ng.3679)), SHAPEIT and Beagle does this. It compares each person with many others and with the reference panel, and finds the most likely pair of haplotypes.
+
+**Stage 2. Imputation.** Each study haplotype is compared with the reference haplotypes. The software looks for reference haplotypes that match it at the measured sites. It then predicts the alleles at the other sites from those matches. Software such as Minimac4, IMPUTE5 and Beagle 5 does this.
+
+Running phasing first and imputation second is called pre-phasing. It made imputation with large panels fast enough for routine use ([Howie et al. 2012](https://doi.org/10.1038/ng.2354)).
+
+**How the software finds a match.** Most methods use a model proposed by Li and Stephens ([2003](https://doi.org/10.1093/genetics/165.4.2213)). It describes a study haplotype as a mosaic: a patchwork of short pieces copied from different reference haplotypes. Along the chromosome, the copy can switch from one reference haplotype to another. Switches are more likely where recombination is frequent. Small differences are allowed, to account for mutations and genotyping errors. The software does not pick one mosaic. It weighs all possible mosaics by how well they fit. The result at each site is a probability for each genotype, not a certain answer.
+
+<!-- Figure placeholder. Gemini prompt: Flat scientific diagram, white background. One study haplotype at the bottom drawn as a horizontal bar made of 4 segments with different fill patterns. Above it, six reference haplotypes as thin horizontal bars, each with its own fill pattern. Dotted vertical lines show that segment 1 of the study haplotype is copied from reference 2, segment 2 from reference 5, segment 3 from reference 1 and segment 4 from reference 5. Small marks at the switch points labelled 'recombination'. Title: 'A haplotype as a mosaic of reference haplotypes'. Colour-blind-safe palette. -->
+
+**Three ways to write an imputed genotype.**
+
+| Form | Example for one person at one site | When to use it |
+| --- | --- | --- |
+| Genotype probabilities | P(AA) = 0.02, P(AG) = 0.90, P(GG) = 0.08 | Complete information, used by some tests |
+| Dosage | 0.02 × 0 + 0.90 × 1 + 0.08 × 2 = 1.06 | The usual input for association tests |
+| Best-guess (hard) call | AG | Only when a tool cannot read dosages |
+
+The [dosage](../docs/glossary.md#dosage) is the expected number of copies of the alternate allele. It runs from 0 to 2. It keeps the uncertainty: a dosage of 1.06 says "almost certainly one copy". A hard call throws that information away. Marchini and Howie ([2010](https://doi.org/10.1038/nrg2796)) advise against testing hard calls: it can cause both false positives and a loss of power.
+
+### You need
+
+Step A.1.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can name the two stages and say why a dosage keeps more information than a hard call.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+If phasing is not clear, think of a person who is heterozygous at two nearby sites. The genotypes do not say whether the two less common alleles sit on the same chromosome copy or on different copies. Phasing estimates that.
+
+</details>
+
+### Quick check
+
+A person has the genotype probabilities P(AA) = 0.10, P(AG) = 0.20 and P(GG) = 0.70, with G as the alternate allele. What is the dosage?
+
+<details><summary>Show the answer</summary>
+
+0.10 × 0 + 0.20 × 1 + 0.70 × 2 = 1.60 copies of G.
+
+</details>
+
+### Files created
+
+None.
+
+## A.3 Reference panels {#step-a-3}
+
+Reading, about 3 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We compare the reference panels used for imputation: their size, the ancestry of their people and the genome build. The panel decides which variants can be imputed and how well.", "student_kind": "reading"} -->
+
+### What we do
+
+Compare the reference panels you will meet, and learn how to choose one.
+
+### Why
+
+The [reference panel](../docs/glossary.md#reference-panel) decides what you can impute and how well. Three properties matter most.
+
+1. **Size.** More haplotypes mean more chances to find a close match. This matters most for low-frequency variants. A variant carried by 1 in 1,000 people needs thousands of reference haplotypes to appear often enough.
+2. **Ancestry match.** The panel must contain people whose [ancestry](../docs/glossary.md#ancestry) is close to that of your samples. Haplotypes differ between populations. A panel made only of Europeans imputes African or South Asian samples poorly.
+3. **Genome build and content.** The panel uses one [genome build](../docs/glossary.md#genome-build). If your data use another build, the server must convert your positions (step A.7). Some panels contain only SNPs; others contain indels too.
+
+**Panels you will meet.** Sample counts are those on the server documentation pages, checked on 23 November 2026.
+
+| Panel | People | Ancestry | Notes | Reference |
+| --- | --- | --- | --- | --- |
+| HapMap 2 | 60 | European (CEU) | Historical. Do not use it for new studies. | [Frazer et al. 2007](https://doi.org/10.1038/nature06258) |
+| 1000 Genomes Phase 3 (v5) | 2,504 (5,008 haplotypes) | 26 populations on five continents | Small, but diverse and public. hg19. | [1000 Genomes Project Consortium 2015](https://doi.org/10.1038/nature15393) |
+| 1000 Genomes high coverage (30x) | 3,202, including 602 trios | The same populations, plus relatives | Public, sequenced at high depth on GRCh38. Not offered by the servers of step A.4. | [Byrska-Bishop et al. 2022](https://doi.org/10.1016/j.cell.2022.08.004) |
+| Haplotype Reference Consortium (HRC) r1.1 | 32,470 on Michigan; 27,165 on HMIS | Mainly European | Controlled access: only usable through a server. hg19. | [McCarthy et al. 2016](https://doi.org/10.1038/ng.3643) |
+| TOPMed r3 | 133,597 | Many ancestries, many US cohorts | GRCh38. 445,600,184 sites on chromosomes 1 to 22. Only on the TOPMed Imputation Server. | [Taliun et al. 2021](https://doi.org/10.1038/s41586-021-03205-y) |
+
+**Why two numbers for HRC?** The Michigan page gives 32,470 samples, the HMIS page 27,165. The HMIS documentation does not explain the difference. The course gives both numbers with their source.
+
+**Why can't I download HRC or TOPMed?** These panels are built from research participants who gave consent for controlled use. They cannot be shared openly. A server keeps the panel and runs the imputation for you. You send your data to the panel, not the panel to you.
+
+**How to choose.**
+
+- European ancestry: TOPMed or HRC give the best accuracy for rare variants. 1000 Genomes is enough for common variants.
+- Mixed or non-European ancestry: TOPMed, which is very diverse, or 1000 Genomes. Choose a population-specific panel if one exists for your group.
+- You must keep data in the EU: choose among the panels of an EU server (step A.5).
+- Always check the terms of the server. Some panels allow only academic use, or require you to acknowledge the consortium.
+
+### You need
+
+Steps A.1 and A.2.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can choose a panel for a study, from its size, its ancestry and its genome build.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+The numbers of people change with each panel release. Always take them from the documentation page of the server you use, and write down the date.
+
+</details>
+
+### Quick check
+
+Your study has 3,000 people of South Asian ancestry. Which panel of the table would you try first, and why?
+
+<details><summary>Show the answer</summary>
+
+TOPMed, because it is the largest and has many ancestries. 1000 Genomes is a public alternative that includes South Asian populations, but it is small, so rare variants will be imputed poorly. HRC is mainly European.
+
+</details>
+
+### Files created
+
+None.
+
+## A.4 Imputation servers {#step-a-4}
+
+Reading, about 3 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We compare three free online imputation servers: where they keep the data, which panels they offer, which files they accept and how long they keep the results.", "student_kind": "reading"} -->
+
+### What we do
+
+Compare the three main imputation servers.
+
+### Why
+
+Imputing with a large panel needs a lot of computing power, and some panels cannot be downloaded. Imputation servers solve both problems. You upload your genotypes, the server phases and imputes them, and you download the result. The servers below are free after registration. They share the same software base ([Das et al. 2016](https://doi.org/10.1038/ng.3656)): Eagle2 or Beagle for phasing, Minimac4 for imputation, and a web interface built with Cloudgene.
+
+**Michigan Imputation Server.** Run by the University of Michigan (USA). Your data leave the EU. Panels: HRC r1.1 (32,470 samples), 1000 Genomes Phase 3 (2,504), Genome Asia, CAAPA, HapMap 2 and two HLA panels. Input: [VCF](../docs/glossary.md#vcf-bcf) files compressed with [bgzip](../docs/glossary.md#bgzip-tabix), one file per chromosome, sorted by position, on GRCh37 or GRCh38. Results are encrypted with a one-time password that the server does not keep. Documentation: [Michigan Imputation Server](https://genepi.github.io/michigan-imputationserver/).
+
+**TOPMed Imputation Server.** Run by the University of Michigan for the US National Heart, Lung, and Blood Institute. Data are processed on Amazon Web Services. One panel: TOPMed r3, 133,597 people, on GRCh38. Input data are deleted when no longer needed. You have 7 days to download the results. The best choice for low-frequency variants and for diverse samples, if your data may legally leave the EU. Documentation: [TOPMed Imputation Server](https://topmedimpute.readthedocs.io/).
+
+**Helmholtz Munich Imputation Server (HMIS).** Run by Helmholtz Munich, Germany, since November 2024 ([Rayner et al. 2024](https://doi.org/10.1038/s41588-024-02012-1)). Data stay on a server in Munich, inside the EU. Panels: HRC r1.1 (27,165 samples on its page), 1000 Genomes Phase 3 and HapMap 2, all on hg19. Input on hg38 is converted to hg19. Results can be downloaded for 7 days. HMIS publishes a Data Processing Agreement under Article 28 of the GDPR: your institution is the data controller and Helmholtz Munich the processor. Documentation: [HMIS](https://imputationserver-doc.readthedocs.io/).
+
+| Feature | Michigan | TOPMed | HMIS |
+| --- | --- | --- | --- |
+| Location of data | outside the EU | Amazon Web Services | Munich (EU) |
+| Largest panel | HRC r1.1 | TOPMed r3 | HRC r1.1 |
+| Build of the panels | hg19 (most panels) | GRCh38 | hg19 |
+| GRCh38 input accepted | yes, converted | yes, with the `chr` prefix | yes, converted to hg19 |
+| Data Processing Agreement (Art. 28 GDPR) | not found | not found | yes, published |
+| Results kept for | 7 days | 7 days | 7 days |
+
+**Running imputation yourself.** It is possible with public panels, such as 1000 Genomes, and free software (Eagle2, Minimac4, IMPUTE5, Beagle 5). For a whole genome it needs a computer cluster. For two regions of 2.5 Mb, as in this module, a laptop is enough (step A.7).
+
+### You need
+
+Step A.3.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can say where each server keeps your data and which panel it offers.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+Server pages change. Check the documentation page of the server on the day you upload, and keep the date with your notes.
+
+</details>
+
+### Quick check
+
+You work in Italy with real genotypes that may not leave the EU. Which server can you use, and with which panels?
+
+<details><summary>Show the answer</summary>
+
+The Helmholtz Munich Imputation Server, whose server is in Munich. It offers HRC r1.1, 1000 Genomes Phase 3 and HapMap 2.
+
+</details>
+
+### Files created
+
+None.
+
+## A.5 Genetic data and the law {#step-a-5}
+
+Reading, about 2 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We see why genotypes are personal data under the European General Data Protection Regulation, what a transfer outside the EU needs, and what to do before any upload.", "student_kind": "reading"} -->
+
+### What we do
+
+Learn the main legal points before you upload genetic data. This step is information, not legal advice.
+
+### Why
+
+Before you upload real data, speak to the data protection officer of your institution.
+
+- Genotypes are personal data even without names. A genome is unique, and a few hundred SNPs are enough to identify a person.
+- Under the General Data Protection Regulation (GDPR), genetic data are a special category. Processing them needs a specific legal basis, for example research with appropriate safeguards and consent.
+- A transfer of personal data outside the EU needs an additional legal basis: for example an adequacy decision for the destination country, or contractual clauses approved by the European Commission. Whether a given server qualifies is a legal question. The answer can change over time.
+- Consent forms and ethics approvals may also limit where data can go. Many European cohorts do not allow upload to servers outside the EU.
+- An EU server such as HMIS removes the transfer problem. It does not remove your other duties: a legal basis, data minimisation and a contract with the processor.
+
+**Good practice before any upload.**
+
+1. Upload only what imputation needs: genotypes and sample IDs. Never upload phenotypes, names or dates of birth.
+2. Replace real IDs with codes that only you can link back.
+3. Keep a record of what you uploaded, where and when.
+4. Download the results promptly and keep the password safe.
+
+**In this course** the data are simulated. They describe no real person. You may upload them to any server to practise, with no legal risk. The course examples do not do so, for a scientific reason (see the module overview): the server panels contain the donors of the simulation.
+
+Reference: [Rayner et al. 2024](https://doi.org/10.1038/s41588-024-02012-1).
+
+### You need
+
+Step A.4.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can list what to check with your institution before an upload.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+If you are not sure whether an upload is allowed, do not upload. Ask the data protection officer and the principal investigator of the study.
+
+</details>
+
+### Quick check
+
+A colleague removes the names from a file of genotypes and says that the file is now anonymous. Is that right?
+
+<details><summary>Show the answer</summary>
+
+No. A genome is unique, and a few hundred SNPs can identify a person. Genotypes remain personal data without names.
+
+</details>
+
+### Files created
+
+None.
+
+## A.6 Reading the classic review {#step-a-6}
+
+Reading, about 5 minutes. You can come back to it later.
+
+<!-- step_meta: {"student_summary": "We read a classic review of imputation, Marchini and Howie (2010), with a guide to its sections. We see what is still true today and what has changed with larger panels and faster software.", "student_kind": "reading"} -->
+
+### What we do
+
+Read Marchini J, Howie B. Genotype imputation for genome-wide association studies. Nat Rev Genet. 2010;11:499-511 ([doi:10.1038/nrg2796](https://doi.org/10.1038/nrg2796)), with the guide below.
+
+### Why
+
+The review was written when imputation became standard practice in GWAS. Most of what it explains is still true. Some parts have been overtaken by larger panels and faster software. You do not need to follow every formula.
+
+| Part of the review | Pages | What to take from it |
+| --- | --- | --- |
+| Introduction and Box 1 | 499-500 | The whole idea in one figure: study haplotypes as a mosaic of reference haplotypes, missing genotypes filled in with uncertainty. Read closely. |
+| Box 2 (Uses of imputation) | 501 | Power, fine-mapping, meta-analysis, untyped variation, non-SNP variation, sporadic missing genotypes. Read closely. |
+| Genotype imputation methods | 499-504 | Most methods are hidden Markov models built on the Li and Stephens model of step A.2. Skim the formulas. Read the warning on page 502 about cases and controls typed on different chips. |
+| Factors that affect imputation accuracy, and Box 4 | 504-507 | Rare variants are imputed worse. Larger panels, and panels that match the ancestry of the study, are better. Read closely. |
+| Post-imputation information measures, and Figure 1 | 506, 508 | INFO and r² measures, and how to read them (step A.8). Read closely. |
+| Association testing using imputed data | 506-510 | Do not test best-guess genotypes. Use methods that keep the uncertainty, such as dosages. Read the text; Box 5 is optional. |
+
+**What has not changed since 2010:** the mosaic idea, the probabilistic output and the information measures. The advice to test dosages rather than hard calls still holds, and so do the warning about different chips and the caution with rare imputed variants.
+
+**What has changed:** panels grew from HapMap (120 to 180 haplotypes per population) to tens of thousands of people (HRC, TOPMed). Accuracy is much better for low-frequency variants with large, well-matched panels. Phasing now runs first, then a fast imputation. Most users impute on online servers. Data protection now matters (GDPR, step A.5).
+
+The questions in the quick check below come from the review. Try to answer each one before you open the answer.
+
+### You need
+
+Steps A.1 to A.5. The review is available through your university library.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can answer the seven questions of the quick check from the review.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+If you cannot open the review, ask your university library. The guide above and the answers below still give the main points.
+
+</details>
+
+### Quick check
+
+1. Box 2 says imputation can boost power. Under what conditions could an imputed variant give a weaker signal than a genotyped one nearby?
+
+<details><summary>Show the answer</summary>
+
+When the imputed variant has a low information measure, its dosages carry less information, so the test loses power. A well-typed neighbour in strong LD may then give a smaller p-value.
+
+</details>
+
+2. In the *TCF7L2* example of Box 2, the imputed SNP has a smaller p-value than the best genotyped SNP. Does that make it the causal variant?
+
+<details><summary>Show the answer</summary>
+
+No. The smallest p-value in a region does not prove causality. Fine-mapping depends on the LD and the number of recombination events in the region. Larger samples, populations with lower LD and functional evidence are needed.
+
+</details>
+
+3. Box 4 shows that larger panels help rare variants more than common ones. Why?
+
+<details><summary>Show the answer</summary>
+
+A rare allele appears on very few haplotypes. In a small panel it may appear on none, or on one only, so matches are rare or absent. Common alleles are matched well already with a small panel.
+
+</details>
+
+4. A study imputes a South Asian cohort with a European-only panel. What will happen to the quality scores?
+
+<details><summary>Show the answer</summary>
+
+Many study haplotypes will not find close matches. The quality scores will be lower, most of all for rare and population-specific variants, and some variants will be missing from the panel.
+
+</details>
+
+5. Cases come from one biobank typed on chip A, controls from another typed on chip B. Both are imputed with the same panel. What can go wrong, and how would you notice it?
+
+<details><summary>Show the answer</summary>
+
+SNPs imputed with different accuracy from the two chips can show allele frequency differences between cases and controls that are only technical. This gives false positives. Signs: hits at SNPs absent from one chip, very different quality scores between the groups, and an inflated QQ plot. The best fix is design: type cases and controls on the same chip.
+
+</details>
+
+6. Why do the authors advise against testing best-guess genotypes?
+
+<details><summary>Show the answer</summary>
+
+Hard calls throw away the uncertainty. Dropping uncertain genotypes, or treating best guesses as certain, can cause both false positives and a loss of power.
+
+</details>
+
+7. Which of the uses in Box 2 matters most for a meta-analysis consortium, and why?
+
+<details><summary>Show the answer</summary>
+
+Meta-analysis, because studies typed on different chips need a common set of SNPs before their results can be combined.
+
+</details>
+
+### Files created
+
+None.
+
+## A.7 Prepare the input files {#step-a-7}
+
+<!-- step_meta: {"success_line": "Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples.", "student_summary": "We write the measured genotypes of the two regions of the module as one compressed VCF file per region, the file format that imputation software and servers read. We check that every reference allele matches the GRCh38 genome and fix two problems of PLINK files on Windows.", "student_plink_options": [{"label": "write the imputation input for chromosome 22", "options": [{"name": "--pfile", "explanation": "Reads s5-7_state.pgen, .pvar and .psam, which hold the final study genotypes and sample details."}, {"name": "--extract", "explanation": "Keeps only the variants inside the regions listed in sA-7_regions.bed1.", "modifiers": [{"name": "bed1", "explanation": "Says that the region file has a chromosome, a start and an end on each line, with positions counted from 1."}]}, {"name": "--chr", "explanation": "Keeps chromosome 22 only. R runs the same command for chromosome 18."}, {"name": "--ref-allele", "explanation": "Sets the reference allele (REF) of each variant from sA-7_ref_alleles_chr22.tsv. The number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1."}, {"name": "--output-chr", "explanation": "Uses chrM to write chromosome names with the chr prefix, for example chr22, as imputation software expects on GRCh38."}, {"name": "--export", "explanation": "Writes the genotypes in the VCF format, one line per variant and one column per sample.", "modifiers": [{"name": "vcf-4.2", "explanation": "Writes version 4.2 of the VCF format, which every imputation server accepts."}, {"name": "bgz", "explanation": "Compresses the file with bgzip, the block compression that VCF tools need."}, {"name": "id-paste", "explanation": "With iid, writes only the individual ID as the sample name."}]}, {"name": "--out", "explanation": "Starts output file names with sA-7_chr22, including sA-7_chr22.vcf.gz."}]}]} -->
+
+### What we do
+
+Write the measured genotypes of the two regions as one VCF file per region, ready for phasing and imputation. Then check every reference allele against the GRCh38 genome.
+
+### Why
+
+This is where most imputation jobs fail, so we do the checks in order.
+
+1. **Start from clean data.** Imputation copies errors: a wrong genotype at a measured site can spread to the sites around it. We start from the final cohort of step 5.7.
+2. **Check the genome build.** The course data are on [GRCh38](../docs/glossary.md#grch38), like the module panel. The Michigan and HMIS panels use hg19, so these servers convert your positions. In some stretches of the genome the conversion can give the wrong allele at A/T and C/G sites ([Sheng et al. 2023](https://doi.org/10.1016/j.xhgg.2022.100159)).
+3. **Check strand and alleles.** The software compares your alleles with the panel. Sites on the wrong strand are flipped or removed. Step 2.5 removed all the ambiguous A/T and C/G sites of the course data. The REF allele of every site must be the GRCh38 [plus-strand](../docs/glossary.md#plus-strand) allele.
+4. **Write one VCF per chromosome**, compressed with bgzip and sorted by position. PLINK 2 can write it.
+5. **Use the chromosome names of the panel.** The module panel uses `chr22`. TOPMed asks for the `chr` prefix on GRCh38.
+
+The R helper `prepare_imputation_input()` runs PLINK once for each region, then checks and fixes the files. PLINK does not know the reference genome, so it marks every REF allele as "provisional" with the flag PR in the INFO column. The helper removes the flag only after it has checked that every REF equals the GRCh38 plus-strand allele of the array annotation (column Ref_Plus). On Windows, PLINK 2 ends each line with a Windows line end (CR LF). The last genotype of every line then reads `0/0\r`, which is not valid VCF. The helper writes the file again with plain line ends, compressed with bgzip.
+
+### You need
+
+Your final cohort from 5.7 and the array annotation from the course data.
+
+### Command
+
+```{r sA-7}
+# 1. Write one VCF per region from your final cohort, then check and fix it.
+input <- prepare_imputation_input(cfg)
+# 2. Show the sites and samples of each file, and what was fixed.
+print(input[, c("chr", "sites", "samples", "crlf_lines", "pr_flags")])
+# 3. Check the counts: 161 and 277 array sites, 1,811 samples in each file.
+stopifnot(identical(input$sites, c(161L, 277L)), all(input$samples == 1811L))
+```
+
+Plain PLINK 2 command for chromosome 22 (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --pfile results/guided/s5-7_state --extract bed1 results/guided/sA-7_regions.bed1 --chr 22 --ref-allele results/guided/sA-7_ref_alleles_chr22.tsv 2 1 --output-chr chrM --export vcf-4.2 bgz id-paste=iid --out results/guided/sA-7_chr22 --threads 2 --memory 2048
+```
+
+`--pfile` reads the final genotype files. `--extract bed1` keeps the variants inside the regions of the file `sA-7_regions.bed1`, which lists a chromosome, a start and an end on each line. `--chr 22` keeps chromosome 22 only; R runs the same command for chromosome 18. `--ref-allele` sets the REF allele from a list: the number 2 says that the allele is in column 2, and 1 says that the variant ID is in column 1. `--output-chr chrM` writes chromosome names with the `chr` prefix, for example `chr22`. `--export vcf-4.2 bgz` writes a VCF file of version 4.2, compressed with bgzip; `id-paste=iid` writes only the individual ID as the sample name. `--out` sets the start of the output file names. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.
+
+A terminal command does not remove the PR flag or the Windows line ends. Use the R helper to make the files you upload.
+
+<details><summary>Show the expected result</summary>
+
+Two VCF files: 161 sites on chromosome 18 and 277 on chromosome 22, each with 1,811 samples. PLINK reports "--ref-allele: No variants changed": the REF alleles of the course data were already right. On Windows the helper reports 168 and 284 lines with a Windows line end (the header lines count too); on macOS and Linux it reports 0. It removed 161 and 277 PR flags.
+
+<!-- verification_note:start -->
+Validation: executable chunks passed on Windows with PLINK 2.0 b.1.4 on the 1,811 samples of the course cohort (data release 2026.1). The genotypes are identical to the input of the imputation in the module A data. bgzip, tabix and bcftools 1.25 read both files.
+<!-- verification_note:end -->
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+"A REF allele differs from the GRCh38 plus-strand allele": a site is on the wrong strand or has the wrong alleles. Do not upload the file. Check step 2.5 and the annotation. "The selected executable is not a working PLINK 2 binary": see step 0.6. Missing files from step 5.7: restore the checkpoint, as the first chunk of the module explains.
+
+</details>
+
+### Quick check
+
+Why does the helper check every REF allele before it removes the PR flag?
+
+<details><summary>Show the answer</summary>
+
+The flag says that PLINK does not know whether REF is the reference genome allele. Removing it without a check would claim something nobody verified. The imputation compares your alleles with the panel, so a wrong REF would give wrong or missing results at that site.
+
+</details>
+
+### Files created
+
+`sA-7_chr18.vcf.gz` and `sA-7_chr22.vcf.gz` (the input for imputation), `sA-7_regions.bed1`, `sA-7_ref_alleles_chr18.tsv`, `sA-7_ref_alleles_chr22.tsv` and the log files.
+
+<details><summary>Another approach (optional)</summary>
+
+**Run the imputation yourself.** The module A data already hold the imputed output, so this box is optional. Eagle2 and Minimac4 run on Linux and macOS, and on Windows only inside the Windows Subsystem for Linux (WSL). They are not part of the course setup. The commands below were tested on 24 November 2026 with Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the files of the module A data and the input of this step. Download the programs only from their official pages: [Eagle](https://alkesgroup.broadinstitute.org/Eagle/) and [Minimac4](https://github.com/statgen/Minimac4).
+
+Phase the input against the panel (Eagle2). Every input site is also in the panel, so none is lost. It takes about one minute per region.
+
+```sh
+eagle --vcfRef panel_chr22.vcf.gz --vcfTarget sA-7_chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z
+```
+
+Impute (Minimac4). The module A data hold the panel in the compact Minimac4 format (`.msav`).
+
+```sh
+minimac4 --map minimac4_chr22.map --format GT,DS --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz
+```
+
+`--format GT,DS` writes the best-guess genotype and the dosage. Add `GP` for the genotype probabilities; the files then grow to 150 to 250 MB per region. `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (step A.8). It takes about one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22.
+
+**Expected result.** Files like those in `data/course/module_a/imputed/`. Compare a few R2 values of the INFO column with the files of the module A data.
+
+**Reference.** [Loh et al. 2016](https://doi.org/10.1038/ng.3679) for Eagle2; [Das et al. 2016](https://doi.org/10.1038/ng.3656) for Minimac.
+
+</details>
+
+## A.8 Is the imputed variant good? {#step-a-8}
+
+<!-- step_meta: {"success_line": "19,832 variants in the comparison with the truth; median R2 0.62, median true r2 0.35.", "student_summary": "We read the quality score that the imputation software gives to every imputed variant on chromosome 22. Because the data are simulated, we can compare it with the true quality, measured against the true genotypes, for common and rare variants.", "student_plink_options": []} -->
+
+### What we do
+
+Read the quality measures of the imputed output on chromosome 22. Then compare the quality that Minimac4 reports with the true quality, measured against the true genotypes of the simulation.
+
+### Why
+
+Each imputed variant comes with a quality score. Minimac4 reports R2 (also written Rsq). IMPUTE reports the INFO score. They measure similar things and run from 0 to 1 ([imputation quality](../docs/glossary.md#imputation-r2)).
+
+**How Minimac4 computes R2.** It compares the variance of the imputed dosages with the variance you would expect if the genotypes were known exactly. Because it is a ratio of two estimates, it can be slightly above 1. **What R2 means, in words:** how much of the information of a true genotype you actually have. An R2 of 0.8 means that 1,000 people with imputed dosages carry about as much information as 800 people with true genotypes. So a low R2 does not make results wrong. It makes them weak.
+
+**Measured sites get a second check.** For sites that were on the array, Minimac4 hides each genotype in turn, imputes it and compares it with the measured value. This gives the empirical R2 (ER2). It tells you how well imputation works in your data.
+
+**Common filters.** Keep variants with an R2 of at least 0.3 (permissive) or 0.8 (strict). The MaCH documentation recommends 0.3: it removes more than 70% of the poorly imputed variants and less than 0.5% of the well imputed ones. Neither threshold is perfect. A strict threshold also throws away true associations; a permissive one keeps more false ones ([Stahl et al. 2025](https://doi.org/10.1093/g3journal/jkaf043)). Choose the threshold before you look at the results, and report it.
+
+**The true quality.** Because the data are simulated, we know the true genotypes. The true r² is the squared correlation between the dosage and the true number of alternate alleles. We compare it with the reported R2 in groups of variants by their [minor allele count](../docs/glossary.md#maf) (MAC) and frequency. We leave out the array sites and the variants that do not vary in the samples.
+
+**The limits of these numbers.** The course panel is small and the study is simulated, so the numbers show the direction, not the size you would get with HRC or TOPMed. The panel has 1,521 people, against about 32,000 in HRC and about 97,000 in TOPMed. Only 313 people of the panel are European, and only 106 are southern European. About 60% of the study is southern European. Each study genome is a mosaic of donor segments, so the LD across a junction is not that of a real genome. Almost no variant has a MAC of 1, because each donor haplotype was copied into several study genomes. So read the table for its pattern, not for its values.
+
+### You need
+
+The imputed output of chromosome 22, the true genotypes of chromosome 22 and the reference panel of chromosome 22, all in the module A data.
+
+### Command
+
+```{r sA-8}
+# 1. Read the quality measures of every variant of the imputed output on chromosome 22.
+module_a <- file.path(cfg$data_dir, "module_a")
+info <- read_imputation_info(file.path(module_a, "imputed", "chr22.dose.vcf.gz"))
+print(data.frame(variants = nrow(info), measured_sites = sum(info$TYPED), median_ER2 = round(median(info$ER2[info$TYPED]), 2)))
+# 2. Compare the reported R2 with the true r2, for every variant that varies in the samples.
+quality <- compare_with_truth(file.path(module_a, "imputed", "chr22.dose.vcf.gz"),
+  file.path(module_a, "true_genotypes", "chr22_true_genotypes.vcf.gz"),
+  panel = file.path(module_a, "reference_panel", "panel_chr22.vcf.gz"))
+# 3. Summarise by frequency class and check the number of variants.
+table_a8 <- imputation_quality_table(quality)
+print(cbind(table_a8[1:2], round(table_a8[-(1:2)], 2)), row.names = FALSE)
+stopifnot(nrow(info) == 60224L, sum(info$TYPED) == 277L, nrow(quality) == 19832L)
+# 4. Save the table and the figure.
+guided_write(quality, guided_path(cfg, "A.8", "quality_chr22.tsv"))
+plot_imputation_quality(quality, guided_path(cfg, "A.8", "r2_chr22.png"))
+```
+
+`read_imputation_info()` reads the INFO column of the dosage file: the estimated frequency (AF and MAF), R2, ER2 and the flags TYPED and IMPUTED. `compare_with_truth()` reads the dosages and the true genotypes, matches the samples by ID and computes the true r² of each variant. It also reads the panel, to report how many variants are in it. `imputation_quality_table()` makes one row for each frequency class.
+
+<details><summary>Show the expected result</summary>
+
+60,224 variants in the dosage file, 277 of them measured on the array, with a median ER2 of 0.59. 19,832 variants in the comparison with the truth; median R2 0.62, median true r2 0.35.
+
+| Class | Variants | In the panel | Median R2 | Median true r² | R2 below 0.3 | R2 at least 0.8 | Mean R2 minus true r² |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| MAC 1 | 9 | 89% | 0.22 | 0.35 | 88% | 0% | -0.16 |
+| MAC 2 to 4 | 368 | 81% | 0.33 | 0.00 | 45% | 4% | +0.28 |
+| below 0.5% | 6,244 | 83% | 0.37 | 0.00 | 40% | 5% | +0.22 |
+| 0.5 to 1% | 2,027 | 95% | 0.47 | 0.06 | 18% | 6% | +0.28 |
+| 1 to 5% | 3,358 | 100% | 0.65 | 0.35 | 3% | 20% | +0.25 |
+| at least 5% | 7,826 | 100% | 0.79 | 0.70 | 0% | 47% | +0.13 |
+| all | 19,832 | 94% | 0.62 | 0.35 | 14% | 26% | +0.19 |
+
+How to read it:
+
+- Common variants are imputed well, and R2 follows the true r² closely.
+- Rare variants are imputed poorly, and R2 overestimates their quality. Below 1%, the median R2 is 0.37 to 0.47, while the median true r² is close to 0. The filter R2 at least 0.3 removes 40% of the variants below 0.5%.
+- About one in six variants below 0.5% is not in the panel at all, so it cannot be imputed.
+
+The figure `sA-8_r2_chr22.png` shows the same comparison, variant by variant. Points below the orange diagonal are variants whose R2 is too optimistic.
+
+<!-- result_figure: {"asset_path": "Figures/module_a/figure_A8_r2_chr22.png", "placement": "expected_result", "alt_text": "Four scatter plots of reported R2 against true r2 for the imputed variants of chromosome 22, one for each frequency class: below 0.5%, 0.5 to 1%, 1 to 5% and at least 5%. Each plot has dashed vertical lines at R2 0.3 and 0.8 and an orange diagonal where R2 equals true r2. For variants of at least 5%, the points follow the diagonal closely (median R2 0.79, median true r2 0.70). For variants below 1%, most points lie well below the diagonal, many with a true r2 near zero although R2 is between 0.3 and 0.8.", "caption": "Reported R2 against true r2 on chromosome 22, by frequency class. Each point is one imputed variant. Points below the orange diagonal are variants whose R2 is too optimistic.", "made_by": "plot_imputation_quality() in R/imputation.R, step A.8"} -->
+
+<!-- verification_note:start -->
+Validation: executable chunks passed on Windows with R 4.5.2 on the module A data (release module-a-2026.1). The table equals the comparison made by the author with an independent Python script.
+<!-- verification_note:end -->
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+"The module A data were not found" or missing files in the first chunk: extract the module A data into `data/course/module_a`. "samples of the dosage file are not in the truth file": the dosage and truth files come from different releases; use the files of one module A release. The comparison needs about 1 GB of memory and two minutes. Close other programs if R stops with a memory error.
+
+</details>
+
+### Quick check
+
+A rare variant has an R2 of 0.6. Can you trust it as much as a common variant with the same R2?
+
+<details><summary>Show the answer</summary>
+
+No. In the table, R2 is too optimistic for rare variants: below 1%, the median true r² is close to 0 although the median R2 is about 0.4. A rare imputed hit needs extra checks, ideally direct genotyping.
+
+</details>
+
+### Files created
+
+`sA-8_quality_chr22.tsv` (one row per variant: class, R2, true r²) and `sA-8_r2_chr22.png` (the figure).
+
+<details><summary>Another approach (optional)</summary>
+
+**Hide some array sites and impute them.** You can measure imputation quality on your own data, without a truth file. Hide some of the sites you measured, impute them, and compare the dosages with the genotypes you know. This needs Eagle2 and Minimac4 (the box of step A.7).
+
+1. Choose 5% of the array sites in the regions at random, with a fixed seed. In the course run: 22 of 438 sites.
+2. Write the input VCF without them (PLINK `--exclude` with the list of their IDs) and run phasing and imputation again.
+3. For each hidden site, compare the dosage with the measured genotype: true r², and the share of best-guess genotypes that match.
+
+**Expected result.** In the course run all 22 sites were imputed. Median R2 0.70, median true r² 0.46. The best-guess genotypes were right in 89% of cases on average. R2 and true r² correlate well (0.93), but R2 is higher, most of all for sites below 5%. One site at 1.7% had an R2 of 0.44 and a true r² of 0.08.
+
+**Reference.** [Marchini and Howie 2010](https://doi.org/10.1038/nrg2796), section on information measures.
+
+</details>
+
+## A.9 Test imputed variants for association {#step-a-9}
+
+<!-- step_meta: {"success_line": "The L4 variant chr18:38042715:G:A: imputation R2 0.95, odds ratio 1.47, p-value 1.7e-06.", "student_summary": "We test the imputed variants of the region around locus L4 for association with disease, with the same model as the main analysis. We compare the result of the simulated risk variant, which is not on the array, with the best variant of the region.", "student_plink_options": [{"label": "test the imputed dosages", "options": [{"name": "--vcf", "explanation": "Reads the imputed output of chromosome 18 from the module A data.", "modifiers": [{"name": "dosage", "explanation": "With DS, reads the dosage field: the expected number of copies of the alternate allele, from 0 to 2."}]}, {"name": "--double-id", "explanation": "Uses the sample name of the VCF file as both family ID and individual ID, so that the rows match the covariate file."}, {"name": "--extract-if-info", "explanation": "Keeps the variants whose imputation quality R2, in the INFO column, is at least 0.3."}, {"name": "--update-sex", "explanation": "Takes the recorded sex of each sample from s5-7_state.psam, because a VCF file has no sex.", "modifiers": [{"name": "col-num", "explanation": "With 3, reads the sex from column 3 of that file."}]}, {"name": "--pheno", "explanation": "Reads the case and control status from s5-7_state.psam, because a VCF file has no phenotype."}, {"name": "--pheno-name", "explanation": "Selects the column Disease of that file."}, {"name": "--maf", "explanation": "Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the study group."}, {"name": "--covar", "explanation": "Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs."}, {"name": "--covar-name", "explanation": "Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation."}, {"name": "--covar-variance-standardize", "explanation": "Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable."}, {"name": "--glm", "explanation": "Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease.", "modifiers": [{"name": "sex", "explanation": "Adds the recorded sex as an adjustment factor in the model."}, {"name": "hide-covar", "explanation": "Reports the genetic tests without separate rows for the effects of age, sex and genetic component scores."}, {"name": "firth-fallback", "explanation": "Uses Firth correction, which gives usable estimates when very few people carry the allele, when the ordinary model calculation fails."}, {"name": "cols", "explanation": "With +a1freq,+machr2, adds the allele frequency and the imputation quality that PLINK computes from the dosages."}]}, {"name": "--out", "explanation": "Starts output file names with sA-9_chr18_assoc, including sA-9_chr18_assoc.Disease.glm.logistic.hybrid."}]}]} -->
+
+### What we do
+
+Test the imputed variants of the region around locus L4 for association, with the model of the main analysis. Then compare the simulated risk variant of L4 with the best variant of the region.
+
+### Why
+
+PLINK 2 reads dosages directly from the VCF files that Minimac4 or a server returns. We use the same samples, covariates and principal components as in the main analysis (step 6.4). Otherwise the results of the two analyses cannot be compared. A test on the dosage keeps the uncertainty of each genotype ([Marchini and Howie 2010](https://doi.org/10.1038/nrg2796)).
+
+Locus L4 is a simulated risk variant on chromosome 18 (`chr18:38042715:G:A`, odds ratio 1.4 by design). It is not on the array. In the main analysis the region did not reach genome-wide significance. Does imputation help?
+
+This is one example, from one simulated region and one panel. It shows what can happen. It is not a rule: in another region, or with a larger panel, the result can go either way.
+
+### You need
+
+Your final cohort from 5.7, the covariates from 6.3 and the imputed output of chromosome 18 in the module A data.
+
+### Command
+
+```{r sA-9}
+# 1. Test the imputed dosages of chromosome 18 with the model of the main analysis.
+module_a <- file.path(cfg$data_dir, "module_a")
+assoc <- imputation_association(cfg, file.path(module_a, "imputed", "chr18.dose.vcf.gz"))
+# 2. Check the number of tested variants.
+stopifnot(nrow(assoc) == 8334L)
+# 3. Compare the L4 variant with the best variant of the region.
+print(imputation_l4(assoc))
+```
+
+Plain PLINK 2 command (use `bin\plink2.exe` on Windows):
+
+```sh
+bin/plink2 --vcf data/course/module_a/imputed/chr18.dose.vcf.gz dosage=DS --double-id --extract-if-info "R2 >= 0.3" --update-sex results/guided/s5-7_state.psam col-num=3 --pheno results/guided/s5-7_state.psam --pheno-name Disease --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback cols=+a1freq,+machr2 --out results/guided/sA-9_chr18_assoc --threads 2 --memory 2048
+```
+
+`--vcf` reads the imputed output; `dosage=DS` reads the dosage field, and without it PLINK would use the best-guess genotypes in GT. `--double-id` uses the sample name of the VCF as both family ID and individual ID: the course covariate file has the family ID equal to the individual ID, so the rows match. `--extract-if-info "R2 >= 0.3"` keeps the variants whose INFO field R2 is at least 0.3; keep the quotes. A VCF has no sex and no phenotype: `--update-sex` with `col-num=3` takes the sex from column 3 of the sample file of step 5.7. `--pheno` reads the case-control status from the same file, and `--pheno-name Disease` selects its column. `--maf 0.01` keeps variants with a minor allele frequency of at least 1%. `--covar` loads the covariate table, which is keyed by sample ID. `--covar-name` selects Age and PC1 to PC10. `--covar-variance-standardize` rescales the numerical covariates so that the fit is stable. `--glm sex hide-covar firth-fallback` is the model of the main analysis; `cols=+a1freq,+machr2` adds the allele frequency and the r² that PLINK computes from the dosages, a check on the R2 of Minimac4. `--out` sets the prefix of the report files. `--threads 2` limits PLINK to two worker threads. `--memory 2048` gives PLINK 2048 MiB (about 2 GB) of working memory.
+
+<details><summary>Show the expected result</summary>
+
+8,334 variants tested. The L4 variant chr18:38042715:G:A: imputation R2 0.95, odds ratio 1.47, p-value 1.7e-06.
+
+| Analysis | Variant | Frequency | R2 | Odds ratio | p-value |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Array sites (main analysis) | best: `18:38107932:C:A`, 65 kb away | 0.25 | measured | 1.49 | 6.6e-07 |
+| Imputed | the L4 variant itself | 0.28 | 0.95 | 1.47 | 1.7e-06 |
+| Imputed | best in the region: `chr18:38106879:G:C` | 0.41 | 0.81 | 1.54 | 4.2e-08 |
+| True genotypes (only in a simulation) | the L4 variant | 0.29 | | 1.46 | 1.3e-06 |
+| True genotypes (only in a simulation) | best in the region | 0.37 | | 1.46 | 1.6e-07 |
+
+The rows of the array sites and of the true genotypes come from the author's run, not from this chunk.
+
+What this example shows:
+
+- The L4 variant is imputed well. Its result is almost the same as with its true genotype.
+- It is not the top of its region. Variants 50 to 80 kb away, in LD with it, give smaller p-values. This happens in real studies too: the lead variant is not necessarily the cause (step 7.6).
+- After imputation the best variant crosses 5e-08. With the true genotypes, the region does not go below 1.6e-07. Here, part of the "genome-wide significant" result comes from noise in the dosages of a variant with R2 0.81. Noise can push a p-value up as well as down; in this region it pushed it down.
+
+<!-- verification_note:start -->
+Validation: executable chunks passed on Windows with PLINK 2.0 b.1.4 on the 1,811 samples of the course cohort (data release 2026.1) and the module A data. The numbers equal the run of the author on 23 November 2026.
+<!-- verification_note:end -->
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+"The L4 variant is not in the result": the R2 filter or the frequency filter removed it; check the filters. Many samples with missing phenotypes: the dosage file and your cohort come from different data releases. Use the module A data of the same release as your course data. A different number of tested variants: check that you kept the quotes around "R2 >= 0.3".
+
+</details>
+
+### Quick check
+
+After imputation, a variant with R2 0.81 crosses the genome-wide threshold, while the array site next to it does not. Is the imputed result a discovery?
+
+<details><summary>Show the answer</summary>
+
+Not yet. In this example the true genotypes do not reach the threshold: part of the result comes from noise in the dosages. Report the R2 of every variant you discuss, look at the measured neighbours, and confirm by direct genotyping or in another study.
+
+</details>
+
+### Files created
+
+`sA-9_chr18_assoc.Disease.glm.logistic.hybrid` and the log files.
+
+## A.10 What can go wrong {#step-a-10}
+
+<!-- step_meta: {"student_summary": "We list the common problems of imputation, their likely causes and what to do about each one.", "student_kind": "reading"} -->
+
+### What we do
+
+Collect the common problems of imputation in one table.
+
+### Why
+
+| Problem | Likely cause | What to do |
+| --- | --- | --- |
+| Many sites removed for allele mismatch | Strand problems or wrong genome build | Repeat steps 2.5 and 2.6; check the REF alleles (step A.7) |
+| Low R2 everywhere | The panel does not match the ancestry, or wrong build | Choose another panel; check the build |
+| The job fails on upload | File not compressed with bgzip, unsorted, or wrong chromosome names | Write the VCF again (step A.7) |
+| Lost results password | Password not saved | The server does not keep it: run the job again |
+| Job deleted before download | Results are kept for 7 days | Download as soon as you get the email |
+| Imputed hit not seen in the measured data | Low R2, or a real signal at an unmeasured site | Check R2; look at LD with measured neighbours; confirm by direct genotyping |
+
+### You need
+
+Steps A.1 to A.9.
+
+### Command
+
+No code to run. This is a reading-only step.
+
+<details><summary>Show the expected result</summary>
+
+You can match each problem with its likely cause.
+
+</details>
+
+<details><summary>If something goes wrong</summary>
+
+For a problem that is not in the table, read the documentation page of your server and the log files of the job.
+
+</details>
+
+### Quick check
+
+A colleague gets a low R2 for almost every variant, common ones too. What two causes would you check first?
+
+<details><summary>Show the answer</summary>
+
+The genome build of the input against that of the panel, and the ancestry of the study against that of the panel.
+
+</details>
+
+### Files created
+
+None.
+
+## Module A recap {#module-a-recap}
+
+- Imputation predicts unmeasured sites from haplotypes shared with a reference panel.
+- It runs in two stages, phasing and imputation, and gives probabilities and dosages, not certain genotypes.
+- The panel decides what can be imputed: its size, its ancestry and its genome build matter.
+- Before an upload, check the server, the location of the data and your legal basis.
+- You prepared the input files with checked REF alleles and plain line ends.
+- R2 tracks the true quality well for common variants and overestimates it for rare ones.
+- An imputed hit needs its R2, a look at the measured neighbours and confirmation.
+
+**Next:** module A is an additional module. Return to the main path at any time.

@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.1",
+  "id": "A.6",
+  "module": "A",
+  "step": 6,
+  "anchor": "step-a-6",
+  "title": "Reading the classic review",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 5 minutes. You can come back to it later.\n\nRead Marchini J, Howie B. Genotype imputation for genome-wide association studies. Nat Rev Genet. 2010;11:499-511 ([doi:10.1038/nrg2796](https://doi.org/10.1038/nrg2796)), with the guide below.",
+    "why": "The review was written when imputation became standard practice in GWAS. Most of what it explains is still true. Some parts have been overtaken by larger panels and faster software. You do not need to follow every formula.\n\n| Part of the review | Pages | What to take from it |\n| --- | --- | --- |\n| Introduction and Box 1 | 499-500 | The whole idea in one figure: study haplotypes as a mosaic of reference haplotypes, missing genotypes filled in with uncertainty. Read closely. |\n| Box 2 (Uses of imputation) | 501 | Power, fine-mapping, meta-analysis, untyped variation, non-SNP variation, sporadic missing genotypes. Read closely. |\n| Genotype imputation methods | 499-504 | Most methods are hidden Markov models built on the Li and Stephens model of step A.2. Skim the formulas. Read the warning on page 502 about cases and controls typed on different chips. |\n| Factors that affect imputation accuracy, and Box 4 | 504-507 | Rare variants are imputed worse. Larger panels, and panels that match the ancestry of the study, are better. Read closely. |\n| Post-imputation information measures, and Figure 1 | 506, 508 | INFO and r² measures, and how to read them (step A.8). Read closely. |\n| Association testing using imputed data | 506-510 | Do not test best-guess genotypes. Use methods that keep the uncertainty, such as dosages. Read the text; Box 5 is optional. |\n\n**What has not changed since 2010:** the mosaic idea, the probabilistic output and the information measures. The advice to test dosages rather than hard calls still holds, and so do the warning about different chips and the caution with rare imputed variants.\n\n**What has changed:** panels grew from HapMap (120 to 180 haplotypes per population) to tens of thousands of people (HRC, TOPMed). Accuracy is much better for low-frequency variants with large, well-matched panels. Phasing now runs first, then a fast imputation. Most users impute on online servers. Data protection now matters (GDPR, step A.5).\n\nThe questions in the quick check below come from the review. Try to answer each one before you open the answer.",
+    "you_need": "Steps A.1 to A.5. The review is available through your university library.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can answer the seven questions of the quick check from the review.",
+    "troubleshooting": "If you cannot open the review, ask your university library. The guide above and the answers below still give the main points.",
+    "quick_check": "1. Box 2 says imputation can boost power. Under what conditions could an imputed variant give a weaker signal than a genotyped one nearby?\n\n<details><summary>Show the answer</summary>\n\nWhen the imputed variant has a low information measure, its dosages carry less information, so the test loses power. A well-typed neighbour in strong LD may then give a smaller p-value.\n\n</details>\n\n2. In the *TCF7L2* example of Box 2, the imputed SNP has a smaller p-value than the best genotyped SNP. Does that make it the causal variant?\n\n<details><summary>Show the answer</summary>\n\nNo. The smallest p-value in a region does not prove causality. Fine-mapping depends on the LD and the number of recombination events in the region. Larger samples, populations with lower LD and functional evidence are needed.\n\n</details>\n\n3. Box 4 shows that larger panels help rare variants more than common ones. Why?\n\n<details><summary>Show the answer</summary>\n\nA rare allele appears on very few haplotypes. In a small panel it may appear on none, or on one only, so matches are rare or absent. Common alleles are matched well already with a small panel.\n\n</details>\n\n4. A study imputes a South Asian cohort with a European-only panel. What will happen to the quality scores?\n\n<details><summary>Show the answer</summary>\n\nMany study haplotypes will not find close matches. The quality scores will be lower, most of all for rare and population-specific variants, and some variants will be missing from the panel.\n\n</details>\n\n5. Cases come from one biobank typed on chip A, controls from another typed on chip B. Both are imputed with the same panel. What can go wrong, and how would you notice it?\n\n<details><summary>Show the answer</summary>\n\nSNPs imputed with different accuracy from the two chips can show allele frequency differences between cases and controls that are only technical. This gives false positives. Signs: hits at SNPs absent from one chip, very different quality scores between the groups, and an inflated QQ plot. The best fix is design: type cases and controls on the same chip.\n\n</details>\n\n6. Why do the authors advise against testing best-guess genotypes?\n\n<details><summary>Show the answer</summary>\n\nHard calls throw away the uncertainty. Dropping uncertain genotypes, or treating best guesses as certain, can cause both false positives and a loss of power.\n\n</details>\n\n7. Which of the uses in Box 2 matters most for a meta-analysis consortium, and why?\n\n<details><summary>Show the answer</summary>\n\nMeta-analysis, because studies typed on different chips need a common set of SNPs before their results can be combined.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [],
+  "student_summary": "We read a classic review of imputation, Marchini and Howie (2010), with a guide to its sections. We see what is still true today and what has changed with larger panels and faster software.",
+  "student_kind": "reading",
+  "student_expected_result": "You can answer the seven questions of the quick check from the review."
+}

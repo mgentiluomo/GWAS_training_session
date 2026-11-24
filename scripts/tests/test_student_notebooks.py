@@ -526,12 +526,42 @@ class QuartoRendererTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             destination = Path(directory)
             students.export_notebooks(destination, format="qmd")
-            self.assertEqual(len(list(destination.glob("*.qmd"))), 9)
+            # Nine notebooks for modules 0 to 7 (eight modules and the complete one), plus one per additional module.
+            extra = len(list((ROOT / "lessons").glob("module_[A-Z]_*.Rmd")))
+            self.assertEqual(len(list(destination.glob("*.qmd"))), 9 + extra)
             self.assertEqual(list(destination.glob("*.Rmd")), [])
             students.export_notebooks(destination, check=True, format="qmd")
             (destination / "module_03_sample_quality_control.qmd").write_text("stale", encoding="utf-8")
             with self.assertRaises(SystemExit):
                 students.export_notebooks(destination, check=True, format="qmd")
+
+    def test_additional_module_brings_its_own_helpers(self):
+        # Module A needs no change to the student project: R/guided.R has no module A entry, and the first
+        # chunk of the module A notebook loads R/imputation.R from the project or from the module A data.
+        table = students.module_check_table(ROOT)
+        self.assertNotIn("`A` = list(", table)
+        self.assertIn("`7` = list(", table)
+        notebook = (ROOT / "notebooks" / "module_A_imputation.qmd").read_text(encoding="utf-8")
+        chunk = notebook.split("#| label: moduleA_check\n", 1)[1].split("```", 1)[0]
+        self.assertNotIn("guided", chunk)
+        self.assertIn('helpers <- c("R/imputation.R", file.path(module_dir, "R", "imputation.R"))', chunk)
+        self.assertIn('Sys.getenv("COURSE_MODULE_A_DIR"', chunk)
+        self.assertIn("R/imputation.R was not found in the project or in the module A data.", chunk)
+        self.assertTrue(chunk.rstrip().endswith("imputation_check_module()"))
+
+    def test_module_a_inputs_match_module_meta(self):
+        # imputation_module_inputs in R/imputation.R repeats module_meta of the lesson; they must agree.
+        lesson = (ROOT / "lessons" / "module_A_imputation.Rmd").read_text(encoding="utf-8")
+        meta = json.loads(re.search(r"<!-- module_meta: (\{.*?\}) -->", lesson).group(1))["prerequisites"]
+        source = (ROOT / "R" / "imputation.R").read_text(encoding="utf-8")
+        block = re.search(r"imputation_module_inputs <- list\((.*?)\)\n", source, re.S).group(1)
+        values = lambda name: re.findall(r'"([^"]+)"', re.search(name + r" = (c\([^)]*\)|\"[^\"]*\")", block).group(1))
+        self.assertEqual(values("checkpoint"), [meta["checkpoint"]])
+        self.assertEqual(values("restart_step"), [meta["restart_step"]])
+        data = [f["path"] for f in meta["files"] if f["base"] == "data"]
+        self.assertEqual(values(r"\bdata"), [p for p in data if not p.startswith("module_a/")])
+        self.assertEqual(values("module_a"), [p.removeprefix("module_a/") for p in data if p.startswith("module_a/")])
+        self.assertEqual(values("output"), [f["path"] for f in meta["files"] if f["base"] == "output"])
 
 
 if __name__ == "__main__":

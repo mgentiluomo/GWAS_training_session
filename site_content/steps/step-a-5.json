@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.1",
+  "id": "A.5",
+  "module": "A",
+  "step": 5,
+  "anchor": "step-a-5",
+  "title": "Genetic data and the law",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "b5c9a5b5fde939a7f2aacf2b7cae3442143a91f0b36802956f1cfda0abe6b88f",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 2 minutes. You can come back to it later.\n\nLearn the main legal points before you upload genetic data. This step is information, not legal advice.",
+    "why": "Before you upload real data, speak to the data protection officer of your institution.\n\n- Genotypes are personal data even without names. A genome is unique, and a few hundred SNPs are enough to identify a person.\n- Under the General Data Protection Regulation (GDPR), genetic data are a special category. Processing them needs a specific legal basis, for example research with appropriate safeguards and consent.\n- A transfer of personal data outside the EU needs an additional legal basis: for example an adequacy decision for the destination country, or contractual clauses approved by the European Commission. Whether a given server qualifies is a legal question. The answer can change over time.\n- Consent forms and ethics approvals may also limit where data can go. Many European cohorts do not allow upload to servers outside the EU.\n- An EU server such as HMIS removes the transfer problem. It does not remove your other duties: a legal basis, data minimisation and a contract with the processor.\n\n**Good practice before any upload.**\n\n1. Upload only what imputation needs: genotypes and sample IDs. Never upload phenotypes, names or dates of birth.\n2. Replace real IDs with codes that only you can link back.\n3. Keep a record of what you uploaded, where and when.\n4. Download the results promptly and keep the password safe.\n\n**In this course** the data are simulated. They describe no real person. You may upload them to any server to practise, with no legal risk. The course examples do not do so, for a scientific reason (see the module overview): the server panels contain the donors of the simulation.\n\nReference: [Rayner et al. 2024](https://doi.org/10.1038/s41588-024-02012-1).",
+    "you_need": "Step A.4.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can list what to check with your institution before an upload.",
+    "troubleshooting": "If you are not sure whether an upload is allowed, do not upload. Ask the data protection officer and the principal investigator of the study.",
+    "quick_check": "A colleague removes the names from a file of genotypes and says that the file is now anonymous. Is that right?\n\n<details><summary>Show the answer</summary>\n\nNo. A genome is unique, and a few hundred SNPs can identify a person. Genotypes remain personal data without names.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [],
+  "student_summary": "We see why genotypes are personal data under the European General Data Protection Regulation, what a transfer outside the EU needs, and what to do before any upload.",
+  "student_kind": "reading",
+  "student_expected_result": "You can list what to check with your institution before an upload."
+}
