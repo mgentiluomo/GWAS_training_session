@@ -50,6 +50,13 @@ workaround as well. `R/session_locale.R` is unchanged in this revision.
    is calibrated at 1,000 controls and becomes more stringent above that size;
    it reproduces the existing reference cutoff for this dataset. It is a
    teaching policy, not a universal research recommendation.
+5. For release 2026.5: correct the student `README_simulated.txt` of the main
+   path. Line 7 still says that "the imputation output" is simulated, but the
+   main build no longer has an `imputation/` folder (module A has its own
+   package, with real imputation output). The text was kept word for word on
+   24 November 2026 so that the module A build stays byte-identical to the
+   build of 11 November. Changing it changes one student file and its SHA-256
+   in the 2026.5 manifest.
 
 ## Known scope and verification limits
 
