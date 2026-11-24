@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.1",
+  "id": "A.4",
+  "module": "A",
+  "step": 4,
+  "anchor": "step-a-4",
+  "title": "Imputation servers",
+  "source": "lessons/module_A_imputation.Rmd",
+  "source_sha256": "0d4e969988d40ee6170569f946c346240877f83d388d44e7f524a109e354a0d6",
+  "verification": "manual_required",
+  "blocks": {
+    "what_we_do": "Reading, about 3 minutes. You can come back to it later.\n\nCompare the three main imputation servers.",
+    "why": "Imputing with a large panel needs a lot of computing power, and some panels cannot be downloaded. Imputation servers solve both problems. You upload your genotypes, the server phases and imputes them, and you download the result. The servers below are free after registration. They share the same software base ([Das et al. 2016](https://doi.org/10.1038/ng.3656)): Eagle2 or Beagle for phasing, Minimac4 for imputation, and a web interface built with Cloudgene.\n\n**Michigan Imputation Server.** Run by the University of Michigan (USA). Your data leave the EU. Panels: HRC r1.1 (32,470 samples), 1000 Genomes Phase 3 (2,504), Genome Asia, CAAPA, HapMap 2 and two HLA panels. Input: [VCF](docs/glossary.md#vcf-bcf) files compressed with [bgzip](docs/glossary.md#bgzip-tabix), one file per chromosome, sorted by position, on GRCh37 or GRCh38. Results are encrypted with a one-time password that the server does not keep. Documentation: [Michigan Imputation Server](https://genepi.github.io/michigan-imputationserver/).\n\n**TOPMed Imputation Server.** Run by the University of Michigan for the US National Heart, Lung, and Blood Institute. Data are processed on Amazon Web Services. One panel: TOPMed r3, 133,597 people, on GRCh38. Input data are deleted when no longer needed. You have 7 days to download the results. The best choice for low-frequency variants and for diverse samples, if your data may legally leave the EU. Documentation: [TOPMed Imputation Server](https://topmedimpute.readthedocs.io/).\n\n**Helmholtz Munich Imputation Server (HMIS).** Run by Helmholtz Munich, Germany, since November 2024 ([Rayner et al. 2024](https://doi.org/10.1038/s41588-024-02012-1)). Data stay on a server in Munich, inside the EU. Panels: HRC r1.1 (27,165 samples on its page), 1000 Genomes Phase 3 and HapMap 2, all on hg19. Input on hg38 is converted to hg19. Results can be downloaded for 7 days. HMIS publishes a Data Processing Agreement under Article 28 of the GDPR: your institution is the data controller and Helmholtz Munich the processor. Documentation: [HMIS](https://imputationserver-doc.readthedocs.io/).\n\n| | Michigan | TOPMed | HMIS |\n| --- | --- | --- | --- |\n| Location of data | outside the EU | Amazon Web Services | Munich (EU) |\n| Largest panel | HRC r1.1 | TOPMed r3 | HRC r1.1 |\n| Build of the panels | hg19 (most panels) | GRCh38 | hg19 |\n| GRCh38 input accepted | yes, converted | yes, with the `chr` prefix | yes, converted to hg19 |\n| Data Processing Agreement (Art. 28 GDPR) | not found | not found | yes, published |\n| Results kept for | 7 days | 7 days | 7 days |\n\n**Running imputation yourself.** It is possible with public panels, such as 1000 Genomes, and free software (Eagle2, Minimac4, IMPUTE5, Beagle 5). For a whole genome it needs a computer cluster. For two regions of 2.5 Mb, as in this module, a laptop is enough (step A.7).",
+    "you_need": "Step A.3.",
+    "command": "No code to run. This is a reading-only step.",
+    "expected_result": "You can say where each server keeps your data and which panel it offers.",
+    "troubleshooting": "Server pages change. Check the documentation page of the server on the day you upload, and keep the date with your notes.",
+    "quick_check": "You work in Italy with real genotypes that may not leave the EU. Which server can you use, and with which panels?\n\n<details><summary>Show the answer</summary>\n\nThe Helmholtz Munich Imputation Server, whose server is in Munich. It offers HRC r1.1, 1000 Genomes Phase 3 and HapMap 2.\n\n</details>",
+    "files_created": "None."
+  },
+  "setup_code": "",
+  "r_commands": [],
+  "notebook_only_expected_code": [],
+  "plink": {
+    "applicable": false,
+    "commands": [],
+    "options": []
+  },
+  "figures": [],
+  "student_summary": "We compare three free online imputation servers: where they keep the data, which panels they offer, which files they accept and how long they keep the results.",
+  "student_kind": "reading",
+  "student_expected_result": "You can say where each server keeps your data and which panel it offers."
+}

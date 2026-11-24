@@ -102,3 +102,43 @@ PR and CRLF removal, the error for a REF that matches neither allele, INFO readi
 - `python -I scripts/author/tests/test_sim2026.py`: 40 of 40.
 - `python -B scripts/check_text.py`: 0 errors (2 old warnings in `docs/site_content_schema.md`).
 - `--export-notebooks notebooks --check-notebooks`: up to date, 10 files.
+
+## Phase 2. Course export
+
+- Lesson structure: one step per section, A.1 to A.10, with the blocks of `docs/site_content_schema.md`
+  (what we do, why, you need, command, expected result, troubleshooting, quick check, files created). The
+  discussion questions of A.6 are its quick check (seven questions, each with its answer).
+- Normal pipeline: `python -B scripts/build_tutorial.py --export-steps site_content/steps --export-main-script
+  scripts/run_main_path.R`. It writes the 63 main-path steps and 8 module pages as before, plus
+  `step-a-1.json` to `step-a-10.json` and `module-a.json`. Verification field: A.7, A.8 and A.9
+  `windows_executed`; the reading steps `manual_required`, as for the reading steps of module 1.
+- Figure A.8 is in the export of step A.8 as a figure of kind `result`, asset
+  `Figures/module_a/figure_A8_r2_chr22.png`, with alt text and caption.
+
+### Required proof: JSON of modules 0 to 7 against the 2026.4 JSON of the website. FAILED: stopped here.
+
+Compared: every file of `src/content/gwas/steps/` and `src/content/gwas/modules/` on `origin/main` of the
+website (export of commit `1e05565`, 64 steps) with `site_content/` of this branch.
+
+| Result | Files |
+| --- | ---: |
+| byte-identical | 9 |
+| different | 62 |
+| only on the website (`step-6-8.json`) | 1 |
+
+Cause: this branch descends from `course/2026.5`, whose lessons differ from 2026.4 (step 6.2 removed, steps
+renumbered, new text and boxes). It is not module A: on this branch, the export of modules 0 to 7 is
+byte-identical before and after module A (phase 1, "Main path unchanged").
+
+As the rule says, the work stops here. **Phase 3 (website) was not started**: no website branch, no sync, no
+preview. The JSON of module A are committed on this branch only.
+
+**To decide.** Two ways forward:
+
+1. Publish module A together with the 2026.5 course (and `data-2026.2`). The website then takes the 2026.5
+   JSON of modules 0 to 7 in the same change. The imputed output of module A must first be made again from
+   the 2026.2 cohort (4 different samples), or the A.9 numbers will not match the students' cohort.
+2. Publish module A on the 2026.4 course now. Module A (lesson, helpers, pipeline changes) must then be
+   carried over to a branch from `course/2026-guided-training`; there the proof can pass. The numbers of the
+   lesson already match the 2026.4 cohort (`data-2026.1`). On 2026.4 the covariates are `s6-3_covariates.tsv`
+   (step 6.3), so the module prerequisites and the A.9 defaults change from 6.2 to 6.3.
