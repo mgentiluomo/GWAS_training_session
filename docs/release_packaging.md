@@ -78,3 +78,101 @@ This is staging only. No new encrypted archive or GitHub Release is created.
 When the author creates the classroom archive, select this approved source and
 a new output directory. Replace both configured URLs and both expected hashes
 in `config.R` after approval; the old local test ZIP remains a distinct artifact.
+
+## Publish module A (imputation) on the 2026.4 course
+
+Module A runs on the 2026.4 course and the `data-2026.1` cohort. Its data are a
+separate release, `module-a-2026.1`. Follow the steps in this order. Each step
+needs the one before it. Do not skip the checks.
+
+Repositories and branches:
+
+- Course: `course/module-a-2026.4`, to be merged into `course/2026-guided-training`.
+- Website: `course/module-a`, to be merged into `main`.
+- Module A data, staged and verified: `codex_work/stage-module-a-2026.1/`, with
+  `stage-module-a-2026.1.MANIFEST.tsv` beside it.
+
+### 0. Before you start
+
+- Decide how students get `R/imputation.R` and the new `R/guided.R`. They are
+  not in the 2026.4 project ZIP. See the review diary of 24 November 2026.
+- `scripts/package_release.py` accepts only `sim2026/student` or a
+  `classroom-stage-*` folder. It refuses `stage-module-a-2026.1`. Allow that
+  source first, in its own commit, with a test.
+
+### 1. Encrypt the module A package (author)
+
+Run the packager on the author machine. Set the password in
+`COURSE_RELEASE_PASSWORD`. Never type it in a command or a file.
+
+```sh
+python -B scripts/package_release.py --source PATH_TO/codex_work/stage-module-a-2026.1 --output PATH_TO/codex_work/release-module-a-2026.1
+```
+
+The output folder must be new. Keep the printed archive SHA-256 and manifest
+SHA-256. Check them with `sha256sum -c SHA256SUMS.txt` in the output folder.
+Students extract the archive into `data/course/module_a`.
+
+### 2. GitHub release `module-a-2026.1`
+
+Create the release `module-a-2026.1` in `mgentiluomo/GWAS_training_session`.
+Upload the encrypted ZIP, `MANIFEST.tsv` and `SHA256SUMS.txt`. Write both
+SHA-256 values in the release notes. Do not put the password there. Copy the
+https download URL of the ZIP. Download it once and compare its SHA-256.
+
+### 3. Merge the course branch
+
+Merge `course/module-a-2026.4` into `course/2026-guided-training` and push.
+Before the merge, run the checks on the branch:
+
+- `python -B -m unittest discover -s scripts/tests`
+- every R file in `scripts/tests/` with `COURSE_DATA_DIR` set to the `data-2026.1` data
+- `python -B scripts/check_text.py`
+- `python -B scripts/build_tutorial.py --export-notebooks notebooks --check-notebooks`
+
+### 4. Sync the website from the merged course branch
+
+The website links to course documents on the branch named in
+`src/content/gwas/index.json`. It must be the main course branch, not the
+module A branch.
+
+1. Check out `course/2026-guided-training` in the sync source (`C:\GWAS_course`,
+   or the folder in `GWAS_COURSE_DIR`). Pull. The working tree must be clean.
+2. On the website branch `course/module-a`, run `npm run sync:gwas`.
+3. Check `src/content/gwas/index.json`: `branch` is
+   `course/2026-guided-training`, `commit` is the merge commit, `dirty` is false.
+4. Check that the JSON of modules 0 to 7 have not changed (`git diff --stat
+   src/content/gwas/steps src/content/gwas/modules` lists only module A files,
+   if any).
+
+### 5. Data URL and publication switch in `release.ts`
+
+In `src/lib/gwas/release.ts` on the website branch:
+
+1. Set `ADDITIONAL_MODULE_DATA.A.url` to the https URL of step 2.
+2. Add `"A"` to `PUBLISHED_ADDITIONAL_MODULES`. Keep the line in its exact form:
+   the build scripts read it.
+
+Then run `npx tsc --noEmit`, `npx eslint .` and `npm run build`. The build log
+must say `additional modules included: A` and `every synced additional module is
+published`. Commit and push. Check the Vercel preview of the branch.
+
+### 6. Merge the website
+
+Merge `course/module-a` into `main`. Vercel deploys production. Open the build
+log of the deployment. It must show the same two lines as in step 5.
+
+### 7. Checks in production
+
+- `/teaching/gwas` links to module A from "Coming later".
+- `/teaching/gwas/module-a` and the ten step pages answer 200.
+- The data button on the module page points to the URL of step 2. The download works.
+- The module A notebook (`/gwas/notebooks/module_A_imputation.qmd`) and figure
+  A.8 (`/gwas/figures/module_a/figure_A8_r2_chr22.png`) answer 200.
+- Links to course documents open on `course/2026-guided-training`.
+- Modules 0 to 7 look as before.
+- In a fresh project folder with the downloaded data, run A.7 to A.9. Check the
+  numbers of the lesson: 161 and 277 sites, 1,811 samples, L4 OR 1.47, p 1.65e-6.
+
+If a check fails, remove `"A"` from `PUBLISHED_ADDITIONAL_MODULES` and deploy
+again. The build then leaves module A out, and its check confirms it.
