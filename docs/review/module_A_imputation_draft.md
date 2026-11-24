@@ -352,23 +352,29 @@ What the tests showed:
 - **Contig lines.** The `##contig` lines have no length, because PLINK does not know it without a FASTA file. Eagle and Minimac4 accept this. **[open, only for students who use a server: whether the servers accept it]**
 - **Checks.** Sorted, no duplicates, only GT, REF equal to the GRCh38 plus-strand allele at every site and to the 1000 Genomes REF at every site the two share.
 
-**Step 2. Phase the input against the panel (Eagle2).**
+**Steps 2 and 3. Phasing and imputation: students read the output.** The module A data hold the imputed output of the 1,811 samples, in the folder `imputed/`: GT and DS for every panel variant, with R2, ER2, IMPUTED and TYPED in the INFO column. Sections A.8 and A.9 start from these files. Running the two programs is optional (box below).
 
-```
-eagle --vcfRef panel_chr22.vcf.gz --vcfTarget chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z
-```
-
-Every input site was also in the panel, so none was lost. About one minute per region, most of it spent writing the output file.
-
-**Step 3. Impute (Minimac4).** The panel is first converted once to the compact Minimac4 format (`minimac4 --compress-reference panel_chr22.vcf.gz -o panel_chr22.msav`; the module A data include the converted files).
-
-```
-minimac4 --map minimac4_chr22.map --format GT,DS,GP --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz
-```
-
-- `--format GT,DS,GP` writes the best-guess genotype, the dosage and the genotype probabilities (section A.2).
-- `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (section A.8).
-- About one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22. With GP the files are large (150 to 250 MB); the module A data keep GT and DS only.
+> **Optional: run the imputation yourself.** Eagle and Minimac4 run on Linux or macOS, and on Windows only inside WSL. They are not part of the course setup. The commands were tested on 24 November 2026 with Eagle 2.4.1 and Minimac4 4.1.6 in WSL Ubuntu, on the files of the module A data (`reference_panel/`, `genetic_map/`) and the input VCF of step 1.
+>
+> **Step 2. Phase the input against the panel (Eagle2).**
+>
+> ```
+> eagle --vcfRef panel_chr22.vcf.gz --vcfTarget chr22.vcf.gz --geneticMapFile genetic_map_hg38_chr18_chr22_eagle.txt.gz --outPrefix phased_chr22 --numThreads 8 --vcfOutFormat z
+> ```
+>
+> Every input site was also in the panel, so none was lost. About one minute per region, most of it spent writing the output file.
+>
+> **Step 3. Impute (Minimac4).** The module A data already hold the panel in the compact Minimac4 format (`.msav`). It was made once with `minimac4 --compress-reference panel_chr22.vcf.gz -o panel_chr22.msav`.
+>
+> ```
+> minimac4 --map minimac4_chr22.map --format GT,DS --threads 8 --empirical-output chr22.empirical_dose.vcf.gz --sites chr22.sites.vcf.gz -o chr22.dose.vcf.gz panel_chr22.msav phased_chr22.vcf.gz
+> ```
+>
+> - `--format GT,DS` writes the best-guess genotype and the dosage (section A.2). Add `GP` for the genotype probabilities: the files then grow to 150 to 250 MB per region.
+> - `--empirical-output` writes the leave-one-out dosages of the array sites, from which Minimac4 computes the empirical R² (section A.8).
+> - About one minute and less than 200 MB of memory per region. The output holds every panel variant: 49,988 on chromosome 18 and 60,224 on chromosome 22.
+> - The course run used `--format GT,DS,GP` and then removed GP with `bcftools annotate -x FORMAT/GP`. GP is only an extra field: GT and DS do not change.
+> - **[open: run the box once more on a second computer and compare R2 with the files in `imputed/`]**
 
 ---
 
@@ -417,6 +423,15 @@ What students should take from it:
 
 The empirical R² of the array sites (leave-one-out) has a median of 0.72 on chromosome 18 and 0.59 on chromosome 22. The array is sparse in these regions (about one site every 15 kb).
 
+**The limits of these numbers.** The course panel is small and the study is simulated, so the numbers show the direction, not the size you would get with HRC or TOPMed:
+
+- The panel has 1,521 people, against about 32,000 in HRC and about 97,000 in TOPMed. A larger panel imputes rare variants much better.
+- Only 313 people of the panel are European, and only 106 are southern European (53 TSI and 53 IBS). About 60% of the study is southern European, so the panel matches the study less well than a large European panel would.
+- Each study genome is a mosaic of donor segments. At each junction (on average every 3 cM) one donor haplotype ends and another begins, so the LD across a junction is not that of a real genome.
+- Almost no variant has a MAC of 1, because each donor haplotype was copied into several study genomes. Real data have many such variants, and they cannot be imputed.
+
+So read the table for its pattern: common variants are imputed well, rare ones badly, and R² is too optimistic for rare variants. Do not quote its values as the quality of real imputation.
+
 ### Exercise: hide some array sites and impute them
 
 You can measure imputation quality on your own data, without a truth file. Hide some of the sites you measured, impute them, and compare the dosages with the genotypes you know.
@@ -455,6 +470,8 @@ bin/plink2 --vcf results/imputation/chr18.dose.vcf.gz dosage=DS --double-id --ex
 
 Locus L4 is a simulated risk variant on chromosome 18 (`chr18:38042715:G:A`, odds ratio 1.4 by design) that is not on the array. In the main analysis the region did not reach genome-wide significance. Does imputation help?
 
+This is one example, from one simulated region and one panel. It shows what can happen. It is not a rule of what imputation does to a signal: in another region, or with a larger panel, the result can go either way.
+
 | Analysis | Variant | Frequency | R² | Odds ratio | p-value |
 | --- | --- | --- | --- | --- | --- |
 | Array sites (main analysis) | best: `18:38107932:C:A`, 65 kb away | 0.25 | measured | 1.49 | 6.6 × 10⁻⁷ |
@@ -463,11 +480,11 @@ Locus L4 is a simulated risk variant on chromosome 18 (`chr18:38042715:G:A`, odd
 | True genotypes (only in a simulation) | the L4 variant | 0.29 | | 1.46 | 1.3 × 10⁻⁶ |
 | True genotypes (only in a simulation) | best in the region | 0.37 | | 1.46 | 1.6 × 10⁻⁷ |
 
-What it shows:
+What this example shows:
 
 - The L4 variant is imputed well (R² 0.94). Its result is almost the same as with its true genotype.
 - It is not the top of its region. Variants 50 to 80 kb away, in LD with it, give smaller p-values. This happens in real studies too: the lead variant is not necessarily the cause (step 7.6).
-- After imputation the best variant crosses 5 × 10⁻⁸. With the true genotypes, the region does not go below 1.6 × 10⁻⁷. So part of the "genome-wide significant" result comes from noise in the dosages of a variant with R² 0.81. This is why an imputed hit needs its R², a look at the measured neighbours and, ideally, confirmation by direct genotyping.
+- After imputation the best variant crosses 5 × 10⁻⁸. With the true genotypes, the region does not go below 1.6 × 10⁻⁷. Here, part of the "genome-wide significant" result comes from noise in the dosages of a variant with R² 0.81. Noise can push a p-value up as well as down; in this region it happened to push it down. This is why an imputed hit needs its R², a look at the measured neighbours and, ideally, confirmation by direct genotyping.
 
 Points to explain to students:
 
