@@ -35,6 +35,29 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             release.inventory(source)
 
+    def test_module_a_rule(self):
+        source = self.root / "stage-module-a-test"
+        for folder in sorted(release.MODULE_A_DIRECTORIES):
+            (source / folder).mkdir(parents=True)
+            (source / folder / "small.txt").write_text("Synthetic fixture.\n", encoding="ascii")
+        (source / "README_simulated.txt").write_text("fixture\n", encoding="ascii")
+        (source / "panel_samples.tsv").write_text("fixture\n", encoding="ascii")
+        (source / "imputed" / "run.log").write_text("author path\n", encoding="ascii")
+        names = [name for _, name in release.inventory(source, "module-a")]
+        self.assertEqual(sorted(names), sorted([f"{d}/small.txt" for d in release.MODULE_A_DIRECTORIES]
+                                               + ["README_simulated.txt", "panel_samples.tsv"]))
+        # Each package accepts only its own top folders.
+        with self.assertRaises(ValueError):
+            release.inventory(source, "main")
+        with self.assertRaises(ValueError):
+            release.inventory(self.source, "module-a")
+        # FORBIDDEN still applies to module A.
+        (source / "truth").mkdir()
+        (source / "truth" / "x.txt").write_text("fixture", encoding="ascii")
+        with self.assertRaises(ValueError):
+            release.inventory(source, "module-a")
+        self.assertNotIn("truth", " ".join(release.MODULE_A_DIRECTORIES))
+
     def test_missing_password(self):
         previous = os.environ.pop("COURSE_RELEASE_PASSWORD", None)
         try:

@@ -25,6 +25,15 @@ WORK = Path(os.environ.get("COURSE_RELEASE_WORK") or r"C:\WEB_site\data_sources\
 FORBIDDEN = ("instructor", "answer_key", "build_record", "truth")
 DIRECTORIES = {"array", "checkpoints", "final_report", "grch37_exercise",
                "imputation", "lab_export", "pca_reference", "phenotypes", "annotation"}
+# Module A (imputation) is a separate package with its own top folders and its own staging prefix.
+# FORBIDDEN applies to both packages.
+MODULE_A_DIRECTORIES = {"reference_panel", "genetic_map", "imputed", "true_genotypes"}
+PACKAGES = {
+    "main": {"directories": DIRECTORIES, "top_files": {"README_simulated.txt"},
+             "archive": "course-data", "stage_prefix": "classroom-stage-"},
+    "module-a": {"directories": MODULE_A_DIRECTORIES, "top_files": {"README_simulated.txt", "panel_samples.tsv"},
+                 "archive": "module-a-data", "stage_prefix": "stage-module-a-"},
+}
 
 
 def safe_path(path: Path) -> None:
@@ -42,7 +51,8 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def inventory(source: Path) -> list[tuple[Path, str]]:
+def inventory(source: Path, package: str = "main") -> list[tuple[Path, str]]:
+    rule = PACKAGES[package]
     safe_path(source)
     if source.is_symlink() or source.is_junction():
         raise ValueError("The source must not be a link or junction.")
@@ -56,7 +66,8 @@ def inventory(source: Path) -> list[tuple[Path, str]]:
         if not path.is_file():
             continue
         relative = path.relative_to(source)
-        if relative.parts[0] not in DIRECTORIES and relative.as_posix() != "README_simulated.txt":
+        top_file = len(relative.parts) == 1 and relative.name in rule["top_files"]
+        if not top_file and (len(relative.parts) == 1 or relative.parts[0] not in rule["directories"]):
             raise ValueError("Unrecognised student file: " + relative.as_posix())
         # Author-machine paths and hostnames are not student inputs.
         if path.suffix.lower() == ".log":
@@ -90,7 +101,8 @@ def aes256_members(path: Path) -> list[str]:
     return names
 
 
-def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1") -> dict:
+def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1", package: str = "main") -> dict:
+    rule = PACKAGES[package]
     started = time.perf_counter()
     for path in (source, output, sevenzip):
         safe_path(path)
@@ -101,7 +113,7 @@ def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1") -
     password = os.environ.get("COURSE_RELEASE_PASSWORD", "")
     if not password or any(c in password for c in "\r\n"):
         raise ValueError("Set a non-empty COURSE_RELEASE_PASSWORD without line breaks.")
-    members = inventory(source)
+    members = inventory(source, package)
     output.mkdir(parents=True)
     staging = output / "payload"
     staging.mkdir()
@@ -116,7 +128,7 @@ def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1") -
     writer.writerow(("path", "bytes", "sha256"))
     writer.writerows(rows)
     (output / "MANIFEST.tsv").write_text(text.getvalue(), encoding="utf-8", newline="\n")
-    archive = output / f"course-data-{version}.zip"
+    archive = output / f"{rule['archive']}-{version}.zip"
     # An explicit list avoids directory entries. The environment is scrubbed.
     listing = output / "members.txt"
     listing.write_text("\n".join(name for _, name in members) + "\n", encoding="utf-8")
@@ -148,6 +160,8 @@ def build(source: Path, output: Path, sevenzip: Path, version: str = "2026.1") -
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--package", choices=sorted(PACKAGES), default="main",
+                        help="main: the course data; module-a: the imputation module (stage-module-a-* folder)")
     parser.add_argument("--version", default="2026.2", help="the data release version, used in the archive name")
     parser.add_argument("--source", type=Path, default=WORK / "classroom-stage-2026.2",
                         help="the verified main-path staging folder (default) or the older sim2026/student folder")
@@ -157,15 +171,18 @@ def main() -> None:
     parser.add_argument("--sevenzip", type=Path, default=Path(r"C:\Program Files\7-Zip\7z.exe"))
     args = parser.parse_args()
     source = args.source.resolve()
-    staged = source.parent == WORK.resolve() and source.name.startswith("classroom-stage-")
-    if source != SOURCE.resolve() and not staged:
+    prefix = PACKAGES[args.package]["stage_prefix"]
+    staged = source.parent == WORK.resolve() and source.name.startswith(prefix)
+    if args.package == "module-a" and not staged:
+        parser.error("Module A input must be a verified stage-module-a-* folder directly under codex_work.")
+    if args.package == "main" and source != SOURCE.resolve() and not staged:
         parser.error("Production input must be sim2026/student or a verified classroom-stage-* folder "
                      "directly under codex_work. Tests call build() on isolated copies.")
     password = os.environ.get("COURSE_RELEASE_PASSWORD", "")
     if len(password) < args.min_password_length:
         parser.error(f"COURSE_RELEASE_PASSWORD must have at least {args.min_password_length} characters.")
     import json
-    print(json.dumps(build(args.source, args.output, args.sevenzip, args.version), indent=2))
+    print(json.dumps(build(args.source, args.output, args.sevenzip, args.version, args.package), indent=2))
 
 
 if __name__ == "__main__":

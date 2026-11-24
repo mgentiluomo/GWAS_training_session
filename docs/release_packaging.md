@@ -117,3 +117,17 @@ gh release create data-2026.2 C:\WEB_site\data_sources\codex_work\release-data-2
 6. Test as a student on a new folder: `download_course_data()` with the new password, then `where_am_i()`, then `check_step("2.8")`. Then run `scripts/run_main_path.R` and compare `step_counts.tsv` with `build_report_2026.2.md` (instructor folder).
 
 The project release 2026.5 and the data release 2026.2 must go out together. The new project does not work with `data-2026.1`, because the checkpoint folders of module 6 are renumbered and the list of long-range LD regions is in the new data (`pca_reference/highLD_b38.bed`).
+
+## Module A package (not released yet)
+
+Module A (imputation) is a separate package with its own rule: `--package module-a`. It accepts only the top
+folders `reference_panel/`, `genetic_map/`, `imputed/` and `true_genotypes/`, plus `README_simulated.txt` and
+`panel_samples.tsv`. The source must be a `stage-module-a-*` folder directly under `codex_work`. The restricted
+names (`FORBIDDEN`) apply as for the main package, so the true genotypes sit in `true_genotypes/`, not in a
+folder called `truth`. The `.log` files of Eagle and Minimac4 are left out, as PLINK logs are.
+
+```powershell
+python -B scripts\package_release.py --package module-a --version 2026.1 --source C:\WEB_site\data_sources\codex_work\stage-module-a-2026.1 --output C:\WEB_site\data_sources\codex_work\release-module-a-2026.1
+```
+
+The archive is `module-a-data-2026.1.zip`. Do not run it until the module is approved.
