@@ -38,7 +38,8 @@ def prose(text: str) -> str:
 def main() -> int:
     errors: list[str] = []
     warnings: list[str] = []
-    files = sorted((ROOT / "lessons").glob("module_0[0-7]_*.Rmd")) + [ROOT / "README.md"] + \
+    files = sorted((ROOT / "lessons").glob("module_0[0-7]_*.Rmd")) + \
+        sorted((ROOT / "lessons").glob("module_[A-Z]_*.Rmd")) + [ROOT / "README.md"] + \
         sorted((ROOT / "docs").glob("*.md"))
     glossary = (ROOT / "docs" / "glossary.md").read_text(encoding="utf-8")
     anchors = set(GLOSSARY_ANCHOR.findall(glossary))
@@ -58,10 +59,13 @@ def main() -> int:
             if anchor not in anchors:
                 errors.append(f"{rel}: glossary link #{anchor} has no entry")
         if path.name.startswith("module_"):
-            n = int(path.name.split("_")[1])
+            # Main-path lessons are module_00 to module_07; additional modules use a letter (module_A).
+            n = path.name.split("_")[1]
+            n = str(int(n)) if n.isdigit() else n
+            slug = n.lower()
             first_step = re.search(rf"^## {n}\.1 ", raw, re.M)
-            overview = re.search(rf"^## Module {n} at a glance \{{#module-{n}-overview\}}\s*$", raw, re.M)
-            recap = re.search(rf"^## Module {n} recap \{{#module-{n}-recap\}}\s*$", raw, re.M)
+            overview = re.search(rf"^## Module {n} at a glance \{{#module-{slug}-overview\}}\s*$", raw, re.M)
+            recap = re.search(rf"^## Module {n} recap \{{#module-{slug}-recap\}}\s*$", raw, re.M)
             last_step = list(re.finditer(rf"^## {n}\.\d+ ", raw, re.M))
             if not overview or not first_step or overview.start() > first_step.start():
                 errors.append(f"{rel}: missing 'Module {n} at a glance' section before step {n}.1")

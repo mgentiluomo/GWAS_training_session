@@ -526,7 +526,9 @@ class QuartoRendererTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             destination = Path(directory)
             students.export_notebooks(destination, format="qmd")
-            self.assertEqual(len(list(destination.glob("*.qmd"))), 9)
+            # Nine notebooks for modules 0 to 7 (eight modules and the complete one), plus one per additional module.
+            extra = len(list((ROOT / "lessons").glob("module_[A-Z]_*.Rmd")))
+            self.assertEqual(len(list(destination.glob("*.qmd"))), 9 + extra)
             self.assertEqual(list(destination.glob("*.Rmd")), [])
             students.export_notebooks(destination, check=True, format="qmd")
             (destination / "module_03_sample_quality_control.qmd").write_text("stale", encoding="utf-8")

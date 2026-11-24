@@ -52,12 +52,13 @@ imputation_write_bgzf <- function(lines, path) {
 # Step A.7: the input files for imputation, one VCF per region, from your own state at step 5.7.
 # PLINK writes the VCF. R then checks every REF allele against the GRCh38 plus strand of the array annotation,
 # removes the "provisional REF" flag (PR) that PLINK adds, and rewrites the file with plain line ends (LF).
+# Output files start with sA-7_ in the output folder, as in the rest of the course.
 prepare_imputation_input <- function(cfg, state = guided_path(cfg, "5.7"),
                                      annotation = file.path(cfg$data_dir, "array", "sim2026_array_annotation.tsv"),
-                                     out_dir = file.path(cfg$out, "imputation"), regions = imputation_regions()) {
+                                     step = "A.7", regions = imputation_regions()) {
   require_files(c(paste0(state, c(".pgen", ".pvar", ".psam")), annotation))
-  dir.create(file.path(out_dir, "input"), recursive = TRUE, showWarnings = FALSE)
-  bed <- file.path(out_dir, "regions.bed1")
+  dir.create(cfg$out, recursive = TRUE, showWarnings = FALSE)
+  bed <- guided_path(cfg, step, "regions.bed1")
   writeLines(paste(regions$chr, regions$start, regions$end, regions$name, sep = "\t"), bed)
 
   # The REF list: variant ID and the GRCh38 plus-strand allele (Ref_Plus) at the same chromosome and position.
@@ -79,10 +80,10 @@ prepare_imputation_input <- function(cfg, state = guided_path(cfg, "5.7"),
   for (i in seq_len(nrow(regions))) {
     chr <- regions$chr[i]
     # One REF list per region: variant ID, then the allele. PLINK reads column 2 as the allele and column 1 as the ID.
-    ref_file <- file.path(out_dir, paste0("ref_alleles_grch38_chr", chr, ".tsv"))
+    ref_file <- guided_path(cfg, step, paste0("ref_alleles_chr", chr, ".tsv"))
     in_region <- names(refs) %in% pvar$ID[pvar$CHROM == chr]
     writeLines(paste(names(refs)[in_region], refs[in_region], sep = "\t"), ref_file)
-    prefix <- file.path(out_dir, "input", paste0("chr", chr))
+    prefix <- guided_path(cfg, step, paste0("chr", chr))
     run_plink(cfg, c("--pfile", state, "--extract", "bed1", bed, "--chr", chr, "--ref-allele", ref_file, "2", "1",
       "--output-chr", "chrM", "--export", "vcf-4.2", "bgz", "id-paste=iid", "--out", prefix),
       expected = paste0(prefix, ".vcf.gz"))
@@ -308,15 +309,53 @@ imputation_quality_table <- function(x) {
       stringsAsFactors = FALSE)
   })
   out <- do.call(rbind, rows)
-  out[out$variants > 0L, ]
+  out <- out[out$variants > 0L, ]
+  rownames(out) <- NULL
+  out
+}
+
+# Step A.8: the figure of the module. Minimac4 R2 against the true r2, one panel per frequency class.
+# The rarest classes (MAC 1 and MAC 2 to 4) are drawn with the variants below 0.5%. Base R only.
+plot_imputation_quality <- function(x, file, title = "Chromosome 22: reported R² against true r²") {
+  d <- x[x$imputed & !is.na(x$true_r2), ]
+  panel <- ifelse(as.character(d$class) %in% c("MAC 1", "MAC 2-4"), "<0.5%", as.character(d$class))
+  panels <- c("<0.5%", "0.5-1%", "1-5%", ">=5%")
+  titles <- c("Below 0.5% (MAC 1 to 4 included)", "0.5 to 1%", "1 to 5%", "At least 5%")
+  ink <- "#0b0b0b"; ink2 <- "#52514e"; grid <- "#e4e3df"; point <- "#2a78d6"; ref <- "#eb6834"
+  grDevices::png(file, width = 2000, height = 2000, res = 220, type = "cairo", bg = "#ffffff")
+  on.exit(grDevices::dev.off())
+  old <- graphics::par(mfrow = c(2, 2), mar = c(4.2, 4.2, 3.2, 1), oma = c(0, 0, 2.6, 0), col.axis = ink2,
+    col.lab = ink, fg = ink2, las = 1, mgp = c(2.6, 0.7, 0))
+  on.exit(graphics::par(old), add = TRUE, after = FALSE)
+  for (k in seq_along(panels)) {
+    p <- d[panel == panels[k], ]
+    graphics::plot(NA, xlim = c(0, 1), ylim = c(0, 1), xaxs = "i", yaxs = "i", xlab = "Minimac4 R²",
+      ylab = "True r² (dosage vs true genotype)", axes = FALSE)
+    graphics::abline(h = seq(0, 1, 0.2), v = seq(0, 1, 0.2), col = grid, lwd = 0.8)
+    graphics::abline(v = c(0.3, 0.8), col = ink2, lty = 2, lwd = 1.2)
+    graphics::abline(0, 1, col = ref, lwd = 2)
+    graphics::points(pmin(p$R2, 1), p$true_r2, pch = 16, cex = 0.45, col = grDevices::adjustcolor(point, alpha.f = 0.25))
+    graphics::axis(1, at = seq(0, 1, 0.2))
+    graphics::axis(2, at = seq(0, 1, 0.2))
+    graphics::box(col = ink2)
+    graphics::title(main = titles[k], col.main = ink, font.main = 2, cex.main = 1.05, line = 1.6)
+    graphics::mtext(sprintf("%s variants | median R² %.2f, median true r² %.2f",
+      format(nrow(p), big.mark = ","), stats::median(p$R2), stats::median(p$true_r2)),
+      side = 3, line = 0.35, cex = 0.72, col = ink2)
+    graphics::text(c(0.3, 0.8), 0.97, c("0.3", "0.8"), pos = 4, cex = 0.75, col = ink2)
+  }
+  graphics::mtext(paste0(title, " (orange line: R² = true r²)"), outer = TRUE, line = 0.8, cex = 1.05,
+    font = 2, col = ink)
+  invisible(file)
 }
 
 # Step A.9: association on the imputed dosages, with the model of the main analysis (step 6.3).
 # min_r2 keeps the variants whose Minimac4 R2 is at least this value.
 imputation_association <- function(cfg, dose, state = guided_path(cfg, "5.7"),
                                    covariates = guided_path(cfg, "6.2", "covariates.tsv"),
-                                   out = file.path(cfg$out, "imputation", "chr18_assoc"), min_r2 = 0.3) {
+                                   out = guided_path(cfg, "A.9", "chr18_assoc"), min_r2 = 0.3) {
   require_files(c(dose, paste0(state, ".psam"), covariates))
+  dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
   run_plink(cfg, c("--vcf", dose, "dosage=DS", "--double-id", "--extract-if-info", paste("R2 >=", min_r2),
     "--update-sex", paste0(state, ".psam"), "col-num=3", "--pheno", paste0(state, ".psam"), "--pheno-name", "Disease",
     "--maf", "0.01", "--covar", covariates, "--covar-name", "Age,PC1-PC10", "--covar-variance-standardize",
@@ -336,5 +375,7 @@ imputation_l4 <- function(result, variant = "chr18:38042715:G:A") {
   l4 <- ok[ok$ID == variant, ]
   if (nrow(l4) != 1L) stop("The L4 variant ", variant, " is not in the result. Check the R2 filter.")
   out <- rbind(cbind(row = "L4 variant", l4), cbind(row = "best in the region", best))
-  out[, intersect(c("row", "ID", "POS", "A1", "A1_FREQ", "MACH_R2", "OR", "P"), names(out))]
+  out <- out[, intersect(c("row", "ID", "POS", "A1", "A1_FREQ", "MACH_R2", "OR", "P"), names(out))]
+  rownames(out) <- NULL
+  out
 }

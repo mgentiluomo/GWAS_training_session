@@ -56,3 +56,49 @@ Checks on the real data (Windows 11, R 4.5.2, PLINK 2.0 b.1.4):
 `scripts/tests/test_imputation.R` (synthetic data, PLINK in `bin/`): BGZF blocks and EOF, REF check and swap,
 PR and CRLF removal, the error for a REF that matches neither allele, INFO reading, true r2 and classes, the
 `ARRAY` flag with AC and AN, a missing sample, association with the R2 filter, and the L4 table. Passed.
+
+### Lesson and notebook
+
+- New lesson `lessons/module_A_imputation.Rmd`, the single source of the notebook and of the website content.
+  It holds the overview ("Module A at a glance"), steps A.1 to A.10 with the fixed blocks of every course
+  step, and the recap. A.1 to A.6 and A.10 are reading steps. A.7 (input files), A.8 (quality and truth) and
+  A.9 (association) run R code; each has a success line, a student summary and the table of PLINK options.
+  Eagle2 and Minimac4 are in the optional box ("Another approach") of A.7, with the tested commands; the
+  masking exercise is the optional box of A.8. The discussion questions of A.6 are its quick check.
+- Prerequisites (`module_meta`): the checkpoint at 6.2 (state 5.7 and the covariates of 6.2), the array
+  annotation and the module A data in `data/course/module_a/`. `R/guided.R` gets the `A` entry of the
+  generated table; `guided_check_module` gives the right restart advice for a letter module.
+- Three glossary entries: haplotype, reference panel, imputation quality (R2 and INFO).
+- Figure A.8: `plot_imputation_quality()` in `R/imputation.R` draws it from `compare_with_truth()`. The same
+  PNG is the module asset `Figures/module_a/figure_A8_r2_chr22.png`, declared in the lesson with alt text and
+  caption (`result_figure` comment).
+- Notebook `notebooks/module_A_imputation.qmd`, generated from the lesson. It is not part of the complete
+  notebook of modules 0 to 7.
+- Render with Quarto (RStudio's quarto.exe, R 4.5.2, Windows 11) on `data-2026.1` (checkpoint 5.7 and
+  covariates) and the module A data: exit 0, about 1.5 minutes. Outputs: 161 and 277 sites with 1,811
+  samples; the A.8 table identical to the draft; L4 OR 1.47, p 1.65e-6, best variant p 4.19e-8.
+
+### Pipeline changes (needed by phase 2, checked here)
+
+- `scripts/course_exports.py`: lessons named `module_<letter>_*.Rmd` are additional modules, exported beside
+  the main path (`step-a-1.json` to `step-a-10.json`, `module-a.json`). The main path keeps its 63-step check
+  and its combined script. New optional figure kind `result` (a PNG made by the course code under
+  `Figures/`). `--export` accepts `vcf-4.2` and `bgz`, and `--extract` accepts `bed1`, as modifiers.
+- `scripts/student_notebooks.py`: one notebook per additional module, with no previous or next module.
+- `scripts/check_text.py` checks the letter lessons too (0 errors).
+- **Main path unchanged.** The export of this branch was saved before the changes. After the changes
+  (with module A), the 63 step files, the 8 module files, the formats, `run_main_path.R` and the 9 notebooks
+  are byte-identical to it.
+
+### Tests (Windows 11, R 4.5.2, Python 3.12, PLINK 2.0 b.1.4)
+
+- Python, `python -B -m unittest discover -s scripts/tests`: 103 tests, OK, 2 skipped (the encrypted round
+  trip without a password, as before). Three tests assumed modules 0 to 7 only (63 JSON files, 9 notebooks,
+  the generated module table); they now count the additional modules separately.
+- R, every file in `scripts/tests/` and `scripts/check_course.R` with `COURSE_DATA_DIR` set to
+  `classroom-stage-2026.2`: 17 of 18 exit 0, including `test_guided_modules.R` (151 s) and the new
+  `test_imputation.R`. `test_main_path_recovery.R` stops at its first line: it needs `COURSE_STAGE_DIR` and
+  `COURSE_CANONICAL_RUN` (an author integration run), which were not set. It does not use module A code.
+- `python -I scripts/author/tests/test_sim2026.py`: 40 of 40.
+- `python -B scripts/check_text.py`: 0 errors (2 old warnings in `docs/site_content_schema.md`).
+- `--export-notebooks notebooks --check-notebooks`: up to date, 10 files.
