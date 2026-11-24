@@ -142,3 +142,64 @@ preview. The JSON of module A are committed on this branch only.
    carried over to a branch from `course/2026-guided-training`; there the proof can pass. The numbers of the
    lesson already match the 2026.4 cohort (`data-2026.1`). On 2026.4 the covariates are `s6-3_covariates.tsv`
    (step 6.3), so the module prerequisites and the A.9 defaults change from 6.2 to 6.3.
+
+## Port to 2026.4 (way forward 2, chosen by the author)
+
+Branch `course/module-a-2026.4`, from `course/2026-guided-training` (release 2026.4, commit `1e05565`). Nothing
+of 2026.5 is carried over.
+
+- Cherry-picked from `course/module-a-data`: the HRC rule (`d8177d9`), the R helpers and tests (`e42da52`), the
+  lesson, notebook, figure and pipeline (`a5eb2b8`), the module A JSON (`2d25e50`).
+- Conflicts solved by hand. `AGENTS.md` keeps the 2026.4 line on the 6.8 rule and adds the HRC rule.
+  `R/guided.R` keeps the 2026.4 table of module 7 and adds module A. The exporter keeps the 2026.4 option
+  modifiers (`--exclude bed1`) and adds `--export vcf-4.2 bgz` and `--extract bed1`. The 64-step check stays.
+- 2026.4 had no "Another approach (optional)" block. It is added to the exporter and to the notebook generator
+  (optional, collapsed, after "Files created"). No main-path lesson uses it, so the main path does not change.
+- The `R/guided.R` of commit `98fed00` lacked one closing parenthesis after the conflict. The next commit
+  fixes it. Every test below ran on the fixed file.
+- `scripts/package_project.py`: additional modules (`lessons/module_<letter>_*.Rmd` and their notebooks) are
+  left out of the main project package. They ship with the module A data release. The main project package
+  stays as in 2026.4, apart from the new `R/imputation.R` and the module A entry of `R/guided.R`.
+
+### Changes for 2026.4
+
+- Covariates: `s6-3_covariates.tsv` (step 6.3). The module prerequisites become checkpoint 6.3, restart 6.4.
+  The A.9 default of `imputation_association()` reads `guided_path(cfg, "6.3", "covariates.tsv")`.
+- Text: "your files at step 6.3", "the covariates from step 6.3", "the main analysis (step 6.4)". The A.9
+  command and its option table read `s6-3_covariates.tsv`.
+- Cohort: `data-2026.1`. The numbers of the lesson are unchanged.
+
+### Checks (Windows 11, R 4.5.2, Python 3.12, PLINK 2.0 b.1.4)
+
+- Python, `python -B -m unittest discover -s scripts/tests`: 88 tests, OK, 2 skipped. Before the package fix,
+  6 tests of `test_project_package.py` failed on the new lesson ("Unexpected student lesson source"). The
+  same failure exists on `course/module-a-data`: there the earlier run of 103 tests came before the lesson
+  was committed, so `git ls-files` did not list it yet.
+- R, every file in `scripts/tests/` and `scripts/check_course.R` with `COURSE_DATA_DIR` set to
+  `classroom-stage-2026.1-final`: 15 of 16 exit 0. `test_main_path_recovery.R` needs `COURSE_STAGE_DIR` and
+  `COURSE_CANONICAL_RUN`, as before.
+- `python -I scripts/author/tests/test_sim2026.py`: exit 0.
+- `python -B scripts/check_text.py`: 0 errors, 0 warnings. `--check-notebooks`: up to date, 10 files.
+- Render of `notebooks/module_A_imputation.qmd` with Quarto on the `data-2026.1` checkpoint 5.7 and
+  `s6-3_covariates.tsv`: exit 0. The A.7 VCF files, the A.8 table and figure and the A.9 association file are
+  byte-identical to the earlier render. L4: R2 0.95, OR 1.47, p 1.65e-6.
+
+### Required proof: JSON of modules 0 to 7 against the website in production. PASSED.
+
+Compared every file of `src/content/gwas/steps/` and `src/content/gwas/modules/` on `origin/main` of the
+website (commit `4b54b05`) with `site_content/` of this branch: 72 of 72 byte-identical (64 steps, 8 modules).
+Module A adds `step-a-1.json` to `step-a-10.json` and `module-a.json`.
+
+## What changes in module A when 2026.5 is released
+
+- Covariates move back to step 6.2 (`s6-2_covariates.tsv`). Prerequisites: checkpoint 6.2, restart 6.3. The
+  A.9 default reads `guided_path(cfg, "6.2", "covariates.tsv")`. The text says "step 6.2" for the covariates
+  and "step 6.3" for the main analysis. These are the values of `course/module-a-data`.
+- The 2026.5 cohort (`data-2026.2`) differs by 4 samples each way: in 2026.2 only SIM26_0017, SIM26_0423,
+  SIM26_0678, SIM26_1088; in 2026.1 only SIM26_1264, SIM26_1291, SIM26_1329, SIM26_1636. The target VCF, the
+  imputed output and the truth files of the module A data must be made again from `data-2026.2`. Then every
+  number of A.7 to A.9 is checked again: sample count, the A.8 table and figure, the L4 result, the best
+  variant of the region and the variant count of A.9.
+- The 2026.5 exporter already has the "Another approach" block; keep one copy when the branches meet.
+- The packaging fix for additional modules (`scripts/package_project.py`) is needed on 2026.5 too.
+- The module A data package is made again for 2026.5, with its own version, and the website link changes.

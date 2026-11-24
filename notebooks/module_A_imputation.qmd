@@ -22,7 +22,7 @@ format:
 editor: visual
 editor_options:
   chunk_output_type: console
-course_source_sha256: "0d4e969988d40ee6170569f946c346240877f83d388d44e7f524a109e354a0d6"
+course_source_sha256: "eda172b1d95d128faa8b30385b5b11ef2afc81b463602da135613f1e99397737"
 ---
 
 Open `GWAS_course.Rproj` and work from the project root. Run the chunks in order in a fresh R session.
@@ -33,7 +33,7 @@ The linked step pages explain the ideas and provide troubleshooting.
 
 **Time.** About 2 hours.
 
-**Before you start.** You need the full [checkpoint at step 6.2](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-2). The first code chunk checks the files that this module needs.
+**Before you start.** You need the full [checkpoint at step 6.3](https://www.manuelgentiluomo.it/teaching/gwas/module-6/step-6-3). The first code chunk checks the files that this module needs.
 
 **Steps.**
 
@@ -318,7 +318,7 @@ print(imputation_l4(assoc))  # <3>
 | `--pheno` | Reads the case and control status from s5-7_state.psam, because a VCF file has no phenotype. |
 | `--pheno-name` | Selects the column Disease of that file. |
 | `--maf` | Keeps variants whose less common allele (DNA version) has a frequency of at least 1% in the study group. |
-| `--covar` | Reads s6-2_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
+| `--covar` | Reads s6-3_covariates.tsv, matching age and genetic component scores to samples by their IDs. |
 | `--covar-name` | Selects Age and PC1 to PC10 as extra factors to adjust the disease comparison; each PC describes one pattern of genetic variation. |
 | `--covar-variance-standardize` | Rescales the numerical adjustment factors to mean zero and variance one, a common scale that helps the model calculation remain stable. |
 | `--glm` | Fits a logistic model at each variant to estimate how each extra copy of the tested DNA version changes the odds of disease. |
@@ -358,7 +358,7 @@ These commands are shown for reference. Run the R chunk above to follow the cour
 R creates any lists needed between PLINK commands. On Windows, use `bin\plink2.exe`.
 
 ```sh
-bin/plink2 --vcf data/course/module_a/imputed/chr18.dose.vcf.gz dosage=DS --double-id --extract-if-info "R2 >= 0.3" --update-sex results/guided/s5-7_state.psam col-num=3 --pheno results/guided/s5-7_state.psam --pheno-name Disease --maf 0.01 --covar results/guided/s6-2_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback cols=+a1freq,+machr2 --out results/guided/sA-9_chr18_assoc --threads 2 --memory 2048
+bin/plink2 --vcf data/course/module_a/imputed/chr18.dose.vcf.gz dosage=DS --double-id --extract-if-info "R2 >= 0.3" --update-sex results/guided/s5-7_state.psam col-num=3 --pheno results/guided/s5-7_state.psam --pheno-name Disease --maf 0.01 --covar results/guided/s6-3_covariates.tsv --covar-name Age,PC1-PC10 --covar-variance-standardize --glm sex hide-covar firth-fallback cols=+a1freq,+machr2 --out results/guided/sA-9_chr18_assoc --threads 2 --memory 2048
 ```
 
 :::

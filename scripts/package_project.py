@@ -24,6 +24,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = ("lessons", "R", "examples/formats", "notebooks", "third_party/plink2")
 # Only the generated student notebooks ship. Experiments and render folders never do.
+ADDITIONAL_MODULE = re.compile(r"(?:lessons/module_[A-Z]_[^/]+\.Rmd|notebooks/module_[A-Z]_[^/]+\.qmd)")
 NOTEBOOK_NAME = re.compile(r"notebooks/(?:module_0[0-7]_[^/]+|gwas_course_complete)\.qmd")
 FILES = (
     "config.R", "GWAS_course.Rproj", "scripts/preflight.R",
@@ -138,6 +139,9 @@ def inventory(root: Path = ROOT) -> dict[str, bytes]:
         path = root / name
         # Moved legacy sources can still be staged as deletions during review.
         if not path.exists() and name not in FILES:
+            continue
+        # Additional modules (module A and later) ship with their own data release, not in the main project.
+        if ADDITIONAL_MODULE.fullmatch(name):
             continue
         if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
             raise ValueError(f"Refusing a linked or escaping project member: {name}")

@@ -349,10 +349,10 @@ plot_imputation_quality <- function(x, file, title = "Chromosome 22: reported RÂ
   invisible(file)
 }
 
-# Step A.9: association on the imputed dosages, with the model of the main analysis (step 6.3).
+# Step A.9: association on the imputed dosages, with the model of the main analysis (step 6.4).
 # min_r2 keeps the variants whose Minimac4 R2 is at least this value.
 imputation_association <- function(cfg, dose, state = guided_path(cfg, "5.7"),
-                                   covariates = guided_path(cfg, "6.2", "covariates.tsv"),
+                                   covariates = guided_path(cfg, "6.3", "covariates.tsv"),
                                    out = guided_path(cfg, "A.9", "chr18_assoc"), min_r2 = 0.3) {
   require_files(c(dose, paste0(state, ".psam"), covariates))
   dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)

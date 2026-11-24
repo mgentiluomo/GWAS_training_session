@@ -6,7 +6,7 @@
   "anchor": "step-a-8",
   "title": "Is the imputed variant good?",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "0d4e969988d40ee6170569f946c346240877f83d388d44e7f524a109e354a0d6",
+  "source_sha256": "eda172b1d95d128faa8b30385b5b11ef2afc81b463602da135613f1e99397737",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Read the quality measures of the imputed output on chromosome 22. Then compare the quality that Minimac4 reports with the true quality, measured against the true genotypes of the simulation.",
