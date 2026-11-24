@@ -15,8 +15,15 @@ STEP = re.compile(r"^## (\d+)\.(\d+) (.*?) \{#(step-\d+-\d+)\}\s*$", re.M)
 HEADING = re.compile(r"^## .*$", re.M)
 OVERVIEW = re.compile(r"^## Module (\d+) at a glance \{#module-\d+-overview\}\s*$", re.M)
 RECAP = re.compile(r"^## Module (\d+) recap \{#module-\d+-recap\}\s*$", re.M)
+# Additional modules (A, B) have a letter instead of a number. They are exported beside the main path,
+# never inside it: the main-path checks, the 63 steps and the combined script stay as they are.
+ADDITIONAL_STEP = re.compile(r"^## ([A-Z])\.(\d+) (.*?) \{#(step-[a-z]-\d+)\}\s*$", re.M)
+ADDITIONAL_OVERVIEW = re.compile(r"^## Module ([A-Z]) at a glance \{#module-[a-z]-overview\}\s*$", re.M)
+ADDITIONAL_RECAP = re.compile(r"^## Module ([A-Z]) recap \{#module-[a-z]-recap\}\s*$", re.M)
 CHUNK = re.compile(r"^```\{r\s+([^,}\s]+)([^}]*)\}\s*\n(.*?)^```\s*$", re.M | re.S)
 SCREENSHOT = re.compile(r"<!-- screenshot:\s*(.*?)\s*-->", re.S)
+# A finished result figure made by the course code (for example the quality plot of step A.8).
+RESULT_FIGURE = re.compile(r"<!-- result_figure:\s*(.*?)\s*-->", re.S)
 STEP_META = re.compile(r"<!-- step_meta:\s*(.*?)\s*-->", re.S)
 MODULE_META = re.compile(r"<!-- module_meta:\s*(.*?)\s*-->", re.S)
 VERIFICATION_NOTE = re.compile(r"<!-- verification_note:start -->(.*?)<!-- verification_note:end -->", re.S)
@@ -90,6 +97,16 @@ def notebook_paths(root: Path = ROOT) -> list[Path]:
     if {int(p.name.split("_")[1]) for p in files} != set(range(8)) or len(files) != 8:
         raise ValueError("Exactly modules 0 to 7 must exist before a complete export.")
     return files
+
+
+def additional_paths(root: Path = ROOT) -> list[Path]:
+    """Lessons of the additional modules, for example lessons/module_A_imputation.Rmd."""
+    return sorted((root / "lessons").glob("module_[A-Z]_*.Rmd"))
+
+
+def module_slug(module: int | str) -> str:
+    """The module part of file names and website addresses: 3 for module 3, a for module A."""
+    return str(module).lower()
 
 
 def split_blocks(body: str) -> dict[str, str]:
@@ -178,6 +195,27 @@ def screenshot_figures(body: str, root: Path = ROOT) -> list[dict]:
     return figures
 
 
+def result_figures(body: str, root: Path = ROOT) -> list[dict]:
+    """Read result figure declarations: a PNG made by the course code and kept under Figures/."""
+    figures = []
+    for match in RESULT_FIGURE.finditer(body):
+        spec = json.loads(match.group(1))
+        required = {"asset_path", "placement", "alt_text", "caption", "made_by"}
+        if not isinstance(spec, dict) or set(spec) != required or not all(
+                isinstance(value, str) and value.strip() for value in spec.values()):
+            raise ValueError("A result figure needs asset_path, placement, alt_text, caption and made_by.")
+        path = PurePosixPath(spec["asset_path"])
+        if (path.is_absolute() or ".." in path.parts or "\\" in spec["asset_path"] or path.parts[0] != "Figures"
+                or path.suffix != ".png" or spec["placement"] not in {name for name, _ in BLOCKS}):
+            raise ValueError("A result figure needs a PNG path under Figures/ and a valid block.")
+        if not (root / path).is_file():
+            raise ValueError(f"The result figure {spec['asset_path']} does not exist.")
+        figures.append({"kind": "result", "asset_path": spec["asset_path"], "asset": spec["asset_path"],
+                        "placement": spec["placement"], "alt_text": spec["alt_text"], "caption": spec["caption"],
+                        "made_by": spec["made_by"], "reviewed": False})
+    return figures
+
+
 MARKDOWN_LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 
 
@@ -187,7 +225,7 @@ PLINK_MODIFIERS = {
     "--pca": {"allele-wts"},
     "--score": {"header-read", "no-mean-imputation", "variance-standardize"},
     "--exclude": {"bed0"}, "--missing": {"sample-only"},
-    "--hardy": {"midp"}, "--export": {"A"},
+    "--hardy": {"midp"}, "--export": {"A", "vcf-4.2", "bgz"}, "--extract": {"bed1"},
     "--rm-dup": {"exclude-mismatch", "list"},
 }
 
@@ -352,115 +390,144 @@ def step_metadata(metadata: dict, record: dict) -> dict:
 def export_steps(root: Path = ROOT) -> list[dict]:
     records = []
     for path in notebook_paths(root):
-        text = path.read_text(encoding="utf-8")
-        matches = list(STEP.finditer(text))
-        explained = {}
-        # The explicit knit_setup chunk configures notebook rendering only.
-        setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])
-                 if m.group(1) != "knit_setup"]
-        for i, match in enumerate(matches):
-            # A step ends at the next level-2 heading, which may be a module recap.
-            following = [h.start() for h in HEADING.finditer(text) if h.start() > match.start()]
-            body = text[match.end():following[0] if following else len(text)]
-            blocks = split_blocks(body)
-            reading = READING_NOTE.search(body)
-            if reading:
-                words = reading_word_count(body)
-                if int(reading.group(1)) != max(1, (words + 199) // 200):
-                    raise ValueError(f"Update the reading time for step {match.group(1)}.{match.group(2)}: {words} words.")
-                # Keep the opening note visible in the site's existing first block.
-                blocks["what_we_do"] = reading.group() + "\n\n" + blocks["what_we_do"]
-            commands = []
-            for fence in re.findall(r"^```sh\s*\n(.*?)^```\s*$", blocks["command"], re.M | re.S):
-                commands.extend(line.strip() for line in fence.splitlines() if line.strip().startswith("bin/"))
-            commands.extend(code for code in re.findall(r"`([^`]+)`", prose(blocks["command"]))
-                            if code.startswith("bin/") and "--" in code)
-            commands = list(dict.fromkeys(commands))
-            options = []
-            flags = sorted({token for command in commands for token in shlex.split(command) if token.startswith("--")})
-            for flag in flags:
-                explanation = flag_explanation(flag, blocks["command"])
-                previous = explained.get(flag)
-                if not explanation and previous:
-                    explanation = previous["explanation_markdown"]
-                if not explanation:
-                    raise ValueError(f"No notebook explanation for {flag} in step {match.group(1)}.{match.group(2)}")
-                option = {"name": flag, "explanation_markdown": explanation}
-                if not flag_explanation(flag, blocks["command"]):
-                    option["explained_at"] = previous.get("explained_at", previous["step_id"])
-                options.append(option)
-                explained[flag] = {**option, "step_id": f"{match.group(1)}.{match.group(2)}"}
-            r_commands = [{"label": m.group(1), "code": m.group(3).strip(),
-                           "run_by_default": not bool(re.search(r"eval\s*=\s*FALSE", m.group(2)))}
-                          for m in CHUNK.finditer(blocks["command"])]
-            expected_render_code = [m.group(3).strip() for m in CHUNK.finditer(blocks["expected_result"])]
-            verification_notes = VERIFICATION_NOTE.findall(blocks["expected_result"])
-            student_expected = VERIFICATION_NOTE.sub("", blocks["expected_result"]).strip()
-            # Notebook rendering helpers are author metadata, not student-facing website text.
-            blocks["expected_result"] = CHUNK.sub("", blocks["expected_result"]).strip()
-            figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\s*-->|\n\n|$)", body, re.S)
-            figures = []
-            command_text = re.sub(r"<!--.*?-->", "", blocks["command"], flags=re.S)
-            if figure_prompt or ".png" in command_text:
-                prompt = figure_prompt.group(1).strip() if figure_prompt else (
-                    f"Create a labelled teaching schematic for {match.group(3)}. "
-                    "Use shapes and text as well as colour. Do not invent numeric course results, "
-                    "gene annotations or individual identities. This complements the tested R plot; it does not replace it.")
-                alt = re.search(r'fig[.]alt="([^"]+)"', body)
-                figures.append({"kind": "placeholder", "asset": None, "gemini_prompt": prompt,
-                                "alt_text": alt.group(1) if alt else f"Teaching schematic: {match.group(3)}.", "reviewed": False})
-            figures.extend(screenshot_figures(body, root))
-            verified = "passed on Windows" in body or "executable preparation chunks passed on Windows" in text
-            blocks = {name: re.sub(r"<!--.*?-->", "", content, flags=re.S).strip()
-                      for name, content in blocks.items()}
-            manual = not any(command["run_by_default"] for command in r_commands)
-            verification = "manual_required" if manual else (
-                "windows_executed" if verified and "UNVERIFIED" not in body and
-                "pending executable Windows verification" not in body else "unverified")
-            record = {"schema_version": SCHEMA_VERSION, "id": f"{match.group(1)}.{match.group(2)}",
-                      "module": int(match.group(1)), "step": int(match.group(2)), "anchor": match.group(4),
-                      "title": match.group(3), "source": path.relative_to(root).as_posix(),
-                      "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
-                      "verification": verification,
-                      "blocks": blocks, "setup_code": "\n\n".join(setup) if r_commands else "", "r_commands": r_commands,
-                      "notebook_only_expected_code": expected_render_code,
-                      "plink": {"applicable": bool(commands), "commands": commands, "options": options},
-                      "figures": figures}
-            metadata = STEP_META.findall(body)
-            if len(metadata) > 1:
-                raise ValueError(f"Duplicate step metadata in {record['id']}.")
-            if metadata:
-                record.update(step_metadata(json.loads(metadata[0]), record))
-            if verification_notes:
-                record["verification_notes"] = verification_notes
-            if verification_notes or "student_summary" in record:
-                record["student_expected_result"] = re.sub(r"<!--.*?-->", "", CHUNK.sub("", student_expected), flags=re.S).strip()
-            interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
-            if interactive:
-                record["interactive_data"] = json.loads(interactive.group(1))
-            records.append(record)
+        records.extend(lesson_steps(path, root, STEP))
     if len(records) != 63 or len({r["id"] for r in records}) != 63:
         raise ValueError("The main path must have 63 unique steps.")
     return records
 
 
+def export_additional_steps(root: Path = ROOT) -> list[dict]:
+    """Steps of the additional modules. Their module field is the letter, for example "A"."""
+    records = []
+    for path in additional_paths(root):
+        steps = lesson_steps(path, root, ADDITIONAL_STEP)
+        letter = path.name.split("_")[1]
+        if not steps or any(r["module"] != letter for r in steps):
+            raise ValueError(f"{path.name} must hold steps {letter}.1, {letter}.2 and so on.")
+        if [r["step"] for r in steps] != list(range(1, len(steps) + 1)):
+            raise ValueError(f"The steps of {path.name} must be numbered 1, 2, 3 and so on, in order.")
+        records.extend(steps)
+    return records
+
+
+def lesson_steps(path: Path, root: Path, step_pattern: re.Pattern) -> list[dict]:
+    """Export the steps of one lesson. The same rules apply to the main path and to additional modules."""
+    records = []
+    text = path.read_text(encoding="utf-8")
+    matches = list(step_pattern.finditer(text))
+    explained = {}
+    # The explicit knit_setup chunk configures notebook rendering only.
+    setup = [m.group(3).strip() for m in CHUNK.finditer(text[:matches[0].start()])
+             if m.group(1) != "knit_setup"]
+    for i, match in enumerate(matches):
+        # A step ends at the next level-2 heading, which may be a module recap.
+        following = [h.start() for h in HEADING.finditer(text) if h.start() > match.start()]
+        body = text[match.end():following[0] if following else len(text)]
+        blocks = split_blocks(body)
+        reading = READING_NOTE.search(body)
+        if reading:
+            words = reading_word_count(body)
+            if int(reading.group(1)) != max(1, (words + 199) // 200):
+                raise ValueError(f"Update the reading time for step {match.group(1)}.{match.group(2)}: {words} words.")
+            # Keep the opening note visible in the site's existing first block.
+            blocks["what_we_do"] = reading.group() + "\n\n" + blocks["what_we_do"]
+        commands = []
+        for fence in re.findall(r"^```sh\s*\n(.*?)^```\s*$", blocks["command"], re.M | re.S):
+            commands.extend(line.strip() for line in fence.splitlines() if line.strip().startswith("bin/"))
+        commands.extend(code for code in re.findall(r"`([^`]+)`", prose(blocks["command"]))
+                        if code.startswith("bin/") and "--" in code)
+        commands = list(dict.fromkeys(commands))
+        options = []
+        flags = sorted({token for command in commands for token in shlex.split(command) if token.startswith("--")})
+        for flag in flags:
+            explanation = flag_explanation(flag, blocks["command"])
+            previous = explained.get(flag)
+            if not explanation and previous:
+                explanation = previous["explanation_markdown"]
+            if not explanation:
+                raise ValueError(f"No notebook explanation for {flag} in step {match.group(1)}.{match.group(2)}")
+            option = {"name": flag, "explanation_markdown": explanation}
+            if not flag_explanation(flag, blocks["command"]):
+                option["explained_at"] = previous.get("explained_at", previous["step_id"])
+            options.append(option)
+            explained[flag] = {**option, "step_id": f"{match.group(1)}.{match.group(2)}"}
+        r_commands = [{"label": m.group(1), "code": m.group(3).strip(),
+                       "run_by_default": not bool(re.search(r"eval\s*=\s*FALSE", m.group(2)))}
+                      for m in CHUNK.finditer(blocks["command"])]
+        expected_render_code = [m.group(3).strip() for m in CHUNK.finditer(blocks["expected_result"])]
+        verification_notes = VERIFICATION_NOTE.findall(blocks["expected_result"])
+        student_expected = VERIFICATION_NOTE.sub("", blocks["expected_result"]).strip()
+        # Notebook rendering helpers are author metadata, not student-facing website text.
+        blocks["expected_result"] = CHUNK.sub("", blocks["expected_result"]).strip()
+        figure_prompt = re.search(r"Figure placeholder\. Gemini prompt: (.*?)(?:\s*-->|\n\n|$)", body, re.S)
+        figures = []
+        command_text = re.sub(r"<!--.*?-->", "", blocks["command"], flags=re.S)
+        results = result_figures(body, root)
+        if not results and (figure_prompt or ".png" in command_text):
+            prompt = figure_prompt.group(1).strip() if figure_prompt else (
+                f"Create a labelled teaching schematic for {match.group(3)}. "
+                "Use shapes and text as well as colour. Do not invent numeric course results, "
+                "gene annotations or individual identities. This complements the tested R plot; it does not replace it.")
+            alt = re.search(r'fig[.]alt="([^"]+)"', body)
+            figures.append({"kind": "placeholder", "asset": None, "gemini_prompt": prompt,
+                            "alt_text": alt.group(1) if alt else f"Teaching schematic: {match.group(3)}.", "reviewed": False})
+        figures.extend(screenshot_figures(body, root))
+        figures.extend(results)
+        verified = "passed on Windows" in body or "executable preparation chunks passed on Windows" in text
+        blocks = {name: re.sub(r"<!--.*?-->", "", content, flags=re.S).strip()
+                  for name, content in blocks.items()}
+        manual = not any(command["run_by_default"] for command in r_commands)
+        verification = "manual_required" if manual else (
+            "windows_executed" if verified and "UNVERIFIED" not in body and
+            "pending executable Windows verification" not in body else "unverified")
+        record = {"schema_version": SCHEMA_VERSION, "id": f"{match.group(1)}.{match.group(2)}",
+                  "module": int(match.group(1)) if match.group(1).isdigit() else match.group(1),
+                  "step": int(match.group(2)), "anchor": match.group(4),
+                  "title": match.group(3), "source": path.relative_to(root).as_posix(),
+                  "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
+                  "verification": verification,
+                  "blocks": blocks, "setup_code": "\n\n".join(setup) if r_commands else "", "r_commands": r_commands,
+                  "notebook_only_expected_code": expected_render_code,
+                  "plink": {"applicable": bool(commands), "commands": commands, "options": options},
+                  "figures": figures}
+        metadata = STEP_META.findall(body)
+        if len(metadata) > 1:
+            raise ValueError(f"Duplicate step metadata in {record['id']}.")
+        if metadata:
+            record.update(step_metadata(json.loads(metadata[0]), record))
+        if verification_notes:
+            record["verification_notes"] = verification_notes
+        if verification_notes or "student_summary" in record:
+            record["student_expected_result"] = re.sub(r"<!--.*?-->", "", CHUNK.sub("", student_expected), flags=re.S).strip()
+        interactive = re.search(r"<!-- interactive_data:\s*(.*?)\s*-->", body, re.S)
+        if interactive:
+            record["interactive_data"] = json.loads(interactive.group(1))
+        records.append(record)
+    return records
+
+
 def section_text(text: str, start: re.Match) -> str:
     following = [h.start() for h in HEADING.finditer(text) if h.start() > start.start()]
-    first_step = STEP.search(text, start.end())
+    first_step = STEP.search(text, start.end()) or ADDITIONAL_STEP.search(text, start.end())
     ends = following[:1] + ([first_step.start()] if first_step else [])
     return text[start.end():min(ends) if ends else len(text)].strip()
 
 
-def export_modules(root: Path = ROOT) -> list[dict]:
-    """Module overview and recap sections, for the website's module pages."""
+def export_modules(root: Path = ROOT, additional: bool = False) -> list[dict]:
+    """Module overview and recap sections, for the website's module pages.
+
+    With additional=True: the pages of the additional modules (A, B) instead of the main path."""
     records = []
-    for path in notebook_paths(root):
+    paths = additional_paths(root) if additional else notebook_paths(root)
+    overview_pattern, recap_pattern = (ADDITIONAL_OVERVIEW, ADDITIONAL_RECAP) if additional else (OVERVIEW, RECAP)
+    for path in paths:
         text = path.read_text(encoding="utf-8")
-        overview, recap = OVERVIEW.search(text), RECAP.search(text)
+        overview, recap = overview_pattern.search(text), recap_pattern.search(text)
         if not overview or not recap:
             raise ValueError(f"{path.name} needs a 'Module N at a glance' and a 'Module N recap' section.")
-        records.append({"schema_version": SCHEMA_VERSION, "module": int(overview.group(1)),
-                        "title": re.search(r'^title: "Module \d+: (.*)"', text, re.M).group(1),
+        module = int(overview.group(1)) if overview.group(1).isdigit() else overview.group(1)
+        records.append({"schema_version": SCHEMA_VERSION, "module": module,
+                        "title": re.search(r'^title: "Module (?:\d+|[A-Z]): (.*)"', text, re.M).group(1),
                         "source": path.relative_to(root).as_posix(),
                         "source_sha256": hashlib.sha256(text.encode()).hexdigest(),
                         "overview_markdown": normalise_links(re.sub(r"<!--.*?-->", "", section_text(text, overview), flags=re.S).strip()),
@@ -540,10 +607,21 @@ def main() -> None:
         for record in modules:
             (module_dir / f"module-{record['module']}.json").write_text(
                 json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        # Additional modules: their own step and module files, beside the main path.
+        extra = export_additional_steps()
+        for record in extra:
+            (args.export_steps / (record["anchor"] + ".json")).write_text(
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        extra_modules = export_modules(additional=True)
+        for record in extra_modules:
+            (module_dir / f"module-{module_slug(record['module'])}.json").write_text(
+                json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
         spec = importlib.util.spec_from_file_location("format_examples", ROOT / "scripts/author/make_format_examples.py")
         formats = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(formats)
         entries = formats.export_formats(args.export_steps.parent / "formats")
+        if extra:
+            print(f"Exported {len(extra)} steps and {len(extra_modules)} module pages of the additional modules.")
         print(f"Exported {len(records)} steps, {len(modules)} module pages and {len(entries)} format descriptions with tiny invented examples; no classroom data or website deployment created.")
     if args.export_main_script:
         args.export_main_script.write_text(main_script(), encoding="utf-8", newline="\n")

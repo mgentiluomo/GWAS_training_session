@@ -114,6 +114,10 @@ local({
   tab <- imputation_quality_table(q)
   stopifnot(identical(tab$class, c("MAC 1", "MAC 2-4", "all")), identical(tab$variants, c(1L, 2L, 3L)),
     identical(tab$imputed, c(1L, 1L, 2L)), isTRUE(all.equal(tab$mean_R2_minus_true[3], mean(c(0.81, 0.1) - 1))))
+  # The figure is a PNG file.
+  png_file <- file.path(root, "quality.png")
+  plot_imputation_quality(q, png_file)
+  stopifnot(file.exists(png_file), identical(readBin(png_file, "raw", 4L), as.raw(c(0x89, 0x50, 0x4e, 0x47))))
   # Classes by frequency, for 2,000 alleles.
   stopifnot(identical(as.character(imputation_class(c(1, 4, 9, 10, 19, 20, 99, 100, 1000), 2000)),
     c("MAC 1", "MAC 2-4", "<0.5%", "0.5-1%", "0.5-1%", "1-5%", "1-5%", ">=5%", ">=5%")))

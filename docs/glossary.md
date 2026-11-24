@@ -200,6 +200,10 @@ The 2013 version of the human reference genome. Each position in the genome has 
 
 Present as a single copy in a person. A man has a haploid X chromosome, outside the pseudoautosomal regions.
 
+### Haplotype {#haplotype}
+
+The sequence of alleles along one copy of a chromosome. Each person has two haplotypes in each region: one from the mother and one from the father.
+
 ### Heterozygosity {#heterozygosity}
 
 Two different alleles at a diploid locus.
@@ -219,6 +223,10 @@ Hardy–Weinberg equilibrium: a population-genetic expectation for genotype prop
 ### Imputation {#imputation}
 
 Estimating unobserved genotypes using observed data and a reference panel.
+
+### Imputation quality: R2 and INFO {#imputation-r2}
+
+A number from 0 to 1 that the imputation software gives for each imputed variant. It estimates how much information the imputed dosages carry, compared with true genotypes. Minimac4 calls it R2; IMPUTE calls a similar measure INFO.
 
 ### Inflation {#inflation}
 
@@ -407,6 +415,10 @@ A number from 0 to 1 that tells how strongly two nearby variants are correlated.
 ### Reference allele {#reference-allele}
 
 The allele that matches the reference genome at a site. It is often written REF. The other allele is often written ALT.
+
+### Reference panel {#reference-panel}
+
+A large group of people whose whole genome was sequenced and phased. Imputation compares the study haplotypes with the panel haplotypes to predict the unmeasured sites.
 
 ### Reference subset {#reference-subset}
 

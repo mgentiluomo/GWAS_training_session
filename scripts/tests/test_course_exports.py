@@ -163,9 +163,13 @@ class CourseExportsTests(unittest.TestCase):
             self.assertIsNone(re.search(r"\w\?\w|\?\?|\?log10|10\^\(\?", visible), path.name)
 
     def test_committed_json_matches_canonical_sources(self):
-        paths = list((ROOT / "site_content" / "steps").glob("*.json"))
+        paths = list((ROOT / "site_content" / "steps").glob("step-[0-9]*.json"))
         self.assertEqual(len(paths), 63)
-        for record in self.records:
+        # Additional modules (step-a-1.json and so on) are exported beside the main path.
+        extra = exports.export_additional_steps()
+        self.assertEqual(sorted(p.name for p in (ROOT / "site_content" / "steps").glob("step-[a-z]-*.json")),
+                         sorted(r["anchor"] + ".json" for r in extra))
+        for record in self.records + extra:
             with self.subTest(step=record["id"]):
                 saved = json.loads((ROOT / "site_content" / "steps" / (record["anchor"] + ".json")).read_text(encoding="utf-8"))
                 self.assertEqual(saved, record)
