@@ -236,3 +236,60 @@ Website branch `course/module-a`, from `origin/main` (`4b54b05`), commit `09e363
   `C:\WEB_site\data_sources\codex_work\module-a-build-20261124\screenshots\`.
 - Vercel preview: built (status success). It is behind Vercel login, so the checks above ran on the local
   review build of the same commit.
+
+## Before publication
+
+### Student code against the 2026.4 project ZIP
+
+Built with `scripts/package_project.py --version 2026.4` from tag `project-2026.4` and from this branch
+(outside Git, no PLINK). 71 files against 72. Three files differ, every other file is byte-identical:
+
+- `R/imputation.R`: new (381 lines).
+- `R/guided.R`: the `A` entry of `guided_module_inputs`, and the restart advice of `guided_check_module()`
+  limited to numbered modules (`grepl("^[0-9]+$", module)`). For modules 0 to 7 the test is always true, so
+  the advice is as before.
+- `docs/glossary.md`: three new entries (haplotype, reference panel, imputation quality).
+
+The module A lesson and notebook are not in the ZIP. The website offers the notebook.
+
+`R/guided.R` does not change any output of modules 0 to 7:
+
+- `scripts/run_main_path.R` ran twice on `classroom-stage-2026.1-final`, from the tag and from this branch, into
+  two new folders: exit 0 both. 379 files each. 249 byte-identical. The other 130 are PLINK logs and command
+  texts: equal once the folder name, the times and PLINK's random seed line are removed, and line wraps are
+  ignored (a longer folder name moves the wrap). No other difference.
+- `test_guided_module_check.R` (exact student messages of modules 0 to 7): exit 0 on both.
+- `test_main_path_recovery.R`, with `COURSE_STAGE_DIR` the same data and `COURSE_CANONICAL_RUN` the run of the
+  tag: exit 0, seven restarts.
+
+Two ways to give students the code (not chosen yet):
+
+1. Inside the module A package: `R/imputation.R` and `R/guided.R`, with a README that says to copy them into
+   the project folder `R/`. The notebook stays a website download. `R/guided.R` replaces the student's
+   file; it is the 2026.4 file plus module A only. A variant avoids replacing it: the module A notebook checks
+   its inputs with a function of `R/imputation.R`, so only a new file is copied.
+2. Project release `project-2026.4.1`: the same ZIP with the three files above. `package_project.py` requires
+   the step 0.3 URL of the new version in the module 0 lesson, so step 0.3 changes, and its website JSON
+   with it. Students already in the course must copy the new files or download the project again.
+
+### Website: module A out of the production build
+
+Website commit `cb1ec03` on `course/module-a`:
+
+- The sync keeps module A apart: `src/content/gwas/additional.json` and source copies in
+  `src/content/gwas/additional-public/`. Nothing of module A is in `public/` or `content.generated.ts`.
+- `scripts/stage-gwas-modules.mjs` runs before `next dev` and `next build`. It imports and copies only the
+  visible modules (review builds, or a letter in `PUBLISHED_ADDITIONAL_MODULES`).
+- `scripts/check-gwas-production.mjs` runs after `next build`. In a production build it fails if a hidden
+  module has a file, a page or a title in `public/` or `.next/`. Phrases also used elsewhere in the site
+  (for example "Imputation servers" in the lecture slides) are not used as markers.
+
+Checks: `tsc` 0 errors, ESLint 0 errors. Production build: exit 0, check OK (2,650 files, no module A).
+Served: module A pages, notebook and figure 404, no link to module A. Review build: module A included;
+the forced production check on it fails, as it must (217 problems). axe on the review build: 52 runs,
+0 violations, no overflow, no broken image.
+
+### Publication sequence
+
+Written in `docs/release_packaging.md` ("Publish module A"). It notes one gap: `package_release.py` refuses
+`stage-module-a-2026.1` as a source today.
