@@ -378,3 +378,28 @@ PLINK logs and command and console texts (paths and times). L4: R2 0.95, OR 1.47
   not in the output.
 - The pin names the branch `course/module-a-2026.4`. After the merge into `course/2026-guided-training`,
   change it in `PACKAGES["module-a"]["pinned"]` before packaging again.
+
+## Publication up to the preview
+
+- Encryption by the author with the script: `module-a-data-2026.1.zip`, 222,857,264 bytes, SHA-256
+  `623e15a87a3f9a8e4fd743b6b31ff352840e841fbea2921f004a9e0df123770b`, MANIFEST SHA-256 `46d63ba7...74ac4`
+  (equal to the stage MANIFEST). The folder `release-module-a-2026.1.old-password` is an earlier attempt and
+  was not used.
+- GitHub release `module-a-2026.1` (tag on `196ab4d`, the commit of the package), not "Latest"
+  (`project-2026.4` stays latest). Assets: the ZIP, `SHA256SUMS.txt`, `MANIFEST.tsv`. Downloaded again:
+  ZIP SHA-256 and MANIFEST equal.
+- `SHA256SUMS.txt` of the release has Windows line ends (CRLF): `sha256sum -c` on Linux and macOS reads the
+  file names with a trailing CR and fails. The checksums are right (checked with the CR removed). The asset
+  was left as published. The packager writes Unix line ends from `119bfb1` on.
+- Merge: `course/module-a-2026.4` into `course/2026-guided-training` (was `1e05565`), `--no-ff`, no
+  conflict: `fa6d067`. Then `61a1ade`: the module A pin names `course/2026-guided-training` and reads
+  `origin/<branch>`; a local branch that differs from origin stops the packager. In this clone the local
+  `course/2026-guided-training` is 26 commits behind origin: update it before packaging again. The stage copy
+  of `R/imputation.R` equals the file on `origin/course/2026-guided-training`. 97 Python tests OK.
+- Website `course/module-a` (`5fed8ec`): sync from `course/2026-guided-training` at `119bfb1` (document links
+  point there), module A data URL set, `"A"` in `PUBLISHED_ADDITIONAL_MODULES`. JSON of modules 0 to 7: 72 of
+  72 identical to production. tsc 0 errors, ESLint 0 errors. Production build: module A included,
+  `check-gwas-production` accepts it. Local production server: module A pages, notebook and figure 200;
+  the data button points to the release asset; axe 52 runs, 0 violations. ZIP link 200 (HEAD only). Step 0.3
+  still links `GWAS_course-2026.4.zip` (release checksum `dba5184b...0facaa`); step 0.7 answers 200.
+  Vercel preview built. No website merge.
