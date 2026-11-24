@@ -18,6 +18,7 @@ The course is an independent teaching resource for students across University of
 
 - The course lives only on manuelgentiluomo.it and in this GitHub repository.
 - External links may point to PubMed or DOI records; official vendor documentation (including Illumina, Thermo Fisher, Roche, Oxford Nanopore and PacBio); official format specifications (including GA4GH hts-specs, PLINK and BGEN); and data resources (including UK Biobank, All of Us, dbGaP and GWAS Catalog). Official software manuals are also allowed. Links to other courses and tutorials stay forbidden, including tutorial sections of official sites.
+- Never link `haplotype-reference-consortium.org`: the domain no longer belongs to the HRC. For the HRC panel, cite McCarthy et al. 2016 (doi:10.1038/ng.3643).
 - All theory needed (p-values, multiple testing, power, LD, population structure, mixed models, inflation) is written in the course or its glossary.
 
 ## Website destination
