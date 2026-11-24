@@ -265,7 +265,7 @@ Imputing with a large panel needs a lot of computing power, and some panels cann
 
 **Helmholtz Munich Imputation Server (HMIS).** Run by Helmholtz Munich, Germany, since November 2024 ([Rayner et al. 2024](https://doi.org/10.1038/s41588-024-02012-1)). Data stay on a server in Munich, inside the EU. Panels: HRC r1.1 (27,165 samples on its page), 1000 Genomes Phase 3 and HapMap 2, all on hg19. Input on hg38 is converted to hg19. Results can be downloaded for 7 days. HMIS publishes a Data Processing Agreement under Article 28 of the GDPR: your institution is the data controller and Helmholtz Munich the processor. Documentation: [HMIS](https://imputationserver-doc.readthedocs.io/).
 
-| | Michigan | TOPMed | HMIS |
+| Feature | Michigan | TOPMed | HMIS |
 | --- | --- | --- | --- |
 | Location of data | outside the EU | Amazon Web Services | Munich (EU) |
 | Largest panel | HRC r1.1 | TOPMed r3 | HRC r1.1 |

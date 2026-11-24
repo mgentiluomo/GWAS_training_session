@@ -6,7 +6,7 @@
   "anchor": "step-a-9",
   "title": "Test imputed variants for association",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "eda172b1d95d128faa8b30385b5b11ef2afc81b463602da135613f1e99397737",
+  "source_sha256": "c85aee8f65f9aa62cc2853716381837752262ebb7d8cf8a61b7c4463d0c896d1",
   "verification": "windows_executed",
   "blocks": {
     "what_we_do": "Test the imputed variants of the region around locus L4 for association, with the model of the main analysis. Then compare the simulated risk variant of L4 with the best variant of the region.",
