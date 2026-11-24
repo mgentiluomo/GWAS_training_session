@@ -45,7 +45,7 @@ The module is optional. The main path of the course (modules 0 to 7) works witho
 
 The course data are simulated. Each study genome is a mosaic of short segments copied from 1000 Genomes genomes (the "donors"). This gives the data a realistic linkage disequilibrium: on chromosome 22, the r² between nearby array SNPs correlates at 0.92 with the r² measured in real European genomes.
 
-This has one consequence for imputation. **A reference panel that contains the donors would contain the study haplotypes themselves.** The imputation would then look far better than it can ever be with real data. The 1000 Genomes panels of the servers contain the donors, and so may other panels built on 1000 Genomes. So the course examples do not use the servers.
+This has one consequence for imputation. **A reference panel that contains the donors would contain the study haplotypes themselves.** The imputation would then look far better than it can ever be with real data. The 1000 Genomes panels of the servers contain the donors. So does the HRC panel: it includes the 1000 Genomes Phase 3 samples (McCarthy et al. 2016). **[open: HMIS lists HRC with 27,165 people, not 32,470. This may be a version without the 1000 Genomes samples; check before saying so.]** Other panels may contain the donors too, for example TOPMed if it includes 1000 Genomes genomes. So the course examples do not use the servers.
 
 Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-coverage (30x) data set who are **not** donors and not related to anyone in the data set (AFR 344, AMR 351, EAS 255, EUR 313, SAS 258). It covers two regions of 2.5 Mb each on GRCh38:
 
