@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 spec = importlib.util.spec_from_file_location("package_release", Path(__file__).parents[1] / "package_release.py")
 release = importlib.util.module_from_spec(spec)
@@ -66,7 +67,7 @@ class PackagingTests(unittest.TestCase):
         self.assertNotIn("truth", " ".join(release.MODULE_A_DIRECTORIES))
 
     def test_module_a_helpers_must_match_the_branch(self):
-        self.assertEqual(release.PACKAGES["module-a"]["pinned"], {"R/imputation.R": "course/module-a-2026.4"})
+        self.assertEqual(release.PACKAGES["module-a"]["pinned"], {"R/imputation.R": "course/2026-guided-training"})
         source = self.root / "stage-module-a-pinned"
         (source / "R").mkdir(parents=True)
         committed = b"# helpers on the branch\n"
@@ -75,7 +76,7 @@ class PackagingTests(unittest.TestCase):
         release.check_pinned_files(source, "module-a", read)
         # A different copy (here only the line ends) stops the packager and says what to do.
         (source / "R" / "imputation.R").write_bytes(committed.replace(b"\n", b"\r\n"))
-        with self.assertRaisesRegex(ValueError, "differs from R/imputation.R on branch course/module-a-2026.4. Copy it again"):
+        with self.assertRaisesRegex(ValueError, "differs from R/imputation.R on branch course/2026-guided-training. Copy it again"):
             release.check_pinned_files(source, "module-a", read)
         (source / "R" / "imputation.R").unlink()
         with self.assertRaisesRegex(ValueError, "is missing or differs"):
@@ -90,17 +91,39 @@ class PackagingTests(unittest.TestCase):
         (source / "R").mkdir()
         (source / "R" / "imputation.R").write_bytes(b"# an older copy\n")
         output = self.root / "dry-run-stale"
-        with self.assertRaisesRegex(ValueError, "Copy it again"):
-            release.dry_run(source, output, "module-a")
+        with patch.object(release, "committed_file", lambda branch, name: b"# the branch copy\n"):
+            with self.assertRaisesRegex(ValueError, "Copy it again"):
+                release.dry_run(source, output, "module-a")
         self.assertFalse(output.exists())
 
     def test_committed_file_reads_the_branch(self):
-        try:
-            data = release.committed_file("course/module-a-2026.4", "R/imputation.R")
-        except ValueError:
-            self.skipTest("Branch course/module-a-2026.4 is not in this clone.")
-        self.assertIn(b"imputation_check_module <- function()", data)
-        self.assertNotIn(b"\r\n", data)
+        # A small repository: origin/b and the local branch b, as git refs.
+        repo = Path(tempfile.mkdtemp(prefix="pinned-repo-", dir=self.root))
+        git = lambda *args: subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True, text=True).stdout.strip()
+        git("init", "-q")
+        git("config", "user.name", "Test")
+        git("config", "user.email", "test@example.invalid")
+        git("config", "core.autocrlf", "false")
+        (repo / "R").mkdir()
+        (repo / "R" / "imputation.R").write_bytes(b"# first\n")
+        git("add", "R/imputation.R")
+        git("commit", "-q", "-m", "first")
+        first = git("rev-parse", "HEAD")
+        (repo / "R" / "imputation.R").write_bytes(b"# second\n")
+        git("commit", "-q", "-am", "second")
+        second = git("rev-parse", "HEAD")
+        git("update-ref", "refs/remotes/origin/b", second)
+        # Only origin/b: read there.
+        self.assertEqual(release.committed_file("b", "R/imputation.R", repo), b"# second\n")
+        # A local b equal to origin: same file.
+        git("update-ref", "refs/heads/b", second)
+        self.assertEqual(release.committed_file("b", "R/imputation.R", repo), b"# second\n")
+        # An old local b: stop, never read the old file.
+        git("update-ref", "refs/heads/b", first)
+        with self.assertRaisesRegex(ValueError, "differs from origin/b"):
+            release.committed_file("b", "R/imputation.R", repo)
+        with self.assertRaisesRegex(ValueError, "was not found"):
+            release.committed_file("missing", "R/imputation.R", repo)
 
     def test_main_rule_unchanged(self):
         # The main package keeps its folders and README, and still refuses module A material.

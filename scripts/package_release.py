@@ -37,22 +37,31 @@ PACKAGES = {
                  "source": "stage-module-a-2026.1", "output": "release-module-a-2026.1",
                  # A named file must equal its committed copy on this branch (read with git, so line ends
                  # of the working tree do not matter).
-                 "pinned": {"R/imputation.R": "course/module-a-2026.4"}},
+                 "pinned": {"R/imputation.R": "course/2026-guided-training"}},
 }
 
 
 def committed_file(branch: str, name: str, repo: Path = REPO) -> bytes:
-    """The bytes of a file on a branch: the local branch, or origin/<branch> when there is no local one."""
-    for ref in (f"refs/heads/{branch}", f"refs/remotes/origin/{branch}"):
+    """The bytes of a file on a branch, read from origin/<branch> (fetch first), or from the local branch
+    when there is no remote one. A local branch that differs from origin stops the packager: it may be old."""
+    commits = {}
+    for kind, ref in (("origin", f"refs/remotes/origin/{branch}"), ("local", f"refs/heads/{branch}")):
         found = subprocess.run(["git", "-C", str(repo), "rev-parse", "--verify", "--quiet", ref],
                                capture_output=True, text=True)
         if found.returncode == 0:
-            return subprocess.check_output(["git", "-C", str(repo), "show", f"{found.stdout.strip()}:{name}"])
-    raise ValueError(f"Branch {branch} was not found in {repo}. Fetch it first.")
+            commits[kind] = found.stdout.strip()
+    if not commits:
+        raise ValueError(f"Branch {branch} was not found in {repo}. Fetch it first.")
+    if len(commits) == 2 and commits["origin"] != commits["local"]:
+        raise ValueError(f"The local branch {branch} differs from origin/{branch}. Update it, or delete it, "
+                         "so that the check reads the published file.")
+    commit = commits.get("origin") or commits["local"]
+    return subprocess.check_output(["git", "-C", str(repo), "show", f"{commit}:{name}"])
 
 
-def check_pinned_files(source: Path, package: str, read=committed_file) -> None:
+def check_pinned_files(source: Path, package: str, read=None) -> None:
     """Stop when a named file of the stage differs from its copy on the course branch."""
+    read = read or committed_file
     for name, branch in PACKAGES[package].get("pinned", {}).items():
         staged = source / name
         if not staged.is_file() or staged.read_bytes() != read(branch, name):
