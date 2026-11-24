@@ -49,9 +49,9 @@ Instead, the module uses its own panel: 1,521 people of the 1000 Genomes high-co
 
 ## A.1 Why imputation works: haplotypes {#step-a-1}
 
-Reading, about 3 minutes. You can come back to it later.
+Reading, about 4 minutes. You can come back to it later.
 
-<!-- step_meta: {"actions": [{"label": "Request the password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}, {"label": "Module A data release", "url": "https://github.com/mgentiluomo/GWAS_training_session/releases/tag/module-a-2026.1", "kind": "page"}], "required_commands": ["sA-1_data"], "where": {"sA-1_data": "console"}, "success_line": "Course data are ready: 22 files verified.", "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between. We also download the module A data with one R command.", "student_plink_options": []} -->
+<!-- step_meta: {"actions": [{"label": "Request the password", "url": "https://www.manuelgentiluomo.it/teaching/gwas/data-access", "kind": "page"}],"required_commands": ["sA-1_data"], "where": {"sA-1_data": "console"}, "success_line": "Course data are ready: 22 files verified.", "student_summary": "We see why the alleles at nearby DNA sites can be predicted from each other. People share long stretches of the same chromosome copy, so a few measured sites point to the unmeasured ones in between. We also download the module A data with one R command.", "student_plink_options": []} -->
 
 ### What we do
 
@@ -130,6 +130,8 @@ Imputation copies alleles from matching haplotypes in the reference panel. If no
 ### Files created
 
 The folder `data/course/module_a` (22 files) and `data/course/module_a.MANIFEST.tsv`, the list of the files with their checksums.
+
+Checksums and licence of the module A data: [release module-a-2026.1](https://github.com/mgentiluomo/GWAS_training_session/releases/tag/module-a-2026.1). You do not download anything there: the command above does it.
 
 ## A.2 Phasing, then imputation {#step-a-2}
 

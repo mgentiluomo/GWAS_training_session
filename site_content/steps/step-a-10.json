@@ -6,7 +6,7 @@
   "anchor": "step-a-10",
   "title": "What can go wrong",
   "source": "lessons/module_A_imputation.Rmd",
-  "source_sha256": "158c9a80c9eed57b88cdafa7db22853a7f5d68ec0bb14c79edfbba8e7abe3bc4",
+  "source_sha256": "144d2d7bb53df6e969f2959dd45018ca38c9c30b59938a347468201a3bcc97d8",
   "verification": "manual_required",
   "blocks": {
     "what_we_do": "Collect the common problems of imputation in one table.",
