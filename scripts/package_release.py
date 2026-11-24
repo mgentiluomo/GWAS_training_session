@@ -34,8 +34,30 @@ PACKAGES = {
              "source": "classroom-stage-2026.1", "output": "release-data-2026.1"},
     "module-a": {"directories": MODULE_A_DIRECTORIES, "top_files": {"README_simulated.txt", "panel_samples.tsv"},
                  "files": {"R/imputation.R"}, "archive": "module-a-data-2026.1", "stage_prefix": "stage-module-a-",
-                 "source": "stage-module-a-2026.1", "output": "release-module-a-2026.1"},
+                 "source": "stage-module-a-2026.1", "output": "release-module-a-2026.1",
+                 # A named file must equal its committed copy on this branch (read with git, so line ends
+                 # of the working tree do not matter).
+                 "pinned": {"R/imputation.R": "course/module-a-2026.4"}},
 }
+
+
+def committed_file(branch: str, name: str, repo: Path = REPO) -> bytes:
+    """The bytes of a file on a branch: the local branch, or origin/<branch> when there is no local one."""
+    for ref in (f"refs/heads/{branch}", f"refs/remotes/origin/{branch}"):
+        found = subprocess.run(["git", "-C", str(repo), "rev-parse", "--verify", "--quiet", ref],
+                               capture_output=True, text=True)
+        if found.returncode == 0:
+            return subprocess.check_output(["git", "-C", str(repo), "show", f"{found.stdout.strip()}:{name}"])
+    raise ValueError(f"Branch {branch} was not found in {repo}. Fetch it first.")
+
+
+def check_pinned_files(source: Path, package: str, read=committed_file) -> None:
+    """Stop when a named file of the stage differs from its copy on the course branch."""
+    for name, branch in PACKAGES[package].get("pinned", {}).items():
+        staged = source / name
+        if not staged.is_file() or staged.read_bytes() != read(branch, name):
+            raise ValueError(f"{name} in {source} is missing or differs from {name} on branch {branch}. "
+                             f"Copy it again from that branch (git show {branch}:{name}) and run the packager again.")
 
 
 def safe_path(path: Path) -> None:
@@ -116,6 +138,7 @@ def dry_run(source: Path, output: Path, package: str = "main") -> dict:
     if output == WORK.resolve() or output.is_relative_to(REPO) or output.exists():
         raise ValueError("Choose a new output directory beneath codex_work.")
     members = inventory(source, package)
+    check_pinned_files(source, package)
     output.mkdir(parents=True)
     rows = [(name, original.stat().st_size, sha256(original)) for original, name in members]
     text = io.StringIO(newline="")
@@ -142,6 +165,7 @@ def build(source: Path, output: Path, sevenzip: Path, package: str = "main") -> 
     if not password or any(c in password for c in "\r\n"):
         raise ValueError("Set a non-empty COURSE_RELEASE_PASSWORD without line breaks.")
     members = inventory(source, package)
+    check_pinned_files(source, package)
     output.mkdir(parents=True)
     staging = output / "payload"
     staging.mkdir()
