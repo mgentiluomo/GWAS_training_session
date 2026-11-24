@@ -293,3 +293,71 @@ the forced production check on it fails, as it must (217 problems). axe on the r
 
 Written in `docs/release_packaging.md` ("Publish module A"). It notes one gap: `package_release.py` refuses
 `stage-module-a-2026.1` as a source today.
+
+## Author decisions: helpers in the module A data, packaging rule
+
+### Student code (way 1, without copying files into the project)
+
+- `R/imputation.R` ships in the module A data, as `data/course/module_a/R/imputation.R`.
+- The first chunk of the module A notebook (generated, `ADDITIONAL_HELPERS` in `scripts/student_notebooks.py`)
+  sources `R/imputation.R` of the project if it is there, otherwise the copy in the module A data
+  (`COURSE_MODULE_A_DIR`, or `module_a` in the course data folder). If both are missing it stops with one
+  sentence: "R/imputation.R was not found in the project or in the module A data. Extract the module A data
+  into ... and run this chunk again." Then it runs `imputation_check_module()`.
+- `imputation_check_module()` (in `R/imputation.R`, base R only) checks the annotation, the module A data and
+  the files of step 6.3, with the messages of `guided_check_module()`. Its list repeats `module_meta` of the
+  lesson; a Python test checks that they agree.
+- `R/guided.R` is the 2026.4 file again: byte-identical content to `project-2026.4` (line ends aside). The
+  generated module table lists modules 0 to 7 only. `scripts/run_main_path.R` is unchanged.
+- The three glossary entries stay: the website reads them.
+- Lesson: "What you need" says that the data hold `R/imputation.R` and that nothing is copied into the
+  project. Step A.1 "You need" lists how to get the data ready (download, password, extract into
+  `data/course/module_a`, open the notebook, run its first chunk). A.1 reading time: 3 minutes (469 words).
+- Export and notebooks regenerated. JSON of modules 0 to 7: 72 of 72 byte-identical to `origin/main` of the
+  website. Module A JSON change (A.1 text, setup code, overview).
+- Course commits: `f8c7acc` (packaging), `6cb7181` (module A).
+
+**For 2026.5.** The 2026.5 project will hold both `R/guided.R` with the module A entry and `R/imputation.R`.
+The notebook then finds `R/imputation.R` in the project first. Keep the copy in the module A data until no
+student uses a 2026.4 project.
+
+### Packaging rule
+
+Ported from `course/module-a-data` (`f19b815`) in its own commit (`f8c7acc`), adapted to 2026.4:
+`--package module-a`, its own top folders (`reference_panel`, `genetic_map`, `imputed`, `true_genotypes`),
+`README_simulated.txt`, `panel_samples.tsv`, and one named file, `R/imputation.R`. No other R file is
+accepted. The source must be a `stage-module-a-*` folder under `codex_work`. `FORBIDDEN` and the
+`classroom-stage-*` rule of the main package are unchanged; a test checks that the main package still
+refuses `R/imputation.R`. New `--dry-run`: MANIFEST.tsv and members.txt only, no ZIP, no password.
+
+Dry run on `stage-module-a-2026.1`, after copying `R/imputation.R` of `6cb7181` into its `R/` folder (nothing
+else in the stage was changed): 22 files, 229,691,213 bytes, MANIFEST.tsv SHA-256
+`46d63ba77ddbc7fd8e079064d12781e79c2f95809900669b1c42fd3aece74ac4`
+(`codex_work/dryrun-module-a-2026.1/`). 21 rows equal the stage sidecar
+`stage-module-a-2026.1.MANIFEST.tsv`; the new row is `R/imputation.R`. The four Eagle and Minimac4 logs of
+`imputed/` are left out, as for every package. The sidecar itself was not changed: it does not list
+`R/imputation.R`.
+
+### Render from a clean 2026.4 project
+
+The published `GWAS_course-2026.4.zip` (release `project-2026.4`, SHA-256 checked) extracted into a new
+folder. PLINK copied from `third_party/` into `bin/`, as at step 0.6. The 22 files of the dry run copied into
+`data/course/module_a` (the extracted package), the array annotation into `data/course/array`, and the files
+of step 6.3 (from the main-path run of the tag) into `results/guided`. No `COURSE_*` variable set. The
+project has no `R/imputation.R` and its `R/guided.R` has no module A entry.
+
+Quarto render of the module A notebook of `6cb7181`: exit 0, 82 s. First chunk: "Module A input files are
+present." The 8 data outputs of A.7 to A.9 are byte-identical to the earlier render; the other 9 files are
+PLINK logs and command and console texts (paths and times). L4: R2 0.95, OR 1.47, p 1.65e-6; best variant
+`chr18:38106879:G:C`, p 4.19e-8.
+
+### Checks after the author decisions
+
+- R: `scripts/check_course.R` and every file in `scripts/tests/`, with `COURSE_DATA_DIR` set to
+  `classroom-stage-2026.1-final`: 15 of 15 exit 0, including `test_imputation.R` (new loader and input-check
+  tests) and `test_main_path_recovery.R` (`COURSE_STAGE_DIR` the same data, `COURSE_CANONICAL_RUN` the run
+  of the tag).
+- Python, `python -B -m unittest discover -s scripts/tests`: 93 tests, OK, 2 skipped (the encrypted round trip
+  without a password).
+- `python -I scripts/author/tests/test_sim2026.py`: exit 0.
+- `python -B scripts/check_text.py`: 0 errors, 0 warnings. `--check-notebooks`: up to date, 10 files.
