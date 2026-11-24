@@ -35,6 +35,68 @@ class PackagingTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             release.inventory(source)
 
+    def test_module_a_rule(self):
+        source = self.root / "stage-module-a-test"
+        for folder in sorted(release.MODULE_A_DIRECTORIES):
+            (source / folder).mkdir(parents=True)
+            (source / folder / "small.txt").write_text("Synthetic fixture.\n", encoding="ascii")
+        (source / "README_simulated.txt").write_text("fixture\n", encoding="ascii")
+        (source / "panel_samples.tsv").write_text("fixture\n", encoding="ascii")
+        (source / "R").mkdir()
+        (source / "R" / "imputation.R").write_text("# helpers\n", encoding="ascii")
+        (source / "imputed" / "run.log").write_text("author path\n", encoding="ascii")
+        names = [name for _, name in release.inventory(source, "module-a")]
+        self.assertEqual(sorted(names), sorted([f"{d}/small.txt" for d in release.MODULE_A_DIRECTORIES]
+                                               + ["README_simulated.txt", "panel_samples.tsv", "R/imputation.R"]))
+        # Each package accepts only its own top folders and files.
+        with self.assertRaises(ValueError):
+            release.inventory(source, "main")
+        with self.assertRaises(ValueError):
+            release.inventory(self.source, "module-a")
+        # R/imputation.R is the only R file module A may carry.
+        (source / "R" / "guided.R").write_text("# not part of module A\n", encoding="ascii")
+        with self.assertRaises(ValueError):
+            release.inventory(source, "module-a")
+        (source / "R" / "guided.R").unlink()
+        # FORBIDDEN still applies to module A.
+        (source / "truth").mkdir()
+        (source / "truth" / "x.txt").write_text("fixture", encoding="ascii")
+        with self.assertRaises(ValueError):
+            release.inventory(source, "module-a")
+        self.assertNotIn("truth", " ".join(release.MODULE_A_DIRECTORIES))
+
+    def test_main_rule_unchanged(self):
+        # The main package keeps its folders and README, and still refuses module A material.
+        self.assertEqual(release.PACKAGES["main"]["stage_prefix"], "classroom-stage-")
+        self.assertEqual(release.PACKAGES["main"]["files"], set())
+        source = self.root / "main-rule"
+        (source / "lab_export").mkdir(parents=True)
+        (source / "lab_export" / "small.txt").write_text("fixture\n", encoding="ascii")
+        (source / "README_simulated.txt").write_text("fixture\n", encoding="ascii")
+        self.assertEqual(sorted(n for _, n in release.inventory(source)), ["README_simulated.txt", "lab_export/small.txt"])
+        (source / "R").mkdir()
+        (source / "R" / "imputation.R").write_text("# helpers\n", encoding="ascii")
+        with self.assertRaises(ValueError):
+            release.inventory(source)
+
+    def test_dry_run_needs_no_password(self):
+        previous = os.environ.pop("COURSE_RELEASE_PASSWORD", None)
+        try:
+            output = self.root / "dry-run"
+            result = release.dry_run(self.source, output)
+        finally:
+            if previous is not None:
+                os.environ["COURSE_RELEASE_PASSWORD"] = previous
+        self.assertEqual(result["files"], 1)
+        self.assertEqual(sorted(p.name for p in output.iterdir()), ["MANIFEST.tsv", "members.txt"])
+        with (output / "MANIFEST.tsv").open(encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream, delimiter="\t"))
+        fixture = self.source / "lab_export" / "small.txt"
+        self.assertEqual(rows, [{"path": "lab_export/small.txt", "bytes": str(fixture.stat().st_size),
+                                 "sha256": release.sha256(fixture)}])
+        with self.assertRaises(ValueError):
+            release.dry_run(self.source, output)
+
     def test_missing_password(self):
         previous = os.environ.pop("COURSE_RELEASE_PASSWORD", None)
         try:
